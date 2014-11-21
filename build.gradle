@@ -1,0 +1,16 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.7
+version = '1.0'
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://bio.informatik.uni-jena.de/artifactory/repo"
+    }
+}
+
+dependencies {
+    compile 'de.unijena.bioinf:epos.plugin.tree:0.9.9-SNAPSHOT'
+    testCompile 'junit:junit:4.11'
+}
