@@ -50,18 +50,18 @@ public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipC
     //this method contains only simple weightings
     @Override
     protected CostComputer initCosts(List<Tree> inputTrees, Tree scaffoldTree) {
-        CostComputer costs = null;
+
         if (UnitCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
             getLog().info("Using Unit Costs");
-            costs = new UnitCostComputer(inputTrees,scaffoldTree);
+            return new UnitCostComputer(inputTrees,scaffoldTree);
         } else if (WeightCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
-            costs = new WeightCostComputer(inputTrees, weights, scaffoldTree);
             getLog().info("Using " + weights);
-        }else{
-            getLog().warn("No supported weight option found. Setting to standard: "+ FlipCutWeights.Weights.EDGE_AND_LEVEL);
-            setWeights(FlipCutWeights.Weights.EDGE_AND_LEVEL);
-            initCosts(inputTrees, scaffoldTree);
+            return new WeightCostComputer(inputTrees, weights, scaffoldTree);
         }
-        return costs;
+
+        getLog().warn("No supported weight option found. Setting to standard: "+ FlipCutWeights.Weights.UNIT_COST);
+        setWeights(FlipCutWeights.Weights.UNIT_COST);
+        return new UnitCostComputer(inputTrees,scaffoldTree);
+
     }
 }

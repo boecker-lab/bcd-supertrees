@@ -2,7 +2,7 @@ package flipCut;
 
 import epos.model.tree.Tree;
 import epos.model.tree.TreeNode;
-import epos.model.tree.treetools.TreeUtils;
+import epos.model.tree.treetools.TreeUtilsBasic;
 import flipCut.flipCutGraph.AbstractFlipCutGraph;
 import flipCut.flipCutGraph.AbstractFlipCutNode;
 import flipCut.flipCutGraph.CutGraphCutter;
@@ -179,7 +179,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
         for (TreeNode node : tree.vertices()) {
             if (node.isInnerNode()) {
                 if (node != tree.getRoot()) {
-                    childrenSets.put(node,TreeUtils.getLeafLabels(node));
+                    childrenSets.put(node, TreeUtilsBasic.getLeafLabels(node));
                 }
             }
         }

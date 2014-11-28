@@ -1,9 +1,7 @@
 package flipCut.flipCutGraph;
 
 
-
 import cuts.CutGraph;
-import cuts.SingleCutGraph;
 import flipCut.costComputer.CostComputer;
 
 import java.util.*;
@@ -290,12 +288,6 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     }
 
 
-
-    protected SingleCutGraph<? extends AbstractFlipCutNode<?>> createHyperGraph() {
-        //todo fill me
-        //todo implement hypergraph mincut algorithm
-        return null;  //To change body of created methods use File | Settings | File Templates.
-    }
 
     //micut calculation
     protected void calculateTarjanMinCut(CutGraph<FlipCutNodeSimpleWeight> cutGraph) {
