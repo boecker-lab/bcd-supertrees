@@ -1,2 +1,10 @@
-rootProject.name = 'bcd_Algorithm'
+rootProject.name = 'flipcut-project'
+
+include 'flipcut-core'
+
+include 'single-cut-algorithm'
+include 'single-cut-CLI'
+
+include 'beam-search-algorithm'
+include 'beam-search-CLI'
 

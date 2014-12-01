@@ -7,12 +7,14 @@ version = '0.9-SNAPSHOT'
 
 sourceCompatibility = 1.7
 
-
 repositories {
     mavenCentral()
     mavenLocal()
+    maven {url "http://bio.informatik.uni-jena.de/artifactory/repo"}
 }
 
 dependencies {
+    compile 'de.unijena.bioinf:phylo_Tree:0.9.9-SNAPSHOT' //todo get rid of epos tree??
+//    compile 'log4j:log4j:1.2.17'
     testCompile 'junit:junit:4.11'
 }

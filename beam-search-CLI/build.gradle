@@ -7,12 +7,13 @@ version = '0.9-SNAPSHOT'
 
 sourceCompatibility = 1.7
 
-
 repositories {
     mavenCentral()
     mavenLocal()
+    maven {url "http://bio.informatik.uni-jena.de/artifactory/repo"}
 }
 
 dependencies {
-    testCompile 'junit:junit:4.11'
+    compile 'de.unijena.bioinf:beam-search-algorithm:0.9-SNAPSHOT'
+    testCompile group: 'junit', name: 'junit', version: '4.11'
 }
