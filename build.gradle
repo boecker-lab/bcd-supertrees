@@ -1,18 +1,70 @@
 apply plugin: 'java'
 apply plugin: 'maven'
-//apply plugin: 'git-dependencies'
 
 group = 'de.unijena.bioinf'
 version = '0.9-SNAPSHOT'
 
 sourceCompatibility = 1.7
 
+subprojects {
+    apply plugin: "java"
+    apply plugin: 'maven'
 
-repositories {
-    mavenCentral()
-    mavenLocal()
+    group = 'de.unijena.bioinf'
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven { url "http://bio.informatik.uni-jena.de/artifactory/repo" }
+    }
+
+    dependencies {
+        testCompile group: 'junit', name: 'junit', version: '4.11'
+    }
 }
 
-dependencies {
-    testCompile 'junit:junit:4.11'
+//Core Project specific stuff
+project(':flipcut.flipcut-core') {
+    version = '0.9-SNAPSHOT'
+
+    dependencies {
+        compile 'de.unijena.bioinf:phylo_Tree:0.9.9-SNAPSHOT'
+    }
 }
+
+//single algo Project specific stuff
+project(':flipcut.single-cut-algorithm') {
+    version = '0.9-SNAPSHOT'
+
+    dependencies {
+        compile project(':flipcut.flipcut-core')
+    }
+}
+
+//singe CLI Project specific stuff
+project(':flipcut.single-cut-CLI') {
+    version = '0.8-SNAPSHOT'
+
+    dependencies {
+        compile project(':flipcut.single-cut-algorithm')
+        compile 'args4j:args4j:2.0.29'
+    }
+}
+
+//beam algo Project specific stuff
+project(':flipcut.beam-search-algorithm') {
+    version = '0.8-SNAPSHOT'
+
+    dependencies {
+        compile project(':flipcut.single-cut-algorithm')
+    }
+}
+
+//beam CLI Project specific stuff
+project(':flipcut.beam-search-CLI') {
+    version = '0.8-SNAPSHOT'
+    dependencies {
+        compile project(':flipcut.beam-search-algorithm'), project(':flipcut.single-cut-CLI')
+    }
+}
+
