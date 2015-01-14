@@ -11,6 +11,7 @@ allprojects {
 
     repositories {
         mavenCentral()
+//        mavenLocal()
         maven { url "http://bio.informatik.uni-jena.de/artifactory/repo" }
     }
 

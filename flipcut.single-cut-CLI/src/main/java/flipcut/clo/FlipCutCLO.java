@@ -110,11 +110,11 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
     @Option(name="-u", aliases = "--uds", usage="Run undisputed sibling pre-processing", hidden = true)
     public boolean removeUndisputedSiblings = false;
 
-    @Option(name = "-v", aliases = "--verbose", usage = "minimal console output")
+    @Option(name = "-v", aliases = "--verbose", usage = "Minimal console output")
     public boolean verbose = false;
 
-    @Option(name = "-i", aliases = "--insufficient", usage = "skip if input trees have insufficient taxa overlap", hidden = true)
-    public boolean skipInsufficientOverlapInstances = false; //todo warn if taxa hav insufficient taxa overlap
+    @Option(name = "-i", aliases = "--insufficient", usage = "Skip if input trees have insufficient taxa overlap", hidden = true)
+    public boolean skipInsufficientOverlapInstances = false; //todo warn if taxa hav insufficient taxa overlap taxa overlap check
 
 
 

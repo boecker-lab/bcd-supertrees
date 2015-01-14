@@ -27,6 +27,7 @@ public class BCDCommandLineInterface extends FlipCutCLO<FlipCutSingleCutSimpleWe
     }
 
     //##### flip cut parameter #####
+    //this is a simple mapping from experimental weighting strategies to
     @Override
     protected EnumMap<SuppportedWeights, FlipCutWeights.Weights> initWheightMapping() {
         final EnumMap<SuppportedWeights, FlipCutWeights.Weights> weightMapping = new EnumMap<>(SuppportedWeights.class);
@@ -47,12 +48,7 @@ public class BCDCommandLineInterface extends FlipCutCLO<FlipCutSingleCutSimpleWe
     } //deafault is has to be null
 
 
-    //##### Methods #####
-    public void run() throws Exception {
-        //todo checkInput as "check" method and output stuff outside this method
-        //todo implement own scm tree implementation --> not used at the moment
-    }
-
+    //##### Methods ####
     private void checkForNexus() throws IOException, Exception {
         File file = new File(arguments.get(0));
         Tree[] inputTrees = SimpleNexus.getTreesFromFile(file);

@@ -38,11 +38,12 @@ public class BCDSupertrees {
                 return;
             }
 
-
+            //todo checkInput as "check" method and output stuff outside this method
+            //todo implement own scm tree implementation --> not used at the moment
             if (bcdCLI.arguments != null && !bcdCLI.arguments.isEmpty()) {
                 final int argSize = bcdCLI.arguments.size();
                 //todo preprocessing
-                if (argSize <= 2) { //todo add nexus support //read Block convert it tor options and parse it an parse is with parser.
+                if (argSize <= 2) { //todo add nexus support //read Block convert it to options and parse it an parse is with parser.
                     Tree[] inputTreesUntouched = Newick.getTreeFromFile(bcdCLI.arguments.get(0));
                     List<Tree> inputTrees;
 
