@@ -1,35 +1,37 @@
 package flipcut;
 
-import flipcut.costComputer.FlipCutWeights;
+import flipcut.clo.FlipCutCLO;
+import flipcut.flipCutGraph.CutGraphCutter;
 import org.junit.Test;
 import org.kohsuke.args4j.CmdLineParser;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 /**
  * Created by Florian on 22.04.2014.
  */
 
 
-public class BCDCommandLineInterfaceTest {
+public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //extending from class to test to get protected access
 
     //Test if parameter gets translated into flipcut parameters in the right way
     @Test
     public void test_used_algo() throws Exception{
-        String[] test_string ={"-a","FC"};
-        final BCDCommandLineInterface test_interface = new BCDCommandLineInterface();
-        final CmdLineParser parser= new CmdLineParser(test_interface);
+        final CmdLineParser parser= new CmdLineParser(this);
+
+        String[] test_string = new String[] {"-a",Algorithm.BCD.name()};
         parser.parseArgument(test_string);
-        test_interface.initAlgorithm();
-
         //assert
+        assertEquals(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW, getAlgorithm().cutter.getType());
 
-        //assertEquals("FC", test_interface.getAlgorithm().cutter.type); //TODO: Need access to cutter type? (protected)
+        test_string =  new String[] {"-a",Algorithm.FC.name()};
+        parser.parseArgument(test_string);
+        //assert
+        assertEquals(CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG , getAlgorithm().cutter.getType());
     }
+
     @Test
-    public void test_set_weights_unit_cost() throws Exception{           //TODO: Test every weight?
+    public void test_set_weights_unit_cost() throws Exception{           //TODO: Test every weight? --> not for the internal notation but for the official see below
         String[] test_String ={"-w","UNIT_WEIGHT"};
         final BCDCommandLineInterface test_interface = new BCDCommandLineInterface();
         final CmdLineParser parser= new CmdLineParser(test_interface);
@@ -37,20 +39,33 @@ public class BCDCommandLineInterfaceTest {
         test_interface.initWheightMapping();
 
         //assert
-
         assertEquals("UNIT_COST", test_interface.getAlgorithm().weights.name());
+    }
+
+    @Test
+    public void test_supported_weights() throws Exception{           //TODO: Test every weight? --> you can iterate over the common weights
+        final BCDCommandLineInterface test_interface = new BCDCommandLineInterface();
+        final CmdLineParser parser= new CmdLineParser(test_interface);
+
+        for (FlipCutCLO.SuppportedWeights weight : SuppportedWeights.values()) {
+            String[] test_String ={"-w", weight.name()};
+            parser.parseArgument(test_String);
+
+            //assert
+            assertEquals(weightMapping.get(weight), test_interface.getAlgorithm().weights);
+
+        }
     }
 
     @Test
     public void test_bst_threshold() throws Exception{
         String[] test_String ={"-b","33"};
-        final BCDCommandLineInterface test_interface = new BCDCommandLineInterface();
-        final CmdLineParser parser= new CmdLineParser(test_interface);
+        final CmdLineParser parser= new CmdLineParser(this);
         parser.parseArgument(test_String);
 
         //assert
 
-        assertEquals(33, test_interface.getAlgorithm().bootstrapThreshold);
+        assertEquals(33, getAlgorithm().bootstrapThreshold);
 
     }
 
@@ -58,42 +73,40 @@ public class BCDCommandLineInterfaceTest {
     @Test
     public void test_SCMtree_usage() throws Exception{
         String[] test_String ={"-s"};
-        final BCDCommandLineInterface test_interface = new BCDCommandLineInterface();
-        final CmdLineParser parser= new CmdLineParser(test_interface);
+        final CmdLineParser parser= new CmdLineParser(this);
         parser.parseArgument(test_String);
 
         //assert
 
-        assertEquals(true, test_interface.useSCM);
+        assertEquals(true, useSCM);
 
     }
 
     @Test
     public void test_output_path() throws Exception{
-        String[] test_String ={"-o","C:\\fictional.txt"};
-        final BCDCommandLineInterface test_interface = new BCDCommandLineInterface();
-        final CmdLineParser parser= new CmdLineParser(test_interface);
+        final String path = "C:\\fictional.txt";
+        String[] test_String ={"-o", path};
+        final CmdLineParser parser= new CmdLineParser(this);
         parser.parseArgument(test_String);
 
         //assert
 
-        assertEquals("C:\\fictional.txt", test_interface.output.getName());
+        assertEquals(path, output.getName());
 
     }
+    //todo use relative path to test-resources folder for test input file and test file reading
+//    getClass().getResource("/testInputFile.tre").getFile();
 
     @Test
     public void test_ucr_usage() throws Exception{
         String[] test_String ={"-u"};
-        final BCDCommandLineInterface test_interface = new BCDCommandLineInterface();
-        final CmdLineParser parser= new CmdLineParser(test_interface);
+        final CmdLineParser parser= new CmdLineParser(this);
         parser.parseArgument(test_String);
 
         //assert
-
-        assertEquals(true, test_interface.useSCM);
+        assertEquals(true, useSCM);
 
     }
-
 
 
 

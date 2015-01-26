@@ -29,7 +29,7 @@ public class BCDCommandLineInterface extends FlipCutCLO<FlipCutSingleCutSimpleWe
     //##### flip cut parameter #####
     //this is a simple mapping from experimental weighting strategies to
     @Override
-    protected EnumMap<SuppportedWeights, FlipCutWeights.Weights> initWheightMapping() {
+    protected final EnumMap<SuppportedWeights, FlipCutWeights.Weights> initWheightMapping() {
         final EnumMap<SuppportedWeights, FlipCutWeights.Weights> weightMapping = new EnumMap<>(SuppportedWeights.class);
         weightMapping.put(SuppportedWeights.UNIT_WEIGHT, FlipCutWeights.Weights.UNIT_COST);
         weightMapping.put(SuppportedWeights.BRANCH_LENGTH, FlipCutWeights.Weights.EDGE_WEIGHTS);

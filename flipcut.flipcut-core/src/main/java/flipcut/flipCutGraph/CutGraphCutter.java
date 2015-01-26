@@ -32,6 +32,9 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
     protected HashMap<N, Set<N>> dummyToMergedTaxa;
 
     protected final CutGraphTypes type;
+    public CutGraphTypes getType() {
+        return type;
+    }
 
     protected T source = null;
     protected List<N> cutGraphTaxa = null;
