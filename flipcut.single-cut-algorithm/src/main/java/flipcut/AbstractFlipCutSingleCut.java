@@ -197,6 +197,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
         cutter = createCutter(type);
     }
 
+
     public class DebugInfo{
         double currentStartTime;
         List<Double> cuttingTimes = new LinkedList<>();
