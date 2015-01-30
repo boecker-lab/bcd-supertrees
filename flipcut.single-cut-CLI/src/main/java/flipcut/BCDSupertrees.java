@@ -1,6 +1,7 @@
 package flipcut;
 
 import epos.model.tree.Tree;
+import epos.model.tree.io.Newick;
 import epos.model.tree.io.SimpleNexus;
 import epos.model.tree.treetools.SiblingReduction;
 import epos.model.tree.treetools.UnsupportedCladeReduction;
@@ -178,7 +179,7 @@ public class BCDSupertrees {
         reducer.reduceUnsupportedClades(supertree);
     }
 
-    private static void writeOutput(Tree supertree) {
+    private static void writeOutput(Tree supertree) throws IOException {
         //create output path
         if (bcdCLI.output != null) {
             if (!bcdCLI.output.isAbsolute())
@@ -211,17 +212,16 @@ public class BCDSupertrees {
 
     }
 
-    private static void writeTreeToFile(Path path, Tree supertree, FlipCutCLO.FileType type, boolean appendExt) {
+    private static void writeTreeToFile(Path path, Tree supertree, FlipCutCLO.FileType type, boolean appendExt) throws IOException {
         switch (type){
             case NEWICK:
-                //todo fill me!
+                Newick.tree2File(path.toFile(),supertree);
                 break;
             case NEXUS:
-
+                SimpleNexus.tree2File(path.toFile(),supertree);
                 break;
             default:
-
-                break;
+                throw new IOException("ERROR: Unknown output file Type. Please specify the file type (--fileType or --outFileType) or use a typical file extension for NEWICK (" + NEWICK_EXT + ") or NEXUS (" + NEXUS_EXT + ")");
         }
 
 
