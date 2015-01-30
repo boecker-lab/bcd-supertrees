@@ -13,13 +13,13 @@ import static org.junit.Assert.assertEquals;
 
 
 public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //extending from class to test to get protected access
-
+    public final String requiredInputPath =  getClass().getResource("/berrysemple-sourcetrees.tre").getFile();
     //Test if parameter gets translated into flipcut parameters in the right way
     @Test
     public void test_used_algo() throws Exception{
         final CmdLineParser parser= new CmdLineParser(this);
 
-        String[] test_string = new String[] {"-a",Algorithm.BCD.name()};
+        String[] test_string = new String[] {"-a",Algorithm.BCD.name(),requiredInputPath};
         parser.parseArgument(test_string);
         //assert
         assertEquals(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW, getAlgorithm().cutter.getType());
@@ -32,7 +32,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
     @Test
     public void test_set_weights_unit_cost() throws Exception{           //TODO: Test every weight? --> not for the internal notation but for the official see below
-        String[] test_String ={"-w","UNIT_WEIGHT"};
+        String[] test_String ={"-w","UNIT_WEIGHT",requiredInputPath};
         final BCDCommandLineInterface test_interface = new BCDCommandLineInterface();
         final CmdLineParser parser= new CmdLineParser(test_interface);
         parser.parseArgument(test_String);
@@ -48,7 +48,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
         final CmdLineParser parser= new CmdLineParser(test_interface);
 
         for (FlipCutCLO.SuppportedWeights weight : SuppportedWeights.values()) {
-            String[] test_String ={"-w", weight.name()};
+            String[] test_String ={"-w", weight.name(),requiredInputPath};
             parser.parseArgument(test_String);
 
             //assert
@@ -59,7 +59,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
     @Test
     public void test_bst_threshold() throws Exception{
-        String[] test_String ={"-b","33"};
+        String[] test_String ={"-b","33",requiredInputPath};
         final CmdLineParser parser= new CmdLineParser(this);
         parser.parseArgument(test_String);
 
@@ -72,7 +72,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
      //Test if CLI parameter input works as intended
     @Test
     public void test_SCMtree_usage() throws Exception{
-        String[] test_String ={"-s"};
+        String[] test_String ={"-s",requiredInputPath};
         final CmdLineParser parser= new CmdLineParser(this);
         parser.parseArgument(test_String);
 
@@ -85,7 +85,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
     @Test
     public void test_output_path() throws Exception{
         final String path = "C:\\fictional.txt";
-        String[] test_String ={"-o", path};
+        String[] test_String ={"-o", path,requiredInputPath};
         final CmdLineParser parser= new CmdLineParser(this);
         parser.parseArgument(test_String);
 
@@ -99,7 +99,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
     @Test
     public void test_ucr_usage() throws Exception{
-        String[] test_String ={"-u"};
+        String[] test_String ={"-u",requiredInputPath};
         final CmdLineParser parser= new CmdLineParser(this);
         parser.parseArgument(test_String);
 
