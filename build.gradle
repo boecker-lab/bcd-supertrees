@@ -33,7 +33,7 @@ project(':flipcut.flipcut-core') {
     version = '0.9-SNAPSHOT'
 
     dependencies {
-        compile 'de.unijena.bioinf:phylo_Tree:0.9.9-SNAPSHOT'
+        compile 'de.unijena.bioinf:phyloTree-lib:0.9.9-SNAPSHOT'
     }
 }
 
