@@ -2,6 +2,7 @@ package flipcut;
 
 import flipcut.clo.FlipCutCLO;
 import flipcut.flipCutGraph.CutGraphCutter;
+import org.junit.Before;
 import org.junit.Test;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -13,18 +14,19 @@ import static org.junit.Assert.assertEquals;
 
 
 public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //extending from class to test to get protected access
-    public final String requiredInputPath =  getClass().getResource("/berrysemple-sourcetrees.tre").getFile();
+    public final String requiredInputPath = "/home/user/inputTrees.tre";
     //Test if parameter gets translated into flipcut parameters in the right way
+
     @Test
     public void test_used_algo() throws Exception{
         final CmdLineParser parser= new CmdLineParser(this);
 
-        String[] test_string = new String[] {"-a",Algorithm.BCD.name(),requiredInputPath};
+        String[] test_string = new String[] {"-a", Algorithm.BCD.name() ,requiredInputPath};
         parser.parseArgument(test_string);
         //assert
         assertEquals(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW, getAlgorithm().cutter.getType());
 
-        test_string =  new String[] {"-a",Algorithm.FC.name()};
+        test_string =  new String[] {"-a", Algorithm.FC.name(),requiredInputPath};
         parser.parseArgument(test_string);
         //assert
         assertEquals(CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG , getAlgorithm().cutter.getType());
@@ -72,7 +74,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
      //Test if CLI parameter input works as intended
     @Test
     public void test_SCMtree_usage() throws Exception{
-        String[] test_String ={"-s",requiredInputPath};
+        String[] test_String = {"-s", "1",requiredInputPath};
         final CmdLineParser parser= new CmdLineParser(this);
         parser.parseArgument(test_String);
 
