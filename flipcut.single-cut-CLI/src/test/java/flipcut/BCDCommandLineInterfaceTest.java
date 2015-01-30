@@ -91,7 +91,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
         //assert
 
-        assertEquals(path, output.getName());
+        assertEquals(path, output.toString());
 
     }
     //todo use relative path to test-resources folder for test input file and test file reading
