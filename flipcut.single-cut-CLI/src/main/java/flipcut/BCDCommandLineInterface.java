@@ -23,7 +23,7 @@ public class BCDCommandLineInterface extends FlipCutCLO<FlipCutSingleCutSimpleWe
 
     @Override
     protected FlipCutSingleCutSimpleWeight initAlgorithm() {
-        return new FlipCutSingleCutSimpleWeight(null);
+        return new FlipCutSingleCutSimpleWeight(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
     }
 
     //##### flip cut parameter #####
@@ -49,14 +49,8 @@ public class BCDCommandLineInterface extends FlipCutCLO<FlipCutSingleCutSimpleWe
 
 
     //##### Methods ####
-    private void checkForNexus() throws IOException, Exception {
-        File file = new File(arguments.get(0));
-        Tree[] inputTrees = SimpleNexus.getTreesFromFile(file);
-
-        FlipCutSingleCutSimpleWeight n = new FlipCutSingleCutSimpleWeight(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
-        n.setInputTrees(Arrays.asList(inputTrees));
-
-        //TOdo: parameter aus nexus file auslesen und setzen
+    private void checkForNexus() throws IOException{
+        //TOdo: parameter aus nexus file auslesen und setzen see below for usage
     }
 
 

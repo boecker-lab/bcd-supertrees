@@ -16,7 +16,7 @@ allprojects {
     }
 
     dependencies {
-        compile 'de.unijena.bioinf:phylo_Tree:0.9.9-SNAPSHOT'
+        compile 'de.unijena.bioinf:phyloTree-lib:0.9.9-SNAPSHOT'
         testCompile group: 'junit', name: 'junit', version: '4.11'
     }
 

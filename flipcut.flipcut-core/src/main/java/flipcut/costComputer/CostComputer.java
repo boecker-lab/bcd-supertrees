@@ -73,7 +73,7 @@ public abstract class CostComputer{
         }
 
         if (scaffoldTree != null && !trees.contains(scaffoldTree)){
-            System.out.println("adding scaffold tree to treelist");
+//            System.out.println("adding scaffold tree to treelist");
             trees.add(scaffoldTree);
             //scaffoldTree.getRoot().setLabel(Double.toString(getScaffoldWeight()));
         }

@@ -12,6 +12,8 @@ import org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler;
 import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -35,11 +37,19 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
     }
 
     // receives other command line parameters than options
-    @Argument
-    public List<String> arguments = new ArrayList<>();
 
-    protected static enum Algorithm {BCD,FC}
-    protected static enum SuppportedWeights {UNIT_WEIGHT, BRANCH_LENGTH, BOOTSTRAP_VALUES, LEVEL, BRANCH_AND_LEVEL, BOOTSTRAP_AND_LEVEL}
+    @Argument(usage = "Path of the file containing the input trees", index = 0, required = true)
+    public Path inputFile;
+
+    @Argument(usage = "Path of the file containing the guide tree", index = 1, required = false)
+    public Path inputSCMFile;
+
+    /*@Argument
+    public List<String> arguments = new ArrayList<>();*/
+
+    public static enum FileType {NEXUS,NEWICK,AUTO}
+    public static enum Algorithm {BCD,FC}
+    public static enum SuppportedWeights {UNIT_WEIGHT, BRANCH_LENGTH, BOOTSTRAP_VALUES, LEVEL, BRANCH_AND_LEVEL, BOOTSTRAP_AND_LEVEL}
 
     protected final EnumMap<SuppportedWeights, FlipCutWeights.Weights> weightMapping = initWheightMapping();
     protected abstract EnumMap<SuppportedWeights,FlipCutWeights.Weights> initWheightMapping();
@@ -59,7 +69,7 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
     }//default value is true
 
     //Weighting
-    @Option(name="-w", aliases = "--graphWeighting", usage="Weighting strategy",forbids = "-W")
+    @Option(name="-w", aliases = "--weighting", usage="Weighting strategy",forbids = "-W")
     public void setWeights(SuppportedWeights weighting){
         if (weighting != null){
             FlipCutWeights.Weights tmp = weightMapping.get(weighting);
@@ -101,7 +111,7 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
     public boolean useSCM = true;  //default value true
 
     @Option(name="-o", aliases = "--outputPath", usage="Output file" )
-    public File output = null;  //default value null
+    public Path output = null;  //default value null
 
     //pre and post procesing stuff
     @Option(name="-r", aliases = "--ucr", usage="Run unsupported clade reduction post-processing", hidden = true)
@@ -116,6 +126,16 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
     @Option(name = "-i", aliases = "--insufficient", usage = "Skip if input trees have insufficient taxa overlap", hidden = true)
     public boolean skipInsufficientOverlapInstances = false; //todo warn if taxa hav insufficient taxa overlap taxa overlap check
 
+    //file and path stuff
+    @Option(name = "-f", aliases = "--fileType", usage = "Type of input files and if not otherwise specified also of the output file")
+    public FileType inputType = FileType.AUTO;
+
+    @Option(name = "-d", aliases = "--outFileType", usage = "Output file type")
+    public FileType outputType = FileType.AUTO;
+
+    @Option(name = "-p", aliases = "--workingDir", usage = "Path of the working directory")
+//    public File workingPath = new File(System.getProperty("user.dir"));
+    public Path workingPath = Paths.get(System.getProperty("user.dir"));
 
 
     //help option
