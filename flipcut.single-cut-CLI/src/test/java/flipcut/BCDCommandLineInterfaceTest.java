@@ -2,7 +2,6 @@ package flipcut;
 
 import flipcut.clo.FlipCutCLO;
 import flipcut.flipCutGraph.CutGraphCutter;
-import org.junit.Before;
 import org.junit.Test;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -15,28 +14,28 @@ import static org.junit.Assert.assertEquals;
 
 public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //extending from class to test to get protected access
     public final String requiredInputPath = "/home/user/inputTrees.tre";
+
     //Test if parameter gets translated into flipcut parameters in the right way
-
     @Test
-    public void test_used_algo() throws Exception{
-        final CmdLineParser parser= new CmdLineParser(this);
+    public void test_used_algo() throws Exception {
+        final CmdLineParser parser = new CmdLineParser(this);
 
-        String[] test_string = new String[] {"-a", Algorithm.BCD.name() ,requiredInputPath};
+        String[] test_string = new String[]{"-a", Algorithm.BCD.name(), requiredInputPath};
         parser.parseArgument(test_string);
         //assert
         assertEquals(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW, getAlgorithm().cutter.getType());
 
-        test_string =  new String[] {"-a", Algorithm.FC.name(),requiredInputPath};
+        test_string = new String[]{"-a", Algorithm.FC.name(), requiredInputPath};
         parser.parseArgument(test_string);
         //assert
-        assertEquals(CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG , getAlgorithm().cutter.getType());
+        assertEquals(CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG, getAlgorithm().cutter.getType());
     }
 
     @Test
-    public void test_set_weights_unit_cost() throws Exception{           //TODO: Test every weight? --> not for the internal notation but for the official see below
-        String[] test_String ={"-w","UNIT_WEIGHT",requiredInputPath};
+    public void test_set_weights_unit_cost() throws Exception {           //TODO: Test every weight? --> not for the internal notation but for the official see below
+        String[] test_String = {"-w", "UNIT_WEIGHT", requiredInputPath};
         final BCDCommandLineInterface test_interface = new BCDCommandLineInterface();
-        final CmdLineParser parser= new CmdLineParser(test_interface);
+        final CmdLineParser parser = new CmdLineParser(test_interface);
         parser.parseArgument(test_String);
         test_interface.initWheightMapping();
 
@@ -45,12 +44,12 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
     }
 
     @Test
-    public void test_supported_weights() throws Exception{           //TODO: Test every weight? --> you can iterate over the common weights
+    public void test_supported_weights() throws Exception {           //TODO: Test every weight? --> you can iterate over the common weights
         final BCDCommandLineInterface test_interface = new BCDCommandLineInterface();
-        final CmdLineParser parser= new CmdLineParser(test_interface);
+        final CmdLineParser parser = new CmdLineParser(test_interface);
 
         for (FlipCutCLO.SuppportedWeights weight : SuppportedWeights.values()) {
-            String[] test_String ={"-w", weight.name(),requiredInputPath};
+            String[] test_String = {"-w", weight.name(), requiredInputPath};
             parser.parseArgument(test_String);
 
             //assert
@@ -60,9 +59,9 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
     }
 
     @Test
-    public void test_bst_threshold() throws Exception{
-        String[] test_String ={"-b","33",requiredInputPath};
-        final CmdLineParser parser= new CmdLineParser(this);
+    public void test_bst_threshold() throws Exception {
+        String[] test_String = {"-b", "33", requiredInputPath};
+        final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
 
         //assert
@@ -71,11 +70,11 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
     }
 
-     //Test if CLI parameter input works as intended
+    //Test if CLI parameter input works as intended
     @Test
-    public void test_SCMtree_usage() throws Exception{
-        String[] test_String = {"-s", "1",requiredInputPath};
-        final CmdLineParser parser= new CmdLineParser(this);
+    public void test_SCMtree_usage() throws Exception {
+        String[] test_String = {"-s", "1", requiredInputPath};
+        final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
 
         //assert
@@ -85,10 +84,10 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
     }
 
     @Test
-    public void test_output_path() throws Exception{
+    public void test_output_path() throws Exception {
         final String path = "C:\\fictional.txt";
-        String[] test_String ={"-o", path,requiredInputPath};
-        final CmdLineParser parser= new CmdLineParser(this);
+        String[] test_String = {"-o", path, requiredInputPath};
+        final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
 
         //assert
@@ -96,13 +95,12 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
         assertEquals(path, output.toString());
 
     }
-    //todo use relative path to test-resources folder for test input file and test file reading
-//    getClass().getResource("/testInputFile.tre").getFile();
+
 
     @Test
-    public void test_ucr_usage() throws Exception{
-        String[] test_String ={"-u",requiredInputPath};
-        final CmdLineParser parser= new CmdLineParser(this);
+    public void test_ucr_usage() throws Exception {
+        String[] test_String = {"-u", requiredInputPath};
+        final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
 
         //assert
@@ -111,10 +109,8 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
     }
 
 
-
-
     @Test
-    public void testDoMainGiveTrees()  throws Exception{
+    public void testDoMainGiveTrees() throws Exception {
 
         /*//arrange
 

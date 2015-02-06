@@ -3,17 +3,18 @@ package flipcut;
 import epos.model.tree.Tree;
 import epos.model.tree.io.Newick;
 import epos.model.tree.io.SimpleNexus;
+import epos.model.tree.io.TreeFileUtils;
 import epos.model.tree.treetools.SiblingReduction;
 import epos.model.tree.treetools.UnsupportedCladeReduction;
 import flipcut.clo.FlipCutCLO;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -24,20 +25,15 @@ import static flipcut.clo.FlipCutCLO.FileType.*;
  * Created by fleisch on 25.11.14.
  */
 public class BCDSupertrees {
-    private static final BCDCommandLineInterface bcdCLI = new BCDCommandLineInterface();
-
-    private static final String NEXUS_EXT = "nex,NEX,ne,NE,nexus,NEXUS";
-    private static final String NEXUS_DEFAULT = ".nex";
-    private static final String NEWICK_EXT = "tree,TREE,tre,TRE,phy,PHY";
-    private static final String NEWICK_DEFAULT = ".tre";
-    private static final String EXT_PATTERN = "([^\\s]+(\\.(?i)(nex|NEX|ne|NE|nexus|NEXUS|tree|TREE|tre|TRE|phy|PHY))$)";
-    private static final PathMatcher nexusMatcher = FileSystems.getDefault().getPathMatcher("glob:**.{" + NEXUS_EXT + "}");
-    private static final PathMatcher newickMatcher = FileSystems.getDefault().getPathMatcher("glob:**.{" + NEWICK_EXT + "}");
-    private static FlipCutCLO.FileType INPUT_TYPE = AUTO;
+    private static BCDCommandLineInterface bcdCLI;
 
 
+    private static FlipCutCLO.FileType INPUT_TYPE;
 
-    public static void main(String[] args){
+
+    public static void main(String[] args) {
+        INPUT_TYPE = AUTO;
+        bcdCLI = new BCDCommandLineInterface();
         final CmdLineParser parser = new CmdLineParser(bcdCLI);
 
         // if you have a wider console, you could increase the value;
@@ -63,7 +59,7 @@ public class BCDSupertrees {
 
             if (bcdCLI.inputFile != null) {
                 //todo preprocessing
-                //todo add nexus support //read Block convert it to options and parse it an parse is with parser.
+                //todo add nexus block support //read Block convert it to options and parse it an parse is with parser.
 
                 if (!bcdCLI.inputFile.isAbsolute())
                     bcdCLI.inputFile = bcdCLI.workingPath.resolve(bcdCLI.inputFile);
@@ -77,9 +73,11 @@ public class BCDSupertrees {
                     if (!bcdCLI.inputSCMFile.isAbsolute())
                         bcdCLI.inputSCMFile = bcdCLI.workingPath.resolve(bcdCLI.inputSCMFile);
 
-                    guideTree = parseFileToTrees(bcdCLI.inputSCMFile,bcdCLI.inputType)[0];
+                    guideTree = parseFileToTrees(bcdCLI.inputSCMFile, bcdCLI.inputType)[0];
                 } else if (bcdCLI.useSCM) {
+                    //todo calculate scm tree!!!!!!!
                     guideTree = calculateSCM(inputTreesUntouched);
+//                    bcdCLI.useSCM = false; //workaround
                 }
 
                 SiblingReduction reducer = null;
@@ -126,14 +124,12 @@ public class BCDSupertrees {
             bcdCLI.printHelp(parser, System.err);
 
             return;
-        } catch (IOException e){
+        } catch (IOException e) {
             System.err.println(e.getMessage());
             System.err.println();
             System.err.println();
-            //todo return some exit code and do some error messages
+            bcdCLI.printHelp(parser, System.err);
         }
-
-
 
 
     }
@@ -143,23 +139,35 @@ public class BCDSupertrees {
     }
 
     private static Tree[] parseFileToTrees(Path path, FlipCutCLO.FileType type) throws IOException {
+        Tree[] t = null;
+        FlipCutCLO.FileType toInputType = AUTO;
         if (type == null || type == AUTO) {
-            if (newickMatcher.matches(path)) {
-                INPUT_TYPE = NEWICK;
-                return SimpleNexus.getTreesFromFile(path.toFile());
-            } else if (nexusMatcher.matches(path)) {
-                INPUT_TYPE = NEXUS;
-                return SimpleNexus.getTreesFromFile(path.toFile());
+            if (TreeFileUtils.newickMatcher.matches(path)) {
+                toInputType = NEWICK;
+                t = Newick.getAllTrees(new FileReader(path.toFile()));
+            } else if (TreeFileUtils.nexusMatcher.matches(path)) {
+                toInputType = NEXUS;
+                t = SimpleNexus.getTreesFromFile(path.toFile());
+            } else {
+                throw new FileNotFoundException("ERROR: Unknown input file extension. Please specify the correct input file type (--fileType) or use a typical file extension for NEWICK (" + TreeFileUtils.NEWICK_EXT + ") or NEXUS (" + TreeFileUtils.NEXUS_EXT + ")");
             }
         } else if (type == NEXUS) {
-            INPUT_TYPE = NEXUS;
-            return SimpleNexus.getTreesFromFile(path.toFile());
+            toInputType = NEXUS;
+            t = SimpleNexus.getTreesFromFile(path.toFile());
         } else if (type == NEWICK) {
-            INPUT_TYPE = NEWICK;
-            return SimpleNexus.getTreesFromFile(path.toFile());
+            toInputType = NEWICK;
+            t = Newick.getAllTrees(new FileReader(path.toFile()));
+        } else {
+            throw new FileNotFoundException("ERROR: Unknown input file extension. Please specify the correct input file type (--fileType) or use a typical file extension for NEWICK (" + TreeFileUtils.NEWICK_EXT + ") or NEXUS (" + TreeFileUtils.NEXUS_EXT + ")");
         }
 
-        throw new FileNotFoundException("ERROR: Unknown input file extension. Please specify the input file type (--fileType) or use a typical file extension for NEWICK (" + NEWICK_EXT + ") or NEXUS (" + NEXUS_EXT + ")");
+        if (t == null || t.length < 1)
+            throw new IOException("ERROR: No Tree in input file or wrong file type detected. Please specify the correct input file type (--fileType) or use a typical file extension for NEWICK (" + TreeFileUtils.NEWICK_EXT + ") or NEXUS (" + TreeFileUtils.NEXUS_EXT + ")");
+
+        if (INPUT_TYPE == null || INPUT_TYPE == AUTO )
+            INPUT_TYPE = toInputType;
+
+        return t;
     }
 
 
@@ -188,22 +196,21 @@ public class BCDSupertrees {
         } else {
             Path outFolder = bcdCLI.inputFile.getParent();
             String filename = bcdCLI.inputFile.getFileName().toString();
-            filename = removerExtensions(filename);
-            filename = filename + "_bcd-supertree";
+            filename = filename.replaceFirst(TreeFileUtils.EXT_PATTERN, "_bcd-supertree");
             bcdCLI.output = outFolder.resolve(filename);
 
         }
 
         //find out file format
         if (bcdCLI.outputType != AUTO) {
-            bcdCLI.output = removerExtensions(bcdCLI.output);
+            bcdCLI.output = removeExtension(bcdCLI.output);
             writeTreeToFile(bcdCLI.output, supertree, bcdCLI.outputType, true);
         } else if (bcdCLI.inputType != AUTO) {
-            bcdCLI.output = removerExtensions(bcdCLI.output);
+            bcdCLI.output = removeExtension(bcdCLI.output);
             writeTreeToFile(bcdCLI.output, supertree, bcdCLI.inputType, true);
-        } else if (newickMatcher.matches(bcdCLI.output)) {
+        } else if (TreeFileUtils.newickMatcher.matches(bcdCLI.output)) {
             writeTreeToFile(bcdCLI.output, supertree, NEWICK, false);
-        } else if (nexusMatcher.matches(bcdCLI.output)) {
+        } else if (TreeFileUtils.nexusMatcher.matches(bcdCLI.output)) {
             writeTreeToFile(bcdCLI.output, supertree, NEXUS, false);
         } else {
             //extension remove not needed because already checked before
@@ -213,28 +220,24 @@ public class BCDSupertrees {
     }
 
     private static void writeTreeToFile(Path path, Tree supertree, FlipCutCLO.FileType type, boolean appendExt) throws IOException {
-        switch (type){
+        switch (type) {
             case NEWICK:
-                Newick.tree2File(path.toFile(),supertree);
+                Newick.tree2File(new File(path.toString() + TreeFileUtils.NEWICK_DEFAULT), supertree);
                 break;
             case NEXUS:
-                SimpleNexus.tree2File(path.toFile(),supertree);
+                SimpleNexus.tree2File(new File(path.toString() + TreeFileUtils.NEXUS_DEFAULT), supertree);
                 break;
             default:
-                throw new IOException("ERROR: Unknown output file Type. Please specify the file type (--fileType or --outFileType) or use a typical file extension for NEWICK (" + NEWICK_EXT + ") or NEXUS (" + NEXUS_EXT + ")");
+                throw new IOException("ERROR: Unknown output file Type. Please specify the file type (--fileType or --outFileType) or use a typical file extension for NEWICK (" + TreeFileUtils.NEWICK_EXT + ") or NEXUS (" + TreeFileUtils.NEXUS_EXT + ")");
         }
 
 
     }
 
-    private static String removerExtensions(String filename) {
-        return filename.replaceAll(EXT_PATTERN, "");
-    }
-
-    private static Path removerExtensions(Path path) {
+    private static Path removeExtension(Path path) {
         Path outFolder = path.getParent();
         String filename = path.getFileName().toString();
-        filename = removerExtensions(filename);
+        filename = filename.replaceFirst(TreeFileUtils.EXT_PATTERN, "");
         return outFolder.resolve(filename);
     }
 }
