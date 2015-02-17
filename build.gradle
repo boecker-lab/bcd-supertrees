@@ -52,6 +52,7 @@ project(':flipcut.single-cut-CLI') {
 
     dependencies {
         compile project(':flipcut.single-cut-algorithm')
+        compile 'de.unijena.bioinf:scm_Algorithm:0.8-SNAPSHOT'
         compile 'args4j:args4j:2.0.29'
     }
 }

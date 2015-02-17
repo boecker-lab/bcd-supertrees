@@ -9,6 +9,9 @@ import epos.model.tree.treetools.UnsupportedCladeReduction;
 import flipcut.clo.FlipCutCLO;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
+import scmAlgorithm.GreedySCMAlgorithm;
+import scmAlgorithm.treeScorer.AbstractOverlapScorer;
+import scmAlgorithm.treeSelector.GreedyTreeSelector;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -75,9 +78,11 @@ public class BCDSupertrees {
 
                     guideTree = parseFileToTrees(bcdCLI.inputSCMFile, bcdCLI.inputType)[0];
                 } else if (bcdCLI.useSCM) {
-                    //todo calculate scm tree!!!!!!!
+                    System.out.println("Calculating SCM Guide Tree...");
+                    long t =  System.currentTimeMillis();
                     guideTree = calculateSCM(inputTreesUntouched);
-//                    bcdCLI.useSCM = false; //workaround
+
+                    System.out.println("...DONE in " + (double)(System.currentTimeMillis() - t)/1000d + "s");
                 }
 
                 SiblingReduction reducer = null;
@@ -172,8 +177,8 @@ public class BCDSupertrees {
 
 
     private static Tree calculateSCM(Tree[] inputTrees) {
-        //todo calculate scm tree
-        return null;
+        GreedySCMAlgorithm algo = new GreedySCMAlgorithm(new GreedyTreeSelector.GTSMapPQ(new AbstractOverlapScorer.OverlapScorerTroveObject(),inputTrees));
+        return algo.getSupertree();
     }
 
     private static SiblingReduction removeUndisputedSiblings(List<Tree> inputTrees) {

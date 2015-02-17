@@ -1,6 +1,7 @@
 package flipcut;
 
 import epos.model.tree.Tree;
+import epos.model.tree.TreeNode;
 import epos.model.tree.io.Newick;
 import epos.model.tree.io.SimpleNexus;
 import epos.model.tree.io.TreeFileUtils;
@@ -12,10 +13,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -108,6 +106,21 @@ public class BCDSupertreesTest {
         testAutoFileTypeDetection(nexusInput, newickSCM, newickOut,null,FlipCutCLO.FileType.NEWICK);
     }
 
+    @Test
+    public void debugTest(){
+        Path inputPath = Paths.get(getClass().getResource("/" + newickInput).getFile());
+        Tree[] trees = Newick.getTreeFromFile(inputPath.toFile());
+        for (Tree tree : trees) {
+            System.out.println("### new Tree ###");
+            List<TreeNode> l = new ArrayList<>();
+            for (TreeNode node : tree.getRoot().depthFirstIterator()) {
+                System.out.println(node);
+                l.add(node);
+            }
+            System.out.println();
+            System.out.println();
+        }
+    }
 
 
 
