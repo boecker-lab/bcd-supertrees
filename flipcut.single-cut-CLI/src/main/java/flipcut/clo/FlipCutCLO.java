@@ -9,12 +9,10 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler;
 
-import java.io.File;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -107,18 +105,21 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
     }
 
     //##### command line parameter #####
-    @Option(name="-s", aliases = "--useSCMTree", handler = ExplicitBooleanOptionHandler.class, usage="Use SCM-tree as guide tree")
+    @Option(name="-s", aliases = "--useSCMTree", handler = ExplicitBooleanOptionHandler.class, usage="Use SCM-tree as guide tree", hidden = true)
     public boolean useSCM = true;  //default value true
 
     @Option(name="-o", aliases = "--outputPath", usage="Output file" )
     public Path output = null;  //default value null
 
     //pre and post procesing stuff
-    @Option(name="-r", aliases = "--ucr", usage="Run unsupported clade reduction post-processing", hidden = true)
+    @Option(name="-n", aliases = "--ucr", usage="Run unsupported clade reduction post-processing", hidden = true)
     public boolean unsupportedCladeReduction = false;
 
     @Option(name="-u", aliases = "--uds", usage="Run undisputed sibling pre-processing", hidden = true)
     public boolean removeUndisputedSiblings = false;
+
+    @Option(name="-r", aliases = "--noRooting", usage="Do not optimize fake roots of unrooted input trees based on Guide tree", hidden = true)
+    public boolean noRootingOptimization = false;
 
     @Option(name = "-v", aliases = "--verbose", usage = "Minimal console output")
     public boolean verbose = false;

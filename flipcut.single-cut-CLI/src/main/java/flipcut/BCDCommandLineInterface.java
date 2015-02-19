@@ -3,15 +3,11 @@ package flipcut; /**
  */
 
 import flipcut.clo.FlipCutCLO;
-import epos.model.tree.Tree;
-import epos.model.tree.io.SimpleNexus;
 import flipcut.costComputer.FlipCutWeights;
 import flipcut.flipCutGraph.CutGraphCutter;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.EnumMap;
 
 public class BCDCommandLineInterface extends FlipCutCLO<FlipCutSingleCutSimpleWeight> {

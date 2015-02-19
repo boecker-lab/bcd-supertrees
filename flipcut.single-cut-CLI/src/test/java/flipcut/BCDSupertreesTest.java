@@ -1,7 +1,6 @@
 package flipcut;
 
 import epos.model.tree.Tree;
-import epos.model.tree.TreeNode;
 import epos.model.tree.io.Newick;
 import epos.model.tree.io.SimpleNexus;
 import epos.model.tree.io.TreeFileUtils;
@@ -13,7 +12,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -26,9 +28,15 @@ public class BCDSupertreesTest {
     public final static String newickSCM = "sm.11.sourceTrees.scmTree.tre";
     public final static String newickOut = "sm.11.sourceTrees_OptSCM-Rooting_bcd-supertree.tre";
 
+    public final static String newickInput16 = "sm.16.sourceTrees_OptSCM-Rooting.tre";
+    public final static String newickInputNoRoot16 = "sm.16.sourceTrees.tre";
+    public final static String newickSCMNoRoot16 = "sm.16.sourceTrees.scmTree.tre";
+
     public final static String nexusInput = "sm.11.sourceTrees_OptSCM-Rooting.nex";
     public final static String nexusOut = "sm.11.sourceTrees_OptSCM-Rooting_bcd-supertree.nex";
     public final static String nexusSCM = "sm.11.sourceTrees.scmTree.nex";
+
+
 
 
     //File Hndling tests
@@ -106,7 +114,29 @@ public class BCDSupertreesTest {
         testAutoFileTypeDetection(nexusInput, newickSCM, newickOut,null,FlipCutCLO.FileType.NEWICK);
     }
 
+
+
     @Test
+    public void testRootOptimization() throws IOException {
+        final Path tempDir = getTmpDir();
+        final List<String> toargs =  new LinkedList<>();
+
+
+        //add input file
+        Path inputPath = Paths.get(getClass().getResource("/" + newickInput16).getFile());
+        inputPath = Files.copy(inputPath, tempDir.resolve(inputPath.getFileName()));
+        toargs.add(inputPath.toString());
+        System.out.println(inputPath);
+
+        String[] args =  new String[toargs.size()];
+        args = toargs.toArray(args);
+        System.out.println("Arguments:");
+        System.out.println(Arrays.toString(args));
+        BCDSupertrees.main(args);
+
+    }
+
+   /* @Test
     public void debugTest(){
         Path inputPath = Paths.get(getClass().getResource("/" + newickInput).getFile());
         Tree[] trees = Newick.getTreeFromFile(inputPath.toFile());
@@ -120,7 +150,7 @@ public class BCDSupertreesTest {
             System.out.println();
             System.out.println();
         }
-    }
+    }*/
 
 
 
