@@ -7,7 +7,7 @@ import epos.model.tree.TreeNode;
 import epos.model.tree.io.Newick;
 import epos.model.tree.io.SimpleNexus;
 import epos.model.tree.io.TreeFileUtils;
-import epos.model.tree.treetools.SiblingReduction;
+import epos.model.tree.treetools.ReductionModifier;
 import epos.model.tree.treetools.TreeUtilsBasic;
 import epos.model.tree.treetools.UnsupportedCladeReduction;
 import flipcut.clo.FlipCutCLO;
@@ -88,11 +88,11 @@ public class BCDSupertrees {
                     System.out.println(Newick.getStringFromTree(guideTree));
                 }
 
-                if (guideTree != null && !bcdCLI.noRootingOptimization) {
+                /*if (guideTree != null && !bcdCLI.noRootingOptimization) {
                     optimizeRooting(inputTreesUntouched,guideTree);
-                }
+                }*/
 
-                SiblingReduction reducer = null;
+                ReductionModifier reducer = null;
                 if (bcdCLI.removeUndisputedSiblings) { //ATTENTION this is an Error prone method
                     inputTrees = new ArrayList<>(inputTreesUntouched.length + 1);
                     for (Tree tree : inputTreesUntouched) {
@@ -325,8 +325,8 @@ public class BCDSupertrees {
         return algo.getSupertree();
     }
 
-    private static SiblingReduction removeUndisputedSiblings(List<Tree> inputTrees) {
-        SiblingReduction reducer = new SiblingReduction(null, false);
+    private static ReductionModifier removeUndisputedSiblings(List<Tree> inputTrees) {
+        ReductionModifier reducer = new ReductionModifier(null, false);
         reducer.modify(inputTrees);
         return reducer;
     }
