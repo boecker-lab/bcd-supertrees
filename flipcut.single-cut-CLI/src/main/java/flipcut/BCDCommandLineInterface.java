@@ -41,7 +41,12 @@ public class BCDCommandLineInterface extends FlipCutCLO<FlipCutSingleCutSimpleWe
     @Override
     public void setGraphType(CutGraphCutter.CutGraphTypes graphType) {
         algorithm.setCutter(graphType);
-    } //deafault is has to be null
+    } //deafault has to be null
+
+    public CutGraphCutter.CutGraphTypes getGraphType() {
+        return algorithm.getCutterType();
+    } //deafault has to be null
+
 
 
     //##### Methods ####

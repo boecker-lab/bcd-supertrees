@@ -196,6 +196,11 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
     public void setCutter(CutGraphCutter.CutGraphTypes type){
         cutter = createCutter(type);
     }
+    public CutGraphCutter.CutGraphTypes getCutterType(){
+        if (cutter == null)
+            return null;
+        return cutter.getType();
+    }
 
 
     public class DebugInfo{

@@ -106,6 +106,10 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
         this.bootstrapThreshold = bootstrapThreshold;
     }
 
+    public int getBootstrapThreshold() {
+        return bootstrapThreshold;
+    }
+
     //abstract stuff!
     public abstract List<Tree> getSupertrees();
 

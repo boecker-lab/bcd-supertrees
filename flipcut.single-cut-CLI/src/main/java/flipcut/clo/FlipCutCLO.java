@@ -86,7 +86,9 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
     public void setBootstrapThreshold(int bootstrapThreshold){
         algorithm.setBootstrapThreshold(bootstrapThreshold);
     }//default bootstrap Threshold value
-
+    public int getBootstrapThreshold(){
+        return algorithm.getBootstrapThreshold();
+    }
 
     public void setInputTrees(List<Tree> inputTrees){
         setInputTrees(inputTrees, null);
