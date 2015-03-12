@@ -5,6 +5,8 @@ import flipcut.flipCutGraph.CutGraphCutter;
 import org.junit.Test;
 import org.kohsuke.args4j.CmdLineParser;
 
+import java.nio.file.Paths;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -99,14 +101,120 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
     @Test
     public void test_ucr_usage() throws Exception {
+        String[] test_String = {"-n", requiredInputPath};
+        final CmdLineParser parser = new CmdLineParser(this);
+        parser.parseArgument(test_String);
+
+        //assert
+        assertEquals(true, unsupportedCladeReduction);
+
+    }
+
+    @Test
+    public void test_uds_usage() throws Exception {
         String[] test_String = {"-u", requiredInputPath};
         final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
 
         //assert
-        assertEquals(true, useSCM);
+        assertEquals(true, removeUndisputedSiblings);
+    }
+
+    @Test
+    public void test_noRooting() throws Exception{
+        String[] test_String = {"-r", requiredInputPath};
+        final CmdLineParser parser = new CmdLineParser(this);
+        parser.parseArgument(test_String);
+
+        //assert
+        assertEquals(true, noRootingOptimization);
 
     }
+
+    @Test
+    public void test_verbose() throws Exception{
+        String[] test_String = {"-v", requiredInputPath};
+        final CmdLineParser parser = new CmdLineParser(this);
+        parser.parseArgument(test_String);
+
+        //assert
+        assertEquals(true, verbose);
+
+    }
+
+    @Test
+    public void test_insufficient() throws Exception{
+        String[] test_String = {"-i", requiredInputPath};
+        final CmdLineParser parser = new CmdLineParser(this);
+        parser.parseArgument(test_String);
+
+        //assert
+        assertEquals(true, skipInsufficientOverlapInstances);
+
+    }
+
+    @Test
+    public void test_in_file_type() throws Exception{
+        final String file_type ="test_type";
+        String[] test_String = {"-f", file_type, requiredInputPath};
+
+        final CmdLineParser parser = new CmdLineParser(this);
+        parser.parseArgument(test_String);
+
+        //assert
+        assertEquals(file_type, inputType);
+
+    }
+
+    @Test
+    public void test_out_file_type() throws Exception{
+        final String file_type="test_type_out";
+        String[] test_String = {"-d",file_type, requiredInputPath};
+        final CmdLineParser parser = new CmdLineParser(this);
+        parser.parseArgument(test_String);
+
+        //assert
+        assertEquals(file_type, outputType);
+
+    }
+
+    @Test
+    public void test_work_dir() throws Exception{
+        final String work_dir_path = "C://fictional";
+        String[] test_String = {"-p", work_dir_path,requiredInputPath};
+        final CmdLineParser parser = new CmdLineParser(this);
+        parser.parseArgument(test_String);
+
+        //assert
+        assertEquals(work_dir_path, workingPath);
+
+    }
+
+    @Test
+    public void test_help() throws Exception{
+        String[] test_String = {"-h", requiredInputPath};
+        final CmdLineParser parser = new CmdLineParser(this);
+        parser.parseArgument(test_String);
+
+        //assert
+        assertEquals(true, help);
+
+    }
+
+    @Test
+    public void test_full_help() throws Exception{
+        String[] test_String = {"-H", requiredInputPath};
+        final CmdLineParser parser = new CmdLineParser(this);
+        parser.parseArgument(test_String);
+
+        //assert
+        assertEquals(true, fullHelp);
+
+    }
+
+
+
+
 
 
     @Test
