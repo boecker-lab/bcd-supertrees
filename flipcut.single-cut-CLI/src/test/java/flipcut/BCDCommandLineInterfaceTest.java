@@ -5,6 +5,7 @@ import flipcut.flipCutGraph.CutGraphCutter;
 import org.junit.Test;
 import org.kohsuke.args4j.CmdLineParser;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
@@ -155,8 +156,8 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
     @Test
     public void test_in_file_type() throws Exception{
-        final String file_type ="test_type";
-        String[] test_String = {"-f", file_type, requiredInputPath};
+        final FileType file_type=FileType.AUTO;
+        String[] test_String = {"-f", file_type.name(), requiredInputPath};
 
         final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
@@ -168,8 +169,8 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
     @Test
     public void test_out_file_type() throws Exception{
-        final String file_type="test_type_out";
-        String[] test_String = {"-d",file_type, requiredInputPath};
+        final FileType file_type=FileType.AUTO;
+        String[] test_String = {"-d",file_type.name(), requiredInputPath};
         final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
 
@@ -180,8 +181,8 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
     @Test
     public void test_work_dir() throws Exception{
-        final String work_dir_path = "C://fictional";
-        String[] test_String = {"-p", work_dir_path,requiredInputPath};
+        final Path work_dir_path = Paths.get("/fictional/path");
+        String[] test_String = {"-p", work_dir_path.toString(),requiredInputPath};
         final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
 
