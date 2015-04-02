@@ -138,9 +138,6 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                         if (DEBUG)
                             debugInfo.cuttingTimes.add((System.currentTimeMillis() - debugInfo.currentStartTime)/1000);
                     }else{
-//                        if (components.size() > 2){
-//                            //todo do recursive pairwise extended semi universal search
-//                        }
                         if (DEBUG)
                             if (components.size() > 2)
                                 debugInfo.polytomies.add(components.size());

@@ -82,7 +82,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
 
                 // skip character with small bootstrap value
                 if (character.getLabel() != null){
-                    int bootstrap = Integer.valueOf(character.getLabel());
+                    double bootstrap = Double.valueOf(character.getLabel());
                     if (bootstrap < bootstrapThreshold){
                         System.out.println("Ignore character with bootstrap value: " + bootstrap + " < " + bootstrapThreshold);
                         continue;

@@ -15,7 +15,8 @@ import gnu.trove.map.hash.THashMap;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import scmAlgorithm.GreedySCMAlgorithm;
-import scmAlgorithm.treeScorer.AbstractOverlapScorer;
+import scmAlgorithm.treeScorer.OverlapScorer;
+import scmAlgorithm.treeScorer.TreeScorer;
 import scmAlgorithm.treeSelector.GreedyTreeSelector;
 
 import java.io.File;
@@ -321,7 +322,7 @@ public class BCDSupertrees {
 
 
     private static Tree calculateSCM(Tree[] inputTrees) {
-        GreedySCMAlgorithm algo = new GreedySCMAlgorithm(new GreedyTreeSelector.GTSMapPQ(new AbstractOverlapScorer.OverlapScorerTroveObject(),inputTrees));
+        GreedySCMAlgorithm algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new OverlapScorer(TreeScorer.ConsensusMethods.STRICT),inputTrees));
         return algo.getSupertree();
     }
 
