@@ -24,17 +24,17 @@ import static org.junit.Assert.assertTrue;
  * Created by fleisch on 02.02.15.
  */
 public class BCDSupertreesTest {
-    public final static String newickInput = "sm.11.sourceTrees_OptSCM-Rooting.tre";
-    public final static String newickSCM = "sm.11.sourceTrees.scmTree.tre";
+    public final static String newickInput = "flipcut/sm.11.sourceTrees_OptSCM-Rooting.tre";
+    public final static String newickSCM = "flipcut/sm.11.sourceTrees.scmTree.tre";
     public final static String newickOut = "sm.11.sourceTrees_OptSCM-Rooting_bcd-supertree.tre";
 
-    public final static String newickInput16 = "sm.16.sourceTrees_OptSCM-Rooting.tre";
-    public final static String newickInputNoRoot16 = "sm.16.sourceTrees.tre";
-    public final static String newickSCMNoRoot16 = "sm.16.sourceTrees.scmTree.tre";
+    public final static String newickInput16 = "flipcut/sm.16.sourceTrees_OptSCM-Rooting.tre";
+    public final static String newickInputNoRoot16 = "flipcut/sm.16.sourceTrees.tre";
+    public final static String newickSCMNoRoot16 = "flipcut/sm.16.sourceTrees.scmTree.tre";
 
-    public final static String nexusInput = "sm.11.sourceTrees_OptSCM-Rooting.nex";
+    public final static String nexusInput = "flipcut/sm.11.sourceTrees_OptSCM-Rooting.nex";
     public final static String nexusOut = "sm.11.sourceTrees_OptSCM-Rooting_bcd-supertree.nex";
-    public final static String nexusSCM = "sm.11.sourceTrees.scmTree.nex";
+    public final static String nexusSCM = "flipcut/sm.11.sourceTrees.scmTree.nex";
 
 
 
