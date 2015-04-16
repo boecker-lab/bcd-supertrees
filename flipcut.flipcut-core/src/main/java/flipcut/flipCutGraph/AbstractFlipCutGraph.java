@@ -18,26 +18,40 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      */
     protected static final boolean DEBUG = false;
 
-    protected  Map<T,TreeNode> charToTreeNode = null;
-    protected  Map<TreeNode,T> treeNodeToChar = null;
+
 
     /**
-     * Turn on/off scm tree based taxa merging
+     * Turn on/off guide tree based taxa merging
      */
-    public static final boolean SCAFF_TAXA_MERGE = true;
-    public static final boolean ADAPTIVE_LEVEL = false;
-
+    public static final boolean SCAFF_TAXA_MERGE = false;
+    /**
+     * Mapping for guide tree based taxa merging
+     */
+    protected  Map<T,TreeNode> charToTreeNode = null;
+    protected  Map<TreeNode,T> treeNodeToChar = null;
+    // active partitions for guide tree based taxa merging
     protected  Set<T> activePartitions = null;
+
+    /**
+     * Turn on/off global character merging for characters with identical edgeset --> works for hypergraph version only
+     */
+    public static final boolean GLOBAL_CHARACTER_MERGE = true;
+    /**
+     * Mapping for edge  based character merging (Global character Map)
+     */
+    protected Map<T, T> characterToDummy = null;
+    protected Map<T, Set<T>> dummyToCharacters = null;
+
+
 
     /**
      * The character vertex set
      */
-    public final List<T> characters;
+    public final LinkedHashSet<T> characters;
     /**
      * The taxa vertex set
      */
-    public final List<T> taxa;
-
+    public final LinkedHashSet<T> taxa;
     /**
      * Marker for DFS
      */
@@ -61,7 +75,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
 
 
     protected AbstractFlipCutGraph(CostComputer costs, int bootstrapThreshold){
-        List<List<T>> data = createGraphData(costs,bootstrapThreshold);
+        List<LinkedHashSet<T>> data = createGraphData(costs,bootstrapThreshold);
         this.characters = data.get(0);
         this.taxa = data.get(1);
         parentNode = null;
@@ -70,7 +84,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
        Sort the leaves alphabetically to ensure we find the same mincut
        for multiple runs
         */
-        sortTaxa();
+//        sortTaxa();
     }
 
 
@@ -83,18 +97,19 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      * @param characters the character
      * @param taxa       the taxa
      */
-    protected AbstractFlipCutGraph(List<T> characters, List<T> taxa, TreeNode parentNode) {
+    protected AbstractFlipCutGraph(LinkedHashSet<T> characters, LinkedHashSet<T> taxa, TreeNode parentNode) {
         this.characters = characters;
         this.taxa = taxa;
         this.parentNode = parentNode;
         treeNode = new TreeNode();
-        /*
-       Sort the leaves alphabetically to ensure we find the same mincut
-       for multiple runs
-        */
-        sortTaxa();
-    }
 
+       /*
+       * Sort the leaves alphabetically to ensure we find the same mincut
+       * for multiple runs
+       */
+
+//        sortTaxa();
+    }
 
 
     /**
@@ -104,8 +119,8 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      * @param nodes the nodes
      */
     public AbstractFlipCutGraph(List<T> nodes, TreeNode parentNode) {
-        characters = new ArrayList<T>();
-        taxa = new ArrayList<T>();
+        characters = new LinkedHashSet<>(nodes.size());
+        taxa = new LinkedHashSet<>(nodes.size());
         for (T node : nodes) {
             if (node.isTaxon()) {
                 taxa.add(node);
@@ -124,25 +139,22 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
        Sort the leaves alphabetically to ensure we find the same mincut
        for multiple runs
         */
-        sortTaxa();
+//        sortTaxa();
     }
 
     /*
        Sorts the leaves alphabetically to ensure we find the same mincut
        for multiple runs
      */
-    protected void sortTaxa() {
+    /*protected void sortTaxa() {
         Collections.sort(taxa, new Comparator<T>() {
             public int compare(T o1, T o2) {
                 return o1.name.compareTo(o2.name);
             }
         });
-    }
+    }*/
 
-
-
-    public abstract int mergeRetundantCharacters();
-    protected abstract List<List<T>> createGraphData(CostComputer costs, int bootstrapThreshold);
+    protected abstract List<LinkedHashSet<T>> createGraphData(CostComputer costs, int bootstrapThreshold);
 
     protected void removeCharacters(Collection<T> toRemove, Collection<T> characters){
         //remove chracters and edges to them from graph
@@ -160,12 +172,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
                         System.out.println("ERROR: Illegal SCAFFOLD character deletion!!! " + toRemove.toString());
                     }
                 }
-            }
-        }
-
-        if (ADAPTIVE_LEVEL) {
-            for (T character : characters) {
-                character.parents.removeAll(toRemove);
             }
         }
     }
@@ -187,25 +193,16 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
                 if (SCAFF_TAXA_MERGE){
                     TreeNode node = charToTreeNode.get(character);
                     if (node!= null){
-                        Set<T> partition = new HashSet<>(character.edges);
-                        Set<T> contolPartition = new HashSet<>(character.edges.size()); //todo debugging maybe remove
                         Set<T> toInsert = new HashSet(node.childCount());
                         for (TreeNode child : node.getChildren()) {
                             if (child.isInnerNode()) {
                                 T n = treeNodeToChar.get(child);
                                 toInsert.add(n);
-//                                contolPartition.addAll(n.edges); //todo DBUG
                             }
                         }
                         activePartitions.remove(character);
                         activePartitions.addAll(toInsert);
-                        /*if (partition.equals(contolPartition)) {
-                            activePartitions.remove(character);
-                            activePartitions.addAll(toInsert);
-                        }else
-                            System.out.println("ERROR: something goes WRONG DURING SCAFFOLD PARTITIONning");*/
-
-                        removeTreNodeCharMapping(character);
+                        removeTreNodeCharGuideTreeMapping(character);
                     }
                 }
             }
@@ -225,7 +222,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      * @param sinkNodes the set of nodes for
      * @return graphs list of two graphs created
      */
-    abstract List<? extends AbstractFlipCutGraph<T>> split(List<T> sinkNodes);
+    abstract List<? extends AbstractFlipCutGraph<T>> split(LinkedHashSet<T> sinkNodes);
 
 
 
@@ -284,30 +281,39 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     protected void checkEdges(){
         // check edges from characters
         for (T character : characters) {
-            character.edges.retainAll(taxa); //Todo retain all ineffective???
+            character.edges.retainAll(taxa);
         }
-
         // check reverse edges from taxa
         for (T taxon : taxa) {
             taxon.edges.retainAll(characters);
         }
     }
 
-    protected void addTreNodeCharMapping(TreeNode character, T c){
+    //########## methods for edge identical character mappin ##########
+    public abstract void addCharacterToDummyMapping(T character, T dummy);
+    public abstract void removeCharacterFromDummyMapping(T character);
+    public abstract void insertCharacterMapping(AbstractFlipCutGraph<T> source, final Map<T,T> oldToNew);
+    //########## methods for edge identical character mappin END ##########
+
+
+
+    //########## methods for guide tree mapping ##########
+    protected void addTreeNodeCharGuideTreeMapping(TreeNode character, T c){
         charToTreeNode.put(c,character);
         treeNodeToChar.put(character,c);
     }
 
-    protected void removeTreNodeCharMapping(TreeNode character){
+    protected void removeTreeNodeCharGuideTreeMapping(TreeNode character){
         charToTreeNode.remove(treeNodeToChar.get(character));
         treeNodeToChar.remove(character);
     }
 
-    protected void removeTreNodeCharMapping(T c){
+    protected void removeTreNodeCharGuideTreeMapping(T c){
         treeNodeToChar.remove(charToTreeNode.get(c));
         charToTreeNode.remove(c);
     }
 
+    //todo maybe use one global map via references and only actualize active partitions --> because maps are read only. we do not need to split them into separate ones
     public void insertScaffPartData(AbstractFlipCutGraph<T> source, final Map<T,T> oldToNew){
         charToTreeNode = new HashMap();
         treeNodeToChar = new HashMap();
@@ -319,7 +325,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
                 sourceNode = entry.getKey();
             }
             if (characters.contains(sourceNode)){
-                addTreNodeCharMapping(entry.getValue(),sourceNode);
+                addTreeNodeCharGuideTreeMapping(entry.getValue(), sourceNode);
             }
         }
 
@@ -334,7 +340,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
             if (characters.contains(sourceNode))
                 activePartitions.add(sourceNode);
         }
-
     }
-
+    //########## methods for guide tree mapping END ##########
 }

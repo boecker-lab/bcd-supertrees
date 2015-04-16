@@ -46,14 +46,6 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
 
             final int numTaxa = currentGraph.taxa.size();
 
-            //remove dublets? //ATTENTION --> Seems to be useless, dont activate
-            if (removeDuplets){
-                getLog().info("Merging identical characters");
-                int removed = currentGraph.mergeRetundantCharacters();
-                if (DEBUG) System.out.println(removed + " characters removed!");
-                getLog().info(removed + " characters removed!");
-            }
-
             //initial step to generate
 
             partitions =  new Partition(0, currentGraph).getKBestNew(numberOfCuts, Long.MAX_VALUE);

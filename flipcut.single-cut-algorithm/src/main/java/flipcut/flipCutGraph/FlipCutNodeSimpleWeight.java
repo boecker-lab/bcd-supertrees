@@ -9,8 +9,6 @@ import java.util.Set;
  * Time: 14:15
  */
 public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimpleWeight> {
-
-
     /**
      * The list of outgoing edges -1(0) entries
      */
@@ -30,12 +28,16 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
     }
 
     //Taxon constructor
-    protected FlipCutNodeSimpleWeight(String name) {
+    public FlipCutNodeSimpleWeight(String name) {
         this(name, new HashSet<FlipCutNodeSimpleWeight>(),null);
     }
     //CharacterConstructor
-    protected FlipCutNodeSimpleWeight() {
+    public FlipCutNodeSimpleWeight() {
         this(null, new HashSet<FlipCutNodeSimpleWeight>(), new HashSet<FlipCutNodeSimpleWeight>());
+    }
+    //DummyConstructor
+    public FlipCutNodeSimpleWeight(Set<FlipCutNodeSimpleWeight> edges) {
+        this(DUMMY_INDETIFIER, edges , new HashSet<FlipCutNodeSimpleWeight>());
     }
 
     @Override
@@ -49,9 +51,10 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
 
     @Override
     protected FlipCutNodeSimpleWeight createClone() {
-        FlipCutNodeSimpleWeight clone = new FlipCutNodeSimpleWeight(null, null, null);
+        FlipCutNodeSimpleWeight clone = new FlipCutNodeSimpleWeight(name, null, null);
         clone.clone = this;
         this.clone = clone;
+
         return clone;
     }
 
@@ -65,6 +68,12 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
         return (imaginaryEdges == null);
     }
 
+    @Override
+    public boolean isDummy() {
+//        return name.equals(DUMMY_INDETIFIER);
+        return DUMMY_INDETIFIER == name; //should also work and be much faster.
+    }
+
     public void addImaginaryEdgeTo(FlipCutNodeSimpleWeight node){
         imaginaryEdges.add(node);
     }
@@ -72,7 +81,7 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
     //this is to find redundant characters in a graph
     //unchecked, save use only on an initial graph
     @Override
-    public boolean compareChar(FlipCutNodeSimpleWeight c2){
+    public boolean characterEquals(FlipCutNodeSimpleWeight c2){
         if (isTaxon() || c2.isTaxon()) return false;
         return edges.equals(c2.edges) && imaginaryEdges.equals(c2.imaginaryEdges);
     }

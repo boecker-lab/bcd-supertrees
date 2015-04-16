@@ -1,5 +1,6 @@
 package flipcut.flipCutGraph;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -16,7 +17,7 @@ public class SingleCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphSimpl
 
     @Override
     public List<FlipCutGraphSimpleWeight> cut(FlipCutGraphSimpleWeight source){
-        List<FlipCutNodeSimpleWeight> minCut = getMinCut(source);
+        LinkedHashSet<FlipCutNodeSimpleWeight> minCut = getMinCut(source);
         if (split == null) {
             split = (List<FlipCutGraphSimpleWeight>) source.split(minCut);
         }

@@ -8,6 +8,7 @@ import java.util.Set;
  * Time: 11:29
  */
 public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
+    protected final static String DUMMY_INDETIFIER = "Dummy";
     /**
      * The nodes name
      */
@@ -27,12 +28,6 @@ public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
      */
     protected T clone;
 
-    //todo experimental!
-    /**
-     * used to calculate adaptive node levels
-     */
-    protected  Set<T> parents = null;
-
     protected AbstractFlipCutNode(String name, Set<T> edges) {
         this.name = name;
         this.edges = edges;
@@ -40,8 +35,16 @@ public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
 
     @Override
     public String toString() {
-        if(isClone()) return "Clone Character " + clone.hashCode();
-        return name == null ? "Character " + hashCode() : name;
+        if (!isDummy()){
+            if (isClone()) return "Clone-Character " + clone.hashCode();
+            return name == null ? "Character " + hashCode() : name;
+        }else {
+            if (isClone())
+                return "Clone-" + name + "-Character " + clone.hashCode();
+            else {
+                return name + "-Character " + hashCode();
+            }
+        }
     }
 
     public void addEdgeTo(T node) {
@@ -49,14 +52,17 @@ public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
     }
 
     //this is to find redundant characters in a graph and should be high performing
-    public abstract boolean compareChar(T c2);
+    public abstract boolean characterEquals(T c2);
 
-    public abstract boolean isTaxon();
+
 
     public abstract  boolean isSemiUniversal();
     public abstract long getEdgeWeight(T node);
     protected abstract T createClone();
     protected abstract T copy();
 
+    public abstract boolean isTaxon();
     public abstract boolean isClone();
+    public abstract boolean isDummy();
+
 }

@@ -1,8 +1,6 @@
 package flipcut.flipCutGraph;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -13,8 +11,7 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
     public static enum CutGraphTypes {MAXFLOW_TARJAN_GOLDBERG, HYPERGRAPH_MINCUT, HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW}
     public static final long INFINITY = 1000000;
 
-    public final boolean mergeCharacters = false;
-    public final boolean staticCharacterMap = false;
+    public final boolean mergeCharacters = true;
 
     public static final boolean MAX_FLIP_NORMALIZATION = false;
 
@@ -25,11 +22,8 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
             //if real char deletion false:
             public static final boolean ZEROES = true;
 
-    protected HashMap<N, N> nodeToDummy;
-    protected HashMap<N, Set<N>> dummyToMerged;
-
-    protected HashMap<N, N> TaxaToDummy;
-    protected HashMap<N, Set<N>> dummyToMergedTaxa;
+    protected Map<N, N> nodeToDummy;
+    protected Map<N, Set<N>> dummyToMerged;
 
     protected final CutGraphTypes type;
     public CutGraphTypes getType() {
@@ -39,7 +33,7 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
     protected T source = null;
     protected List<N> cutGraphTaxa = null;
 
-    protected List<N> mincut;
+    protected LinkedHashSet<N> mincut;
     protected long mincutValue;
     protected List<T> split = null;
 
@@ -47,7 +41,7 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
         this.type = type;
     }
 
-    public List<N> getMinCut(T source) {
+    public LinkedHashSet<N> getMinCut(T source) {
         if (this.source != source) {
             this.source = source;
             calculateMinCut();
@@ -68,22 +62,12 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
         mincut = null;
         mincutValue = 0;
         split = null;
-        if (!staticCharacterMap) {
-            nodeToDummy = null;
-            dummyToMerged = null;
-        }
+        nodeToDummy = null;
+        dummyToMerged = null;
+
     }
 
     public abstract List<T> cut(T source);
     protected abstract void calculateMinCut();
-    protected abstract int buildCharacterMergingMap(T source);
-//    protected abstract int buildScaffoldTaxaMergingMap(Set<Set<N>> mergedTaxa);
-
-    public int buildInitialCharacterMergingMap(T initGraph){
-        return buildCharacterMergingMap(initGraph);
-    }
-
-
-    public abstract void removeNodeFromMergeSet(N toRemove);
-
+    protected abstract int buildCharacterMergingMap(T source,final boolean globalMap);
 }

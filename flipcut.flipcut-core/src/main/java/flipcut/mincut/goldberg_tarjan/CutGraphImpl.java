@@ -22,6 +22,7 @@ package flipcut.mincut.goldberg_tarjan;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -777,7 +778,7 @@ class CutGraphImpl {
      * @param activateChecks check the results
      * @return cut all elements of the component that contains the sink
      */
-    List<Object> mincut(Node source, Node sink, final boolean activateChecks) {
+    LinkedHashSet<Object> mincut(Node source, Node sink, final boolean activateChecks) {
         long sum;
         globUpdtFreq = GLOB_UPDT_FREQ;
         this.source = source;
@@ -832,8 +833,7 @@ class CutGraphImpl {
             }
         }
 
-        List<Object> cut = new ArrayList<Object>();
-
+        LinkedHashSet<Object> cut =  new LinkedHashSet<>();
         /// original :
         for (Node j : nodes) {
             if (j.d < n) {

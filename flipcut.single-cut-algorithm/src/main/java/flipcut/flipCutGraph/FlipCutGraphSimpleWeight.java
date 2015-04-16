@@ -17,7 +17,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         super(costs, bootstrapThreshold);
     }
 
-    protected FlipCutGraphSimpleWeight(List<FlipCutNodeSimpleWeight> characters, List<FlipCutNodeSimpleWeight> taxa, TreeNode parentNode) {
+    protected FlipCutGraphSimpleWeight(LinkedHashSet<FlipCutNodeSimpleWeight> characters, LinkedHashSet<FlipCutNodeSimpleWeight> taxa, TreeNode parentNode) {
         super(characters, taxa, parentNode);
     }
 
@@ -26,11 +26,11 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     }
 
     @Override
-    List<? extends FlipCutGraphSimpleWeight> split(List<FlipCutNodeSimpleWeight> sinkNodes) {
-        List<List<List<FlipCutNodeSimpleWeight>>> graphData = splitToGraphData(sinkNodes);
+    List<? extends FlipCutGraphSimpleWeight> split(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes) {
+        List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> graphData = splitToGraphData(sinkNodes);
         List<FlipCutGraphSimpleWeight> graphs = new LinkedList<FlipCutGraphSimpleWeight>();
-        FlipCutGraphSimpleWeight g1 =  new FlipCutGraphSimpleWeight(graphData.get(0).get(0),graphData.get(0).get(1),treeNode);
-        FlipCutGraphSimpleWeight g2 = new FlipCutGraphSimpleWeight(graphData.get(1).get(0),graphData.get(1).get(1),treeNode);
+        FlipCutGraphSimpleWeight g1 = new FlipCutGraphSimpleWeight(graphData.get(0).get(0), graphData.get(0).get(1), treeNode);
+        FlipCutGraphSimpleWeight g2 = new FlipCutGraphSimpleWeight(graphData.get(1).get(0), graphData.get(1).get(1), treeNode);
         graphs.add(g1);
         graphs.add(g2);
 
@@ -38,28 +38,31 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     }
 
     @Override
-    protected List<List<FlipCutNodeSimpleWeight>> createGraphData(CostComputer costs, int bootstrapThreshold){
+    protected List<LinkedHashSet<FlipCutNodeSimpleWeight>> createGraphData(CostComputer costs, int bootstrapThreshold) {
+        System.out.println("Creating intitial FC graph...");
         List<Tree> inputTrees = new ArrayList<>(costs.getTrees());
-        Tree scaff = null;
-        if (SCAFF_TAXA_MERGE){
+        Tree scaff;
+        if (SCAFF_TAXA_MERGE) {
             scaff = costs.getScaffoldTree();
             charToTreeNode = new HashMap<>();
             treeNodeToChar = new HashMap<>();
-            activePartitions =  new HashSet<>();
+            activePartitions = new HashSet<>();
         }
-        Map<FlipCutNodeSimpleWeight,TreeNode> charToNode;
-        Map<TreeNode,FlipCutNodeSimpleWeight> nodeToChar;
-        if (ADAPTIVE_LEVEL){
-            charToNode = new HashMap<>();
-            nodeToChar =  new HashMap<>();
+
+        if (GLOBAL_CHARACTER_MERGE) {
+            characterToDummy = new HashMap<>();
+            dummyToCharacters = new HashMap<>();
         }
+
         Map<String, FlipCutNodeSimpleWeight> taxa = new HashMap<String, FlipCutNodeSimpleWeight>();
-        List<FlipCutNodeSimpleWeight> characters = new LinkedList<FlipCutNodeSimpleWeight>();
+        Map<List<Set<FlipCutNodeSimpleWeight>>, FlipCutNodeSimpleWeight> characters = new HashMap<>();
+        Map<Set<FlipCutNodeSimpleWeight>, FlipCutNodeSimpleWeight> edgeSetToDummy = new HashMap<>();
 
         //create taxon list
+        System.out.println("create taxon list");
         for (Tree tree : inputTrees) {
             for (TreeNode taxon : tree.getLeaves()) {
-                if(!taxa.containsKey(taxon.getLabel())){
+                if (!taxa.containsKey(taxon.getLabel())) {
                     FlipCutNodeSimpleWeight n = new FlipCutNodeSimpleWeight(taxon.getLabel());
                     taxa.put(n.name, n);
                 }
@@ -67,7 +70,13 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         }
 
         //create character list
+        System.out.println("create chracter list");
+//        int trees = 0;
+        int chars = 0;
+        int bsIngnoredChars = 0;
         for (Tree tree : inputTrees) {
+//            trees++;
+//            System.out.println("processing tree number: " + trees);
             Map<String, FlipCutNodeSimpleWeight> leaves = new HashMap<String, FlipCutNodeSimpleWeight>();
             for (TreeNode treeNode : tree.getLeaves()) {
                 leaves.put(treeNode.getLabel(), taxa.get(treeNode.getLabel()));
@@ -75,17 +84,20 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
 
             for (TreeNode character : tree.vertices()) {
                 //skip leaves
-                if(character.isLeaf()) continue;
+                if (character.isLeaf()) continue;
                 // also skip root
-                if(character == tree.getRoot()) continue;
+                if (character == tree.getRoot()) continue;
 
 
                 // skip character with small bootstrap value
-                if (character.getLabel() != null){
-                    double bootstrap = Double.valueOf(character.getLabel());
-                    if (bootstrap < bootstrapThreshold){
-                        System.out.println("Ignore character with bootstrap value: " + bootstrap + " < " + bootstrapThreshold);
-                        continue;
+                if (character.getLabel() != null) {
+                    try {
+                        double bootstrap = Double.valueOf(character.getLabel());
+                        if (bootstrap < bootstrapThreshold) {
+                            bsIngnoredChars++;
+                            continue;
+                        }
+                    } catch (NumberFormatException e) {
                     }
                 }
 
@@ -94,25 +106,10 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                     chracterLeaves.put(treeNode.getLabel(), taxa.get(treeNode.getLabel()));
                 }
 
-                FlipCutNodeSimpleWeight c = new FlipCutNodeSimpleWeight(null,new HashSet<FlipCutNodeSimpleWeight>(chracterLeaves.size()), new HashSet<FlipCutNodeSimpleWeight>(leaves.size() - chracterLeaves.size()));
+                FlipCutNodeSimpleWeight c = new FlipCutNodeSimpleWeight(null, new HashSet<FlipCutNodeSimpleWeight>(chracterLeaves.size()), new HashSet<FlipCutNodeSimpleWeight>(leaves.size() - chracterLeaves.size()));
+                c.edgeWeight = costs.getEdgeWeight(character, null, (TreeNode) null);
 
-                c.edgeWeight = costs.getEdgeWeight(character,null,(TreeNode)null);
-
-                if (ADAPTIVE_LEVEL){
-                    c.parents =  new HashSet<>();
-                    nodeToChar.put(character,c);
-                    charToNode.put(c,character);
-                }
-
-                //insert scaffold characters to mapping if activated
-                if (SCAFF_TAXA_MERGE){
-                    if (scaff != null && tree.equals(scaff)){
-                        addTreNodeCharMapping(character,c);
-                        //create set of active partitions
-                        if (character.getParent().equals(scaff.getRoot()))
-                            activePartitions.add(c);
-                    }
-                }
+                chars++;
 
                 for (FlipCutNodeSimpleWeight taxon : leaves.values()) {
                     //add leaves and set to "1"
@@ -125,59 +122,71 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                         c.addImaginaryEdgeTo(taxon);
                     }
                 }
+
                 // add to characters list
-                characters.add(c);
-            }
-        }
+                List<Set<FlipCutNodeSimpleWeight>> characterIndentifier = new ArrayList<>(2);
+                characterIndentifier.add(c.edges);
+                characterIndentifier.add(c.imaginaryEdges);
 
-        if (ADAPTIVE_LEVEL) {
-            for (FlipCutNodeSimpleWeight c : characters) {
-                TreeNode child = charToNode.get(c);
-                TreeNode parent;
+                //identical character merge
+                FlipCutNodeSimpleWeight characerInList = characters.get(characterIndentifier);
+                if (characerInList == null) {
+                    characerInList = c;
+                    characters.put(characterIndentifier, characerInList);
 
-                while ( (parent = child.getParent()) != null ){
-                    c.parents.add(nodeToChar.get(parent));
-                    child = parent;
-                }
-            }
-        }
-
-        if (DEBUG)
-            if (charToTreeNode != null)
-                System.out.println("Scaffold node number: " + charToTreeNode.size());
-        return Arrays.asList(characters, new ArrayList<FlipCutNodeSimpleWeight>(taxa.values()));
-    }
-
-    //todo maybe some optimization possible!
-    @Override
-    public int mergeRetundantCharacters() {
-        Set<FlipCutNodeSimpleWeight> toRemove = new HashSet<FlipCutNodeSimpleWeight>();
-        int dupletsCounter = 0;
-        for (int i = 0; i < characters.size() - 1; i++) {
-            if (!toRemove.contains(characters.get(i))) {
-                for (int j = i + 1; j < characters.size(); j++) {
-                    FlipCutNodeSimpleWeight charac = characters.get(j);
-                    if (!toRemove.contains(charac)) {
-                        if (characters.get(i).compareChar(charac)) {
-                            toRemove.add(charac);
-                            //sum up edge weights
-                            characters.get(i).edgeWeight += charac.edgeWeight;
-                            dupletsCounter++;
+                    //global character merge for chars with same edgeset
+                    if (GLOBAL_CHARACTER_MERGE) {
+                        FlipCutNodeSimpleWeight dummy = edgeSetToDummy.get(c.edges);
+                        if (dummy == null) {
+                            dummy = new FlipCutNodeSimpleWeight();
+                            dummy.edges.addAll(characerInList.edges);
+                            edgeSetToDummy.put(dummy.edges, dummy);
+                            dummyToCharacters.put(dummy, new HashSet<FlipCutNodeSimpleWeight>());
+                            dummyToCharacters.put(dummy.clone, new HashSet<FlipCutNodeSimpleWeight>());
                         }
+                        addCharacterToDummyMapping(characerInList, dummy);
+                    }
+                } else {
+                    characerInList.edgeWeight += c.edgeWeight;
+                    if (GLOBAL_CHARACTER_MERGE)
+                        characterToDummy.get(characerInList).edgeWeight += c.edgeWeight;
+                }
+
+                //insert scaffold characters to mapping if activated
+                if (SCAFF_TAXA_MERGE) {
+                    if (scaff != null && tree.equals(scaff)) {
+                        System.out.println("INFO: Scaffold Tree found!");
+                        addTreeNodeCharGuideTreeMapping(character, characerInList);
+                        //create set of active partitions
+                        if (character.getParent().equals(scaff.getRoot()))
+                            activePartitions.add(characerInList);
                     }
                 }
             }
         }
-        removeCharacters(toRemove);
-        return dupletsCounter;
+        if (DEBUG)
+            if (charToTreeNode != null)
+                System.out.println("Scaffold node number: " + charToTreeNode.size());
+
+        List<LinkedHashSet<FlipCutNodeSimpleWeight>> out = new ArrayList<>(2);
+        out.add(new LinkedHashSet<>(characters.values()));
+        out.add(new LinkedHashSet<>(taxa.values()));
+
+
+        System.out.println(bsIngnoredChars + " characters were ignored because of a bootstrap value less than " + bootstrapThreshold);
+        System.out.println(out.get(0).size() + " of " + chars + " added to initial graph");
+        if (GLOBAL_CHARACTER_MERGE)
+            System.out.println(characterToDummy.size() / 2 + " can be merged to " + dummyToCharacters.size() / 2 + " during mincut phases");
+        System.out.println("...Done!");
+        return out;
     }
 
-    protected List<List<List<FlipCutNodeSimpleWeight>>> splitToGraphData(List<FlipCutNodeSimpleWeight> sinkNodes) {
-        List<FlipCutNodeSimpleWeight> g1Characters = new LinkedList<FlipCutNodeSimpleWeight>();
-        List<FlipCutNodeSimpleWeight> g1Taxa = new LinkedList<FlipCutNodeSimpleWeight>();
-        List<FlipCutNodeSimpleWeight> g2Characters = new LinkedList<FlipCutNodeSimpleWeight>();
-        List<FlipCutNodeSimpleWeight> g2Taxa = new LinkedList<FlipCutNodeSimpleWeight>();
-        List<FlipCutNodeSimpleWeight> charactersToRemove = new ArrayList<FlipCutNodeSimpleWeight>();
+    protected List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> splitToGraphData(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes) {
+        LinkedHashSet<FlipCutNodeSimpleWeight> g1Characters = new LinkedHashSet(characters.size());
+        LinkedHashSet<FlipCutNodeSimpleWeight> g1Taxa =  new LinkedHashSet(taxa.size());
+        LinkedHashSet<FlipCutNodeSimpleWeight> g2Characters;
+        LinkedHashSet<FlipCutNodeSimpleWeight> g2Taxa;
+        LinkedHashSet<FlipCutNodeSimpleWeight> charactersToRemove =  new LinkedHashSet(characters.size());
 
         // check if we have to remove vertices
         for (FlipCutNodeSimpleWeight node : sinkNodes) {
@@ -210,16 +219,16 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         }
 
         // fill g2 lists
-        g2Characters.addAll(characters);
+        g2Characters =  new LinkedHashSet<>(characters);
         g2Characters.removeAll(g1Characters);
-        g2Taxa.addAll(taxa);
+        g2Taxa = new LinkedHashSet<>(taxa);
         g2Taxa.removeAll(g1Taxa);
 
         // remove characters from g1 if we have to remove any
-        removeCharacters(charactersToRemove,g1Characters);
+        removeCharacters(charactersToRemove, g1Characters);
 
         // remove characters from g2 if we have to remove any
-        removeCharacters(charactersToRemove,g2Characters);
+        removeCharacters(charactersToRemove, g2Characters);
 
         // remove all edges between g2 characters and g1 taxa
         removeEdgesToOtherGraph(g2Characters, g1Taxa);
@@ -228,20 +237,20 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         removeEdgesToOtherGraph(g1Characters, g2Taxa);
 
         // create the sub graphs
-        List<List<FlipCutNodeSimpleWeight>> g1 = Arrays.asList(g1Characters, g1Taxa);
-        List<List<FlipCutNodeSimpleWeight>> g2 = Arrays.asList(g2Characters, g2Taxa);
+        List<LinkedHashSet<FlipCutNodeSimpleWeight>> g1 = Arrays.asList(g1Characters, g1Taxa);
+        List<LinkedHashSet<FlipCutNodeSimpleWeight>> g2 = Arrays.asList(g2Characters, g2Taxa);
 
         return Arrays.asList(g1, g2);
     }
 
     //helper method for split
-    protected void removeEdgesToOtherGraph(List<FlipCutNodeSimpleWeight> aCharacters, List<FlipCutNodeSimpleWeight> bTaxa){
+    protected void removeEdgesToOtherGraph(Collection<FlipCutNodeSimpleWeight> aCharacters, Collection<FlipCutNodeSimpleWeight> bTaxa) {
         for (FlipCutNodeSimpleWeight aCharacter : aCharacters) {
             for (FlipCutNodeSimpleWeight bTaxon : bTaxa) {
                 //update zero edge counter
                 if (aCharacter.imaginaryEdges.remove(bTaxon)) { // < 0
                     //todo maybe include semiuniversal deletion here???
-                //remove edge to other side
+                    //remove edge to other side
                 } else if (aCharacter.edges.remove(bTaxon)) { // > 0
                     // remove reverse edge
                     bTaxon.edges.remove(aCharacter);
@@ -259,7 +268,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
             oldToNew.put(character, character.copy());
         }
         for (FlipCutNodeSimpleWeight taxon : taxa) {
-            oldToNew.put(taxon,taxon.copy());
+            oldToNew.put(taxon, taxon.copy());
         }
 
         for (FlipCutNodeSimpleWeight character : characters) {
@@ -285,10 +294,40 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
             character.edges.retainAll(taxa);
             character.imaginaryEdges.retainAll(taxa);
         }
-
         // check reverse edges from taxa
         for (FlipCutNodeSimpleWeight taxon : taxa) {
             taxon.edges.retainAll(characters);
         }
     }
+
+
+    //########## methods for edge identical character mappin ##########
+
+    @Override
+    public void insertCharacterMapping(AbstractFlipCutGraph<FlipCutNodeSimpleWeight> source, Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew) {
+        characterToDummy = source.characterToDummy;
+        dummyToCharacters = source.dummyToCharacters;
+    }
+
+    @Override
+    public void addCharacterToDummyMapping(FlipCutNodeSimpleWeight character, FlipCutNodeSimpleWeight dummy) {
+        characterToDummy.put(character, dummy);
+        characterToDummy.put(character.clone, dummy.clone);
+        dummyToCharacters.get(dummy).add(character);
+        dummyToCharacters.get(dummy.clone).add(character.clone);
+
+        dummy.edgeWeight += character.edgeWeight;
+    }
+
+    @Override
+    public void removeCharacterFromDummyMapping(FlipCutNodeSimpleWeight character) {
+        FlipCutNodeSimpleWeight dummy = characterToDummy.remove(character);
+        characterToDummy.remove(character.clone);
+        dummyToCharacters.get(dummy).remove(character);
+        dummyToCharacters.get(dummy.clone).remove(character.clone);
+
+        dummy.edgeWeight -= character.edgeWeight;
+        System.out.println("removing " + character.toString());
+    }
+    //########## methods for edge identical character mappin END ##########
 }

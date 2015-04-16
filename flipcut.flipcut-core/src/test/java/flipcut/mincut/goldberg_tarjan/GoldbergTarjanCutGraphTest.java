@@ -20,6 +20,7 @@ package flipcut.mincut.goldberg_tarjan;/*
 
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -55,11 +56,12 @@ public class GoldbergTarjanCutGraphTest {
         hp.addEdge(7, 5, 5);
         hp.addEdge(7, 8, 1);
 
+        hp.calculate(1,8);
+        System.out.println(hp.getMinCutValue());
 
-        System.out.println(hp.getMinCutValue(1, 8));
 
-        assertEquals(4, hp.getMinCutValue(1, 8));
-        List<Object> cut = hp.getMinCut(1, 8);
+        assertEquals(4, hp.getMinCutValue());
+        List<Object> cut = new ArrayList<>(hp.getMinCut().getSinkSet()) ;
         assertEquals(4, cut.size());
         assertTrue(cut.contains(5));
         assertTrue(cut.contains(6));

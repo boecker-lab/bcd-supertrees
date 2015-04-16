@@ -60,7 +60,7 @@ public class Partition implements Comparable<Partition> {
         for (FlipCutGraphMultiSimpleWeight graph : graphs) {
             //only 1 taxon left --> labeling node corresponding to the graph with the label of the last taxon
             if (graph.taxa.size() == 1) {
-                graph.treeNode.setLabel(graph.taxa.get(0).name);
+                graph.treeNode.setLabel(graph.taxa.iterator().next().name);
                 toRemove.add(graph);
                 finishedGraphs++;
                 System.out.println("WARNING: shouldn't be possible anymore!!! or?!"); //todo remove this if sure
@@ -145,7 +145,7 @@ public class Partition implements Comparable<Partition> {
             while (it.hasNext()) {
                 FlipCutGraphMultiSimpleWeight splitGraph = it.next();
                 if (splitGraph.taxa.size() == 1) {
-                    splitGraph.treeNode.setLabel(splitGraph.taxa.get(0).name); //todo if or not
+                    splitGraph.treeNode.setLabel(splitGraph.taxa.iterator().next().name); //todo if or not
                     newFinished++;
                 }else{
                     newPartitionGraphs.add(splitGraph);

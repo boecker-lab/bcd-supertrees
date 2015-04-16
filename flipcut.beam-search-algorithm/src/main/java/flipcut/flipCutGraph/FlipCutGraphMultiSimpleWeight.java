@@ -35,7 +35,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         nextCutIndexToCalculate = 0;
     }
 
-    protected FlipCutGraphMultiSimpleWeight(List<FlipCutNodeSimpleWeight> characters, List<FlipCutNodeSimpleWeight> taxa, TreeNode parentNode, int k, CutGraphCutter.CutGraphTypes cutterType) {
+    protected FlipCutGraphMultiSimpleWeight(LinkedHashSet<FlipCutNodeSimpleWeight> characters, LinkedHashSet<FlipCutNodeSimpleWeight> taxa, TreeNode parentNode, int k, CutGraphCutter.CutGraphTypes cutterType) {
         super(characters, taxa, parentNode);
         if (VAZIRANI) {
             this.cutter = new MultiCutGraphCutter(cutterType,this);
@@ -80,9 +80,9 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
     }
 
     @Override
-    public List<? extends FlipCutGraphMultiSimpleWeight> split(List<FlipCutNodeSimpleWeight> sinkNodes) {
+    public List<? extends FlipCutGraphMultiSimpleWeight> split(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes) {
         Map<FlipCutNodeSimpleWeight,FlipCutNodeSimpleWeight> oldToNew = copyNodes();
-        List<List<List<FlipCutNodeSimpleWeight>>> graphData = splitToGraphData(new LinkedList<FlipCutNodeSimpleWeight>(sinkNodes), oldToNew);
+        List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> graphData = splitToGraphData(new LinkedHashSet<>(sinkNodes), oldToNew);
         List<FlipCutGraphMultiSimpleWeight> graphs = new LinkedList<FlipCutGraphMultiSimpleWeight>();
         graphs.add(new FlipCutGraphMultiSimpleWeight(graphData.get(0).get(0),graphData.get(0).get(1),treeNode, cuts.length, cutter.getType()));
         graphs.add(new FlipCutGraphMultiSimpleWeight(graphData.get(1).get(0),graphData.get(1).get(1),treeNode, cuts.length, cutter.getType()));
@@ -96,13 +96,13 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
 
     //overwritten --> creates cloned nodes for multiple splits
 //    @Override
-    protected List<List<List<FlipCutNodeSimpleWeight>>> splitToGraphData(List<FlipCutNodeSimpleWeight> sinkNodes, final Map<FlipCutNodeSimpleWeight,FlipCutNodeSimpleWeight> oldToNew) {
+    protected List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> splitToGraphData(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes, final Map<FlipCutNodeSimpleWeight,FlipCutNodeSimpleWeight> oldToNew) {
 
 
-        List<FlipCutNodeSimpleWeight> g1Characters = new LinkedList<FlipCutNodeSimpleWeight>();
-        List<FlipCutNodeSimpleWeight> g1Taxa = new LinkedList<FlipCutNodeSimpleWeight>();
-        List<FlipCutNodeSimpleWeight> g2Characters = new LinkedList<FlipCutNodeSimpleWeight>();
-        List<FlipCutNodeSimpleWeight> g2Taxa = new LinkedList<FlipCutNodeSimpleWeight>();
+        LinkedHashSet<FlipCutNodeSimpleWeight> g1Characters = new LinkedHashSet<>();
+        LinkedHashSet<FlipCutNodeSimpleWeight> g1Taxa = new LinkedHashSet<>();
+        LinkedHashSet<FlipCutNodeSimpleWeight> g2Characters = new LinkedHashSet<>();
+        LinkedHashSet<FlipCutNodeSimpleWeight> g2Taxa = new LinkedHashSet<>();
 
         // check if we have to remove vertices
         List<FlipCutNodeSimpleWeight> preCharactersToRemove = checkRemoveCharacter(sinkNodes);
@@ -156,13 +156,13 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         removeEdgesToOtherGraph(g1Characters, g2Taxa);
 
         // create the sub graphs
-        List<List<FlipCutNodeSimpleWeight>> g1 = Arrays.asList(g1Characters, g1Taxa);
-        List<List<FlipCutNodeSimpleWeight>> g2 = Arrays.asList(g2Characters, g2Taxa);
+        List<LinkedHashSet<FlipCutNodeSimpleWeight>> g1 = Arrays.asList(g1Characters, g1Taxa);
+        List<LinkedHashSet<FlipCutNodeSimpleWeight>> g2 = Arrays.asList(g2Characters, g2Taxa);
 
         return Arrays.asList(g1, g2);
     }
 
-    public List<FlipCutNodeSimpleWeight> checkRemoveCharacter(List<FlipCutNodeSimpleWeight> sinkNodes){
+    public List<FlipCutNodeSimpleWeight> checkRemoveCharacter(Set<FlipCutNodeSimpleWeight> sinkNodes){
         List<FlipCutNodeSimpleWeight> charactersToRemove = new LinkedList<FlipCutNodeSimpleWeight>();
         for (FlipCutNodeSimpleWeight node : sinkNodes) {
             if (!node.isTaxon()) {

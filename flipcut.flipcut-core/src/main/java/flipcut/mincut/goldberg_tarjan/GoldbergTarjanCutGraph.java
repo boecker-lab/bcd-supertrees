@@ -20,12 +20,11 @@
 
 package flipcut.mincut.goldberg_tarjan;
 
+import flipcut.mincut.bipartition.BasicCut;
+import flipcut.mincut.DirectedCutGraph;
 import flipcut.mincut.CutGraph;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -73,7 +72,11 @@ System.out.println(hp.getMinCut(1, 8));
  * @param <T> the nodes type
  * @author Thasso Griebel (thasso.griebel@gmail.com)
  */
-public class GoldbergTarjanCutGraph<T> extends CutGraph<T> {
+public class GoldbergTarjanCutGraph<T> implements CutGraph<T>,DirectedCutGraph<T> {
+     /**
+     * The complete cut with score, source set and sink set
+     */
+    protected BasicCut cut;
     /**
      * The internal nodes to simplify graph construction
      */
@@ -89,22 +92,8 @@ public class GoldbergTarjanCutGraph<T> extends CutGraph<T> {
     private CutGraphImpl hipri;
 
 
-    public long getMinCutValue(T source, T target) {
-        if (source != this.source || target != this.target || cutValue == -1) {
-            this.source = source;
-            this.target = target;
-            mincut(source, target);
-        }
-        return cutValue;
-    }
-
-
-    public List<T> getMinCut(T source, T target) {
-        if (source != this.source || target != this.target || cutValue == -1) {
-            this.source = source;
-            this.target = target;
-            mincut(source, target);
-        }
+    @Override
+    public BasicCut getMinCut() {
         return cut;
     }
 
@@ -114,7 +103,8 @@ public class GoldbergTarjanCutGraph<T> extends CutGraph<T> {
      * @param source the source
      * @param sink the sink
      */
-    void mincut(Object source, Object sink) {
+    @Override
+    public void calculate(T source, T sink) {
         if(hipri == null){
             hipri = new CutGraphImpl(nodes.size(), edges);
             /*
@@ -136,13 +126,15 @@ public class GoldbergTarjanCutGraph<T> extends CutGraph<T> {
         CutGraphImpl.Node s = nodes.get(source).node;
         CutGraphImpl.Node t = nodes.get(sink).node;
 
-        this.cut = (List<T>) hipri.mincut(s, t, false);
-        this.cutValue = hipri.getValue();
+        LinkedHashSet<T> sinkList = (LinkedHashSet<T>) hipri.mincut(s, t, false);
+        this.cut = new BasicCut(sinkList,source,sink,hipri.getValue());
     }
 
     public Map<Object, Object> getNodes() {
         return new HashMap<Object, Object>(nodes);
     }
+
+
 
 
     public void addNode(T source) {

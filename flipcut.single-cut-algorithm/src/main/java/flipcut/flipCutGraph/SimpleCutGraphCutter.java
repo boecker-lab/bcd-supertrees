@@ -3,6 +3,7 @@ package flipcut.flipCutGraph;
 
 import flipcut.costComputer.CostComputer;
 import flipcut.mincut.CutGraph;
+import flipcut.mincut.bipartition.BasicCut;
 import flipcut.mincut.goldberg_tarjan.GoldbergTarjanCutGraph;
 
 import java.util.*;
@@ -40,7 +41,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         addTaxa(cutGraph);
         Set<FlipCutNodeSimpleWeight> edgesAlreadySet = new HashSet<FlipCutNodeSimpleWeight>(dummyToMerged.size());
 
-        // add edges
+        // add edges //todo merge with character adding step
         for (FlipCutNodeSimpleWeight character : source.characters) {
             FlipCutNodeSimpleWeight dummy = nodeToDummy.get(character);
             if (dummy != null) {
@@ -88,7 +89,6 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
                     charsToAdd.put(edgesTo, character);
                     dummyToWeight.put(character, 0l);
-
 
                     dummyToMerged.put(character,set);
                     dummyToMerged.put(character.clone,cloneSet);
@@ -184,11 +184,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     protected long calculateCharacterCap(FlipCutNodeSimpleWeight character) {
         long characterCap;
         if (IGNORE_MATRIX_ENTRIES) {
-            if (source.ADAPTIVE_LEVEL) {
-                characterCap = character.parents.size() * character.edgeWeight;
-            }else{
-                characterCap = character.edgeWeight;
-            }
+            characterCap = character.edgeWeight;
         }else{
             if (REAL_CHAR_DELETION) {
                 characterCap = character.edgeWeight * (Math.min(character.imaginaryEdges.size(),character.edges.size()));
@@ -224,7 +220,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     protected void createGoldbergTarjanCharacterWeightsMerged(CutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         Set<FlipCutNodeSimpleWeight> inGraph = new HashSet<FlipCutNodeSimpleWeight>();
         // add characters, character clones and edges between them
-
+        //todo do as default and use map to iterate. no double iterations needed.
         for (FlipCutNodeSimpleWeight character : source.characters) {
             FlipCutNodeSimpleWeight dummy = nodeToDummy.get(character);
             if (dummy != null){
@@ -232,13 +228,12 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                     inGraph.add(dummy);
                     cutGraph.addNode(dummy);
                     cutGraph.addNode(dummy.clone);
-
                     //calculate character weight
-                    long charCap = 0;
+//                    long charCap = dummy.edgeWeight;
+                    long charCap = 0;//todo only global map compatible
                     for (FlipCutNodeSimpleWeight charac : dummyToMerged.get(dummy)) {
                         charCap += calculateCharacterCap(charac);
                     }
-
                     cutGraph.addEdge(dummy.clone, dummy, charCap);
                 }
             }else{
@@ -250,32 +245,30 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
 
     //micut calculation
-    protected void calculateTarjanMinCut(CutGraph<FlipCutNodeSimpleWeight> cutGraph) {
+    protected BasicCut<FlipCutNodeSimpleWeight> calculateTarjanMinCut(GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
 
         List<FlipCutNodeSimpleWeight> taxa;
 
         if (cutGraphTaxa != null) {
             taxa = cutGraphTaxa;
         } else {
-            taxa = source.taxa;
+            taxa = new ArrayList<>(source.taxa);
         }
 
         // get the mincut, fix s iterate over t
         FlipCutNodeSimpleWeight s = taxa.get(0);
-        List<FlipCutNodeSimpleWeight> minCut = null;
-        long minCutValue = Long.MAX_VALUE;
+        BasicCut<FlipCutNodeSimpleWeight> minCut = BasicCut.MAX_CUT_DUMMY;
         FlipCutNodeSimpleWeight t = null;
         for (int i = 1; i < taxa.size(); i++) {
             t = taxa.get(i);
-            long nextMinCutValue = cutGraph.getMinCutValue(s, t);
-            if (nextMinCutValue < minCutValue) {
-                minCut = cutGraph.getMinCut(s, t);
-                minCutValue = nextMinCutValue;
+            cutGraph.calculate(s, t);
+            BasicCut<FlipCutNodeSimpleWeight> next =  cutGraph.getMinCut();
+            if (next.minCutValue < minCut.minCutValue) {
+                minCut = next;
             }
             //Attention! no handling of cooptimal mincut!
         }
-        mincut = minCut;
-        mincutValue = minCutValue;
+        return minCut;
     }
 
     @Override
@@ -283,34 +276,40 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         CutGraph<FlipCutNodeSimpleWeight> cutGraph;
         switch (type) {
             case MAXFLOW_TARJAN_GOLDBERG: {
-                if (mergeCharacters ) {
-                    if (staticCharacterMap) System.out.println("WARNING: static character map is not implemented for edge! The slower NON STATIC Version is used instead");
-                    int merged = buildCharacterMergingMap(source);
+                if (mergeCharacters) {
+                    if (source.GLOBAL_CHARACTER_MERGE)
+                        System.out.println("WARNING: static character map is not implemented for edge! The slower NON STATIC Version is used instead");
+                    int merged = buildCharacterMergingMap(source, false);
                     if (DEBUG) System.out.println(merged + "characters merged before mincut");
                     cutGraph = new GoldbergTarjanCutGraph<>();
                     createGoldbergTarjanCharacterWeightsMerged(cutGraph);
                     createGoldbergTarjanMerged(cutGraph);
-                    calculateTarjanMinCut(cutGraph);
-                    List<FlipCutNodeSimpleWeight> newMinCut = new LinkedList<>();
-                    for (FlipCutNodeSimpleWeight node : mincut) {
+                    BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph);
+
+                    mincut =  new LinkedHashSet<>(source.characters.size() + source.taxa.size());
+                    for (FlipCutNodeSimpleWeight node : newMinCut.getSinkSet()) {
                         Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
-                        if (realNodes != null)
-                            newMinCut.addAll(realNodes);
-                        else
-                            System.out.println("ERROR: something with the character merge map went wrong");
+                        if (realNodes == null) {
+                            if (node.isTaxon()) { //todo debug if --> remove!
+                                mincut.add(node);
+                            } else {
+                                System.out.println("ERROR: something with the character merge map went wrong");
+                            }
+                        } else {
+                            mincut.addAll(realNodes);
+                        }
                     }
-                    mincut = newMinCut;
                 } else {
                     cutGraph = new GoldbergTarjanCutGraph<>();
                     createGoldbergTarjanCharacterWeights(cutGraph);
                     createGoldbergTarjan(cutGraph);
-                    calculateTarjanMinCut(cutGraph);
+                    mincut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph).getSinkSet();
                 }
 
 
                 break;
             }
-            case HYPERGRAPH_MINCUT: {
+          /*  case HYPERGRAPH_MINCUT: {
                 //Todo implement if hypergraph mincut immplemetation is avalible
                 if (mergeCharacters) {
 
@@ -318,47 +317,52 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
                 }
                 break;
-            }
+            }*/
             case HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW: {
                 if (mergeCharacters) {
-                    if (!staticCharacterMap) {
-                        int merged = buildCharacterMergingMap(source);
-                        if (DEBUG) System.out.println(merged + "characters merged before mincut");
-                    }
+                    int merged = buildCharacterMergingMap(source, source.GLOBAL_CHARACTER_MERGE);
+                    if (DEBUG) System.out.println(merged + "characters merged before mincut");
+
                     cutGraph = new GoldbergTarjanCutGraph<>();
                     createGoldbergTarjanCharacterWeightsMerged(cutGraph);
                     createTarjanGoldbergHyperGraphMerged(cutGraph);
-                    calculateTarjanMinCut(cutGraph);
-                    List<FlipCutNodeSimpleWeight> newMinCut = new LinkedList<FlipCutNodeSimpleWeight>();
-                    for (FlipCutNodeSimpleWeight node : mincut) {
+                    BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph);
+                    mincut =  new LinkedHashSet<>(source.characters.size() + source.taxa.size());
+                    for (FlipCutNodeSimpleWeight node : newMinCut.getSinkSet()) {
                         Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
 
-                        if (realNodes == null){
-                            if (node.isTaxon()) { //todo debug if remove!
-                                newMinCut.add(node);
-                            }else{
+                        if (realNodes == null) {
+                            if (node.isTaxon()) { //todo debug if --> remove!
+                                mincut.add(node);
+                            } else {
                                 System.out.println("ERROR: something with the character merge map went wrong");
                             }
-                        }else{
-                            newMinCut.addAll(realNodes);
+                        } else {
+                            mincut.addAll(realNodes);
                         }
                     }
-                    mincut = newMinCut;
-                } else if(source.SCAFF_TAXA_MERGE && source.activePartitions != null) {
+
+
+
+
+
+
+
+                } else if (source.SCAFF_TAXA_MERGE && source.activePartitions != null) {
                     //create mapping
-                    //todo optimize all thes mapping stuff if it works good
-                    Map<FlipCutNodeSimpleWeight,FlipCutNodeSimpleWeight> taxonToDummy = new HashMap<>();
-                    Map<FlipCutNodeSimpleWeight,Set<FlipCutNodeSimpleWeight>> dummyToTaxa = new HashMap<>();
+                    //todo optimize all these mapping stuff if it works good
+                    Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> taxonToDummy = new HashMap<>();
+                    Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToTaxa = new HashMap<>();
                     Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> trivialcharacters = new HashMap<>();
-                    dummyToMerged =  new HashMap<>();
+                    dummyToMerged = new HashMap<>();//todo incompatible with character merging. find better solution
 
                     int mergedTaxonIndex = 0;
                     for (FlipCutNodeSimpleWeight scaffChar : source.activePartitions) {
                         FlipCutNodeSimpleWeight mergeTaxon = new FlipCutNodeSimpleWeight("TaxonGrooup_" + mergedTaxonIndex);
                         for (FlipCutNodeSimpleWeight taxon : scaffChar.edges) {
-                            taxonToDummy.put(taxon,mergeTaxon);
+                            taxonToDummy.put(taxon, mergeTaxon);
                         }
-                        dummyToTaxa.put(mergeTaxon,scaffChar.edges);
+                        dummyToTaxa.put(mergeTaxon, scaffChar.edges);
                         mergedTaxonIndex++;
                     }
                     for (FlipCutNodeSimpleWeight taxon : source.taxa) {
@@ -369,41 +373,38 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
                     //create cutgraph
                     cutGraph = new GoldbergTarjanCutGraph<>();
-                    createTarjanGoldbergHyperGraphTaxaMerged(cutGraph,taxonToDummy,trivialcharacters);
+                    createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, taxonToDummy, trivialcharacters);
 
                     //calculate mincut
-                    calculateTarjanMinCut(cutGraph);
+                    BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph);
 
                     //undo mapping
-                    List<FlipCutNodeSimpleWeight> newMinCut = new LinkedList<FlipCutNodeSimpleWeight>();
-                    for (FlipCutNodeSimpleWeight node : mincut) {
+                    mincut =  new LinkedHashSet<>(source.characters.size() + source.taxa.size());
+                    for (FlipCutNodeSimpleWeight node : newMinCut.getSinkSet()) {
 
                         //undo taxa mapping
-                        if (node.isTaxon()){
+                        if (node.isTaxon()) {
                             Set<FlipCutNodeSimpleWeight> trivials = trivialcharacters.get(node);
                             if (trivials != null)
-                                newMinCut.addAll(trivials);
+                                mincut.addAll(trivials);
 
                             Set<FlipCutNodeSimpleWeight> realT = dummyToTaxa.get(node);
                             if (realT != null)
-                                newMinCut.addAll(realT);
+                                mincut.addAll(realT);
                             else
-                                newMinCut.add(node);
+                                mincut.add(node);
 
-                        //undo character mapping
-                        }else{
+                            //undo character mapping
+                        } else {
                             Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
-                            newMinCut.addAll(realNodes);
-//                            newMinCut.add(node);
+                            mincut.addAll(realNodes);
                         }
                     }
-                    mincut = newMinCut;
-
                 } else {
                     cutGraph = new GoldbergTarjanCutGraph<>();
                     createGoldbergTarjanCharacterWeights(cutGraph);
                     createTarjanGoldbergHyperGraph(cutGraph);
-                    calculateTarjanMinCut(cutGraph);
+                    mincut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph).getSinkSet();
                 }
                 break;
             }
@@ -411,50 +412,51 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     }
 
     //merges characters with same edgeset and sums up the weights to reduce node and edgeset before mincut!
-    //todo maybe optimization
     @Override
-    protected int buildCharacterMergingMap(T source){
-        Set<FlipCutNodeSimpleWeight> alreadyInMergeSet = new HashSet<FlipCutNodeSimpleWeight>();
-        dummyToMerged = new HashMap<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>>();
-        nodeToDummy = new HashMap<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight>();
-        List<FlipCutNodeSimpleWeight> characters = source.characters;
-        List<FlipCutNodeSimpleWeight> charactersAdded = source.characters;
-        int dupletsCounter = 0;
-        //ATTENTION: size -1 does not work, because if last note is alone in a groub, it wont be added to the cut graph
-//      for (int i = 0; i < characters.size() - 1; i++) {
-        for (int i = 0; i < characters.size(); i++) {
-            FlipCutNodeSimpleWeight charac1 = characters.get(i);
-            if (!alreadyInMergeSet.contains(charac1)) {
-                FlipCutNodeSimpleWeight dummy = new FlipCutNodeSimpleWeight();
-                dummy.edgeWeight = charac1.edgeWeight;
-                //todo copatible dummy
-                //dummy.characterWeight = charac1.characterWeight;
-                Set<FlipCutNodeSimpleWeight> toMerge = new HashSet<FlipCutNodeSimpleWeight>();
-                toMerge.add(charac1);
-                Set<FlipCutNodeSimpleWeight> toMergeClones = new HashSet<FlipCutNodeSimpleWeight>();
-                toMergeClones.add(charac1.clone);
-                alreadyInMergeSet.add(charac1); //not really needed but consistent
-                //just for debugging
-                charactersAdded.add(charac1);
+    protected int buildCharacterMergingMap(T source, final boolean globalMap){
 
-                for (int j = i + 1; j < characters.size(); j++) {
-                    FlipCutNodeSimpleWeight charac2 = characters.get(j);
-                    if (!alreadyInMergeSet.contains(charac2)) {
-                        if (charac1.compareCharLazy(charac2)) {
-                            alreadyInMergeSet.add(charac2);
-                            toMerge.add(charac2);
-                            toMergeClones.add(charac2.clone);
-                            nodeToDummy.put(charac2,dummy);
-                            //sum up edge weights
-                            dummy.edgeWeight += charac2.edgeWeight;
-                            //todo compatible dummy
-                            //dummy.characterWeight += charac2.characterWeight;
-                            charactersAdded.add(charac2);
-                            dupletsCounter++;
+        int dupletsCounter;
+        if (globalMap) {
+            dummyToMerged = source.dummyToCharacters;
+            nodeToDummy = source.characterToDummy;
+            dupletsCounter = nodeToDummy.size() - dummyToMerged.size();
+        } else {
+            //todo this is stupid!!! OPTIMIZE after proof
+            Set<FlipCutNodeSimpleWeight> alreadyInMergeSet = new HashSet<FlipCutNodeSimpleWeight>();
+            dummyToMerged = new HashMap<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>>();
+            nodeToDummy = new HashMap<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight>();
+            List<FlipCutNodeSimpleWeight> characters = new ArrayList<>(source.characters);
+            List<FlipCutNodeSimpleWeight> charactersAdded = new ArrayList<>(source.characters);
+            dupletsCounter = 0;
+            //ATTENTION: size -1 does not work, because if last note is alone in a group, it wont be added to the cut graph
+            for (int i = 0; i < characters.size(); i++) {
+                FlipCutNodeSimpleWeight charac1 = characters.get(i);
+                if (!alreadyInMergeSet.contains(charac1)) {
+                    FlipCutNodeSimpleWeight dummy = new FlipCutNodeSimpleWeight();
+                    dummy.edgeWeight = charac1.edgeWeight;
+                    Set<FlipCutNodeSimpleWeight> toMerge = new HashSet<FlipCutNodeSimpleWeight>();
+                    toMerge.add(charac1);
+                    Set<FlipCutNodeSimpleWeight> toMergeClones = new HashSet<FlipCutNodeSimpleWeight>();
+                    toMergeClones.add(charac1.clone);
+                    alreadyInMergeSet.add(charac1); //not really needed but consistent
+                    //just for debugging
+                    charactersAdded.add(charac1);
+
+                    for (int j = i + 1; j < characters.size(); j++) {
+                        FlipCutNodeSimpleWeight charac2 = characters.get(j);
+                        if (!alreadyInMergeSet.contains(charac2)) {
+                            if (charac1.compareCharLazy(charac2)) {
+                                alreadyInMergeSet.add(charac2);
+                                toMerge.add(charac2);
+                                toMergeClones.add(charac2.clone);
+                                nodeToDummy.put(charac2,dummy);
+                                //sum up edge weights
+                                dummy.edgeWeight += charac2.edgeWeight;
+                                charactersAdded.add(charac2);
+                                dupletsCounter++;
+                            }
                         }
                     }
-                }
-                if (toMerge.size() > 0){ //todo why > 1? don't unterstand this check --> should be > 0 but this is useless
                     dummyToMerged.put(dummy,toMerge);
                     dummyToMerged.put(dummy.clone,toMergeClones);
                     nodeToDummy.put(charac1,dummy);
@@ -462,29 +464,6 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                 }
             }
         }
-
         return dupletsCounter;
     }
-
-    public void removeNodeFromMergeSet(FlipCutNodeSimpleWeight toRemove){
-        FlipCutNodeSimpleWeight dummy = nodeToDummy.get(toRemove);
-        if (dummy != null){
-            nodeToDummy.remove(toRemove);
-            //todo compatible dummy
-            //dummy.characterWeight -= toRemove.characterWeight;
-            dummy.edgeWeight -= toRemove.edgeWeight;
-            Set<FlipCutNodeSimpleWeight> merged = dummyToMerged.get(dummy);
-            merged.remove(toRemove);
-            Set<FlipCutNodeSimpleWeight> mergedClones = dummyToMerged.get(dummy.clone);
-            mergedClones.remove(toRemove.clone);
-            if (merged.isEmpty()){
-//                nodeToDummy.remove(merged.iterator().next());
-                dummyToMerged.remove(dummy);
-                dummyToMerged.remove(dummy.clone);
-            }
-        }
-    }
-
-
-
 }

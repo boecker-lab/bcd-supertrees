@@ -54,16 +54,6 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                 globalWeight = 0;
 
             getLog().info("Computing FS Supertree");
-            //build static node merge map for initial graph
-            if (cutter.mergeCharacters && cutter.staticCharacterMap){
-                if (DEBUG)
-                    debugInfo.currentStartTime = System.currentTimeMillis();
-
-                cutter.buildInitialCharacterMergingMap(currentGraph);
-
-                if (DEBUG)
-                    debugInfo.mergingMapCreateTime = (System.currentTimeMillis() - debugInfo.currentStartTime)/1000 ;
-            }
             Tree supertree = new Tree();
 
             Queue<T> graphs = new LinkedList<T>();
@@ -71,12 +61,15 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
 
             //remove identical Nodes. That means complete identical Matrix columns of the Nodes that are from trees with same taxon set
             //maybe useful for MrBayes input trees, but maybe this becomes nearly useless because of undisputed sibling reduction
-            if (removeDuplets){
-                getLog().info("Merging identical characters");
-                int removed = currentGraph.mergeRetundantCharacters();
-                /*if (DEBUG)*/ System.out.println(removed + " characters removed!");
-                getLog().info(removed + " characters removed!");
-            }
+            //todo not longer needed but usable for testing
+//            if (removeDuplets){
+//                System.out.println("Merging identical characters");
+//                getLog().info("Merging identical characters");
+//                int removed = currentGraph.mergeRetundantCharacters();
+//                /*if (DEBUG)*/ System.out.println(removed + " characters removed!");
+//                getLog().info(removed + " characters removed!");
+//                System.out.println(removed + " characters removed!");
+//            }
 
             getLog().info("Starting iterative graph splitting to compute Supertree");
             while(graphs.size() > 0){
@@ -88,21 +81,22 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                     supertree.addEdge(currentGraph.parentNode, currentGraph.treeNode);
 
                 // init the graph (remove semi universals)
-                if (cutter.mergeCharacters && cutter.staticCharacterMap){
+                List<N> toRemove = currentGraph.deleteSemiUniversals();
+                if (cutter.mergeCharacters && currentGraph.GLOBAL_CHARACTER_MERGE){
                     //todo maybe do this only before cutting
-                    List<N> toRemove = currentGraph.deleteSemiUniversals();
                     for (N node : toRemove) {
-                        cutter.removeNodeFromMergeSet(node);
+                        if (!node.isClone())
+                            currentGraph.removeCharacterFromDummyMapping(node);
+                        else
+                            System.out.println("WARNING:  tried to remove clone!");//todo remove
                     }
-                }else{
-                    currentGraph.deleteSemiUniversals();
                 }
 
 
                 // check if we have just one taxon left
                 if(currentGraph.taxa.size() == 1){
                     // the current node becomes the leaf
-                    currentGraph.treeNode.setLabel((currentGraph.taxa.get(0)).name);
+                    currentGraph.treeNode.setLabel((currentGraph.taxa.iterator().next()).name);
                 // check if we have just two taxa left --> cut is trivial
                 }else if(currentGraph.taxa.size() == 2){
                     //System.out.println("################ TRIVAL CUT ################");
@@ -122,7 +116,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                         cutter.clear();
                         List<T> componentGraphs = cutter.cut(currentGraph);
                         //mincut value in graph needed?
-                        if(CALCULATE_SCORE) globalWeight = globalWeight + cutter.getMinCutValue(currentGraph);
+                        if(CALCULATE_SCORE) globalWeight  += cutter.getMinCutValue(currentGraph);
                         if (DEBUG)
                             if (componentGraphs.size() > 2)
                                 debugInfo.polytomies.add(componentGraphs.size());
@@ -132,6 +126,8 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                             if (currentGraph.SCAFF_TAXA_MERGE){
                                 componentGraph.insertScaffPartData(currentGraph,null);
                             }
+                            if (currentGraph.GLOBAL_CHARACTER_MERGE)
+                                componentGraph.insertCharacterMapping(currentGraph,null);
                             graphs.offer(componentGraph);
                         }
 
@@ -150,6 +146,8 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                             if (currentGraph.SCAFF_TAXA_MERGE){
                                 g.insertScaffPartData(currentGraph,null);
                             }
+                            if (currentGraph.GLOBAL_CHARACTER_MERGE)
+                                g.insertCharacterMapping(currentGraph,null);
                             graphs.offer(g);
                         }
                         if (DEBUG)
@@ -162,13 +160,6 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                 debugInfo.weight = globalWeight;
                 debugInfo.overallCalculationTime = (System.currentTimeMillis() - debugInfo.overallCalculationTime)/1000;
             }
-
-            /*if (PP){
-                System.out.println("starting PP to delete unsupported clades");
-                pp(supertree);
-
-            }*/
-
             return supertree;
         } else {
             throw new IllegalArgumentException("No inputTrees found");

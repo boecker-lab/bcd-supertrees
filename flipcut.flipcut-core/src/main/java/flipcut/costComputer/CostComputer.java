@@ -41,6 +41,7 @@ public abstract class CostComputer{
 
 
     public CostComputer(List<Tree> inputTrees,  FlipCutWeights.Weights weights, Tree scaffoldTree) {
+        System.out.println("Init CostComputer");
         this.scaffoldTree = scaffoldTree;
         trees = new ArrayList<>(inputTrees);
 
@@ -62,7 +63,7 @@ public abstract class CostComputer{
                             maxLevel = level;
                     }else {
                         //BS stuff
-                        double currentBS = readBSValueFromLabel(node);
+                        double currentBS = parseBSValueFromLabel(node);
                         if (currentBS > maxBSValue){
                             maxBSValue = currentBS;
                         }
@@ -81,6 +82,7 @@ public abstract class CostComputer{
             maxBSValue = 100d;
         }
         this.weights = weights;
+        System.out.println("...Done!");
     }
 
     //todo maybe not needed because of infinity option
@@ -94,12 +96,30 @@ public abstract class CostComputer{
         return scaffoldWeight;
     }
 
-    protected double readBSValueFromLabel(TreeNode node){
+    protected double parseBSValueFromLabel(TreeNode node){
         if (node.getLabel() != null) {
-            return Double.valueOf(node.getLabel());
-        }else{
-            return -2d;
+            try {
+                return Double.valueOf(node.getLabel());
+            } catch (NumberFormatException e) {
+    //            e.printStackTrace(); //todo maybe remove!!!
+                return Double.NaN;
+            }
         }
+        return Double.NaN;
+
+    }
+
+    //returns 1 if no weight is set
+    protected double parseTreeWeightFromLabel(Tree tree){
+        String rootLabel = tree.getRoot().getLabel();
+        if (rootLabel != null){
+            try {
+                return Double.valueOf(rootLabel);
+            } catch (NumberFormatException e) {
+                return 1d;
+            }
+        }
+        return 1d;
     }
 
     public abstract long getEdgeWeight(TreeNode node, List<? extends AbstractFlipCutNode> leafes, AbstractFlipCutNode leaf);

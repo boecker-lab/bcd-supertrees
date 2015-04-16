@@ -135,15 +135,7 @@ public class WeightCostComputer extends SimpleCosts {
 
 
             // rounding and weighting by tree weight
-            double treeWeight = 1;
-            String rootLabel = tree.getRoot().getLabel();
-            if (rootLabel != null){
-                try {
-                    treeWeight = Double.valueOf(rootLabel);
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                }
-            }
+            double treeWeight = parseTreeWeightFromLabel(tree);
 
             long w;
             if (weights == FlipCutWeights.Weights.TREE_WEIGHT){
@@ -169,7 +161,7 @@ public class WeightCostComputer extends SimpleCosts {
     }
 
     private double calcBSValueFromLabel(TreeNode node){
-        return readBSValueFromLabel(node) / maxBSValue;
+        return parseBSValueFromLabel(node) / maxBSValue;
     }
 
     private double calcNodeLevel(TreeNode node){

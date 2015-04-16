@@ -4,6 +4,7 @@ package flipcut.model;
 import flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 import flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -12,13 +13,13 @@ import java.util.List;
  * Time: 18:10
  */
 public class Cut implements Comparable<Cut> {
-    private List<FlipCutNodeSimpleWeight> sinkNodes;
+    private LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes;
     private List<List<FlipCutNodeSimpleWeight>> comp;
     private List<FlipCutGraphMultiSimpleWeight> splittedGraphs;
     final long minCutValue;
     final FlipCutGraphMultiSimpleWeight sourceGraph;
 
-    public Cut(List<FlipCutNodeSimpleWeight> sinkNodes, long minCutValue, FlipCutGraphMultiSimpleWeight sourceGraph) {
+    public Cut(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes, long minCutValue, FlipCutGraphMultiSimpleWeight sourceGraph) {
         //splittedGraphs = (List<FlipCutGraphMultiSimpleWeight>) sourceGraph.split(sinkNodes);
         this.sinkNodes = sinkNodes;
         this.minCutValue = minCutValue;
