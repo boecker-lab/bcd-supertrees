@@ -39,7 +39,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     /**
      * Mapping for edge  based character merging (Global character Map)
      */
-    protected Map<T, T> characterToDummy = null;
+    public Map<T, T> characterToDummy = null;
     protected Map<T, Set<T>> dummyToCharacters = null;
 
 

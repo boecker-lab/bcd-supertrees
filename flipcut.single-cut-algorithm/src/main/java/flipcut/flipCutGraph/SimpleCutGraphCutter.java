@@ -432,7 +432,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
             for (int i = 0; i < characters.size(); i++) {
                 FlipCutNodeSimpleWeight charac1 = characters.get(i);
                 if (!alreadyInMergeSet.contains(charac1)) {
-                    FlipCutNodeSimpleWeight dummy = new FlipCutNodeSimpleWeight();
+                    FlipCutNodeSimpleWeight dummy = new FlipCutNodeSimpleWeight(charac1.edges);
                     dummy.edgeWeight = charac1.edgeWeight;
                     Set<FlipCutNodeSimpleWeight> toMerge = new HashSet<FlipCutNodeSimpleWeight>();
                     toMerge.add(charac1);

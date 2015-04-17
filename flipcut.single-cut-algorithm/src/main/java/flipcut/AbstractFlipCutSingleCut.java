@@ -59,21 +59,15 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
             Queue<T> graphs = new LinkedList<T>();
             graphs.offer(currentGraph);
 
-            //remove identical Nodes. That means complete identical Matrix columns of the Nodes that are from trees with same taxon set
-            //maybe useful for MrBayes input trees, but maybe this becomes nearly useless because of undisputed sibling reduction
-            //todo not longer needed but usable for testing
-//            if (removeDuplets){
-//                System.out.println("Merging identical characters");
-//                getLog().info("Merging identical characters");
-//                int removed = currentGraph.mergeRetundantCharacters();
-//                /*if (DEBUG)*/ System.out.println(removed + " characters removed!");
-//                getLog().info(removed + " characters removed!");
-//                System.out.println(removed + " characters removed!");
-//            }
-
             getLog().info("Starting iterative graph splitting to compute Supertree");
             while(graphs.size() > 0){
                 currentGraph = graphs.poll();
+
+                //todo debugging
+                for (N character : currentGraph.characters) {
+                    if (!currentGraph.characterToDummy.containsKey(character))
+                        System.out.println(character.toString() + " is not in mapping");
+                }
 
                 // add the node
                 supertree.addVertex(currentGraph.treeNode);
@@ -82,7 +76,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
 
                 // init the graph (remove semi universals)
                 List<N> toRemove = currentGraph.deleteSemiUniversals();
-                if (cutter.mergeCharacters && currentGraph.GLOBAL_CHARACTER_MERGE){
+                if (currentGraph.GLOBAL_CHARACTER_MERGE && cutter.mergeCharacters){
                     //todo maybe do this only before cutting
                     for (N node : toRemove) {
                         if (!node.isClone())

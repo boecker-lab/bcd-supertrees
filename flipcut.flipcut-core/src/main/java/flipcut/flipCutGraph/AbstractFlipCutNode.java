@@ -36,13 +36,14 @@ public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
     @Override
     public String toString() {
         if (!isDummy()){
-            if (isClone()) return "Clone-Character " + clone.hashCode();
-            return name == null ? "Character " + hashCode() : name;
+            if (isClone())
+                return "Clone-Character " + Integer.toHexString(clone.hashCode());
+            return name == null ? "Character " + Integer.toHexString(hashCode()) : name;
         }else {
             if (isClone())
-                return "Clone-" + name + "-Character " + clone.hashCode();
+                return "Clone-" + name + "-Character " + Integer.toHexString(clone.hashCode());
             else {
-                return name + "-Character " + hashCode();
+                return name + "-Character " + Integer.toHexString(hashCode());
             }
         }
     }
