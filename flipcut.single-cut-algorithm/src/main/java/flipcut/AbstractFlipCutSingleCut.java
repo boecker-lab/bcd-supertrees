@@ -63,29 +63,13 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
             while(graphs.size() > 0){
                 currentGraph = graphs.poll();
 
-                //todo debugging
-                for (N character : currentGraph.characters) {
-                    if (!currentGraph.characterToDummy.containsKey(character))
-                        System.out.println(character.toString() + " is not in mapping");
-                }
-
                 // add the node
                 supertree.addVertex(currentGraph.treeNode);
                 if(currentGraph.parentNode != null)
                     supertree.addEdge(currentGraph.parentNode, currentGraph.treeNode);
 
                 // init the graph (remove semi universals)
-                List<N> toRemove = currentGraph.deleteSemiUniversals();
-                if (currentGraph.GLOBAL_CHARACTER_MERGE && cutter.mergeCharacters){
-                    //todo maybe do this only before cutting
-                    for (N node : toRemove) {
-                        if (!node.isClone())
-                            currentGraph.removeCharacterFromDummyMapping(node);
-                        else
-                            System.out.println("WARNING:  tried to remove clone!");//todo remove
-                    }
-                }
-
+                currentGraph.deleteSemiUniversals();
 
                 // check if we have just one taxon left
                 if(currentGraph.taxa.size() == 1){

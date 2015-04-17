@@ -116,7 +116,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                         c.addEdgeTo(taxon);
                         // add reverse edge
 //                        taxon.addEdgeTo(c); --> //we have to wait with this until we know if character will be part of the graph --> see below
-                    //now set all nodes of this tree to "0"
+                        //now set all nodes of this tree to "0"
                     } else {
                         c.addImaginaryEdgeTo(taxon);
                     }
@@ -170,7 +170,6 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                 System.out.println("Scaffold node number: " + charToTreeNode.size());
 
 
-
         List<LinkedHashSet<FlipCutNodeSimpleWeight>> out = new ArrayList<>(2);
         out.add(new LinkedHashSet<>(characters.values()));
         out.add(new LinkedHashSet<>(taxa.values()));
@@ -188,10 +187,10 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
 
     protected List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> splitToGraphData(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes) {
         LinkedHashSet<FlipCutNodeSimpleWeight> g1Characters = new LinkedHashSet(characters.size());
-        LinkedHashSet<FlipCutNodeSimpleWeight> g1Taxa =  new LinkedHashSet(taxa.size());
+        LinkedHashSet<FlipCutNodeSimpleWeight> g1Taxa = new LinkedHashSet(taxa.size());
         LinkedHashSet<FlipCutNodeSimpleWeight> g2Characters;
         LinkedHashSet<FlipCutNodeSimpleWeight> g2Taxa;
-        LinkedHashSet<FlipCutNodeSimpleWeight> charactersToRemove =  new LinkedHashSet(characters.size());
+        LinkedHashSet<FlipCutNodeSimpleWeight> charactersToRemove = new LinkedHashSet(characters.size());
 
         // check if we have to remove vertices
         for (FlipCutNodeSimpleWeight node : sinkNodes) {
@@ -224,7 +223,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         }
 
         // fill g2 lists
-        g2Characters =  new LinkedHashSet<>(characters);
+        g2Characters = new LinkedHashSet<>(characters);
         g2Characters.removeAll(g1Characters);
         g2Taxa = new LinkedHashSet<>(taxa);
         g2Taxa.removeAll(g1Taxa);
@@ -254,7 +253,6 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
             for (FlipCutNodeSimpleWeight bTaxon : bTaxa) {
                 //update zero edge counter
                 if (aCharacter.imaginaryEdges.remove(bTaxon)) { // < 0
-                    //todo maybe include semiuniversal deletion here???
                     //remove edge to other side
                 } else if (aCharacter.edges.remove(bTaxon)) { // > 0
                     // remove reverse edge
@@ -327,19 +325,11 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     @Override
     public void removeCharacterFromDummyMapping(FlipCutNodeSimpleWeight character) {
         FlipCutNodeSimpleWeight dummy = characterToDummy.remove(character);
-        if (dummy == null) {
-            for (FlipCutNodeSimpleWeight nodeSimpleWeight : characterToDummy.keySet()) {
-                if (nodeSimpleWeight.toString().equals(character.toString()))
-                    System.out.println("CHAR IS IN TREE BUT NOT FOUND");
-            }
-            System.out.println("DAMN null value");
-        }
-            characterToDummy.remove(character.clone);
-            dummyToCharacters.get(dummy).remove(character);
-            dummyToCharacters.get(dummy.clone).remove(character.clone);
+        characterToDummy.remove(character.clone);
+        dummyToCharacters.get(dummy).remove(character);
+        dummyToCharacters.get(dummy.clone).remove(character.clone);
 
-            dummy.edgeWeight -= character.edgeWeight;
-            System.out.println("removing " + character.toString());
+        dummy.edgeWeight -= character.edgeWeight;
     }
     //########## methods for edge identical character mappin END ##########
 }

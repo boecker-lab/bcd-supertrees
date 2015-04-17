@@ -190,6 +190,10 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
                 toRemove.add(character);
                 //remove deleted partitions an insert child partitions
 
+                if (GLOBAL_CHARACTER_MERGE){
+                    removeCharacterFromDummyMapping(character);
+                }
+
                 if (SCAFF_TAXA_MERGE){
                     TreeNode node = charToTreeNode.get(character);
                     if (node!= null){
