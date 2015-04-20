@@ -130,7 +130,10 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         }
 
         // checks an removes edges to taxa that are not in this component!!!
-        checkEdges();
+        if (GLOBAL_CHARACTER_MERGE) { //has to be false for original edge deletion flipCut
+            if (checkEdges())
+                System.out.println("Edges between graphs deleted!");
+        }
 
         this.parentNode = parentNode;
         treeNode = new TreeNode();
@@ -282,15 +285,18 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     }
 
     //checks edges and reverse edges but NO imaginary edges...
-    protected void checkEdges(){
+    //todo this is for the flipCut edge deletion version only
+    protected boolean checkEdges(){
+        boolean deleted = false;
         // check edges from characters
         for (T character : characters) {
-            character.edges.retainAll(taxa);
+            deleted =  deleted || character.edges.retainAll(taxa);
         }
         // check reverse edges from taxa
         for (T taxon : taxa) {
-            taxon.edges.retainAll(characters);
+            deleted = deleted || taxon.edges.retainAll(characters);
         }
+        return deleted;
     }
 
     //########## methods for edge identical character mappin ##########

@@ -291,16 +291,19 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     }
 
     @Override
-    protected void checkEdges() {
+    protected boolean checkEdges() {
+        boolean deleted = false;
         // check edges from characters
         for (FlipCutNodeSimpleWeight character : characters) {
-            character.edges.retainAll(taxa);
+            deleted =  deleted || character.edges.retainAll(taxa);
             character.imaginaryEdges.retainAll(taxa);
         }
         // check reverse edges from taxa
         for (FlipCutNodeSimpleWeight taxon : taxa) {
-            taxon.edges.retainAll(characters);
+            deleted =  deleted || taxon.edges.retainAll(characters);
         }
+        return deleted;
+
     }
 
 
