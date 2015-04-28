@@ -49,7 +49,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
     }
 
     public FlipCutGraphMultiSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, int k, CutGraphCutter.CutGraphTypes cutterType) {
-        super(nodes, parentNode);
+        super(nodes, parentNode, (cutterType == CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG));
         if (VAZIRANI) {
             this.cutter = new MultiCutGraphCutter(cutterType,this);
         } else {

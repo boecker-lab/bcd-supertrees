@@ -21,8 +21,8 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         super(characters, taxa, parentNode);
     }
 
-    public FlipCutGraphSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode) {
-        super(nodes, parentNode);
+    public FlipCutGraphSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, final boolean checkEdges) {
+        super(nodes, parentNode,checkEdges);
     }
 
     @Override
@@ -291,16 +291,19 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     }
 
     @Override
-    protected boolean checkEdges() {
+    protected boolean checkEdges(final boolean edgeDeletion) {
         boolean deleted = false;
         // check edges from characters
         for (FlipCutNodeSimpleWeight character : characters) {
-            deleted =  deleted || character.edges.retainAll(taxa);
+            if (edgeDeletion)
+                deleted =  deleted || character.edges.retainAll(taxa);
             character.imaginaryEdges.retainAll(taxa);
         }
-        // check reverse edges from taxa
-        for (FlipCutNodeSimpleWeight taxon : taxa) {
-            deleted =  deleted || taxon.edges.retainAll(characters);
+        if (edgeDeletion) {
+            // check reverse edges from taxa
+            for (FlipCutNodeSimpleWeight taxon : taxa) {
+                deleted =  deleted || taxon.edges.retainAll(characters);
+            }
         }
         return deleted;
 

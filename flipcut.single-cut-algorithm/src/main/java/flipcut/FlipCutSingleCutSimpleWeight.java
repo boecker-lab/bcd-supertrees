@@ -38,8 +38,8 @@ public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipC
 
 
     @Override
-    protected FlipCutGraphSimpleWeight createGraph(List<FlipCutNodeSimpleWeight> component, TreeNode treeNode) {
-        return new FlipCutGraphSimpleWeight(component,treeNode);
+    protected FlipCutGraphSimpleWeight createGraph(List<FlipCutNodeSimpleWeight> component, TreeNode treeNode, final boolean checkEdges) {
+        return new FlipCutGraphSimpleWeight(component,treeNode,checkEdges);
     }
 
     @Override

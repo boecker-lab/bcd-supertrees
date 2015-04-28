@@ -115,8 +115,9 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                         if (DEBUG)
                             debugInfo.currentStartTime = System.currentTimeMillis();
                         // create the component graphs
+                        boolean checkEdges = (getCutterType() == CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
                         for (List<N> component : components) {
-                            T g = createGraph(component, currentGraph.treeNode);
+                            T g = createGraph(component, currentGraph.treeNode, checkEdges);
                             //actualize scaffold partition data
                             if (currentGraph.SCAFF_TAXA_MERGE){
                                 g.insertScaffPartData(currentGraph,null);
@@ -154,7 +155,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
         return childrenSets;
     }
 
-    protected abstract T createGraph(List<N> component, TreeNode treeNode);
+    protected abstract T createGraph(List<N> component, TreeNode treeNode, final boolean checkEdges);
     protected abstract C createCutter(CutGraphCutter.CutGraphTypes type);
     public void setCutter(CutGraphCutter.CutGraphTypes type){
         cutter = createCutter(type);

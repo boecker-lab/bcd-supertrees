@@ -115,7 +115,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      *
      * @param nodes the nodes
      */
-    public AbstractFlipCutGraph(List<T> nodes, TreeNode parentNode) {
+    public AbstractFlipCutGraph(List<T> nodes, TreeNode parentNode, final boolean checkEdges) {
         characters = new LinkedHashSet<>(nodes.size());
         taxa = new LinkedHashSet<>(nodes.size());
         for (T node : nodes) {
@@ -127,10 +127,8 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         }
 
         // checks an removes edges to taxa that are not in this component!!!
-//        if (GLOBAL_CHARACTER_MERGE) { //todo deactivate for merge //has to be false for original edge deletion flipCut
-        if (checkEdges())
-            System.out.println("Edges between graphs deleted!");
-//        }
+        if (checkEdges(checkEdges))
+            System.out.println("INFO: Edges between graphs deleted! - Not possible for BCD");
 
         this.parentNode = parentNode;
         treeNode = new TreeNode();
@@ -285,17 +283,20 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
 
     //checks edges and reverse edges but NO imaginary edges...
     //this is for the flipCut edge deletion version only
-    protected boolean checkEdges() {
-        boolean deleted = false;
-        // check edges from characters
-        for (T character : characters) {
-            deleted = deleted || character.edges.retainAll(taxa);
+    protected boolean checkEdges(final boolean edgeDeletion) {
+        if (edgeDeletion) {
+            boolean deleted = false;
+            // check edges from characters
+            for (T character : characters) {
+                deleted = deleted || character.edges.retainAll(taxa);
+            }
+            // check reverse edges from taxa
+            for (T taxon : taxa) {
+                deleted = deleted || taxon.edges.retainAll(characters);
+            }
+            return deleted;
         }
-        // check reverse edges from taxa
-        for (T taxon : taxa) {
-            deleted = deleted || taxon.edges.retainAll(characters);
-        }
-        return deleted;
+        return false;
     }
 
     //########## methods for edge identical character mappin ##########
