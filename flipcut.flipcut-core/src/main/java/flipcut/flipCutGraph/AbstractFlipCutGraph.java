@@ -324,33 +324,45 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         charToTreeNode.remove(c);
     }
 
-    //todo maybe use one global map via references and only actualize active partitions --> because maps are read only. we do not need to split them into separate ones
     public void insertScaffPartData(AbstractFlipCutGraph<T> source, final Map<T, T> oldToNew) {
-        charToTreeNode = new HashMap();
-        treeNodeToChar = new HashMap();
+
         activePartitions = new HashSet<>();
         if (!source.activePartitions.isEmpty()) {
-            for (Map.Entry<T, TreeNode> entry : source.charToTreeNode.entrySet()) {
-                T sourceNode;
-                if (oldToNew != null) {
-                    sourceNode = oldToNew.get(entry.getKey());
-                } else {
-                    sourceNode = entry.getKey();
-                }
-                if (characters.contains(sourceNode)) {
-                    addTreeNodeCharGuideTreeMapping(entry.getValue(), sourceNode);
-                }
-            }
 
-            for (T activePartition : source.activePartitions) {
-                T sourceNode;
-                if (oldToNew != null) {
-                    sourceNode = oldToNew.get(activePartition);
-                } else {
-                    sourceNode = activePartition;
+            // multicutted version
+            if (oldToNew != null) {
+                charToTreeNode = new HashMap();
+                treeNodeToChar = new HashMap();
+                for (Map.Entry<T, TreeNode> entry : source.charToTreeNode.entrySet()) {
+                    T sourceNode;
+                    if (oldToNew != null) {
+                        sourceNode = oldToNew.get(entry.getKey());
+                    } else {
+                        sourceNode = entry.getKey();
+                    }
+                    if (characters.contains(sourceNode)) {
+                        addTreeNodeCharGuideTreeMapping(entry.getValue(), sourceNode);
+                    }
                 }
-                if (characters.contains(sourceNode))
-                    activePartitions.add(sourceNode);
+
+                for (T activePartition : source.activePartitions) {
+                    T sourceNode;
+                    if (oldToNew != null) {
+                        sourceNode = oldToNew.get(activePartition);
+                    } else {
+                        sourceNode = activePartition;
+                    }
+                    if (characters.contains(sourceNode))
+                        activePartitions.add(sourceNode);
+                }
+            // single cutted version
+            }else{
+                charToTreeNode =  source.charToTreeNode;
+                treeNodeToChar =  source.treeNodeToChar;
+                for (T sourceNode : source.activePartitions) {
+                    if (characters.contains(sourceNode))
+                        activePartitions.add(sourceNode);
+                }
             }
         }
     }

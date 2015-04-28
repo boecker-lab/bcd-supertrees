@@ -293,15 +293,15 @@ public class FlipCutSingleCutSimpleWeightTest {
         Tree[] trees =  Newick.getTreeFromFile(inputFile);
 
         long t = System.currentTimeMillis();
-        GreedySCMAlgorithm algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new ConsensusResolutionScorer(TreeScorer.ConsensusMethods.STRICT), TreeUtilsBasic.cloneTrees(trees)));
-        Tree guideTree = algo.getSupertree();
+//        GreedySCMAlgorithm algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new ConsensusResolutionScorer(TreeScorer.ConsensusMethods.STRICT), TreeUtilsBasic.cloneTrees(trees)));
+//        Tree guideTree = algo.getSupertree();
         System.out.println("SCM time : " + (System.currentTimeMillis()-t));
 
         t = System.currentTimeMillis();
         FlipCutSingleCutSimpleWeight a = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
         a.setWeights(FlipCutWeights.Weights.UNIT_COST);
-        a.setInputTrees(Arrays.asList(trees),guideTree);
-//        a.setInputTrees(Arrays.asList(trees));
+//        a.setInputTrees(Arrays.asList(trees),guideTree);
+        a.setInputTrees(Arrays.asList(trees));
         Tree sTree =  a.getSupertree();
         System.out.println("time : " + (System.currentTimeMillis()-t));
         assertNotNull(sTree);
