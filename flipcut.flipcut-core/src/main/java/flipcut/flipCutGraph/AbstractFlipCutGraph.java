@@ -19,18 +19,17 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     protected static final boolean DEBUG = false;
 
 
-
     /**
      * Turn on/off guide tree based taxa merging
      */
-    public static final boolean SCAFF_TAXA_MERGE = false;
+    public static final boolean SCAFF_TAXA_MERGE = true;
     /**
      * Mapping for guide tree based taxa merging
      */
-    protected  Map<T,TreeNode> charToTreeNode = null;
-    protected  Map<TreeNode,T> treeNodeToChar = null;
+    protected Map<T, TreeNode> charToTreeNode = null;
+    protected Map<TreeNode, T> treeNodeToChar = null;
     // active partitions for guide tree based taxa merging
-    protected  Set<T> activePartitions = null;
+    protected Set<T> activePartitions = null;
 
     /**
      * Turn on/off global character merging for characters with identical edgeset --> works for hypergraph version only
@@ -40,8 +39,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      * Mapping for edge  based character merging (Global character Map)
      */
     public Map<T, T> characterToDummy = null;
-    protected Map<T, Set<T>> dummyToCharacters = null;
-
+    public Map<T, Set<T>> dummyToCharacters = null;
 
 
     /**
@@ -74,8 +72,8 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     public final TreeNode treeNode;
 
 
-    protected AbstractFlipCutGraph(CostComputer costs, int bootstrapThreshold){
-        List<LinkedHashSet<T>> data = createGraphData(costs,bootstrapThreshold);
+    protected AbstractFlipCutGraph(CostComputer costs, int bootstrapThreshold) {
+        List<LinkedHashSet<T>> data = createGraphData(costs, bootstrapThreshold);
         this.characters = data.get(0);
         this.taxa = data.get(1);
         parentNode = null;
@@ -86,7 +84,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         */
 //        sortTaxa();
     }
-
 
 
     /**
@@ -130,10 +127,10 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         }
 
         // checks an removes edges to taxa that are not in this component!!!
-        if (GLOBAL_CHARACTER_MERGE) { //has to be false for original edge deletion flipCut
-            if (checkEdges())
-                System.out.println("Edges between graphs deleted!");
-        }
+//        if (GLOBAL_CHARACTER_MERGE) { //todo deactivate for merge //has to be false for original edge deletion flipCut
+        if (checkEdges())
+            System.out.println("Edges between graphs deleted!");
+//        }
 
         this.parentNode = parentNode;
         treeNode = new TreeNode();
@@ -159,47 +156,50 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
 
     protected abstract List<LinkedHashSet<T>> createGraphData(CostComputer costs, int bootstrapThreshold);
 
-    protected void removeCharacters(Collection<T> toRemove, Collection<T> characters){
-        //remove chracters and edges to them from graph
-
-        for (T remove : toRemove) {
-            if (characters.remove(remove)) {
-                // remove edges to taxa
-                for (T taxon : remove.edges) {
-                    taxon.edges.remove(remove);
-                }
-                //check that no active scaffold character gets removded
-                //JUST for DEBUGGING
-                if (SCAFF_TAXA_MERGE && DEBUG){
-                    if (charToTreeNode.containsKey(remove)){
-                        System.out.println("ERROR: Illegal SCAFFOLD character deletion!!! " + toRemove.toString());
-                    }
-                }
+    protected void removeAdjacentEdges(T characterToRemove) {
+        // remove edges to taxa
+        for (T taxon : characterToRemove.edges) {
+            taxon.edges.remove(characterToRemove);
+        }
+        //check that no active scaffold character gets removded
+        //JUST for DEBUGGING
+        if (DEBUG) {
+            if (charToTreeNode.containsKey(characterToRemove)) {
+                System.out.println("ERROR: Illegal SCAFFOLD character deletion!!! " + characterToRemove.toString());
             }
         }
     }
 
-    protected void removeCharacters(Collection<T> toRemove){
-        removeCharacters(toRemove,characters);
+    protected void removeCharacters(Collection<T> toRemove, Collection<T> characters) {
+        //remove chracters and edges to them from graph
+        for (T remove : toRemove) {
+            if (characters.remove(remove)) {
+                removeAdjacentEdges(remove);
+            }
+        }
+    }
+
+    protected void removeCharacters(Collection<T> toRemove) {
+        removeCharacters(toRemove, characters);
     }
 
     /**
      * Remove semi universal characters
      */
-    public  List<T> deleteSemiUniversals() {
-        List<T> toRemove = new ArrayList<T>();
-        for (T character : characters) {
+    public void deleteSemiUniversals() {
+        Iterator<T> it = characters.iterator();
+        while (it.hasNext()) {
+            T character = it.next();
             if (character.isSemiUniversal()) {
-                toRemove.add(character);
                 //remove deleted partitions an insert child partitions
 
-                if (GLOBAL_CHARACTER_MERGE){
+                if (GLOBAL_CHARACTER_MERGE) {
                     removeCharacterFromDummyMapping(character);
                 }
 
-                if (SCAFF_TAXA_MERGE){
+                if (SCAFF_TAXA_MERGE && !activePartitions.isEmpty()) {
                     TreeNode node = charToTreeNode.get(character);
-                    if (node!= null){
+                    if (node != null) {
                         Set<T> toInsert = new HashSet(node.childCount());
                         for (TreeNode child : node.getChildren()) {
                             if (child.isInnerNode()) {
@@ -212,12 +212,13 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
                         removeTreNodeCharGuideTreeMapping(character);
                     }
                 }
+
+                it.remove();
+                removeAdjacentEdges(character);
+                if (DEBUG)
+                    System.out.println("Removing semi universal char " + character.toString() + " semiUniversal");
             }
         }
-        if (DEBUG)
-            System.out.println("Removing " + toRemove.size() + " semiUniversals");
-        removeCharacters(toRemove);
-        return toRemove;
     }
 
 
@@ -230,7 +231,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      * @return graphs list of two graphs created
      */
     abstract List<? extends AbstractFlipCutGraph<T>> split(LinkedHashSet<T> sinkNodes);
-
 
 
     /**
@@ -268,7 +268,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         v.color = GREY;
         component.add(v);
         for (T edge : v.edges) {
-        //for (int i = 0; i < v.edges.size(); i++) {
+            //for (int i = 0; i < v.edges.size(); i++) {
             //T next = v.edges.get(i);
             if (edge != null && edge.color == WHITE) {
                 dfs(edge, component);
@@ -279,18 +279,17 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     protected abstract Map<T, T> copyNodes();
 
 
-
     public long getMinCutValue() {
         return minCutValue;
     }
 
     //checks edges and reverse edges but NO imaginary edges...
-    //todo this is for the flipCut edge deletion version only
-    protected boolean checkEdges(){
+    //this is for the flipCut edge deletion version only
+    protected boolean checkEdges() {
         boolean deleted = false;
         // check edges from characters
         for (T character : characters) {
-            deleted =  deleted || character.edges.retainAll(taxa);
+            deleted = deleted || character.edges.retainAll(taxa);
         }
         // check reverse edges from taxa
         for (T taxon : taxa) {
@@ -301,54 +300,57 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
 
     //########## methods for edge identical character mappin ##########
     public abstract void addCharacterToDummyMapping(T character, T dummy);
+
     public abstract void removeCharacterFromDummyMapping(T character);
-    public abstract void insertCharacterMapping(AbstractFlipCutGraph<T> source, final Map<T,T> oldToNew);
+
+    public abstract void insertCharacterMapping(AbstractFlipCutGraph<T> source, final Map<T, T> oldToNew);
     //########## methods for edge identical character mappin END ##########
 
 
-
     //########## methods for guide tree mapping ##########
-    protected void addTreeNodeCharGuideTreeMapping(TreeNode character, T c){
-        charToTreeNode.put(c,character);
-        treeNodeToChar.put(character,c);
+    protected void addTreeNodeCharGuideTreeMapping(TreeNode character, T c) {
+        charToTreeNode.put(c, character);
+        treeNodeToChar.put(character, c);
     }
 
-    protected void removeTreeNodeCharGuideTreeMapping(TreeNode character){
+    protected void removeTreeNodeCharGuideTreeMapping(TreeNode character) {
         charToTreeNode.remove(treeNodeToChar.get(character));
         treeNodeToChar.remove(character);
     }
 
-    protected void removeTreNodeCharGuideTreeMapping(T c){
+    protected void removeTreNodeCharGuideTreeMapping(T c) {
         treeNodeToChar.remove(charToTreeNode.get(c));
         charToTreeNode.remove(c);
     }
 
     //todo maybe use one global map via references and only actualize active partitions --> because maps are read only. we do not need to split them into separate ones
-    public void insertScaffPartData(AbstractFlipCutGraph<T> source, final Map<T,T> oldToNew){
+    public void insertScaffPartData(AbstractFlipCutGraph<T> source, final Map<T, T> oldToNew) {
         charToTreeNode = new HashMap();
         treeNodeToChar = new HashMap();
-        for (Map.Entry<T, TreeNode> entry : source.charToTreeNode.entrySet()) {
-            T sourceNode;
-            if (oldToNew != null) {
-                sourceNode = oldToNew.get(entry.getKey());
-            } else {
-                sourceNode = entry.getKey();
-            }
-            if (characters.contains(sourceNode)){
-                addTreeNodeCharGuideTreeMapping(entry.getValue(), sourceNode);
-            }
-        }
-
         activePartitions = new HashSet<>();
-        for (T activePartition : source.activePartitions) {
-            T sourceNode;
-            if (oldToNew != null) {
-                sourceNode = oldToNew.get(activePartition);
-            } else {
-                sourceNode = activePartition;
+        if (!source.activePartitions.isEmpty()) {
+            for (Map.Entry<T, TreeNode> entry : source.charToTreeNode.entrySet()) {
+                T sourceNode;
+                if (oldToNew != null) {
+                    sourceNode = oldToNew.get(entry.getKey());
+                } else {
+                    sourceNode = entry.getKey();
+                }
+                if (characters.contains(sourceNode)) {
+                    addTreeNodeCharGuideTreeMapping(entry.getValue(), sourceNode);
+                }
             }
-            if (characters.contains(sourceNode))
-                activePartitions.add(sourceNode);
+
+            for (T activePartition : source.activePartitions) {
+                T sourceNode;
+                if (oldToNew != null) {
+                    sourceNode = oldToNew.get(activePartition);
+                } else {
+                    sourceNode = activePartition;
+                }
+                if (characters.contains(sourceNode))
+                    activePartitions.add(sourceNode);
+            }
         }
     }
     //########## methods for guide tree mapping END ##########

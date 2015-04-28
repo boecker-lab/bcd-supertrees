@@ -57,6 +57,7 @@ project(':flipcut.single-cut-algorithm') {
 
     dependencies {
         compile project(':flipcut.flipcut-core')
+        testCompile 'de.unijena.bioinf:scm_Algorithm:0.8-SNAPSHOT'
     }
 }
 

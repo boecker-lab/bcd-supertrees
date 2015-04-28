@@ -211,7 +211,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
                 }
             }
             FlipCutGraphMultiSimpleWeight g = new FlipCutGraphMultiSimpleWeight(new ArrayList<FlipCutNodeSimpleWeight>(oldToNew.values()),treeNode,cuts.length,getCutterType());
-            if (SCAFF_TAXA_MERGE)
+            if (SCAFF_TAXA_MERGE )
                 g.insertScaffPartData(this,oldToNew);
             splittedGraphs.add(g);
 

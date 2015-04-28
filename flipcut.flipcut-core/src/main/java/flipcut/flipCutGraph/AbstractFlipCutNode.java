@@ -35,15 +35,17 @@ public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
 
     @Override
     public String toString() {
-        if (!isDummy()){
-            if (isClone())
+        if (isClone()) {
+            if (clone.isDummyCharacter()) {
+                return "Clone-" + DUMMY_INDETIFIER + "-Character " + Integer.toHexString(clone.hashCode());
+            } else {
                 return "Clone-Character " + Integer.toHexString(clone.hashCode());
-            return name == null ? "Character " + Integer.toHexString(hashCode()) : name;
-        }else {
-            if (isClone())
-                return "Clone-" + name + "-Character " + Integer.toHexString(clone.hashCode());
-            else {
-                return name + "-Character " + Integer.toHexString(hashCode());
+            }
+        } else {
+            if (isDummyCharacter()) {
+                return DUMMY_INDETIFIER + "-Character " + Integer.toHexString(hashCode());
+            } else {
+                return name == null ? "Character " + Integer.toHexString(hashCode()) : name;
             }
         }
     }
@@ -56,14 +58,20 @@ public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
     public abstract boolean characterEquals(T c2);
 
 
+    public abstract boolean isSemiUniversal();
 
-    public abstract  boolean isSemiUniversal();
     public abstract long getEdgeWeight(T node);
+
     protected abstract T createClone();
+
     protected abstract T copy();
 
     public abstract boolean isTaxon();
+
     public abstract boolean isClone();
-    public abstract boolean isDummy();
+
+    public abstract boolean isDummyCharacter();
+
+    public abstract boolean isCharacter();
 
 }

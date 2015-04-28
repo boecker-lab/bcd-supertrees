@@ -32,10 +32,6 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
      */
     protected boolean verbose = false;
     /**
-     * Turn on/of merging of identical character nodes
-     */
-    protected boolean removeDuplets = false;
-    /**
      * Set minimum bootstrap value of a clade to be part of the analysis ()
      */
     protected int bootstrapThreshold = 0;
@@ -68,10 +64,6 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
             log = Logger.getLogger(getClass());
         }
         return log;
-    }
-
-    public void setRemoveDuplets(boolean removeDuplets) {
-        this.removeDuplets = removeDuplets;
     }
 
     /**

@@ -22,7 +22,7 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
     protected FlipCutNodeSimpleWeight(String name, Set<FlipCutNodeSimpleWeight> edges, Set<FlipCutNodeSimpleWeight> imaginaryEdges) {
         super(name, edges);
         this.imaginaryEdges = imaginaryEdges;
-        if (imaginaryEdges != null){
+        if (!isTaxon() && !isClone()){
             createClone();
         }
     }
@@ -37,7 +37,7 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
     }
     //DummyConstructor
     public FlipCutNodeSimpleWeight(Set<FlipCutNodeSimpleWeight> edges) {
-        this(DUMMY_INDETIFIER, edges , new HashSet<FlipCutNodeSimpleWeight>());
+        this(null, edges, null);
     }
 
     @Override
@@ -65,14 +65,20 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
 
     @Override
     public boolean isTaxon() {
-        return (imaginaryEdges == null);
+        return (imaginaryEdges == null && name != null);
     }
 
     @Override
-    public boolean isDummy() {
-//        return name.equals(DUMMY_INDETIFIER);
-        return DUMMY_INDETIFIER == name; //should also work and be much faster.
+    public boolean isCharacter() {
+        return (imaginaryEdges != null);
     }
+
+    @Override
+    public boolean isDummyCharacter() {
+        return (edges != null && imaginaryEdges == null && name == null);
+    }
+
+
 
     public void addImaginaryEdgeTo(FlipCutNodeSimpleWeight node){
         imaginaryEdges.add(node);

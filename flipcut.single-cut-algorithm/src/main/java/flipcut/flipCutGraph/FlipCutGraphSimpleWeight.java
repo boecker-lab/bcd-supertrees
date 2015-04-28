@@ -41,9 +41,8 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     protected List<LinkedHashSet<FlipCutNodeSimpleWeight>> createGraphData(CostComputer costs, int bootstrapThreshold) {
         System.out.println("Creating intitial FC graph...");
         List<Tree> inputTrees = new ArrayList<>(costs.getTrees());
-        Tree scaff;
+        Tree scaff = costs.getScaffoldTree();
         if (SCAFF_TAXA_MERGE) {
-            scaff = costs.getScaffoldTree();
             charToTreeNode = new HashMap<>();
             treeNodeToChar = new HashMap<>();
             activePartitions = new HashSet<>();
@@ -147,6 +146,8 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                         }
                         addCharacterToDummyMapping(c, dummy);
                     }
+
+                    characerInList = c;
                 } else {
                     characerInList.edgeWeight += c.edgeWeight;
                     if (GLOBAL_CHARACTER_MERGE)
@@ -156,7 +157,6 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                 //insert scaffold characters to mapping if activated
                 if (SCAFF_TAXA_MERGE) {
                     if (scaff != null && tree.equals(scaff)) {
-                        System.out.println("INFO: Scaffold Tree found!");
                         addTreeNodeCharGuideTreeMapping(character, characerInList);
                         //create set of active partitions
                         if (character.getParent().equals(scaff.getRoot()))
@@ -173,7 +173,6 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         List<LinkedHashSet<FlipCutNodeSimpleWeight>> out = new ArrayList<>(2);
         out.add(new LinkedHashSet<>(characters.values()));
         out.add(new LinkedHashSet<>(taxa.values()));
-
 
         System.out.println(bsIngnoredChars + " characters were ignored because of a bootstrap value less than " + bootstrapThreshold);
         System.out.println(out.get(0).size() + " of " + chars + " added to initial graph");
@@ -256,6 +255,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                     //remove edge to other side
                 } else if (aCharacter.edges.remove(bTaxon)) { // > 0
                     // remove reverse edge
+                    System.out.println("!!!!!!!!!!!!! should not the case for bcd !!!!!!!!!!!!!");
                     bTaxon.edges.remove(aCharacter);
                 }
             }

@@ -3,10 +3,7 @@ package flipcut;
 import epos.model.tree.Tree;
 import epos.model.tree.TreeNode;
 import epos.model.tree.treetools.TreeUtilsBasic;
-import flipcut.flipCutGraph.AbstractFlipCutGraph;
-import flipcut.flipCutGraph.AbstractFlipCutNode;
-import flipcut.flipCutGraph.CutGraphCutter;
-import flipcut.flipCutGraph.SingleCutGraphCutter;
+import flipcut.flipCutGraph.*;
 import org.apache.log4j.Logger;
 
 import java.util.*;

@@ -4,12 +4,17 @@ import epos.model.tree.Tree;
 import epos.model.tree.io.Newick;
 import epos.model.tree.treetools.RFDistance;
 import epos.model.tree.treetools.TreeSorter;
+import epos.model.tree.treetools.TreeUtilsBasic;
 import epos.model.tree.treetools.UnsupportedCladeReduction;
 import flipcut.costComputer.FlipCutWeights;
 import flipcut.flipCutGraph.CutGraphCutter;
 import flipcut.flipCutGraph.SingleCutGraphCutter;
 import org.junit.Assert;
 import org.junit.Test;
+import scmAlgorithm.GreedySCMAlgorithm;
+import scmAlgorithm.treeScorer.ConsensusResolutionScorer;
+import scmAlgorithm.treeScorer.TreeScorer;
+import scmAlgorithm.treeSelector.GreedyTreeSelector;
 
 import java.io.File;
 import java.util.Arrays;
@@ -278,20 +283,25 @@ public class FlipCutSingleCutSimpleWeightTest {
         System.out.println(RFDistance.getDifference(tree, mtt, true));
     }
 
-//    @Test
+    @Test
     public void testManyInputTrees(){
 //        File inputFile =  new File(getClass().getResource("/flipcut/omm.source.Trees.tre").getFile());
-        File inputFile =  new File(getClass().getResource("/flipcut/mcmahon.source_trees").getFile());
+//        File inputFile =  new File(getClass().getResource("/flipcut/mcmahon.source_trees").getFile());
 //        File inputFile =  new File(getClass().getResource("/flipcut/berrysemple-sourcetrees.tre").getFile());
-//        File inputFile =  new File(getClass().getResource("/flipcut/smo.9.sourceTrees.tre").getFile());
+        File inputFile =  new File(getClass().getResource("/flipcut/smo.9.sourceTrees.tre").getFile());
 //        File inputFile =  new File(getClass().getResource("/flipcut/sm.9.sourceTrees_OptSCM-Rooting.tre").getFile());
         Tree[] trees =  Newick.getTreeFromFile(inputFile);
 
         long t = System.currentTimeMillis();
+        GreedySCMAlgorithm algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new ConsensusResolutionScorer(TreeScorer.ConsensusMethods.STRICT), TreeUtilsBasic.cloneTrees(trees)));
+        Tree guideTree = algo.getSupertree();
+        System.out.println("SCM time : " + (System.currentTimeMillis()-t));
+
+        t = System.currentTimeMillis();
         FlipCutSingleCutSimpleWeight a = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
         a.setWeights(FlipCutWeights.Weights.UNIT_COST);
-        a.setRemoveDuplets(false);
-        a.setInputTrees(Arrays.asList(trees));
+        a.setInputTrees(Arrays.asList(trees),guideTree);
+//        a.setInputTrees(Arrays.asList(trees));
         Tree sTree =  a.getSupertree();
         System.out.println("time : " + (System.currentTimeMillis()-t));
         assertNotNull(sTree);

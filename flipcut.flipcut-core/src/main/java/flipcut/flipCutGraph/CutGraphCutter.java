@@ -11,8 +11,6 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
     public static enum CutGraphTypes {MAXFLOW_TARJAN_GOLDBERG, HYPERGRAPH_MINCUT, HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW}
     public static final long INFINITY = 1000000;
 
-    public final boolean mergeCharacters = true;
-
     public static final boolean MAX_FLIP_NORMALIZATION = false;
 
     //THE "real" bcd without flip weighting
@@ -69,5 +67,5 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
 
     public abstract List<T> cut(T source);
     protected abstract void calculateMinCut();
-    protected abstract int buildCharacterMergingMap(T source,final boolean globalMap);
+//    protected abstract int buildCharacterMergingMap(T source);
 }

@@ -137,29 +137,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
             }*/
             //todo same code as in singe cut... finde better solution!!!!
             case HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW: {
-                if (mergeCharacters) {
-
-                    int merged = buildCharacterMergingMap(source,source.GLOBAL_CHARACTER_MERGE);
-                    if (DEBUG) System.out.println(merged + "characters merged before mincut");
-                    cutGraph = new GoldbergTarjanCutGraph<>();
-                    createGoldbergTarjanCharacterWeightsMerged(cutGraph);
-                    createTarjanGoldbergHyperGraphMerged(cutGraph);
-                    BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph);
-                    mincut =  new LinkedHashSet<>(source.taxa.size() + source.characters.size());
-                    for (FlipCutNodeSimpleWeight node : newMinCut.getSinkSet()) {
-                        Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
-
-                        if (realNodes == null){
-                            if (node.isTaxon()) { //todo debug if remove!
-                                mincut.add(node);
-                            }else{
-                                System.out.println("ERROR: something with the character merge map went wrong");
-                            }
-                        }else{
-                            mincut.addAll(realNodes);
-                        }
-                    }
-                } else if(source.SCAFF_TAXA_MERGE && source.activePartitions != null) {
+                if(source.SCAFF_TAXA_MERGE && !source.activePartitions.isEmpty()) {
                     //create mapping
                     //todo optimize all thes mapping stuff if it works good
                     Map<FlipCutNodeSimpleWeight,FlipCutNodeSimpleWeight> taxonToDummy = new HashMap<>();
@@ -207,9 +185,33 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
 
                             //undo character mapping
                         }else{
+                            //todo merge back
                             Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
                             mincut.addAll(realNodes);
 //                            newMinCut.add(node);
+                        }
+                    }
+                } else if (source.GLOBAL_CHARACTER_MERGE) {
+                    dummyToMerged = source.dummyToCharacters;
+                    nodeToDummy = source.characterToDummy;
+                    int merged = nodeToDummy.size() - dummyToMerged.size();
+                    if (DEBUG) System.out.println(merged + "characters merged before mincut");
+                    cutGraph = new GoldbergTarjanCutGraph<>();
+                    createGoldbergTarjanCharacterWeightsMerged(cutGraph);
+                    createTarjanGoldbergHyperGraphMerged(cutGraph);
+                    BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph);
+                    mincut =  new LinkedHashSet<>(source.taxa.size() + source.characters.size());
+                    for (FlipCutNodeSimpleWeight node : newMinCut.getSinkSet()) {
+                        Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
+
+                        if (realNodes == null){
+                            if (node.isTaxon()) { //todo debug if remove!
+                                mincut.add(node);
+                            }else{
+                                System.out.println("ERROR: something with the character merge map went wrong");
+                            }
+                        }else{
+                            mincut.addAll(realNodes);
                         }
                     }
                 } else {
