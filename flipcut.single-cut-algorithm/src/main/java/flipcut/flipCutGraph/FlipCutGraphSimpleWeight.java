@@ -262,7 +262,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         }
     }
 
-    @Override//todo move to multi only??
+    @Override
     protected Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> copyNodes() {
         //clone all nodes
         Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew = new HashMap<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight>(characters.size() + taxa.size());
