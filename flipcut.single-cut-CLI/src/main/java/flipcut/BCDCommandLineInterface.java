@@ -28,6 +28,7 @@ public class BCDCommandLineInterface extends FlipCutCLO<FlipCutSingleCutSimpleWe
     protected final EnumMap<SuppportedWeights, FlipCutWeights.Weights> initWheightMapping() {
         final EnumMap<SuppportedWeights, FlipCutWeights.Weights> weightMapping = new EnumMap<>(SuppportedWeights.class);
         weightMapping.put(SuppportedWeights.UNIT_WEIGHT, FlipCutWeights.Weights.UNIT_COST);
+        weightMapping.put(SuppportedWeights.TREE_WEIGHT, FlipCutWeights.Weights.TREE_WEIGHT);
         weightMapping.put(SuppportedWeights.BRANCH_LENGTH, FlipCutWeights.Weights.EDGE_WEIGHTS);
         weightMapping.put(SuppportedWeights.BOOTSTRAP_VALUES, FlipCutWeights.Weights.BOOTSTRAP_VALUES);
         weightMapping.put(SuppportedWeights.LEVEL, FlipCutWeights.Weights.NODE_LEVEL);

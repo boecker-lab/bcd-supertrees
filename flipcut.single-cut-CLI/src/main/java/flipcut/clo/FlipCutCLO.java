@@ -44,8 +44,8 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
 
     public static enum FileType {NEXUS,NEWICK,AUTO}
     public static enum Algorithm {BCD,FC}
-    public static enum SCM {OVERLAP,RESOLUTION,RANDOMIZED,SUPPORT}
-    public static enum SuppportedWeights {UNIT_WEIGHT, BRANCH_LENGTH, BOOTSTRAP_VALUES, LEVEL, BRANCH_AND_LEVEL, BOOTSTRAP_AND_LEVEL}
+    public static enum SCM {DISABLED,OVERLAP,RESOLUTION,RANDOMIZED,SUPPORT}
+    public static enum SuppportedWeights {UNIT_WEIGHT, TREE_WEIGHT, BRANCH_LENGTH, BOOTSTRAP_VALUES, LEVEL, BRANCH_AND_LEVEL, BOOTSTRAP_AND_LEVEL}
 
     protected final EnumMap<SuppportedWeights, FlipCutWeights.Weights> weightMapping = initWheightMapping();
     protected abstract EnumMap<SuppportedWeights,FlipCutWeights.Weights> initWheightMapping();
@@ -110,16 +110,17 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
 
     @Option(name="-S", aliases = "--scmMethod", usage="Enable SCM-tree usage and specify the method to construct this tree", forbids = "-s", hidden = true)
     public void setSCMMethod(SCM scmMethod){
-        useSCM = true;
+        if (scmMethod != SCM.DISABLED) {
+            useSCM = true;
+        }else{
+            useSCM = false;
+        }
         this.scmMethod = scmMethod;
     }
     public SCM scmMethod = SCM.OVERLAP;
 
     @Option(name="-I", aliases = "--scmIterations", usage="Number of iterations for randomized scm algorithm", hidden = true)
     public int scmiterations = 25;
-
-
-
 
     @Option(name="-o", aliases = "--outputPath", usage="Output file" )
     public Path output = null;  //default value null
