@@ -139,14 +139,14 @@ public class BCDSupertrees {
             System.err.println(e.getMessage());
             System.err.println();
             System.err.println();
-            bcdCLI.printHelp(parser, System.err);
+            bcdCLI.printHelp(parser, System.out);
 
             return;
         } catch (IOException e) {
             System.err.println(e.getMessage());
             System.err.println();
             System.err.println();
-            bcdCLI.printHelp(parser, System.err);
+            bcdCLI.printHelp(parser, System.out);
         }
 
 
