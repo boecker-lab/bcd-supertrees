@@ -14,14 +14,15 @@ public interface MultiCutGraph<V> extends CutGraph<V> {
      *
      * @return values of the all calulated cuts
      */
-    default long[] getMinCutValues(){
+    long[] getMinCutValues();
+    /*default long[] getMinCutValues(){
         List<BasicCut<V>> mins = getMinCuts();
         long[] cutValues = new long[mins.size()];
         for (int i = 0; i < cutValues.length; i++) {
             cutValues[i] = mins.get(i).minCutValue;
         }
         return cutValues;
-    }
+    }*/
 
     /**
      * Resturns a list of Cuts calculated lazily

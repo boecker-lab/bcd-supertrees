@@ -1,5 +1,6 @@
 package flipcut.mincut.kargerStein;
 
+import flipcut.mincut.AbstractMultiCutGraph;
 import flipcut.mincut.bipartition.BasicCut;
 import flipcut.mincut.MultiCutGraph;
 import flipcut.mincut.UndirectedCutGraph;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * Created by fleisch on 15.04.15.
  */
-public class KargerSteinMultiCutGraph<V> implements MultiCutGraph<V>,UndirectedCutGraph<V> {
+public class KargerSteinMultiCutGraph<V> extends AbstractMultiCutGraph<V> implements MultiCutGraph<V>,UndirectedCutGraph<V> {
     private int nextEdgeColor = 0; // we nee this for uncolored version
 
     @Override

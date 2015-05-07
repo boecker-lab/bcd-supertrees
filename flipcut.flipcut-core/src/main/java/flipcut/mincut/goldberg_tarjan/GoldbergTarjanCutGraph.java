@@ -20,6 +20,7 @@
 
 package flipcut.mincut.goldberg_tarjan;
 
+import flipcut.mincut.AbstractSingelCutGraph;
 import flipcut.mincut.bipartition.BasicCut;
 import flipcut.mincut.DirectedCutGraph;
 import flipcut.mincut.CutGraph;
@@ -69,10 +70,10 @@ System.out.println(hp.getMinCutValue(1, 8));
 System.out.println(hp.getMinCut(1, 8));
 </code></pre>
  *
- * @param <T> the nodes type
+ * @param <V> the nodes type
  * @author Thasso Griebel (thasso.griebel@gmail.com)
  */
-public class GoldbergTarjanCutGraph<T> implements CutGraph<T>,DirectedCutGraph<T> {
+public class GoldbergTarjanCutGraph<V> extends AbstractSingelCutGraph<V> implements CutGraph<V>,DirectedCutGraph<V> {
      /**
      * The complete cut with score, source set and sink set
      */
@@ -104,7 +105,7 @@ public class GoldbergTarjanCutGraph<T> implements CutGraph<T>,DirectedCutGraph<T
      * @param sink the sink
      */
     @Override
-    public void calculate(T source, T sink) {
+    public void calculate(V source, V sink) {
         if(hipri == null){
             hipri = new CutGraphImpl(nodes.size(), edges);
             /*
@@ -126,7 +127,7 @@ public class GoldbergTarjanCutGraph<T> implements CutGraph<T>,DirectedCutGraph<T
         CutGraphImpl.Node s = nodes.get(source).node;
         CutGraphImpl.Node t = nodes.get(sink).node;
 
-        LinkedHashSet<T> sinkList = (LinkedHashSet<T>) hipri.mincut(s, t, false);
+        LinkedHashSet<V> sinkList = (LinkedHashSet<V>) hipri.mincut(s, t, false);
         this.cut = new BasicCut(sinkList,source,sink,hipri.getValue());
     }
 
@@ -137,7 +138,7 @@ public class GoldbergTarjanCutGraph<T> implements CutGraph<T>,DirectedCutGraph<T
 
 
 
-    public void addNode(T source) {
+    public void addNode(V source) {
         if(hipri != null) throw new RuntimeException("A computation was already started. You can not add new nodes or edges !");
         if (!nodes.containsKey(source)) {
             N node = new N();
@@ -145,7 +146,7 @@ public class GoldbergTarjanCutGraph<T> implements CutGraph<T>,DirectedCutGraph<T
         }
     }
 
-    public void addEdge(T source, T target, long capacity) {
+    public void addEdge(V source, V target, long capacity) {
         // add node checks if the nodes are already contained
         addNode(source);
         addNode(target);

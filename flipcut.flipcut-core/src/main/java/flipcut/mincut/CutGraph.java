@@ -13,11 +13,12 @@ public interface CutGraph<V> {
      *
      * @return cutValue the cut value for the cut between source and sink
      */
-    default long getMinCutValue(){
+    long getMinCutValue();
+    /*default long getMinCutValue(){
         if (getMinCut() == null)
             return -1;
         return getMinCut().minCutValue;
-    }
+    }*/
 
     /**
      * Returns the minimum cut.
