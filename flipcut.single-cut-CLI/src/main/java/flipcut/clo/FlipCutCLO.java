@@ -122,6 +122,9 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
     @Option(name="-I", aliases = "--scmIterations", usage="Number of iterations for randomized scm algorithm", hidden = true)
     public int scmiterations = 25;
 
+    @Option(name="-R", aliases = "--runtimeFile", usage="writes running time into File", hidden = true)
+    public Path runtimeFile = null;  //default value null
+
     @Option(name="-o", aliases = "--outputPath", usage="Output file" )
     public Path output = null;  //default value null
 

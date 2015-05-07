@@ -23,7 +23,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,6 +44,8 @@ public class BCDSupertrees {
 
 
     public static void main(String[] args) {
+        double runtime =  System.currentTimeMillis();
+
         INPUT_TYPE = AUTO;
         bcdCLI = new BCDCommandLineInterface();
         final CmdLineParser parser = new CmdLineParser(bcdCLI);
@@ -74,6 +79,7 @@ public class BCDSupertrees {
                 List<Tree> inputTrees;
                 Tree guideTree = null;
                 Tree suppportTree = null;
+                double scmRuntime = Double.NaN;
 
                 if (bcdCLI.inputSCMFile != null) {
                     if (!bcdCLI.inputSCMFile.isAbsolute())
@@ -82,14 +88,16 @@ public class BCDSupertrees {
                     guideTree = parseFileToTrees(bcdCLI.inputSCMFile, bcdCLI.inputType)[0];
                 } else if (bcdCLI.useSCM) { //scm tree option is hidden because should be activated
                     System.out.println("Calculating SCM Guide Tree...");
-                    long t =  System.currentTimeMillis();
+                    scmRuntime =  System.currentTimeMillis();
                     if (bcdCLI.scmMethod != FlipCutCLO.SCM.SUPPORT) {
                         guideTree = calculateSCM(TreeUtilsBasic.cloneTrees(TreeUtilsBasic.cloneTrees(inputTreesUntouched)), bcdCLI.scmMethod);
                     } else {
                         guideTree = calculateSCM(TreeUtilsBasic.cloneTrees(TreeUtilsBasic.cloneTrees(inputTreesUntouched)), FlipCutCLO.SCM.OVERLAP);
                         suppportTree = calculateSCMSupportTree(TreeUtilsBasic.cloneTrees(inputTreesUntouched));
                     }
-                    System.out.println("...DONE in " + (double)(System.currentTimeMillis() - t)/1000d + "s");
+
+                    scmRuntime = ((double)System.currentTimeMillis() - scmRuntime)/1000d;
+                    System.out.println("...SCM Guide Tree calculation DONE in " + scmRuntime + "s");
                     System.out.println(Newick.getStringFromTree(guideTree));
                 }
 
@@ -127,6 +135,19 @@ public class BCDSupertrees {
 
                 writeOutput(superTree);
 
+                runtime = ((double)System.currentTimeMillis() - runtime)/1000d;
+                if (!Double.isNaN(scmRuntime))
+                    System.out.println("...FlipCut runs in " + (runtime - scmRuntime) + "s");
+                System.out.println("...Supertree calculated in " + runtime + "s");
+                System.out.println(Newick.getStringFromTree(superTree));
+                Path f = bcdCLI.runtimeFile;
+                if (f != null){
+                    Files.write(f, (Double.toString(runtime) + "\n").getBytes());
+                    if (!Double.isNaN(scmRuntime)){
+                        Files.write(f, (Double.toString(scmRuntime) + "\n").getBytes(),StandardOpenOption.APPEND);
+                        Files.write(f, (Double.toString(runtime-scmRuntime)).getBytes(),StandardOpenOption.APPEND);
+                    }
+                }
             } else {
                 throw new CmdLineException(parser, "ERROR: No input file is given! See help text for information about correct usage.");
             }

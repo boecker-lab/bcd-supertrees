@@ -149,12 +149,16 @@ public class BCDSupertreesTest {
         toargs.add("-w");
         toargs.add("BOOTSTRAP_VALUES");
 
+        //timeFile
+        Path timeFile = tempDir.resolve("timeFile");
+        toargs.add("-R");
+        toargs.add(timeFile.toString());
+        System.out.println(timeFile);
 
         //add input file
         inputPath = Files.copy(inputPath, tempDir.resolve(inputPath.getFileName()));
         toargs.add(inputPath.toString());
         System.out.println(inputPath);
-
 
         String[] args =  new String[toargs.size()];
         args = toargs.toArray(args);
