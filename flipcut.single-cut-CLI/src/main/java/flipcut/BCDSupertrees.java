@@ -1,10 +1,7 @@
 package flipcut;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import epos.algo.consensus.nconsensus.NConsensus;
 import epos.model.tree.Tree;
-import epos.model.tree.TreeNode;
 import epos.model.tree.io.Newick;
 import epos.model.tree.io.SimpleNexus;
 import epos.model.tree.io.TreeFileUtils;
@@ -12,7 +9,6 @@ import epos.model.tree.treetools.ReductionModifier;
 import epos.model.tree.treetools.TreeUtilsBasic;
 import epos.model.tree.treetools.UnsupportedCladeReduction;
 import flipcut.clo.FlipCutCLO;
-import gnu.trove.map.hash.THashMap;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import scmAlgorithm.AbstractSCMAlgorithm;
@@ -28,7 +24,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static flipcut.clo.FlipCutCLO.FileType.*;
 
@@ -111,7 +109,8 @@ public class BCDSupertrees {
                     if (guideTree != null)
                        inputTrees.remove(inputTrees.size() - 1); //remove guide tree again from input list
                 } else {
-                    inputTrees = Arrays.asList(inputTreesUntouched);
+                    inputTrees = new ArrayList<>(inputTreesUntouched.length +1);
+                    inputTrees.addAll(Arrays.asList(inputTreesUntouched));
                     if (suppportTree != null)
                         inputTrees.add(suppportTree);
                 }

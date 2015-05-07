@@ -116,7 +116,7 @@ public class BCDSupertreesTest {
 
 
 
-    @Test
+    /*@Test
     public void testRootOptimization() throws IOException {
         final Path tempDir = getTmpDir();
         final List<String> toargs =  new LinkedList<>();
@@ -135,22 +135,34 @@ public class BCDSupertreesTest {
         BCDSupertrees.main(args);
 
     }
-
-   /* @Test
-    public void debugTest(){
+*/
+    @Test
+    public void debugTest() throws IOException {
         Path inputPath = Paths.get(getClass().getResource("/" + newickInput).getFile());
-        Tree[] trees = Newick.getTreeFromFile(inputPath.toFile());
-        for (Tree tree : trees) {
-            System.out.println("### new Tree ###");
-            List<TreeNode> l = new ArrayList<>();
-            for (TreeNode node : tree.getRoot().depthFirstIterator()) {
-                System.out.println(node);
-                l.add(node);
-            }
-            System.out.println();
-            System.out.println();
-        }
-    }*/
+        final Path tempDir = getTmpDir();
+        final List<String> toargs =  new LinkedList<>();
+
+        //set parameter
+
+        toargs.add("-S");
+        toargs.add("SUPPORT");
+        toargs.add("-w");
+        toargs.add("BOOTSTRAP_VALUES");
+
+
+        //add input file
+        inputPath = Files.copy(inputPath, tempDir.resolve(inputPath.getFileName()));
+        toargs.add(inputPath.toString());
+        System.out.println(inputPath);
+
+
+        String[] args =  new String[toargs.size()];
+        args = toargs.toArray(args);
+        System.out.println("Arguments:");
+        System.out.println(Arrays.toString(args));
+        BCDSupertrees.main(args);
+
+    }
 
 
 
