@@ -90,7 +90,7 @@ public class BCDSupertrees {
                     if (bcdCLI.scmMethod != FlipCutCLO.SCM.SUPPORT) {
                         guideTree = calculateSCM(TreeUtilsBasic.cloneTrees(TreeUtilsBasic.cloneTrees(inputTreesUntouched)), bcdCLI.scmMethod);
                     } else {
-                        guideTree = calculateSCM(TreeUtilsBasic.cloneTrees(TreeUtilsBasic.cloneTrees(inputTreesUntouched)), FlipCutCLO.SCM.OVERLAP);
+                        guideTree = calculateSCM(TreeUtilsBasic.cloneTrees(TreeUtilsBasic.cloneTrees(inputTreesUntouched)), FlipCutCLO.SCM.COLLISION);
                         suppportTree = calculateSCMSupportTree(TreeUtilsBasic.cloneTrees(inputTreesUntouched));
                     }
 
