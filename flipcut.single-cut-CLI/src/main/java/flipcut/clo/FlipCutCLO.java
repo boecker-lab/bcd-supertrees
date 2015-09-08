@@ -44,7 +44,7 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
 
     public static enum FileType {NEXUS,NEWICK,AUTO}
     public static enum Algorithm {BCD,FC}
-    public static enum SCM {DISABLED,OVERLAP,RESOLUTION,RANDOMIZED,SUPPORT}
+    public static enum SCM {DISABLED,OVERLAP,UNIQUE_TAXA, RESOLUTION,COLLISION,RANDOMIZED,SUPPORT}
     public static enum SuppportedWeights {UNIT_WEIGHT, TREE_WEIGHT, BRANCH_LENGTH, BOOTSTRAP_VALUES, LEVEL, BRANCH_AND_LEVEL, BOOTSTRAP_AND_LEVEL}
 
     protected final EnumMap<SuppportedWeights, FlipCutWeights.Weights> weightMapping = initWheightMapping();

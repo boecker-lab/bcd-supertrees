@@ -19,8 +19,6 @@ allprojects {
 
     group = 'de.unijena.bioinf'
 
-//    sourceCompatibility = 1.7
-
     repositories {
         mavenCentral()
 //        mavenLocal()

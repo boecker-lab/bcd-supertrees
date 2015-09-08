@@ -1,9 +1,9 @@
 package flipcut.mincut.kargerStein;
 
 import flipcut.mincut.AbstractMultiCutGraph;
-import flipcut.mincut.bipartition.BasicCut;
 import flipcut.mincut.MultiCutGraph;
 import flipcut.mincut.UndirectedCutGraph;
+import flipcut.mincut.bipartition.BasicCut;
 
 import java.util.List;
 
@@ -25,7 +25,6 @@ public class KargerSteinMultiCutGraph<V> extends AbstractMultiCutGraph<V> implem
 
     @Override
     public void addNode(V vertex) {
-
     }
 
     @Override

@@ -23,6 +23,8 @@ public abstract class CostComputer{
      * The accuracy used to go from double to long
      */
     public final static long ACCURACY = 100000000;
+    public final static double ZERO = Double.MIN_VALUE;
+
     public final static Set<FlipCutWeights.Weights> SUPPORTED_COST_TYPES = Collections.emptySet();
 
     protected final List<Tree> trees;
@@ -101,7 +103,6 @@ public abstract class CostComputer{
             try {
                 return Double.valueOf(node.getLabel());
             } catch (NumberFormatException e) {
-    //            e.printStackTrace(); //todo maybe remove!!!
                 return Double.NaN;
             }
         }

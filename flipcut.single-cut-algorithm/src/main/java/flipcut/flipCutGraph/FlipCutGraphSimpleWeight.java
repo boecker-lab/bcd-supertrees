@@ -92,7 +92,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                 if (character.getLabel() != null) {
                     try {
                         double bootstrap = Double.valueOf(character.getLabel());
-                        if (bootstrap < bootstrapThreshold) {
+                        if (bootstrap <= bootstrapThreshold) {
                             bsIngnoredChars++;
                             continue;
                         }

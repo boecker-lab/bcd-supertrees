@@ -139,9 +139,9 @@ public class WeightCostComputer extends SimpleCosts {
 
             long w;
             if (weights == FlipCutWeights.Weights.TREE_WEIGHT){
-                w = Math.round(treeWeight * ACCURACY);
+                w = Math.round(Math.max(ZERO,treeWeight) * ACCURACY);
             }else{
-                w = Math.round(ACCURACY * edgeWeight * nodeLevel * treeWeight);
+                w = Math.round(ACCURACY * Math.max(ZERO,edgeWeight) * Math.max(ZERO,nodeLevel) * Math.max(ZERO,treeWeight));
             }
 
             return w;

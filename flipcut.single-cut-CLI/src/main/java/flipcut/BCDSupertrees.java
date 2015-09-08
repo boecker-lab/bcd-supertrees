@@ -14,9 +14,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import scmAlgorithm.AbstractSCMAlgorithm;
 import scmAlgorithm.GreedySCMAlgorithm;
 import scmAlgorithm.RandomizedSCMAlgorithm;
-import scmAlgorithm.treeScorer.ConsensusResolutionScorer;
-import scmAlgorithm.treeScorer.OverlapScorer;
-import scmAlgorithm.treeScorer.TreeScorer;
+import scmAlgorithm.treeScorer.*;
 import scmAlgorithm.treeSelector.GreedyTreeSelector;
 
 import java.io.File;
@@ -339,6 +337,12 @@ public class BCDSupertrees {
             case OVERLAP:
                 algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new OverlapScorer(TreeScorer.ConsensusMethods.STRICT),inputTrees));
                 break;
+            case UNIQUE_TAXA:
+                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new UniqueTaxaNumberScorer(TreeScorer.ConsensusMethods.STRICT),inputTrees));
+                break;
+            case COLLISION:
+                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new CollisionLostCladesNumberScorer(TreeScorer.ConsensusMethods.STRICT),inputTrees));
+                break;
             case RESOLUTION:
                 algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new ConsensusResolutionScorer(TreeScorer.ConsensusMethods.STRICT),inputTrees));
                 break;
@@ -346,7 +350,8 @@ public class BCDSupertrees {
                 algo = new RandomizedSCMAlgorithm(bcdCLI.scmiterations,inputTrees,new OverlapScorer(TreeScorer.ConsensusMethods.STRICT));
                 break;
             default:
-                return null;
+                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new CollisionLostCladesNumberScorer(TreeScorer.ConsensusMethods.STRICT),inputTrees));
+                break;
         }
         return algo.getSupertree();
     }
