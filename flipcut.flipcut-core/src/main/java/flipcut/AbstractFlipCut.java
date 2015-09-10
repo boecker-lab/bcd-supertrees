@@ -8,6 +8,8 @@ import flipcut.flipCutGraph.AbstractFlipCutNode;
 import org.apache.log4j.Logger;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -18,6 +20,8 @@ import java.util.List;
 public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>> {
     protected static final boolean DEBUG = false;
     //postprocess that deletes clade of the supertree without support from the input trees
+    private ExecutorService GOBAL_EXECUTER;
+    protected int numberOfThreads = 0;
 
     /**
      * Use edge weights
@@ -38,7 +42,7 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
     /**
      * The Graph actual working on
      */
-    protected T currentGraph;
+    protected T initialGraph;
 
     protected AbstractFlipCut() {
         this(Logger.getLogger(AbstractFlipCut.class));
@@ -90,8 +94,7 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
 
     public void setInputTrees(List<Tree> inputTrees, Tree scaffoldTree) {
         final CostComputer costs = initCosts(inputTrees, scaffoldTree);
-
-        currentGraph = createInitGraph(costs);
+        initialGraph = createInitGraph(costs);
     }
 
     public void setBootstrapThreshold(int bootstrapThreshold) {
@@ -102,6 +105,15 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
         return bootstrapThreshold;
     }
 
+
+    public void setNumberOfThreads(int numberOfThreads) {
+        this.numberOfThreads = numberOfThreads;
+    }
+
+    public int getNumberOfThreads() {
+        return numberOfThreads;
+    }
+
     //abstract stuff!
     public abstract List<Tree> getSupertrees();
 
@@ -109,5 +121,14 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
 
     protected abstract CostComputer initCosts(List<Tree> inputTrees, Tree scaffoldTree);
 
+    protected ExecutorService getExecuter() {
+        if (numberOfThreads <= 1) {
+            GOBAL_EXECUTER = null;
+        } else {
+            if (GOBAL_EXECUTER == null)
+                GOBAL_EXECUTER = Executors.newWorkStealingPool(numberOfThreads);
+        }
+        return GOBAL_EXECUTER;
+    }
 
 }

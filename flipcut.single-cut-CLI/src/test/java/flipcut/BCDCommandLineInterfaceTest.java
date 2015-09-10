@@ -26,37 +26,36 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
         String[] test_string = new String[]{"-a", Algorithm.BCD.name(), requiredInputPath};
         parser.parseArgument(test_string);
         //assert
-        assertEquals(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW, getAlgorithm().cutter.getType());
+        assertEquals(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW, algorithm.getCutterType());
 
         test_string = new String[]{"-a", Algorithm.FC.name(), requiredInputPath};
         parser.parseArgument(test_string);
         //assert
-        assertEquals(CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG, getAlgorithm().cutter.getType());
+        assertEquals(CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG, algorithm.getCutterType());
     }
 
     @Test
     public void test_set_weights_unit_cost() throws Exception {           //TODO: Test every weight? --> not for the internal notation but for the official see below
         String[] test_String = {"-w", "UNIT_WEIGHT", requiredInputPath};
-        final BCDCommandLineInterface test_interface = new BCDCommandLineInterface();
-        final CmdLineParser parser = new CmdLineParser(test_interface);
+
+        final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
-        test_interface.initWheightMapping();
+        initWheightMapping();
 
         //assert
-        assertEquals("UNIT_COST", test_interface.getAlgorithm().weights.name());
+        assertEquals("UNIT_COST", algorithm.weights.name());
     }
 
     @Test
     public void test_supported_weights() throws Exception {           //TODO: Test every weight? --> you can iterate over the common weights
-        final BCDCommandLineInterface test_interface = new BCDCommandLineInterface();
-        final CmdLineParser parser = new CmdLineParser(test_interface);
+        final CmdLineParser parser = new CmdLineParser(this);
 
         for (FlipCutCLO.SuppportedWeights weight : SuppportedWeights.values()) {
             String[] test_String = {"-w", weight.name(), requiredInputPath};
             parser.parseArgument(test_String);
 
             //assert
-            assertEquals(weightMapping.get(weight), test_interface.getAlgorithm().weights);
+            assertEquals(weightMapping.get(weight), algorithm.weights);
 
         }
     }
@@ -69,7 +68,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
         //assert
 
-        assertEquals(33, getAlgorithm().bootstrapThreshold);
+        assertEquals(33, algorithm.bootstrapThreshold);
 
     }
 

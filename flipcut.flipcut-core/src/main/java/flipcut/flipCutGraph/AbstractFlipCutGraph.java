@@ -22,7 +22,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     /**
      * Turn on/off guide tree based taxa merging
      */
-    public static final boolean SCAFF_TAXA_MERGE = true;
+    public static final boolean SCAFF_TAXA_MERGE = false;
     /**
      * Mapping for guide tree based taxa merging
      */

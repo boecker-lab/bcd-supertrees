@@ -40,16 +40,16 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
 
         List<Tree> supertrees = new ArrayList<>(numberOfCuts);
 
-        if (currentGraph != null) {
+        if (initialGraph != null) {
             long calctime = System.currentTimeMillis();
             System.out.println("Calculating Partitions...");
 
-            final int numTaxa = currentGraph.taxa.size();
+            final int numTaxa = initialGraph.taxa.size();
 
             //initial step to generate
 
-            partitions =  new Partition(0, currentGraph).getKBestNew(numberOfCuts, Long.MAX_VALUE);
-            currentGraph = null; //get rid of these large graph
+            partitions =  new Partition(0, initialGraph).getKBestNew(numberOfCuts, Long.MAX_VALUE);
+            initialGraph = null; //get rid of these large graph
 
             int partitionningSteps = 0; //DEBUG variable
             if (DEBUG) {

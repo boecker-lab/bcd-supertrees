@@ -28,6 +28,10 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 
 import static flipcut.clo.FlipCutCLO.FileType.*;
 
@@ -36,8 +40,7 @@ import static flipcut.clo.FlipCutCLO.FileType.*;
  */
 public class BCDSupertrees {
     private static BCDCommandLineInterface bcdCLI;
-
-
+    
     private static FlipCutCLO.FileType INPUT_TYPE;
 
 
@@ -50,7 +53,7 @@ public class BCDSupertrees {
 
         // if you have a wider console, you could increase the value;
         // here 80 is also the default
-        parser.setUsageWidth(80);
+//        parser.setUsageWidth(80);
 
         try {
             // parse the arguments.
@@ -167,132 +170,7 @@ public class BCDSupertrees {
             System.err.println();
             bcdCLI.printHelp(parser, System.out);
         }
-
-
     }
-
-//    private static void optimizeRooting(Tree inputTrees[], Tree guideTree) {
-//        Set<String> all =  new HashSet<>(guideTree.vertexCount());
-//        Map<TreeNode,Set<String>> guideLCAToLabels = new THashMap<>(guideTree.vertexCount());
-//        Map<String,TreeNode> guideLabelToLeaf =  new HashMap<>(guideTree.vertexCount());
-//
-//        for (TreeNode node : guideTree.getRoot().depthFirstIterator()) {
-//            if (!node.equals(guideTree.getRoot())) {
-//                TreeNode p = node.getParent();
-//
-//
-//                if (!guideLCAToLabels.containsKey(p))
-//                    guideLCAToLabels.put(p,new HashSet<String>());
-//
-//                if (node.isLeaf()){
-//                    String l =  node.getLabel();
-//                    guideLCAToLabels.get(p).add(l);
-//                    guideLabelToLeaf.put(l, node);
-//                    all.add(l);
-//
-//                }else{
-//                    guideLCAToLabels.get(p).addAll(guideLCAToLabels.get(node));
-//
-//                }
-//            }
-//        }
-//
-//        for (Tree tree : inputTrees) {
-//            if (tree.getRoot().childCount() > 2){ //check if true is not already rooted
-//                Set<String> allLeafLabels = TreeUtilsBasic.getLeafLabels(tree.getRoot());
-//                List<TreeNode> allGuideLeafes = new ArrayList<>(tree.vertexCount());
-//
-//                BiMap<TreeNode,Set<String>> lCAToLabels = HashBiMap.create(tree.vertexCount());
-//                BiMap<TreeNode,Set<Set<String>>> nodeToSplits = HashBiMap.create(tree.vertexCount());
-//                Map<TreeNode,Set<String>> nodeToParentSplit =  new HashMap<>(tree.vertexCount());
-//
-//                for (TreeNode node : tree.getRoot().depthFirstIterator()) {
-//                    if (!node.equals(tree.getRoot())) {
-//                        TreeNode p = node.getParent();
-//
-//                        if (!nodeToParentSplit.containsKey(p))
-//                            nodeToParentSplit.put(p,new HashSet<String>());
-//                        if (!lCAToLabels.containsKey(p))
-//                            lCAToLabels.put(p,new HashSet<String>());
-//                        if (!nodeToSplits.containsKey(p))
-//                            nodeToSplits.put(p,new HashSet<Set<String>>());
-//
-//                        if (node.isLeaf()){
-//                            String l =  node.getLabel();
-//                            lCAToLabels.get(p).add(l);
-//                            allGuideLeafes.add(guideLabelToLeaf.get(l));
-//
-//                            Set<String> s1 =  new HashSet<>(1);
-//                            s1.add(l);
-//                            nodeToSplits.get(p).add(s1);
-//
-//                            Set<String> s2 =  new HashSet<>(allLeafLabels);
-//                            s2.remove(l);
-//                            nodeToSplits.get(p).add(s2);
-//
-//                            //add s1 to parentsplit
-//                            nodeToParentSplit.get(p).addAll(s1);
-//
-//                        }else{
-//                            lCAToLabels.get(p).addAll(lCAToLabels.get(node));
-//
-//                            Set<String> s1 =  new HashSet<>(lCAToLabels.get(node));
-//                            nodeToSplits.get(p).add(s1);
-//
-//                            Set<String> s2 =  new HashSet<>(allLeafLabels);
-//                            s2.removeAll(s1);
-//                            nodeToSplits.get(p).add(s2);
-//
-//                            //add s1 to parentsplit
-//                            nodeToParentSplit.get(p).addAll(s1);
-//                            //add parent split off current node dot bimap
-//                            Set<String> parentSplit =  nodeToParentSplit.get(node);
-//                            if (parentSplit.equals(allLeafLabels))
-//                                System.out.println("Something goes wrong");
-//                            Set<String> parentSplit2 =  new HashSet<>(allLeafLabels);
-//                            parentSplit2.removeAll(parentSplit);
-//                            nodeToSplits.get(node).add(parentSplit);
-//                            nodeToSplits.get(node).add(parentSplit2);
-//
-//                        }
-//                    }
-//                }
-//
-//                //build lca splits and search it in tree
-//                TreeNode guideLCA =  guideTree.findLeastCommonAncestor(allGuideLeafes);
-//                Set<Set<String>> splits = new HashSet<>(guideLCA.childCount());
-////                Set<String> parentSplit = new HashSet<>(allGuideLeafes.size());
-//
-//                for (TreeNode child : guideLCA.children()) {
-//                    Set<String> s1;
-//                    Set<String> s2;
-//                    if (child.isInnerNode()) {
-//                        s1 = new HashSet<>(guideLCAToLabels.get(child));
-//                    } else {
-//                        s1 = new HashSet<>(1);
-//                        s1.add(child.getLabel());
-//                    }
-//                    s1.retainAll(allLeafLabels);
-//
-//                    if (!s1.isEmpty()) {
-//                        splits.add(s1);
-////                        parentSplit.addAll(s1);
-//
-//                        s2 = new HashSet<>(allLeafLabels);
-//                        s2.removeAll(s1);
-//                        splits.add(s2);
-//                    }
-//                }
-//
-//                TreeNode lca = nodeToSplits.inverse().get(splits);
-//                if (lca != null){
-//                    TreeUtilsBasic.moveFakeRoot(tree,lca);
-//                }else{
-//                    System.err.println("NOT possible with strict consensus guide tree");
-//                }
-//            }
-//        }
-//    }
 
     private static Tree[] parseFileToTrees(Path path) throws IOException {
         return parseFileToTrees(path, AUTO);

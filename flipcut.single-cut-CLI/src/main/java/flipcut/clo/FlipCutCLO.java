@@ -30,9 +30,6 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
 
     protected final A algorithm = initAlgorithm();
     protected abstract A initAlgorithm();
-    public A getAlgorithm() {
-        return algorithm;
-    }
 
     // receives other command line parameters than options
 
@@ -155,6 +152,19 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
 //    public File workingPath = new File(System.getProperty("user.dir"));
     public Path workingPath = Paths.get(System.getProperty("user.dir"));
 
+    @Option(name = "-t", aliases = "--threads", usage = "Set a positive number of Threads that should be used", forbids = "-T")
+    public void setNumberOfThreads(int numberOfThreads){
+            algorithm.setNumberOfThreads(numberOfThreads);
+    }
+
+    @Option(name = "-T", aliases = "--singleThreaded", usage = "starts in single threaded mode, equal to \"-t 1\"", forbids = "-t")
+    public void singleThreaded(boolean single){
+        if (single) {
+            algorithm.setNumberOfThreads(1);
+        }else{
+            algorithm.setNumberOfThreads(0);
+        }
+    }
 
     //help option
     @Option(name = "-h", aliases = "--help", usage = "usage message", help = true, forbids = "-H")
