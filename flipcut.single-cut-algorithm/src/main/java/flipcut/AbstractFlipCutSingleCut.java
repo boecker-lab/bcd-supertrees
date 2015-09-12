@@ -2,7 +2,6 @@ package flipcut;
 
 import epos.model.tree.Tree;
 import epos.model.tree.TreeNode;
-import epos.model.tree.treetools.TreeUtilsBasic;
 import flipcut.flipCutGraph.AbstractFlipCutGraph;
 import flipcut.flipCutGraph.AbstractFlipCutNode;
 import flipcut.flipCutGraph.CutGraphCutter;
@@ -11,7 +10,6 @@ import org.apache.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Stream;
 
 /**
  * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -23,10 +21,11 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
 
     private ExecutorService executor = null;
     private Queue<Future<Queue<TreeNode>>> results = new ConcurrentLinkedQueue<>();
+    private Queue<C> cutterQueue;
 
     public DebugInfo debugInfo;
     private long globalWeight;
-    private SingleCutGraphCutter.CutGraphTypes type;
+    protected C.CutGraphTypes type;
 
     protected AbstractFlipCutSingleCut() {
         super();
@@ -50,8 +49,6 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
 
     public Tree getSupertree() {
         if (initialGraph != null) {
-
-
             if (DEBUG) {
                 debugInfo = new DebugInfo();
                 debugInfo.overallCalculationTime = System.currentTimeMillis();
@@ -92,108 +89,15 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
         }
     }
 
-
-    private Tree computeSTreeMultiThreadedStreams() {
-        System.out.println("testing streams...");
-        final Tree supertree = new Tree();
-
-        List<T> graphs = Collections.synchronizedList(new LinkedList<>());
-        graphs.add(initialGraph);
-        supertree.addVertex(initialGraph.treeNode);
-        supertree.setRoot(initialGraph.treeNode);
-
-        getLog().info("Computing Supertree during iterative graph splitting (MultiThreaded)");
-
-        while (graphs.size() > 0) {
-            Stream<T> graphStream = graphs.parallelStream();
-
-            final List<T> tmpGraphs = Collections.synchronizedList(new LinkedList<T>());
-            graphStream.forEach(currentGraph -> {
-                Collection<T> nuGraphs = splitGraph(currentGraph);
-                if (nuGraphs != null) {
-                    for (T graph : nuGraphs) {
-                        // add the node
-                        supertree.addVertex(graph.treeNode);
-                        if (graph.parentNode != null)
-                            supertree.addEdge(graph.parentNode, graph.treeNode);
-                        tmpGraphs.add(graph);
-                    }
-                }
-            });
-
-            graphs = tmpGraphs;
-        }
-
-        return supertree;
-    }
-
-    private Collection<T> splitGraph(T initialGraph) {
-        C cutter = createCutter(type);
-
-        // init the graph (remove semi universals)
-        initialGraph.deleteSemiUniversals();
-
-        // check if we have just one taxon left
-        if (initialGraph.taxa.size() == 1) {
-            // the current node becomes the leaf
-            initialGraph.treeNode.setLabel((initialGraph.taxa.iterator().next()).name);
-            return null;
-        } else {
-            Set<T> outputGraphs = new HashSet<>(5);
-            // get components
-            List<List<N>> components = initialGraph.getComponents();
-            if (components.size() == 1) {
-                // just one component, we have to cut
-                cutter.clear();
-                List<T> componentGraphs = cutter.cut(initialGraph);
-                //mincut value in graph needed?
-                if (CALCULATE_SCORE) globalWeight += cutter.getMinCutValue(initialGraph);
-
-                //Cut graph components
-                for (T componentGraph : componentGraphs) {
-                    if (initialGraph.SCAFF_TAXA_MERGE) {
-                        componentGraph.insertScaffPartData(initialGraph, null);
-                    }
-                    if (initialGraph.GLOBAL_CHARACTER_MERGE)
-                        componentGraph.insertCharacterMapping(initialGraph, null);
-                    outputGraphs.add(componentGraph);
-                }
-
-
-            } else {
-                // create the component graphs
-                boolean checkEdges = (getCutterType() == CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
-                for (List<N> component : components) {
-                    T g = createGraph(component, initialGraph.treeNode, checkEdges);
-                    //actualize scaffold partition data
-                    if (initialGraph.SCAFF_TAXA_MERGE) {
-                        g.insertScaffPartData(initialGraph, null);
-                    }
-                    if (initialGraph.GLOBAL_CHARACTER_MERGE)
-                        g.insertCharacterMapping(initialGraph, null);
-                    outputGraphs.add(g);
-                    ;
-                }
-            }
-            return outputGraphs;
-        }
-    }
-
-
     private Tree computeIterativeMultiThreaded() throws ExecutionException, InterruptedException {
         getLog().info("Computing Supertree during iterative graph splitting (SingleThreaded)");
         Tree supertree = null;
-
-        int cores = Runtime.getRuntime().availableProcessors();
-        executor = Executors.newFixedThreadPool(cores);
-//        executor = Executors.newCachedThreadPool();
-//        executor = Executors.newWorkStealingPool();
-
 
         supertree = new Tree();
         supertree.addVertex(initialGraph.treeNode);
         supertree.setRoot(initialGraph.treeNode);
 
+        cutterQueue = new ConcurrentLinkedQueue<>();
         results.offer(executor.submit(new GraphSplitterIterative(initialGraph)));
 
         //building supertree during waiting for threads
@@ -214,7 +118,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
     }
 
     private Tree computeSTreeSingleThreaded() {
-        final C cutter = createCutter(type);
+        final C cutter = createCutter();
         final Tree supertree = new Tree();
 
         Queue<T> graphs = new LinkedList<T>();
@@ -300,63 +204,9 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
         return supertree;
     }
 
-    private Tree computeSTreeMultiThreaded() {
-        Tree supertree = null;
-        try {
-            System.out.println("Starting iterative graph splitting (MultiThreaded)...");
-            GraphSplitterRecursive rootTask = new GraphSplitterRecursive(initialGraph);
-            final Collection<Object> treeStructure = executor.submit(rootTask).get();
-            System.out.println("...DONE!");
-            System.out.println("Building Supertree from partitions...");
-            supertree = new Tree();
-            createSupertree(supertree, treeStructure);
-            System.out.println("...DONE!");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        return supertree;
-    }
-
-
-    private TreeNode createSupertree(final Tree tree, Collection<Object> treeStructure) {
-        if (treeStructure.size() > 1) {
-            TreeNode localRoot = new TreeNode();
-            tree.addVertex(localRoot);
-            if (tree.vertexCount() == 1)
-                tree.setRoot(localRoot);
-            for (Object o : treeStructure) {
-                if (o instanceof TreeNode) {
-                    TreeNode node = (TreeNode) o;
-                    tree.addVertex(node);
-                    tree.addEdge(localRoot, node);
-                } else {
-                    TreeNode child = createSupertree(tree, (Collection<Object>) o);
-                    tree.addEdge(localRoot, child);
-                }
-            }
-            return localRoot;
-        } else {
-            return (TreeNode) treeStructure.iterator().next();
-        }
-    }
-
-    private Map<TreeNode, Set<String>> getNodeToChildrenMap(final Tree tree) {
-        Map<TreeNode, Set<String>> childrenSets = new HashMap<>();
-        for (TreeNode node : tree.vertices()) {
-            if (node.isInnerNode()) {
-                if (node != tree.getRoot()) {
-                    childrenSets.put(node, TreeUtilsBasic.getLeafLabels(node));
-                }
-            }
-        }
-        return childrenSets;
-    }
-
     protected abstract T createGraph(List<N> component, TreeNode treeNode, final boolean checkEdges);
 
-    protected abstract C createCutter(CutGraphCutter.CutGraphTypes type);
+    protected abstract C createCutter();
 
     public void setCutter(CutGraphCutter.CutGraphTypes type) {
         this.type = type;
@@ -366,6 +216,74 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
         return type;
     }
 
+
+    private class GraphSplitterIterative implements Callable<Queue<TreeNode>> {
+        final T currentGraph;
+
+        GraphSplitterIterative(final T currentGraph) {
+            this.currentGraph = currentGraph;
+        }
+
+        @Override
+        public Queue<TreeNode> call() throws Exception {
+
+            // init the graph (remove semi universals)
+            currentGraph.deleteSemiUniversals();
+
+            // check if we have just one taxon left
+            if (currentGraph.taxa.size() == 1) {
+                // the current node becomes the leaf
+                currentGraph.treeNode.setLabel((currentGraph.taxa.iterator().next()).name);
+                return null;
+            } else {
+
+
+                Queue<TreeNode> nodes = new LinkedList<>();
+                nodes.offer(currentGraph.treeNode);
+                List<GraphSplitterIterative> outputGraphs = new LinkedList<>();
+                // get components
+                List<List<N>> components = currentGraph.getComponents();
+                if (components.size() == 1) {
+                    // just one component, we have to cut
+                    C cutter = cutterQueue.poll();
+                    if (cutter ==null)
+                        cutter = createCutter();
+
+                    List<T> componentGraphs = cutter.cut(currentGraph);
+                    //mincut value in graph needed?
+                    if (CALCULATE_SCORE) globalWeight += cutter.getMinCutValue(currentGraph);
+
+                    //Cut graph components
+                    for (T componentGraph : componentGraphs) {
+                        if (currentGraph.SCAFF_TAXA_MERGE) {
+                            componentGraph.insertScaffPartData(currentGraph, null);
+                        }
+                        if (currentGraph.GLOBAL_CHARACTER_MERGE)
+                            componentGraph.insertCharacterMapping(currentGraph, null);
+                        nodes.add(componentGraph.treeNode);
+                        results.offer(executor.submit(new GraphSplitterIterative(componentGraph)));
+                    }
+                    cutter.clear();
+                    cutterQueue.offer(cutter);
+                } else {
+                    // create the component graphs
+                    boolean checkEdges = (getCutterType() == CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
+                    for (List<N> component : components) {
+                        T g = createGraph(component, currentGraph.treeNode, checkEdges);
+                        //actualize scaffold partition data
+                        if (currentGraph.SCAFF_TAXA_MERGE) {
+                            g.insertScaffPartData(currentGraph, null);
+                        }
+                        if (currentGraph.GLOBAL_CHARACTER_MERGE)
+                            g.insertCharacterMapping(currentGraph, null);
+                        nodes.add(g.treeNode);
+                        results.offer(executor.submit(new GraphSplitterIterative(g)));
+                    }
+                }
+                return nodes;
+            }
+        }
+    }
 
     public class DebugInfo {
         double currentStartTime;
@@ -485,146 +403,6 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
         }
     }
 
-    private class GraphSplitterRecursive implements Callable<Collection<Object>> {
-        final T currentGraph;
-
-        GraphSplitterRecursive(final T currentGraph) {
-            this.currentGraph = currentGraph;
-        }
-
-        @Override
-        public Collection<Object> call() throws Exception {
-            // init the graph (remove semi universals)
-            currentGraph.deleteSemiUniversals();
-            // check if we have just one taxon left
-            final Collection<Object> childrenNodes = new HashSet<>();
 
 
-            if (currentGraph.taxa.size() == 1) {
-                // the current node becomes the leaf
-                currentGraph.treeNode.setLabel((currentGraph.taxa.iterator().next()).name);
-                childrenNodes.add(currentGraph.treeNode);
-                // check if we have just two taxa left --> cut is trivial
-            } else if (currentGraph.taxa.size() == 2) {
-                for (N taxon : currentGraph.taxa) {
-                    TreeNode t = new TreeNode(taxon.name);
-                    childrenNodes.add(t);
-                }
-            } else {
-                final List<GraphSplitterRecursive> toSubmit = new LinkedList<>();
-                // get components
-                List<List<N>> components = currentGraph.getComponents();
-                if (components.size() == 1) {
-                    // just one component, we have to cut
-//                    cutter.clear();
-                    C cutter = createCutter(getCutterType());
-                    List<T> componentGraphs = cutter.cut(currentGraph);
-                    //mincut value in graph needed?
-                    if (CALCULATE_SCORE) globalWeight += cutter.getMinCutValue(currentGraph);
-
-                    //Cut graph components
-                    for (T componentGraph : componentGraphs) {
-                        if (currentGraph.SCAFF_TAXA_MERGE) {
-                            componentGraph.insertScaffPartData(currentGraph, null);
-                        }
-                        if (currentGraph.GLOBAL_CHARACTER_MERGE)
-                            componentGraph.insertCharacterMapping(currentGraph, null);
-                        //graphs.offer(componentGraph);
-                        toSubmit.add(new GraphSplitterRecursive(componentGraph));
-                    }
-                } else {
-
-                    // create the component graphs
-                    boolean checkEdges = (getCutterType() == CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
-                    for (List<N> component : components) {
-                        T g = createGraph(component, currentGraph.treeNode, checkEdges);
-                        //actualize scaffold partition data
-                        if (currentGraph.SCAFF_TAXA_MERGE) {
-                            g.insertScaffPartData(currentGraph, null);
-                        }
-                        if (currentGraph.GLOBAL_CHARACTER_MERGE)
-                            g.insertCharacterMapping(currentGraph, null);
-
-                        toSubmit.add(new GraphSplitterRecursive(g));
-                    }
-                }
-
-                //submitting subtasks
-                final List<Future<Collection<Object>>> splitTasks = new LinkedList<>();
-                for (GraphSplitterRecursive graphSplitter : toSubmit) {
-                    splitTasks.add(executor.submit(graphSplitter));
-                }
-                //waiting until sub tasks are finished
-                for (Future<Collection<Object>> splitTask : splitTasks) {
-                    childrenNodes.add(splitTask.get());
-                }
-            }
-
-            return childrenNodes;
-        }
-    }
-
-
-    private class GraphSplitterIterative implements Callable<Queue<TreeNode>> {
-        final T currentGraph;
-
-        GraphSplitterIterative(final T currentGraph) {
-            this.currentGraph = currentGraph;
-        }
-
-        @Override
-        public Queue<TreeNode> call() throws Exception {
-
-            // init the graph (remove semi universals)
-            currentGraph.deleteSemiUniversals();
-
-            // check if we have just one taxon left
-            if (currentGraph.taxa.size() == 1) {
-                // the current node becomes the leaf
-                currentGraph.treeNode.setLabel((currentGraph.taxa.iterator().next()).name);
-                return null;
-            } else {
-                C cutter = createCutter(type);//todo get cutter from cutter pool
-
-                Queue<TreeNode> nodes = new LinkedList<>();
-                nodes.offer(currentGraph.treeNode);
-                List<GraphSplitterIterative> outputGraphs = new LinkedList<>();
-                // get components
-                List<List<N>> components = currentGraph.getComponents();
-                if (components.size() == 1) {
-                    // just one component, we have to cut
-                    cutter.clear();
-                    List<T> componentGraphs = cutter.cut(currentGraph);
-                    //mincut value in graph needed?
-                    if (CALCULATE_SCORE) globalWeight += cutter.getMinCutValue(currentGraph);
-
-                    //Cut graph components
-                    for (T componentGraph : componentGraphs) {
-                        if (currentGraph.SCAFF_TAXA_MERGE) {
-                            componentGraph.insertScaffPartData(currentGraph, null);
-                        }
-                        if (currentGraph.GLOBAL_CHARACTER_MERGE)
-                            componentGraph.insertCharacterMapping(currentGraph, null);
-                        nodes.add(componentGraph.treeNode);
-                        results.offer(executor.submit(new GraphSplitterIterative(componentGraph)));
-                    }
-                } else {
-                    // create the component graphs
-                    boolean checkEdges = (getCutterType() == CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
-                    for (List<N> component : components) {
-                        T g = createGraph(component, currentGraph.treeNode, checkEdges);
-                        //actualize scaffold partition data
-                        if (currentGraph.SCAFF_TAXA_MERGE) {
-                            g.insertScaffPartData(currentGraph, null);
-                        }
-                        if (currentGraph.GLOBAL_CHARACTER_MERGE)
-                            g.insertCharacterMapping(currentGraph, null);
-                        nodes.add(g.treeNode);
-                        results.offer(executor.submit(new GraphSplitterIterative(g)));
-                    }
-                }
-                return nodes;
-            }
-        }
-    }
 }

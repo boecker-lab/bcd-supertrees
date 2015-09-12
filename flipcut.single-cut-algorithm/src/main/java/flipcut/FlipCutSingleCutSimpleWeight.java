@@ -43,7 +43,7 @@ public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipC
     }
 
     @Override
-    protected SingleCutGraphCutter createCutter(CutGraphCutter.CutGraphTypes type) {
+    protected SingleCutGraphCutter createCutter() {
         return new SingleCutGraphCutter(type);
     }
 
