@@ -19,8 +19,9 @@ import java.util.concurrent.Executors;
  */
 public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>> {
     protected static final boolean DEBUG = false;
-    //postprocess that deletes clade of the supertree without support from the input trees
-    private ExecutorService GOBAL_EXECUTER;
+    /**
+     * number of thread that should be used 0 -> automatic
+     */
     protected int numberOfThreads = 0;
 
     /**
@@ -120,15 +121,4 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
     protected abstract T createInitGraph(CostComputer costsComputer);
 
     protected abstract CostComputer initCosts(List<Tree> inputTrees, Tree scaffoldTree);
-
-    protected ExecutorService getExecuter() {
-        if (numberOfThreads <= 1) {
-            GOBAL_EXECUTER = null;
-        } else {
-            if (GOBAL_EXECUTER == null)
-                GOBAL_EXECUTER = Executors.newWorkStealingPool(numberOfThreads);
-        }
-        return GOBAL_EXECUTER;
-    }
-
 }

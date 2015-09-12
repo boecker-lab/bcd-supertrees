@@ -1,10 +1,13 @@
 package flipcut.flipCutGraph;
 
+import EDU.oswego.cs.dl.util.concurrent.SyncSet;
 import epos.model.tree.Tree;
 import epos.model.tree.TreeNode;
 import flipcut.costComputer.CostComputer;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -42,15 +45,20 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         System.out.println("Creating intitial FC graph...");
         List<Tree> inputTrees = new ArrayList<>(costs.getTrees());
         Tree scaff = costs.getScaffoldTree();
-        if (SCAFF_TAXA_MERGE) {
-            charToTreeNode = new HashMap<>();
-            treeNodeToChar = new HashMap<>();
-            activePartitions = new HashSet<>();
+        if (SCAFF_TAXA_MERGE ) {
+            final int size;
+            if (scaff != null)
+                size = scaff.vertexCount() - scaff.getNumTaxa();
+            else
+                size = 0;
+            charToTreeNode = new ConcurrentHashMap<>(size);
+            treeNodeToChar = new ConcurrentHashMap<>(size);
+            activePartitions = Collections.newSetFromMap(new ConcurrentHashMap<>(size));
         }
 
         if (GLOBAL_CHARACTER_MERGE) {
-            characterToDummy = new HashMap<>();
-            dummyToCharacters = new HashMap<>();
+            characterToDummy = new ConcurrentHashMap<>();//todo size estimation?
+            dummyToCharacters = new ConcurrentHashMap<>();//todo size estimation?
         }
 
         Map<String, FlipCutNodeSimpleWeight> taxa = new HashMap<String, FlipCutNodeSimpleWeight>();
@@ -141,8 +149,8 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                         if (dummy == null) {
                             dummy = new FlipCutNodeSimpleWeight(c.edges);
                             edgeSetToDummy.put(dummy.edges, dummy);
-                            dummyToCharacters.put(dummy, new HashSet<FlipCutNodeSimpleWeight>());
-                            dummyToCharacters.put(dummy.clone, new HashSet<FlipCutNodeSimpleWeight>());
+                            dummyToCharacters.put(dummy, Collections.newSetFromMap(new ConcurrentHashMap()));
+                            dummyToCharacters.put(dummy.clone, Collections.newSetFromMap(new ConcurrentHashMap()));
                         }
                         addCharacterToDummyMapping(c, dummy);
                     }
