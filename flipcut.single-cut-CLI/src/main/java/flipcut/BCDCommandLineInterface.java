@@ -19,7 +19,9 @@ public class BCDCommandLineInterface extends FlipCutCLO<FlipCutSingleCutSimpleWe
 
     @Override
     protected FlipCutSingleCutSimpleWeight initAlgorithm() {
-        return new FlipCutSingleCutSimpleWeight(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
+        FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
+        fs.setPrintProgress(true);
+        return fs;
     }
 
     //##### flip cut parameter #####

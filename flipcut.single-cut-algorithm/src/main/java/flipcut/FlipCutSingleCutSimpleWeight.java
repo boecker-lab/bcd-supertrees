@@ -14,6 +14,7 @@ import flipcut.flipCutGraph.SingleCutGraphCutter;
 import org.apache.log4j.Logger;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -35,7 +36,9 @@ public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipC
         super(log, type);
     }
 
-
+    public FlipCutSingleCutSimpleWeight(Logger log, ExecutorService executorService1, CutGraphCutter.CutGraphTypes type) {
+        super(log, executorService1, type);
+    }
 
     @Override
     protected FlipCutGraphSimpleWeight createGraph(List<FlipCutNodeSimpleWeight> component, TreeNode treeNode, final boolean checkEdges) {
@@ -57,14 +60,14 @@ public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipC
     protected CostComputer initCosts(List<Tree> inputTrees, Tree scaffoldTree) {
 
         if (UnitCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
-            getLog().info("Using Unit Costs");
+            logger.info("Using Unit Costs");
             return new UnitCostComputer(inputTrees,scaffoldTree);
         } else if (WeightCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
-            getLog().info("Using " + weights);
+            logger.info("Using " + weights);
             return new WeightCostComputer(inputTrees, weights, scaffoldTree);
         }
 
-        getLog().warn("No supported weight option found. Setting to standard: "+ FlipCutWeights.Weights.UNIT_COST);
+        logger.warn("No supported weight option found. Setting to standard: "+ FlipCutWeights.Weights.UNIT_COST);
         setWeights(FlipCutWeights.Weights.UNIT_COST);
         return new UnitCostComputer(inputTrees,scaffoldTree);
 

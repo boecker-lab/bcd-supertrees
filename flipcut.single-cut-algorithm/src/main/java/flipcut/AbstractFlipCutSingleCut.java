@@ -7,9 +7,11 @@ import flipcut.flipCutGraph.AbstractFlipCutNode;
 import flipcut.flipCutGraph.CutGraphCutter;
 import flipcut.flipCutGraph.SingleCutGraphCutter;
 import org.apache.log4j.Logger;
+import utils.CLIProgressBar;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -18,36 +20,55 @@ import java.util.concurrent.*;
  */
 public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends CutGraphCutter<N, T>> extends AbstractFlipCut<N, T> {
     private static final boolean CALCULATE_SCORE = true;
+    private long globalWeight;
 
-    private ExecutorService executor = null;
+    protected C.CutGraphTypes type;
+
     private Queue<Future<Queue<TreeNode>>> results = new ConcurrentLinkedQueue<>();
     private Queue<C> cutterQueue;
 
     public DebugInfo debugInfo;
-    private long globalWeight;
-    protected C.CutGraphTypes type;
+
+    protected CLIProgressBar progressBar = null;
+    protected int finish;
+
+    protected Tree supertree = null;
 
     protected AbstractFlipCutSingleCut() {
         super();
     }
 
-    public AbstractFlipCutSingleCut(SingleCutGraphCutter.CutGraphTypes type) {
-        super();
-        setCutter(type);
+    public AbstractFlipCutSingleCut(C.CutGraphTypes type) {
+        this.type = type;
     }
 
-    public AbstractFlipCutSingleCut(Logger log, SingleCutGraphCutter.CutGraphTypes type) {
+    public AbstractFlipCutSingleCut(Logger log, C.CutGraphTypes type) {
         super(log);
-        setCutter(type);
+        this.type = type;
     }
 
+    public AbstractFlipCutSingleCut(Logger log, ExecutorService executorService1, C.CutGraphTypes type) {
+        super(log, executorService1);
+        this.type = type;
+    }
 
     @Override
-    public List<Tree> getSupertrees() {
-        return Arrays.asList(getSupertree());
+    public Tree getResult() {
+        return supertree;
     }
 
-    public Tree getSupertree() {
+    @Override
+    public List<Tree> getResults() {
+        return  Arrays.asList(getResult());
+    }
+
+    @Override
+    public void run() {
+        calculateST();
+    }
+
+    private void calculateST() {
+        supertree=null;
         if (initialGraph != null) {
             if (DEBUG) {
                 debugInfo = new DebugInfo();
@@ -58,39 +79,51 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
 
             System.out.println("Computing Supertree...");
 
+            if (printProgress) {
+                progressBar = new CLIProgressBar();
+                finish = initialGraph.taxa.size()*2 +10;
+                progressBar.update(0,finish);
+            }
+
+
             Tree supertree = null;
             try {
                 if (numberOfThreads < 1) {
-                    executor = Executors.newCachedThreadPool();
-                    supertree = computeIterativeMultiThreaded();
+                    if (executorService== null)
+                        executorService = Executors.newCachedThreadPool();
+                    supertree = computeSTIterativeMultiThreaded();
                 } else if (numberOfThreads == 1) {
-                    supertree = computeSTreeSingleThreaded();
+                    supertree = computeSTIterativeSingleThreaded();
                 } else {
-                    executor = Executors.newFixedThreadPool(numberOfThreads);
-                    supertree = computeIterativeMultiThreaded();
+                    if (executorService== null)
+                        executorService = Executors.newFixedThreadPool(numberOfThreads);
+                    supertree = computeSTIterativeMultiThreaded();
                 }
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (executor != null)
-                executor.shutdown();
             if (CALCULATE_SCORE) supertree.setName("Tree_" + globalWeight);
             if (DEBUG) {
                 debugInfo.weight = globalWeight;
                 debugInfo.overallCalculationTime = (System.currentTimeMillis() - debugInfo.overallCalculationTime) / 1000;
             }
+            if (printProgress) {
+                progressBar.update(finish, finish);
+                System.out.println();
+            }
             System.out.println("...Supertree construction FINISHED!");
-            return supertree;
+            this.supertree = supertree;
+
 
         } else {
             throw new IllegalArgumentException("No inputTrees found");
         }
     }
 
-    private Tree computeIterativeMultiThreaded() throws ExecutionException, InterruptedException {
-        getLog().info("Computing Supertree during iterative graph splitting (SingleThreaded)");
+    private Tree computeSTIterativeMultiThreaded() throws ExecutionException, InterruptedException {
+        logger.info("Computing Supertree during iterative graph splitting (MultiThreaded)");
         Tree supertree = null;
 
         supertree = new Tree();
@@ -98,7 +131,9 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
         supertree.setRoot(initialGraph.treeNode);
 
         cutterQueue = new ConcurrentLinkedQueue<>();
-        results.offer(executor.submit(new GraphSplitterIterative(initialGraph)));
+        results.offer(executorService.submit(new GraphSplitterIterative(initialGraph)));
+        int pcount = 1;
+        initialGraph = null;
 
         //building supertree during waiting for threads
         while (!results.isEmpty()) {
@@ -111,21 +146,22 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                     supertree.addEdge(parent, child);
                 }
             }
+            if (printProgress)
+                progressBar.update(pcount++,finish);
         }
-
-        executor.shutdown();
         return supertree;
     }
 
-    private Tree computeSTreeSingleThreaded() {
+    private Tree computeSTIterativeSingleThreaded() {
         final C cutter = createCutter();
         final Tree supertree = new Tree();
 
         Queue<T> graphs = new LinkedList<T>();
         graphs.offer(initialGraph);
 
-        getLog().info("Computing Supertree during iterative graph splitting (SingleThreaded)");
+        logger.info("Computing Supertree during iterative graph splitting (SingleThreaded)");
 
+        int pcount = 1;
         while (graphs.size() > 0) {
             initialGraph = graphs.poll();
 
@@ -199,6 +235,8 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                         debugInfo.splittingTimes.add((System.currentTimeMillis() - debugInfo.currentStartTime) / 1000);
                 }
             }
+            if (printProgress)
+                progressBar.update(pcount++,finish);
         }
 
         return supertree;
@@ -261,7 +299,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                         if (currentGraph.GLOBAL_CHARACTER_MERGE)
                             componentGraph.insertCharacterMapping(currentGraph, null);
                         nodes.add(componentGraph.treeNode);
-                        results.offer(executor.submit(new GraphSplitterIterative(componentGraph)));
+                        results.offer(executorService.submit(new GraphSplitterIterative(componentGraph)));
                     }
                     cutter.clear();
                     cutterQueue.offer(cutter);
@@ -277,7 +315,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                         if (currentGraph.GLOBAL_CHARACTER_MERGE)
                             g.insertCharacterMapping(currentGraph, null);
                         nodes.add(g.treeNode);
-                        results.offer(executor.submit(new GraphSplitterIterative(g)));
+                        results.offer(executorService.submit(new GraphSplitterIterative(g)));
                     }
                 }
                 return nodes;

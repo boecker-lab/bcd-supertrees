@@ -4,17 +4,11 @@ import epos.model.tree.Tree;
 import epos.model.tree.io.Newick;
 import epos.model.tree.treetools.RFDistance;
 import epos.model.tree.treetools.TreeSorter;
-import epos.model.tree.treetools.TreeUtilsBasic;
 import epos.model.tree.treetools.UnsupportedCladeReduction;
 import flipcut.costComputer.FlipCutWeights;
-import flipcut.flipCutGraph.CutGraphCutter;
 import flipcut.flipCutGraph.SingleCutGraphCutter;
 import org.junit.Assert;
 import org.junit.Test;
-import scmAlgorithm.GreedySCMAlgorithm;
-import scmAlgorithm.treeScorer.ConsensusResolutionScorer;
-import scmAlgorithm.treeScorer.TreeScorer;
-import scmAlgorithm.treeSelector.GreedyTreeSelector;
 
 import java.io.File;
 import java.util.Arrays;
@@ -39,8 +33,9 @@ public class FlipCutSingleCutSimpleWeightTest {
         Tree t2 = Newick.getTreeFromString("((A,B),C);");
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
-        fs.setInputTrees(Arrays.asList(t1, t2));
-        Tree supertree = fs.getSupertree();
+        fs.setInput(Arrays.asList(t1, t2));
+        fs.run();
+        Tree supertree = fs.getResult();
         assertNotNull(supertree);
         Assert.assertEquals(5, supertree.vertexCount());
         Assert.assertEquals(3, supertree.getLeaves().length);
@@ -60,10 +55,11 @@ public class FlipCutSingleCutSimpleWeightTest {
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
         fs.setWeights(FlipCutWeights.Weights.UNIT_COST);
-        fs.setInputTrees(input);
+        fs.setInput(input);
         UnsupportedCladeReduction r = new UnsupportedCladeReduction(input);
 
-        Tree supertree = fs.getSupertree();
+        fs.run();
+        Tree supertree = fs.getResult();
         Tree toReduce = supertree.cloneTree();
         r.reduceUnsupportedClades(toReduce);
 
@@ -83,10 +79,11 @@ public class FlipCutSingleCutSimpleWeightTest {
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
         fs.setWeights(FlipCutWeights.Weights.UNIT_COST);
-        fs.setInputTrees(input);
+        fs.setInput(input);
         UnsupportedCladeReduction r = new UnsupportedCladeReduction(input);
 
-        Tree supertree = fs.getSupertree();
+        fs.run();
+        Tree supertree = fs.getResult();
         Tree toReduce = supertree.cloneTree();
         r.reduceUnsupportedClades(toReduce);
 
@@ -108,10 +105,11 @@ public class FlipCutSingleCutSimpleWeightTest {
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
         fs.setWeights(FlipCutWeights.Weights.UNIT_COST);
-        fs.setInputTrees(input);
+        fs.setInput(input);
         UnsupportedCladeReduction r = new UnsupportedCladeReduction(input);
 
-        Tree supertree = fs.getSupertree();
+        fs.run();
+        Tree supertree = fs.getResult();
         Tree toReduce = supertree.cloneTree();
         r.reduceUnsupportedClades(toReduce);
 
@@ -133,10 +131,11 @@ public class FlipCutSingleCutSimpleWeightTest {
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
         fs.setWeights(FlipCutWeights.Weights.UNIT_COST);
-        fs.setInputTrees(input);
+        fs.setInput(input);
         UnsupportedCladeReduction r = new UnsupportedCladeReduction(input);
 
-        Tree supertree = fs.getSupertree();
+        fs.run();
+        Tree supertree = fs.getResult();
         Tree toReduce = supertree.cloneTree();
         r.reduceUnsupportedClades(toReduce);
 
@@ -156,10 +155,11 @@ public class FlipCutSingleCutSimpleWeightTest {
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
         fs.setWeights(FlipCutWeights.Weights.UNIT_COST);
-        fs.setInputTrees(input);
+        fs.setInput(input);
         UnsupportedCladeReduction r = new UnsupportedCladeReduction(input);
 
-        Tree supertree = fs.getSupertree();
+        fs.run();
+        Tree supertree = fs.getResult();
         Tree toReduce = supertree.cloneTree();
         r.reduceUnsupportedClades(toReduce);
 
@@ -179,10 +179,11 @@ public class FlipCutSingleCutSimpleWeightTest {
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
         fs.setWeights(FlipCutWeights.Weights.UNIT_COST);
-        fs.setInputTrees(input);
+        fs.setInput(input);
         UnsupportedCladeReduction r = new UnsupportedCladeReduction(input);
 
-        Tree supertree = fs.getSupertree();
+        fs.run();
+        Tree supertree = fs.getResult();
         Tree toReduce = supertree.cloneTree();
         r.reduceUnsupportedClades(toReduce);
 
@@ -203,10 +204,11 @@ public class FlipCutSingleCutSimpleWeightTest {
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
         fs.setWeights(FlipCutWeights.Weights.UNIT_COST);
-        fs.setInputTrees(input);
+        fs.setInput(input);
         UnsupportedCladeReduction r = new UnsupportedCladeReduction(input);
 
-        Tree supertree = fs.getSupertree();
+        fs.run();
+        Tree supertree = fs.getResult();
         Tree toReduce = supertree.cloneTree();
         r.reduceUnsupportedClades(toReduce);
 
@@ -230,8 +232,9 @@ public class FlipCutSingleCutSimpleWeightTest {
         Tree t3 = Newick.getTreeFromString("(((a,b),c),e);");
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
-        fs.setInputTrees(Arrays.asList(t1, t2, t3));
-        Tree supertree = fs.getSupertree();
+        fs.setInput(Arrays.asList(t1, t2, t3));
+        fs.run();
+        Tree supertree = fs.getResult();
         System.out.println(Newick.getStringFromTree(supertree));
     }
 
@@ -242,8 +245,9 @@ public class FlipCutSingleCutSimpleWeightTest {
 //        Tree t3 = Newick.getTreeFromString("(((a,b),c),e);");
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
-        fs.setInputTrees(Arrays.asList(t1, t2));
-        Tree supertree = fs.getSupertree();
+        fs.setInput(Arrays.asList(t1, t2));
+        fs.run();
+        Tree supertree = fs.getResult();
         System.out.println(Newick.getStringFromTree(supertree));
     }
 
@@ -254,8 +258,9 @@ public class FlipCutSingleCutSimpleWeightTest {
 //        Tree t3 = Newick.getTreeFromString("(((a,b),c),e);");
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
-        fs.setInputTrees(Arrays.asList(t1, t2));
-        Tree supertree = fs.getSupertree();
+        fs.setInput(Arrays.asList(t1, t2));
+        fs.run();
+        Tree supertree = fs.getResult();
         System.out.println(Newick.getStringFromTree(supertree));
     }
 
@@ -267,8 +272,9 @@ public class FlipCutSingleCutSimpleWeightTest {
         FlipCutSingleCutSimpleWeight a = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
         a.setWeights(FlipCutWeights.Weights.EDGE_AND_LEVEL);
         long t = System.currentTimeMillis();
-        a.setInputTrees(Arrays.asList(trees[0], trees[1]));
-        Tree tree = a.getSupertree();
+        a.setInput(Arrays.asList(trees[0], trees[1]));
+        a.run();
+        Tree tree = a.getResult();
         System.out.println("time : " + (System.currentTimeMillis()-t));
 
 
@@ -300,9 +306,10 @@ public class FlipCutSingleCutSimpleWeightTest {
         t = System.currentTimeMillis();
         FlipCutSingleCutSimpleWeight a = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
         a.setWeights(FlipCutWeights.Weights.UNIT_COST);
-//        a.setInputTrees(Arrays.asList(trees),guideTree);
-        a.setInputTrees(Arrays.asList(trees));
-        Tree sTree =  a.getSupertree();
+//        a.setInput(Arrays.asList(trees),guideTree);
+        a.setInput(Arrays.asList(trees));
+        a.run();
+        Tree sTree =  a.getResult();
         System.out.println("time : " + (System.currentTimeMillis()-t));
         assertNotNull(sTree);
         System.out.println(Newick.getStringFromTree(sTree));

@@ -1,5 +1,6 @@
 package flipcut;//import epos.model.tree.Tree;
 
+import epos.model.algo.SupertreeAlgorithm;
 import epos.model.tree.Tree;
 import flipcut.costComputer.CostComputer;
 import flipcut.costComputer.FlipCutWeights;
@@ -9,7 +10,6 @@ import org.apache.log4j.Logger;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 
 /**
@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
  * Date: 29.11.12
  * Time: 14:10
  */
-public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>> {
+public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>> extends SupertreeAlgorithm {
     protected static final boolean DEBUG = false;
     /**
      * number of thread that should be used 0 -> automatic
@@ -25,13 +25,14 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
     protected int numberOfThreads = 0;
 
     /**
+     * number of thread that should be used 0 -> automatic
+     */
+    protected boolean printProgress = false;
+
+    /**
      * Use edge weights
      */
     protected FlipCutWeights.Weights weights = FlipCutWeights.Weights.UNIT_COST;
-    /**
-     * Logger
-     */
-    protected Logger log;
     /**
      * Verbose logs
      */
@@ -45,30 +46,28 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
      */
     protected T initialGraph;
 
+    /**
+     * Create new instace with logger
+     */
     protected AbstractFlipCut() {
-        this(Logger.getLogger(AbstractFlipCut.class));
+        super();
     }
-
     /**
      * Create new instace with logger
      *
      * @param log the logger
      */
     protected AbstractFlipCut(Logger log) {
-        this.log = log;
+        super(log);
     }
 
-
     /**
-     * Provide lazy access to the log
+     * Create new instace with logger and global Executor service
      *
-     * @return log the log
+     * @param log the logger
      */
-    public Logger getLog() {
-        if (log == null) {
-            log = Logger.getLogger(getClass());
-        }
-        return log;
+    protected AbstractFlipCut(Logger log, ExecutorService executorService1) {
+        super(log,executorService1);
     }
 
     /**
@@ -89,11 +88,13 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
         this.weights = weights;
     }
 
-    public void setInputTrees(List<Tree> inputTrees) {
-        setInputTrees(inputTrees, null);
+
+    @Override
+    public void setInput(List<Tree> inputTrees) {
+        setInput(inputTrees, null);
     }
 
-    public void setInputTrees(List<Tree> inputTrees, Tree scaffoldTree) {
+    public void setInput(List<Tree> inputTrees, Tree scaffoldTree) {
         final CostComputer costs = initCosts(inputTrees, scaffoldTree);
         initialGraph = createInitGraph(costs);
     }
@@ -106,17 +107,13 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
         return bootstrapThreshold;
     }
 
+    public void setPrintProgress(boolean printProgress) {
+        this.printProgress = printProgress;
+    }
 
     public void setNumberOfThreads(int numberOfThreads) {
         this.numberOfThreads = numberOfThreads;
     }
-
-    public int getNumberOfThreads() {
-        return numberOfThreads;
-    }
-
-    //abstract stuff!
-    public abstract List<Tree> getSupertrees();
 
     protected abstract T createInitGraph(CostComputer costsComputer);
 

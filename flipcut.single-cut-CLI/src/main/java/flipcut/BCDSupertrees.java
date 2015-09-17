@@ -9,6 +9,7 @@ import epos.model.tree.treetools.ReductionModifier;
 import epos.model.tree.treetools.TreeUtilsBasic;
 import epos.model.tree.treetools.UnsupportedCladeReduction;
 import flipcut.clo.FlipCutCLO;
+import org.apache.log4j.*;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import scmAlgorithm.AbstractSCMAlgorithm;
@@ -22,16 +23,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ForkJoinPool;
 
 import static flipcut.clo.FlipCutCLO.FileType.*;
 
@@ -40,22 +37,30 @@ import static flipcut.clo.FlipCutCLO.FileType.*;
  */
 public class BCDSupertrees {
     private static BCDCommandLineInterface bcdCLI;
-    
+    public final static Path BCD_HOME_DIR = Paths.get(System.getProperty("user.home")).resolve(".bcdSupertrees");
+    public final static Logger LOGGER = Logger.getRootLogger();
     private static FlipCutCLO.FileType INPUT_TYPE;
 
 
     public static void main(String[] args) {
-        double runtime =  System.currentTimeMillis();
-
+        double runtime = System.currentTimeMillis();
         INPUT_TYPE = AUTO;
         bcdCLI = new BCDCommandLineInterface();
         final CmdLineParser parser = new CmdLineParser(bcdCLI);
 
-        // if you have a wider console, you could increase the value;
-        // here 80 is also the default
-//        parser.setUsageWidth(80);
-
         try {
+            if (Files.notExists(BCD_HOME_DIR))
+                Files.createDirectory(BCD_HOME_DIR);
+            //init logger shit
+            SimpleLayout layout = new SimpleLayout();
+            ConsoleAppender consoleAppender = new ConsoleAppender(layout);
+            LOGGER.addAppender(consoleAppender);
+            FileAppender fileAppender = new FileAppender(layout, BCD_HOME_DIR.resolve("bcdSupertrees.log").toString(), false);
+            LOGGER.addAppender(fileAppender);
+            // ALL | DEBUG | INFO | WARN | ERROR | FATAL | OFF:
+            LOGGER.setLevel(Level.WARN);
+
+
             // parse the arguments.
             parser.parseArgument(args);
 
@@ -89,7 +94,7 @@ public class BCDSupertrees {
                     guideTree = parseFileToTrees(bcdCLI.inputSCMFile, bcdCLI.inputType)[0];
                 } else if (bcdCLI.useSCM) { //scm tree option is hidden because should be activated
                     System.out.println("Calculating SCM Guide Tree...");
-                    scmRuntime =  System.currentTimeMillis();
+                    scmRuntime = System.currentTimeMillis();
                     if (bcdCLI.scmMethod != FlipCutCLO.SCM.SUPPORT) {
                         guideTree = calculateSCM(TreeUtilsBasic.cloneTrees(TreeUtilsBasic.cloneTrees(inputTreesUntouched)), bcdCLI.scmMethod);
                     } else {
@@ -97,7 +102,7 @@ public class BCDSupertrees {
                         suppportTree = calculateSCMSupportTree(TreeUtilsBasic.cloneTrees(inputTreesUntouched));
                     }
 
-                    scmRuntime = ((double)System.currentTimeMillis() - scmRuntime)/1000d;
+                    scmRuntime = ((double) System.currentTimeMillis() - scmRuntime) / 1000d;
                     System.out.println("...SCM Guide Tree calculation DONE in " + scmRuntime + "s");
                     System.out.println(Newick.getStringFromTree(guideTree));
                 }
@@ -116,14 +121,15 @@ public class BCDSupertrees {
                     reducer = removeUndisputedSiblings(inputTrees);
 
                     if (guideTree != null)
-                       inputTrees.remove(inputTrees.size() - 1); //remove guide tree again from input list
+                        inputTrees.remove(inputTrees.size() - 1); //remove guide tree again from input list
                 } else {
-                    inputTrees = new ArrayList<>(inputTreesUntouched.length +1);
+                    inputTrees = new ArrayList<>(inputTreesUntouched.length + 1);
                     inputTrees.addAll(Arrays.asList(inputTreesUntouched));
                     if (suppportTree != null)
                         inputTrees.add(suppportTree);
                 }
 
+                //todo do not run via cli, run directly, in executor service --> multiple runs in parralel possible
                 bcdCLI.setInputTrees(inputTrees, guideTree);
                 Tree superTree = bcdCLI.getSupertree();
 
@@ -136,17 +142,17 @@ public class BCDSupertrees {
 
                 writeOutput(superTree);
 
-                runtime = ((double)System.currentTimeMillis() - runtime)/1000d;
+                runtime = ((double) System.currentTimeMillis() - runtime) / 1000d;
                 if (!Double.isNaN(scmRuntime))
                     System.out.println("...FlipCut runs in " + (runtime - scmRuntime) + "s");
                 System.out.println("...Supertree calculated in " + runtime + "s");
                 System.out.println(Newick.getStringFromTree(superTree));
                 Path f = bcdCLI.runtimeFile;
-                if (f != null){
+                if (f != null) {
                     Files.write(f, (Double.toString(runtime) + "\n").getBytes());
-                    if (!Double.isNaN(scmRuntime)){
-                        Files.write(f, (Double.toString(scmRuntime) + "\n").getBytes(),StandardOpenOption.APPEND);
-                        Files.write(f, (Double.toString(runtime-scmRuntime)).getBytes(),StandardOpenOption.APPEND);
+                    if (!Double.isNaN(scmRuntime)) {
+                        Files.write(f, (Double.toString(scmRuntime) + "\n").getBytes(), StandardOpenOption.APPEND);
+                        Files.write(f, (Double.toString(runtime - scmRuntime)).getBytes(), StandardOpenOption.APPEND);
                     }
                 }
             } else {
@@ -202,7 +208,7 @@ public class BCDSupertrees {
         if (t == null || t.length < 1)
             throw new IOException("ERROR: No Tree in input file or wrong file type detected. Please specify the correct input file type (--fileType) or use a typical file extension for NEWICK (" + TreeFileUtils.NEWICK_EXT + ") or NEXUS (" + TreeFileUtils.NEXUS_EXT + ")");
 
-        if (INPUT_TYPE == null || INPUT_TYPE == AUTO )
+        if (INPUT_TYPE == null || INPUT_TYPE == AUTO)
             INPUT_TYPE = toInputType;
 
         return t;
@@ -210,37 +216,43 @@ public class BCDSupertrees {
 
 
     private static Tree calculateSCM(Tree[] inputTrees, final FlipCutCLO.SCM method) {
+        //todo add to executor sevice
         AbstractSCMAlgorithm algo;
-        switch (method){
+        switch (method) {
             case OVERLAP:
-                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new OverlapScorer(TreeScorer.ConsensusMethods.STRICT),inputTrees));
+                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new OverlapScorer(TreeScorer.ConsensusMethods.STRICT,LOGGER,true,true), inputTrees));
                 break;
             case UNIQUE_TAXA:
-                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new UniqueTaxaNumberScorer(TreeScorer.ConsensusMethods.STRICT),inputTrees));
+                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new UniqueTaxaNumberScorer(TreeScorer.ConsensusMethods.STRICT,LOGGER,true,true), inputTrees));
                 break;
             case COLLISION:
-                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new CollisionLostCladesNumberScorer(TreeScorer.ConsensusMethods.STRICT),inputTrees));
+                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new CollisionLostCladesNumberScorer(TreeScorer.ConsensusMethods.STRICT,LOGGER,true,true), inputTrees));
                 break;
             case RESOLUTION:
-                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new ConsensusResolutionScorer(TreeScorer.ConsensusMethods.STRICT),inputTrees));
+                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new ConsensusResolutionScorer(TreeScorer.ConsensusMethods.STRICT,LOGGER,true,true), inputTrees));
                 break;
             case RANDOMIZED:
-                algo = new RandomizedSCMAlgorithm(bcdCLI.scmiterations,inputTrees,new OverlapScorer(TreeScorer.ConsensusMethods.STRICT));
+                algo = new RandomizedSCMAlgorithm(bcdCLI.scmiterations, inputTrees, new OverlapScorer(TreeScorer.ConsensusMethods.STRICT,LOGGER,true,true));
                 break;
             default:
-                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new CollisionLostCladesNumberScorer(TreeScorer.ConsensusMethods.STRICT),inputTrees));
+                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new CollisionLostCladesNumberScorer(TreeScorer.ConsensusMethods.STRICT,LOGGER,true,true), inputTrees));
                 break;
         }
-        return algo.getSupertree();
+        algo.run();
+        return algo.getResult();
     }
 
-    private static Tree calculateSCMSupportTree(Tree[] inputTrees){
-        AbstractSCMAlgorithm scmSupportAlgorithm = new RandomizedSCMAlgorithm(bcdCLI.scmiterations,inputTrees,new OverlapScorer(TreeScorer.ConsensusMethods.SEMI_STRICT));
-        List<Tree> temp =  scmSupportAlgorithm.getSupertrees();
-        NConsensus c =  new NConsensus();
+    private static Tree calculateSCMSupportTree(Tree[] inputTrees) {
+        //todo add to executor sevice --> ist can be done perfectly parralel
+        AbstractSCMAlgorithm scmSupportAlgorithm = new RandomizedSCMAlgorithm(bcdCLI.scmiterations, inputTrees, new OverlapScorer(TreeScorer.ConsensusMethods.SEMI_STRICT,LOGGER,true,true));
+        scmSupportAlgorithm.run();
+        List<Tree> temp = scmSupportAlgorithm.getResults();
+        NConsensus c = new NConsensus();
         c.setMethod(NConsensus.METHOD_MAJORITY);
-        Tree scmSupportTree = c.getConsensusTree(temp.toArray(new Tree[temp.size()]));
-        scmSupportTree.getRoot().setLabel(Double.toString((double)inputTrees.length/2d));
+        c.setInput(temp);
+        c.run();
+        Tree scmSupportTree = c.getResult();
+        scmSupportTree.getRoot().setLabel(Double.toString((double) inputTrees.length / 2d));
         return scmSupportTree;
     }
 

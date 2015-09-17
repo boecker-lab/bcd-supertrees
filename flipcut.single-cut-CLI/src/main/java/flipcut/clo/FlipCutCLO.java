@@ -1,5 +1,6 @@
 package flipcut.clo;
 
+
 import epos.model.tree.Tree;
 import flipcut.AbstractFlipCut;
 import flipcut.costComputer.FlipCutWeights;
@@ -13,6 +14,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 
@@ -90,15 +92,16 @@ public abstract class FlipCutCLO <A extends AbstractFlipCut>{
     }
 
     public void setInputTrees(List<Tree> inputTrees, Tree guideTree){
-        algorithm.setInputTrees(inputTrees,guideTree);
+        algorithm.setInput(inputTrees, guideTree);
     }
     
     public Tree getSupertree(){
-        return getSupertrees().get(0);
+        algorithm.run();
+        return (Tree)algorithm.getResult();
     }
 
     private List<Tree> getSupertrees() {
-        return algorithm.getSupertrees();
+        return Arrays.asList(getSupertree());
     }
 
     //##### command line parameter #####
