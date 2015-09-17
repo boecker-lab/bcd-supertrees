@@ -6,6 +6,7 @@ import flipcut.costComputer.CostComputer;
 import flipcut.costComputer.FlipCutWeights;
 import flipcut.flipCutGraph.AbstractFlipCutGraph;
 import flipcut.flipCutGraph.AbstractFlipCutNode;
+import flipcut.flipCutGraph.CutGraphCutter;
 import org.apache.log4j.Logger;
 
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.concurrent.ExecutorService;
  * Date: 29.11.12
  * Time: 14:10
  */
-public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>> extends SupertreeAlgorithm {
+public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends CutGraphCutter> extends SupertreeAlgorithm {
     protected static final boolean DEBUG = false;
     /**
      * number of thread that should be used 0 -> automatic
@@ -29,6 +30,7 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
      */
     protected boolean printProgress = false;
 
+    protected C.CutGraphTypes type;
     /**
      * Use edge weights
      */
@@ -46,19 +48,26 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
      */
     protected T initialGraph;
 
+
+
+    protected AbstractFlipCut() {
+        super();
+    }
     /**
      * Create new instace with logger
      */
-    protected AbstractFlipCut() {
+    protected AbstractFlipCut(C.CutGraphTypes type) {
         super();
+        this.type = type;
     }
     /**
      * Create new instace with logger
      *
      * @param log the logger
      */
-    protected AbstractFlipCut(Logger log) {
+    protected AbstractFlipCut(Logger log,C.CutGraphTypes type) {
         super(log);
+        this.type = type;
     }
 
     /**
@@ -66,8 +75,9 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
      *
      * @param log the logger
      */
-    protected AbstractFlipCut(Logger log, ExecutorService executorService1) {
+    protected AbstractFlipCut(Logger log, ExecutorService executorService1,C.CutGraphTypes type) {
         super(log,executorService1);
+        this.type = type;
     }
 
     /**
@@ -97,6 +107,14 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
     public void setInput(List<Tree> inputTrees, Tree scaffoldTree) {
         final CostComputer costs = initCosts(inputTrees, scaffoldTree);
         initialGraph = createInitGraph(costs);
+    }
+
+    public void setCutter(CutGraphCutter.CutGraphTypes type) {
+        this.type = type;
+    }
+
+    public CutGraphCutter.CutGraphTypes getCutterType() {
+        return type;
     }
 
     public void setBootstrapThreshold(int bootstrapThreshold) {

@@ -5,39 +5,64 @@ import flipcut.costComputer.CostComputer;
 import flipcut.costComputer.FlipCutWeights;
 import flipcut.costComputer.UnitCostComputer;
 import flipcut.costComputer.WeightCostComputer;
-import flipcut.flipCutGraph.AbstractFlipCutGraph;
-import flipcut.flipCutGraph.CutGraphCutter;
-import flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
-import flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
+import flipcut.flipCutGraph.*;
 import flipcut.model.Partition;
 import org.apache.log4j.Logger;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 17.01.13
  * Time: 13:56
  */
-public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight> {
+public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight,MultiCutGraphCutter> {
     protected int numberOfCuts = 1;
     private List<Partition> partitions;
     //map to store partitions which are already cutted in more parts than the others
     private final TreeMap<Integer,Set<Partition>> subsBench = new TreeMap<>();
-    final CutGraphCutter.CutGraphTypes type;
+
+    protected List<Tree> result;
+
+    public FlipCutMultiCut() {
+        super();
+    }
 
     public FlipCutMultiCut(CutGraphCutter.CutGraphTypes type) {
-        this.type = type;
+        super(type);
     }
 
     public FlipCutMultiCut(Logger log, CutGraphCutter.CutGraphTypes type) {
-        super(log);
-        this.type = type;
+        super(log, type);
+    }
+
+    public FlipCutMultiCut(Logger log, ExecutorService executorService1, CutGraphCutter.CutGraphTypes type) {
+        super(log, executorService1, type);
+    }
+
+    //todo sort with some quality criteria
+    @Override
+    public Tree getResult() {
+        if (result == null || result.isEmpty())
+            return getResults().get(0);
+        return null;
     }
 
     @Override
-    public List<Tree> getSupertrees() {
+    public List<Tree> getResults() {
+        if (result == null || result.isEmpty())
+            return result;
+        return null;
+    }
 
+    @Override
+    public void run() {
+        calculateSTs();
+    }
+
+    private void calculateSTs() {
+        result = null;
         List<Tree> supertrees = new ArrayList<>(numberOfCuts);
 
         if (initialGraph != null) {
@@ -148,7 +173,7 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
             }
             System.out.println("...DONE in " + ((double)(System.currentTimeMillis() - supertreetime)/1000d) + "s");
         }
-        return supertrees;
+        result = supertrees;
     }
 
     @Override
@@ -161,13 +186,13 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
     protected CostComputer initCosts(List<Tree> inputTrees, Tree scaffoldTree) {
         CostComputer costs = null;
         if (UnitCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
-            getLog().info("Using Unit Costs");
+            logger.info("Using Unit Costs");
             costs = new UnitCostComputer(inputTrees,scaffoldTree);
         } else if (WeightCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
             costs = new WeightCostComputer(inputTrees,weights,scaffoldTree);
-            getLog().info("Using " + weights);
+            logger.info("Using " + weights);
         }else{
-            getLog().warn("No supported weight option set. Setting to standard: "+ FlipCutWeights.Weights.EDGE_AND_LEVEL);
+            logger.warn("No supported weight option set. Setting to standard: " + FlipCutWeights.Weights.EDGE_AND_LEVEL);
             setWeights(FlipCutWeights.Weights.EDGE_AND_LEVEL);
             initCosts(inputTrees, scaffoldTree);
         }

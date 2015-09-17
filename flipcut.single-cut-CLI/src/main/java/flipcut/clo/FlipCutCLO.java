@@ -25,7 +25,7 @@ import static org.kohsuke.args4j.OptionHandlerFilter.PUBLIC;
 /**
  * Created by fleisch on 19.06.14.
  */
-public abstract class FlipCutCLO <A extends AbstractFlipCut>{
+public abstract class FlipCutCLO<A extends AbstractFlipCut>{
     //should return the name of the algorithm, respectively the command to run the method
     protected final String NAME  =  initName();
     protected abstract String initName();

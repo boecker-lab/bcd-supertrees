@@ -23,8 +23,7 @@ import java.util.concurrent.ExecutorService;
  */
 public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipCutNodeSimpleWeight,FlipCutGraphSimpleWeight,SingleCutGraphCutter> {
 
-
-    protected FlipCutSingleCutSimpleWeight() {
+    public FlipCutSingleCutSimpleWeight() {
         super();
     }
 

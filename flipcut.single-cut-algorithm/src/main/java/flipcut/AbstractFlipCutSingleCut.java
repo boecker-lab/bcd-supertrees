@@ -18,11 +18,9 @@ import java.util.concurrent.atomic.AtomicLong;
  * Date: 29.11.12
  * Time: 14:42
  */
-public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends CutGraphCutter<N, T>> extends AbstractFlipCut<N, T> {
+public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends CutGraphCutter<N, T>> extends AbstractFlipCut<N, T, C> {
     private static final boolean CALCULATE_SCORE = true;
     private long globalWeight;
-
-    protected C.CutGraphTypes type;
 
     private Queue<Future<Queue<TreeNode>>> results = new ConcurrentLinkedQueue<>();
     private Queue<C> cutterQueue;
@@ -38,18 +36,16 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
         super();
     }
 
-    public AbstractFlipCutSingleCut(C.CutGraphTypes type) {
-        this.type = type;
+    protected AbstractFlipCutSingleCut(C.CutGraphTypes type) {
+        super(type);
     }
 
-    public AbstractFlipCutSingleCut(Logger log, C.CutGraphTypes type) {
-        super(log);
-        this.type = type;
+    protected AbstractFlipCutSingleCut(Logger log, C.CutGraphTypes type) {
+        super(log,type);
     }
 
-    public AbstractFlipCutSingleCut(Logger log, ExecutorService executorService1, C.CutGraphTypes type) {
-        super(log, executorService1);
-        this.type = type;
+    protected AbstractFlipCutSingleCut(Logger log, ExecutorService executorService1, C.CutGraphTypes type) {
+        super(log, executorService1,type);
     }
 
     @Override
@@ -245,15 +241,6 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
     protected abstract T createGraph(List<N> component, TreeNode treeNode, final boolean checkEdges);
 
     protected abstract C createCutter();
-
-    public void setCutter(CutGraphCutter.CutGraphTypes type) {
-        this.type = type;
-    }
-
-    public CutGraphCutter.CutGraphTypes getCutterType() {
-        return type;
-    }
-
 
     private class GraphSplitterIterative implements Callable<Queue<TreeNode>> {
         final T currentGraph;
