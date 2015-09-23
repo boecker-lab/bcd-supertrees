@@ -2,6 +2,7 @@ package flipcut.flipCutGraph;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -13,6 +14,10 @@ import java.util.List;
 public class SingleCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphSimpleWeight> {
     public SingleCutGraphCutter(CutGraphTypes type) {
         super(type);
+    }
+
+    public SingleCutGraphCutter(CutGraphTypes type, ExecutorService executorService, int threads) {
+        super(type, executorService, threads);
     }
 
     @Override

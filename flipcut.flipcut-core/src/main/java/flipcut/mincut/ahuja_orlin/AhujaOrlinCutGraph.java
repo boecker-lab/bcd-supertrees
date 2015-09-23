@@ -1,7 +1,6 @@
 package flipcut.mincut.ahuja_orlin;
 
-import flipcut.mincut.AbstractSingelCutGraph;
-import flipcut.mincut.CutGraph;
+import flipcut.mincut.MultiThreadedCutGraph;
 import flipcut.mincut.DirectedCutGraph;
 import flipcut.mincut.ahuja_orlin.algorithms.MaxFlowCalculator;
 import flipcut.mincut.ahuja_orlin.graph.Edge;
@@ -9,10 +8,13 @@ import flipcut.mincut.ahuja_orlin.graph.FlowGraph;
 import flipcut.mincut.bipartition.BasicCut;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+
 /**
  * Created by fleisch on 21.09.15.
  */
-public class AhujaOrlinCutGraph<V> extends AbstractSingelCutGraph<V> implements CutGraph<V>,DirectedCutGraph<V> {
+public class AhujaOrlinCutGraph<V> extends MultiThreadedCutGraph<V> implements DirectedCutGraph<V> {
     /**
      * The complete cut with score, source set and sink set
      */
@@ -39,15 +41,27 @@ public class AhujaOrlinCutGraph<V> extends AbstractSingelCutGraph<V> implements 
 
 
     @Override
-    public void calculate(V source, V sink) {
+    public BasicCut<V> calculateMinSTCut(V source, V sink) {
         ahujaGraph.setSource(nodes.get(source));
         ahujaGraph.setSink(nodes.get(sink));
         MaxFlowCalculator.getMaxFlow(ahujaGraph);
         //todo claculate mincut form residual network
+        return null;
     }
 
     @Override
-    public BasicCut getMinCut() {
+    public void submitSTCutCalculation(V source, V sink) {
+
+    }
+
+    @Override
+    public List<BasicCut<V>> calculateMinSTCuts() {
+        return null;
+    }
+
+
+    @Override
+    public BasicCut<V> calculateMinCut() throws ExecutionException, InterruptedException {
         return null;
     }
 
@@ -66,5 +80,10 @@ public class AhujaOrlinCutGraph<V> extends AbstractSingelCutGraph<V> implements 
         addNode(vertex1);
         addNode(vertex2);
         ahujaGraph.addEdge(new Edge(nodes.get(vertex1),nodes.get(vertex2),capacity));
+    }
+
+    @Override
+    public void clear() {
+
     }
 }

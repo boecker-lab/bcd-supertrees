@@ -1,8 +1,8 @@
 package flipcut.flipCutGraph;
 
 import flipcut.costComputer.CostComputer;
-import flipcut.mincut.CutGraph;
 import flipcut.mincut.DirectedCutGraph;
+import flipcut.mincut.MultiThreadedCutGraph;
 import flipcut.mincut.bipartition.BasicCut;
 import flipcut.mincut.goldberg_tarjan.GoldbergTarjanCutGraph;
 import flipcut.model.Cut;
@@ -19,7 +19,7 @@ import java.util.*;
 /**
  * VAZIRANI ALGORITHM
  */
-
+//TODO THE VAZIRANI should be an own Cutgraph not a cut graph cutter --> it should extend directed cut graph an use some max flow implemetation
 
 public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter {
 
@@ -45,7 +45,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
         List<VaziraniNode> cuts = new ArrayList<VaziraniNode>(taxa.size() - sourceCut.k);
 
         VaziraniNode currentCut;
-        DirectedCutGraph<FlipCutNodeSimpleWeight> cutGraph;
+        GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph;
         Set<FlipCutNodeSimpleWeight> sSet;
         Set<FlipCutNodeSimpleWeight> tSet;
 
@@ -142,9 +142,9 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
 
 
                 // compute mincut an put it to results
-                cutGraph.calculate(randomS, randomT);
-                long minCutValue = cutGraph.getMinCutValue();
-                Set<FlipCutNodeSimpleWeight> setT = new HashSet<FlipCutNodeSimpleWeight>(cutGraph.getMinCut().getSinkSet());
+                BasicCut<FlipCutNodeSimpleWeight> tmpCut = cutGraph.calculateMinSTCut(randomS, randomT);
+                long minCutValue = tmpCut.minCutValue;
+                Set<FlipCutNodeSimpleWeight> setT = new HashSet<FlipCutNodeSimpleWeight>(tmpCut.getSinkSet());
                 setT.addAll(tSet);
 
                 currentCut = new VaziraniNode(setT, minCutValue, k + 1);
@@ -203,7 +203,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
     }
 
     private void initialCut(){
-        DirectedCutGraph<FlipCutNodeSimpleWeight> cutGraph = null;
+        GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph = null;
 
         // get the mincut, fix s iterate over t
         FlipCutNodeSimpleWeight s;
@@ -239,8 +239,8 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
             }
         }
 
-        cutGraph.calculate(taxa.get(0), taxa.get(1));
-        minCut = cutGraph.getMinCut();
+
+        minCut = cutGraph.calculateMinSTCut(taxa.get(0), taxa.get(1));
         lightestCut = new VaziraniNode(new HashSet<FlipCutNodeSimpleWeight>(minCut.getSinkSet()), minCut.minCutValue, 1);
         initCuts[0] = lightestCut;
 
@@ -313,8 +313,8 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                     cutGraph.addEdge(s, character.clone, sWeight);
                 }
             }
-            cutGraph.calculate(s, t);
-            minCut = cutGraph.getMinCut();
+
+            minCut = cutGraph.calculateMinSTCut(s, t);
             currentNode = new VaziraniNode(new HashSet<FlipCutNodeSimpleWeight>(minCut.getSinkSet()), minCut.minCutValue, 1);
             initCuts[j] = currentNode;
             //save lightest cut for HEAP init

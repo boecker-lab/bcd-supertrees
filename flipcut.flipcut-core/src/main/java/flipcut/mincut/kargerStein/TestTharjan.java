@@ -6,11 +6,10 @@ import epos.model.tree.io.Newick;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
 
-import flipcut.*;
 import flipcut.mincut.goldberg_tarjan.GoldbergTarjanCutGraph;
 
 /**
@@ -70,11 +69,17 @@ public class TestTharjan {
         for(int i=0; i<leavearr.length-1;i++){
             for(int j=i+1;j<leavearr.length;j++){
                 try {
-                    gold.calculate(leavearr[i], leavearr[j]);
+                    gold.calculateMinSTCut(leavearr[i], leavearr[j]);
                 }catch (Exception e){
                     System.out.println(leavearr[i]+"."+leavearr[j]);
                 }
-                System.out.println(gold.getMinCut().minCutValue);
+                try {
+                    System.out.println(gold.calculateMinCut().minCutValue);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
 

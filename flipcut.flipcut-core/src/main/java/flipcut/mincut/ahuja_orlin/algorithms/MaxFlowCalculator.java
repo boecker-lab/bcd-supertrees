@@ -92,7 +92,6 @@ public class MaxFlowCalculator {
         int n = g.numNodes();
         List<Edge> backEdges = addBackEdges(g); // aggiungi archi all'indietro per creare la rete residuale
         LinkedList<Edge> path = new LinkedList<Edge>(); // il cammino (aumentante) corrente
-        int sourceDist; // distanza della sorgente dal pozzo
         int i = g.getSource(); // nodo corrente
 
         // Criterio di terminazione: la distance label del nodo sorgente
@@ -100,7 +99,7 @@ public class MaxFlowCalculator {
         // pi� esistere un cammino aumentante (capacit� residua positiva per ogni arco del path)
         // da source a sink.
 
-        while (i != FlowGraph.NULL && (sourceDist = labels.getLabel(g.getSource())) < n) {
+        while (i != FlowGraph.NULL && labels.getLabel(g.getSource()) < n) {
             Edge e = getAdmissibleEdge(g, i, labels);
             if (e != null) {
                 i = advance(e, path);

@@ -46,7 +46,11 @@ public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipC
 
     @Override
     protected SingleCutGraphCutter createCutter() {
-        return new SingleCutGraphCutter(type);
+        if (executorService == null) {
+            return new SingleCutGraphCutter(type);
+        }else{
+            return new SingleCutGraphCutter(type,executorService,numberOfThreads);
+        }
     }
 
     @Override

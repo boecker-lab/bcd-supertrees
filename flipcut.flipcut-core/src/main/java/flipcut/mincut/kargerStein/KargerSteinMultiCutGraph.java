@@ -1,43 +1,46 @@
 package flipcut.mincut.kargerStein;
 
-import flipcut.mincut.AbstractMultiCutGraph;
+import flipcut.mincut.MultiThreadedCutGraph;
 import flipcut.mincut.MultiCutGraph;
-import flipcut.mincut.UndirectedCutGraph;
 import flipcut.mincut.bipartition.BasicCut;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by fleisch on 15.04.15.
  */
-public class KargerSteinMultiCutGraph<V> extends AbstractMultiCutGraph<V> implements MultiCutGraph<V>,UndirectedCutGraph<V> {
+public class KargerSteinMultiCutGraph<V> extends MultiThreadedCutGraph<V> implements MultiCutGraph<V> {
     private int nextEdgeColor = 0; // we nee this for uncolored version
 
-    @Override
-    public List<BasicCut<V>> getMinCuts() {
-        return null;
-    }
 
     @Override
-    public BasicCut getMinCut() {
+    public BasicCut<V> calculateMinCut() throws ExecutionException, InterruptedException {
         return null;
     }
 
     @Override
     public void addNode(V vertex) {
+
     }
 
     @Override
     public void addEdge(V vertex1, V vertex2, long capacity) {
-        addEdge(vertex1,vertex2,capacity,--nextEdgeColor);
-    }
 
-    public void addEdge(V vertex1, V vertex2, long capacity, int color) {
-        //todo @Martin this should add vertices automatically if they are not already in the graph
     }
 
     @Override
-    public void calculateMinCuts() {
+    public void clear() {
 
+    }
+
+    @Override
+    public List<BasicCut<V>> calculateMinCuts() {
+        return null;
+    }
+
+    @Override
+    public List<BasicCut<V>> calculateMinCuts(int numberOfCuts) {
+        return null;
     }
 }

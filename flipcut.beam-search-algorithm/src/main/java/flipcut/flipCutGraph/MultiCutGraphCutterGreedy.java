@@ -2,7 +2,7 @@ package flipcut.flipCutGraph;
 
 
 import flipcut.costComputer.CostComputer;
-import flipcut.mincut.CutGraph;
+import flipcut.mincut.MultiThreadedCutGraph;
 import flipcut.mincut.bipartition.BasicCut;
 import flipcut.mincut.goldberg_tarjan.GoldbergTarjanCutGraph;
 import flipcut.model.Cut;
@@ -25,7 +25,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
         stopCutting = false;
     }
 
-    @Override
+//    @Override
     /*protected void createGoldbergTarjanCharacterWeights(CutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         // add characters, character clones and edges between them
         for (FlipCutNodeSimpleWeight character : source.characters) {
@@ -59,7 +59,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
         }
     }
 */
-    protected void createGoldbergTarjanCharacterWeights(CutGraph<FlipCutNodeSimpleWeight> cutGraph) {
+    protected void createGoldbergTarjanCharacterWeights(MultiThreadedCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         // add characters, character clones and edges between them
         for (FlipCutNodeSimpleWeight character : source.characters) {
             cutGraph.addNode(character);
@@ -76,7 +76,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
     }
 
     @Override
-    protected void createGoldbergTarjanCharacterWeightsMerged(CutGraph<FlipCutNodeSimpleWeight> cutGraph) {
+    protected void createGoldbergTarjanCharacterWeightsMerged(GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         Set<FlipCutNodeSimpleWeight> inGraph = new HashSet<FlipCutNodeSimpleWeight>();
         // add characters, character clones and edges between them
 
@@ -110,7 +110,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
 
     @Override
     protected void calculateMinCut() {
-        CutGraph<FlipCutNodeSimpleWeight> cutGraph;
+        GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph;
         switch (type) {
             /*case MAXFLOW_TARJAN_GOLDBERG: {
                     cutGraph = new CutGraph<FlipCutNodeSimpleWeight>();

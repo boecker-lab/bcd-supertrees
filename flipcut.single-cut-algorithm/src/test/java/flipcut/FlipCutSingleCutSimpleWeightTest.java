@@ -293,9 +293,9 @@ public class FlipCutSingleCutSimpleWeightTest {
     public void testManyInputTrees(){
 //        File inputFile =  new File(getClass().getResource("/flipcut/omm.source.Trees.tre").getFile());
 //        File inputFile =  new File(getClass().getResource("/flipcut/mcmahon.source_trees").getFile());
-        File inputFile =  new File(getClass().getResource("/flipcut/berrysemple-sourcetrees.tre").getFile());
+//        File inputFile =  new File(getClass().getResource("/flipcut/berrysemple-sourcetrees.tre").getFile());
 //        File inputFile =  new File(getClass().getResource("/flipcut/smo.9.sourceTrees.tre").getFile());
-//        File inputFile =  new File(getClass().getResource("/flipcut/sm.9.sourceTrees_OptSCM-Rooting.tre").getFile());
+        File inputFile =  new File(getClass().getResource("/flipcut/sm.9.sourceTrees_OptSCM-Rooting.tre").getFile());
         Tree[] trees =  Newick.getTreeFromFile(inputFile);
 
         long t = System.currentTimeMillis();

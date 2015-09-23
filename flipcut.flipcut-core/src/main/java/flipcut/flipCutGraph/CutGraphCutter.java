@@ -1,6 +1,7 @@
 package flipcut.flipCutGraph;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -8,6 +9,8 @@ import java.util.*;
  * Time: 14:15
  */
 public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends AbstractFlipCutGraph<N>> {
+
+
     public static enum CutGraphTypes {MAXFLOW_TARJAN_GOLDBERG, HYPERGRAPH_MINCUT, HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW}
     public static final long INFINITY = 1000000;
 
@@ -19,6 +22,9 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
         public static final boolean REAL_CHAR_DELETION = true;
             //if real char deletion false:
             public static final boolean ZEROES = true;
+
+    protected final ExecutorService executorService;
+    protected final int threads;
 
     protected Map<N, N> nodeToDummy;
     protected Map<N, Set<N>> dummyToMerged;
@@ -35,8 +41,15 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
     protected long mincutValue;
     protected List<T> split = null;
 
-    public CutGraphCutter(CutGraphTypes type) {
+    protected CutGraphCutter(CutGraphTypes type) {
         this.type = type;
+        this.executorService = null;
+        this.threads=1;
+    }
+    protected CutGraphCutter(CutGraphTypes type, ExecutorService executorService, int threads) {
+        this.type = type;
+        this.executorService = executorService;
+        this.threads =  threads;
     }
 
     public LinkedHashSet<N> getMinCut(T source) {
@@ -67,5 +80,4 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
 
     public abstract List<T> cut(T source);
     protected abstract void calculateMinCut();
-//    protected abstract int buildCharacterMergingMap(T source);
 }

@@ -20,10 +20,8 @@
 
 package flipcut.mincut.goldberg_tarjan;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.Callable;
 
 /**
  * The actual implementation the the push-relabel maxflow min cut method based on the C
@@ -48,7 +46,7 @@ import java.util.List;
 /*
 This class is not cleaned up ! This is more or less a translation from the C code, so don't expect too much ;)
  */
-class CutGraphImpl {
+class CutGraphImpl{
     //#define MAXLONG 1073741824
     private static final long MAXLONG = Long.MAX_VALUE - 1;
 
@@ -88,7 +86,6 @@ class CutGraphImpl {
     long i_dist;
 
     private int createdNodes = 0;
-
 
     public CutGraphImpl(int nodes, int edges) {
         this.n = nodes;
@@ -521,7 +518,7 @@ class CutGraphImpl {
             /* now do the bottom */
             Node i = bos;
             int ac = 0;
-            // todo : do we realy have to move over all edges up to the end of the list
+            // todo : do we really have to move over all edges up to the end of the list
             // the original implementation runs to the end of the arc list,
             // starting with bos->first
             // if we do not run to the end we get one less relabeling operation but
@@ -770,15 +767,22 @@ class CutGraphImpl {
         flow = sink.excess;
     }
 
+
+    public void setSink(Node sink) {
+        this.sink = sink;
+    }
+
+    public void setSource(Node source) {
+        this.source = source;
+    }
+
     /**
      * Computes the mincut - this does only stageOne
      *
-     * @param source the source
-     * @param sink the sink
      * @param activateChecks check the results
      * @return cut all elements of the component that contains the sink
      */
-    LinkedHashSet<Object> mincut(Node source, Node sink, final boolean activateChecks) {
+    LinkedHashSet<Object> calculateMaxSTFlow(final boolean activateChecks) {
         long sum;
         globUpdtFreq = GLOB_UPDT_FREQ;
         this.source = source;
@@ -841,13 +845,12 @@ class CutGraphImpl {
             }
         }
         return cut;
-
     }
 
     /*
     This was the coriginal main method --- somehow
      */
-    void run(Node source, Node sink) {
+    /*void run(Node source, Node sink) {
 
 
         long sum;
@@ -888,11 +891,11 @@ class CutGraphImpl {
 
         System.out.printf("c cut tm:      %f\n", t2);
 
-        /* check if you have a flow (pseudoflow) */
-        /* check arc flows */
+        *//* check if you have a flow (pseudoflow) *//*
+        *//* check arc flows *//*
         for (Node i : nodes) {
             for (Arc a : i.arcs) {
-                if (a.cap > 0) /* original arc */
+                if (a.cap > 0) *//* original arc *//*
                     if ((a.resCap + a.rev.resCap != a.cap)
                             || (a.resCap < 0)
                             || (a.rev.resCap < 0)) {
@@ -902,17 +905,17 @@ class CutGraphImpl {
             }
         }
 
-        /* check conservation */
+        *//* check conservation *//*
         for (Node i : nodes)
             if ((i != source) && (i != sink)) {
-                /*
+                *//*
                 #ifdef CUT_ONLY
                   if (i->excess < 0) {
                 printf("ERROR: nonzero node excess\n");
                 exit(2);
                   }
                 #else
-                */
+                *//*
                 if (i.excess != 0) {
                     System.err.printf("ERROR: nonzero node excess\n");
                     System.exit(2);
@@ -923,7 +926,7 @@ class CutGraphImpl {
 
                 for (Arc a : i.arcs) {
 
-                    if (a.cap > 0) /* original arc */
+                    if (a.cap > 0) *//* original arc *//*
                         sum -= a.cap - a.resCap;
                     else
                         sum += a.resCap;
@@ -935,7 +938,7 @@ class CutGraphImpl {
                 }
             }
 
-        /* check if mincut is saturated */
+        *//* check if mincut is saturated *//*
         aMax = dMax = 0;
         for (Bucket bucket : buckets) {
             bucket.firstActive = null;
@@ -980,7 +983,7 @@ class CutGraphImpl {
             if (j.d < n)
                 System.out.printf("c %s\n", j.toString());
 
-    }
+    }*/
 
     long timer() {
         return System.currentTimeMillis();

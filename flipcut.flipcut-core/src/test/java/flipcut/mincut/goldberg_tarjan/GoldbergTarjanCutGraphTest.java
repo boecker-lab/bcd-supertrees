@@ -18,6 +18,7 @@ package flipcut.mincut.goldberg_tarjan;/*
  * along with Epos.  If not, see <http://www.gnu.org/licenses/>
  */
 
+import flipcut.mincut.bipartition.BasicCut;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -56,17 +57,16 @@ public class GoldbergTarjanCutGraphTest {
         hp.addEdge(7, 5, 5);
         hp.addEdge(7, 8, 1);
 
-        hp.calculate(1,8);
-        System.out.println(hp.getMinCutValue());
+        BasicCut cut = hp.calculateMinSTCut(1, 8);
+        System.out.println(cut.minCutValue);
 
 
-        assertEquals(4, hp.getMinCutValue());
-        List<Object> cut = new ArrayList<>(hp.getMinCut().getSinkSet()) ;
-        assertEquals(4, cut.size());
-        assertTrue(cut.contains(5));
-        assertTrue(cut.contains(6));
-        assertTrue(cut.contains(7));
-        assertTrue(cut.contains(8));
+        assertEquals(4, cut.minCutValue);
+        assertEquals(4, cut.getSinkSet().size());
+        assertTrue(cut.getSinkSet().contains(5));
+        assertTrue(cut.getSinkSet().contains(6));
+        assertTrue(cut.getSinkSet().contains(7));
+        assertTrue(cut.getSinkSet().contains(8));
 
         /*
         p max 8 11

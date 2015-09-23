@@ -41,11 +41,11 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
     }
 
     protected AbstractFlipCutSingleCut(Logger log, C.CutGraphTypes type) {
-        super(log,type);
+        super(log, type);
     }
 
     protected AbstractFlipCutSingleCut(Logger log, ExecutorService executorService1, C.CutGraphTypes type) {
-        super(log, executorService1,type);
+        super(log, executorService1, type);
     }
 
     @Override
@@ -55,7 +55,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
 
     @Override
     public List<Tree> getResults() {
-        return  Arrays.asList(getResult());
+        return Arrays.asList(getResult());
     }
 
     @Override
@@ -64,7 +64,8 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
     }
 
     private void calculateST() {
-        supertree=null;
+        long time = System.currentTimeMillis();
+        supertree = null;
         if (initialGraph != null) {
             if (DEBUG) {
                 debugInfo = new DebugInfo();
@@ -77,22 +78,24 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
 
             if (printProgress) {
                 progressBar = new CLIProgressBar();
-                finish = initialGraph.taxa.size()*2 +10;
-                progressBar.update(0,finish);
+                finish = initialGraph.taxa.size() * 2 + 10;
+                progressBar.update(0, finish);
             }
 
 
             Tree supertree = null;
             try {
                 if (numberOfThreads < 1) {
-                    if (executorService== null)
-                        executorService = Executors.newCachedThreadPool();
+                    if (executorService == null)
+                        executorService = Executors.newWorkStealingPool();
+//                        executorService = Executors.newCachedThreadPool();
                     supertree = computeSTIterativeMultiThreaded();
                 } else if (numberOfThreads == 1) {
                     supertree = computeSTIterativeSingleThreaded();
                 } else {
-                    if (executorService== null)
-                        executorService = Executors.newFixedThreadPool(numberOfThreads);
+                    if (executorService == null)
+                        executorService = Executors.newWorkStealingPool(numberOfThreads);
+//                        executorService = Executors.newFixedThreadPool(numberOfThreads);
                     supertree = computeSTIterativeMultiThreaded();
                 }
             } catch (ExecutionException e) {
@@ -111,6 +114,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
             }
             System.out.println("...Supertree construction FINISHED!");
             this.supertree = supertree;
+            System.out.println("calculations time: " + (double) (System.currentTimeMillis() - time) / 1000d + "s");
 
 
         } else {
@@ -143,7 +147,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                 }
             }
             if (printProgress)
-                progressBar.update(pcount++,finish);
+                progressBar.update(pcount++, finish);
         }
         return supertree;
     }
@@ -232,7 +236,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                 }
             }
             if (printProgress)
-                progressBar.update(pcount++,finish);
+                progressBar.update(pcount++, finish);
         }
 
         return supertree;
@@ -271,7 +275,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                 if (components.size() == 1) {
                     // just one component, we have to cut
                     C cutter = cutterQueue.poll();
-                    if (cutter ==null)
+                    if (cutter == null)
                         cutter = createCutter();
 
                     List<T> componentGraphs = cutter.cut(currentGraph);
@@ -427,7 +431,6 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
             return debugInfo.toString();
         }
     }
-
 
 
 }

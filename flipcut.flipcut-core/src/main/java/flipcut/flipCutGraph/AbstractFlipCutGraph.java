@@ -18,7 +18,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      */
     protected static final boolean DEBUG = false;
 
-
     /**
      * Turn on/off guide tree based taxa merging
      */
