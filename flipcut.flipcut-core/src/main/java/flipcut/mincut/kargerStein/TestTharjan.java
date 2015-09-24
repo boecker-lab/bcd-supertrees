@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
+import flipcut.mincut.bipartition.BasicCut;
 import flipcut.mincut.goldberg_tarjan.GoldbergTarjanCutGraph;
 
 /**
@@ -74,7 +75,8 @@ public class TestTharjan {
                     System.out.println(leavearr[i]+"."+leavearr[j]);
                 }
                 try {
-                    System.out.println(gold.calculateMinCut().minCutValue);
+                    BasicCut cut = gold.calculateMinCut();
+                    System.out.println("Golderg mincut value: " + cut.minCutValue);
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {

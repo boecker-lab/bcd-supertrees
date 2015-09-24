@@ -26,7 +26,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
         String[] test_string = new String[]{"-a", Algorithm.BCD.name(), requiredInputPath};
         parser.parseArgument(test_string);
         //assert
-        assertEquals(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW, algorithm.getCutterType());
+        assertEquals(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG, algorithm.getCutterType());
 
         test_string = new String[]{"-a", Algorithm.FC.name(), requiredInputPath};
         parser.parseArgument(test_string);

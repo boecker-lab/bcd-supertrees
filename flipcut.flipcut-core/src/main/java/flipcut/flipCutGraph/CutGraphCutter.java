@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends AbstractFlipCutGraph<N>> {
 
 
-    public static enum CutGraphTypes {MAXFLOW_TARJAN_GOLDBERG, HYPERGRAPH_MINCUT, HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW}
+    public static enum CutGraphTypes {MAXFLOW_TARJAN_GOLDBERG, MAXFLOW_AHOJI_ORLIN, HYPERGRAPH_MINCUT, HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG, HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN}
     public static final long INFINITY = 1000000;
 
     public static final boolean MAX_FLIP_NORMALIZATION = false;

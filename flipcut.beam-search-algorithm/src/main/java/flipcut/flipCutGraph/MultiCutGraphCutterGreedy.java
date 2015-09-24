@@ -2,7 +2,7 @@ package flipcut.flipCutGraph;
 
 
 import flipcut.costComputer.CostComputer;
-import flipcut.mincut.MultiThreadedCutGraph;
+import flipcut.mincut.MaxFlowCutGraph;
 import flipcut.mincut.bipartition.BasicCut;
 import flipcut.mincut.goldberg_tarjan.GoldbergTarjanCutGraph;
 import flipcut.model.Cut;
@@ -59,7 +59,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
         }
     }
 */
-    protected void createGoldbergTarjanCharacterWeights(MultiThreadedCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
+    protected void createGoldbergTarjanCharacterWeights(MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         // add characters, character clones and edges between them
         for (FlipCutNodeSimpleWeight character : source.characters) {
             cutGraph.addNode(character);
@@ -76,7 +76,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
     }
 
     @Override
-    protected void createGoldbergTarjanCharacterWeightsMerged(GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
+    protected void createGoldbergTarjanCharacterWeightsMerged(MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         Set<FlipCutNodeSimpleWeight> inGraph = new HashSet<FlipCutNodeSimpleWeight>();
         // add characters, character clones and edges between them
 
@@ -128,7 +128,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                 }
                 break;
             }*/
-           /* case HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW: {
+           /* case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
                     cutGraph = new CutGraph<FlipCutNodeSimpleWeight>();
                     createGoldbergTarjanCharacterWeights(cutGraph);
                     createTarjanGoldbergHyperGraph(cutGraph);
@@ -136,7 +136,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                 break;
             }*/
             //todo same code as in singe cut... finde better solution!!!!
-            case HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW: {
+            case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
                 if(source.SCAFF_TAXA_MERGE && !source.activePartitions.isEmpty()) {
                     //create mapping
                     //todo optimize all thes mapping stuff if it works good
@@ -165,11 +165,11 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                     createTarjanGoldbergHyperGraphTaxaMerged(cutGraph,taxonToDummy,trivialcharacters);
 
                     //calculate mincut
-                    BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph);
+                    BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph);
                     mincut =  new LinkedHashSet<>(source.taxa.size() + source.characters.size());
 
                     //undo mapping
-                    for (FlipCutNodeSimpleWeight node : newMinCut.getSinkSet()) {
+                    for (FlipCutNodeSimpleWeight node : newMinCut.getCutSet()) {
 
                         //undo taxa mapping
                         if (node.isTaxon()){
@@ -199,9 +199,9 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                     cutGraph = new GoldbergTarjanCutGraph<>();
                     createGoldbergTarjanCharacterWeightsMerged(cutGraph);
                     createTarjanGoldbergHyperGraphMerged(cutGraph);
-                    BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph);
+                    BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph);
                     mincut =  new LinkedHashSet<>(source.taxa.size() + source.characters.size());
-                    for (FlipCutNodeSimpleWeight node : newMinCut.getSinkSet()) {
+                    for (FlipCutNodeSimpleWeight node : newMinCut.getCutSet()) {
                         Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
 
                         if (realNodes == null){
@@ -218,7 +218,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                     cutGraph = new GoldbergTarjanCutGraph<>();
                     createGoldbergTarjanCharacterWeights(cutGraph);
                     createTarjanGoldbergHyperGraph(cutGraph);
-                    mincut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph).getSinkSet();
+                    mincut = calculateTarjanMinCut(cutGraph).getCutSet();
                 }
                 break;
             }

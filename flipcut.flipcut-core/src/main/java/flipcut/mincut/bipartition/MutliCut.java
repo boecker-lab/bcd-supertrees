@@ -30,8 +30,8 @@ public class MutliCut<V> extends BasicCut<V> {
             return false;
 
         if (!(
-                (sourceSet.equals(cut.sourceSet) && sinkSet.equals(cut.sinkSet)) ||
-                        (sourceSet.equals(cut.sinkSet) && sinkSet.equals(cut.sourceSet))
+                (sourceSet.equals(cut.sourceSet) && cutSet.equals(cut.cutSet)) ||
+                        (sourceSet.equals(cut.cutSet) && cutSet.equals(cut.sourceSet))
         ))
             return false;
 
@@ -42,14 +42,14 @@ public class MutliCut<V> extends BasicCut<V> {
     public int hashCode() { //this should be a efficient hashcode, so equals perfomance is not that important if using hashmaps
         if (hashCode == 0) {
             int sourceSize = sourceSet.size();
-            int sinkSize = sinkSet.size();
+            int sinkSize = cutSet.size();
 
             if (sourceSize < sinkSize){
-                hashCode = 31 * sourceSize * sourceSet.hashCode() + 67 * sinkSize * sinkSet.hashCode();
+                hashCode = 31 * sourceSize * sourceSet.hashCode() + 67 * sinkSize * cutSet.hashCode();
             }else if (sourceSize > sinkSize){
-                hashCode = 31 * sinkSize * sinkSet.hashCode()  + 67 * sourceSize * sourceSet.hashCode() ;
+                hashCode = 31 * sinkSize * cutSet.hashCode()  + 67 * sourceSize * sourceSet.hashCode() ;
             }else{
-                hashCode = sinkSize + sinkSet.hashCode() + sourceSize + sourceSet.hashCode();
+                hashCode = sinkSize + cutSet.hashCode() + sourceSize + sourceSet.hashCode();
             }
         }
         return hashCode;

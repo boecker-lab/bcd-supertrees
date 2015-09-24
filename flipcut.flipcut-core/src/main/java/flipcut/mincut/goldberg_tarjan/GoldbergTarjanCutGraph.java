@@ -20,13 +20,12 @@
 
 package flipcut.mincut.goldberg_tarjan;
 
-import flipcut.mincut.MultiThreadedCutGraph;
+import flipcut.mincut.MaxFlowCutGraph;
 import flipcut.mincut.bipartition.BasicCut;
 import flipcut.mincut.DirectedCutGraph;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.Callable;
 
 /**
  * This is an implementation of the push-relabel method to compute minimum mincut/maximum flows
@@ -73,7 +72,7 @@ import java.util.concurrent.Callable;
  * @param <V> the nodes type
  * @author Thasso Griebel (thasso.griebel@gmail.com)
  */
-public class GoldbergTarjanCutGraph<V> extends MultiThreadedCutGraph<V> implements DirectedCutGraph<V> {
+public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
     /**
      * The complete cut with score, source set and sink set
      */
@@ -88,13 +87,6 @@ public class GoldbergTarjanCutGraph<V> extends MultiThreadedCutGraph<V> implemen
      * Global edge counter
      */
     private int edges = 0;
-
-
-    /**
-     * The computer
-     */
-    private Queue<Future<BasicCut<V>>> busyHipries;
-    private Queue<SS> stToCalculate = new LinkedBlockingQueue<>();
 
 
     private CutGraphImpl createHipri() {
@@ -138,74 +130,6 @@ public class GoldbergTarjanCutGraph<V> extends MultiThreadedCutGraph<V> implemen
         return new BasicCut(sinkList, source, sink, hipri.getValue());
     }
 
-    public void submitSTCutCalculation(V source, V sink) {
-        stToCalculate.offer(new SS(source, sink));
-    }
-
-    @Override
-    public List<BasicCut<V>> calculateMinSTCuts() {
-        List<BasicCut<V>> stCuts = new LinkedList<>();
-        while (!stToCalculate.isEmpty()) {
-            SS st = stToCalculate.poll();
-            stCuts.add(
-                    calculateMinSTCut(st.source, st.sink));
-        }
-        return stCuts;
-    }
-
-    @Override
-    public BasicCut<V> calculateMinCut() throws ExecutionException, InterruptedException {
-        if (threads == 1 || CORES_AVAILABLE == 1) {
-            return calculatMinCutSingle();
-        } else if (threads == 0) {
-            return calculatMinCutParallel((CORES_AVAILABLE / 2) - 1); // find a HT solution
-        } else {
-            return calculatMinCutParallel(threads - 1); //minus 1 because it is daster if 1 thread is left for other things
-        }
-
-    }
-
-    private BasicCut<V> calculatMinCutSingle() {
-        BasicCut<V> cut = BasicCut.MAX_CUT_DUMMY;
-        while (!stToCalculate.isEmpty()) {
-            SS st = stToCalculate.poll();
-            BasicCut<V> next = calculateMinSTCut(st.source, st.sink);
-            if (next.minCutValue < cut.minCutValue)
-                cut=next;
-        }
-        return cut;
-    }
-
-    private BasicCut<V> calculatMinCutParallel(int threads) throws ExecutionException, InterruptedException {
-        if (executorService == null) {
-            executorService = Executors.newFixedThreadPool(threads);
-        }
-
-        busyHipries = new ArrayBlockingQueue<>(stToCalculate.size());
-        BasicCut<V> cut = BasicCut.MAX_CUT_DUMMY;
-
-        int index = 0;
-        while (index < threads && !stToCalculate.isEmpty()) {
-            SS ss = stToCalculate.poll();
-            HipriCallable callable = new HipriCallable();
-            callable.setSourceAndSink(ss);
-            busyHipries.offer(executorService.submit(callable));
-            index++;
-        }
-
-        while (!busyHipries.isEmpty()) {
-            Future<BasicCut<V>> f = busyHipries.poll();
-            BasicCut<V> next = f.get();
-            if (next.minCutValue < cut.minCutValue)
-                cut = next;
-        }
-        return cut;
-    }
-
-    public Map<Object, Object> getNodes() {
-        return new HashMap<Object, Object>(nodes);
-    }
-
     public void addNode(V source) {
         if (hipri != null)
             throw new RuntimeException("A computation was already started. You can not add new nodes or edges !");
@@ -235,6 +159,27 @@ public class GoldbergTarjanCutGraph<V> extends MultiThreadedCutGraph<V> implemen
         reverse.reverseEdge = e;
         edges += 2;
     }
+
+    @Override
+    protected MaxFlowCallable createCallable() {
+        return new HipriCallable();
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        nodes.clear();
+        algoNodeMaps.clear();
+        hipri = null;
+        edges = 0;
+    }
+
+    public Map<Object, Object> getNodes() {
+        return new HashMap<Object, Object>(nodes);
+    }
+
+
+
 
     public void printGraph() {
         System.out.println("##### Start Printing CutGraph #####");
@@ -266,14 +211,9 @@ public class GoldbergTarjanCutGraph<V> extends MultiThreadedCutGraph<V> implemen
     }
 
 
-    @Override
-    public void clear() {
-        nodes.clear();
-        algoNodeMaps.clear();
-        stToCalculate.clear();
-        hipri = null;
-        edges = 0;
-    }
+
+
+
 
     /**
      * Internal builder representation for Nodes
@@ -297,30 +237,14 @@ public class GoldbergTarjanCutGraph<V> extends MultiThreadedCutGraph<V> implemen
         }
     }
 
-    private class HipriCallable implements Callable<BasicCut<V>> {
+    private class HipriCallable extends MaxFlowCallable {
         private CutGraphImpl hipri = null;
-        private V source;
-        private V sink;
 
         public HipriCallable(CutGraphImpl hipri) {
             this.hipri = hipri;
         }
 
-        public HipriCallable() {
-        }
-
-        public void setSource(V source) {
-            this.source = source;
-        }
-
-        public void setSink(V sink) {
-            this.sink = sink;
-        }
-
-        public void setSourceAndSink(SS sourceAndSink) {
-            this.source = sourceAndSink.source;
-            this.sink = sourceAndSink.sink;
-        }
+        public HipriCallable() {}
 
         @Override
         public BasicCut<V> call() throws Exception {
@@ -339,21 +263,13 @@ public class GoldbergTarjanCutGraph<V> extends MultiThreadedCutGraph<V> implemen
                 HipriCallable nuCallable = new HipriCallable(hipri);
                 hipri = null;
                 nuCallable.setSourceAndSink(ss);
-                busyHipries.offer(executorService.submit(nuCallable));
+                busyMaxFlow.offer(executorService.submit(nuCallable));
             }
             return cut;
         }
     }
 
-    private class SS {
-        final V source;
-        final V sink;
 
-        public SS(V source, V sink) {
-            this.source = source;
-            this.sink = sink;
-        }
-    }
 
 
 }

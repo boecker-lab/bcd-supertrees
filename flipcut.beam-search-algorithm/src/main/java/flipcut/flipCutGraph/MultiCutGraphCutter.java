@@ -1,8 +1,6 @@
 package flipcut.flipCutGraph;
 
 import flipcut.costComputer.CostComputer;
-import flipcut.mincut.DirectedCutGraph;
-import flipcut.mincut.MultiThreadedCutGraph;
 import flipcut.mincut.bipartition.BasicCut;
 import flipcut.mincut.goldberg_tarjan.GoldbergTarjanCutGraph;
 import flipcut.model.Cut;
@@ -83,7 +81,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                     //todo implement
                     break;
                 }
-                case HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW: {
+                case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
                     createGoldbergTarjanCharacterWeights(cutGraph);
                     break;
                 }
@@ -115,7 +113,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                                 //todo implement
                                 break;
                             }
-                            case HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW: {
+                            case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
                                 weight = CostComputer.ACCURACY * INFINITY;
                                 break;
                             }
@@ -144,7 +142,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                 // compute mincut an put it to results
                 BasicCut<FlipCutNodeSimpleWeight> tmpCut = cutGraph.calculateMinSTCut(randomS, randomT);
                 long minCutValue = tmpCut.minCutValue;
-                Set<FlipCutNodeSimpleWeight> setT = new HashSet<FlipCutNodeSimpleWeight>(tmpCut.getSinkSet());
+                Set<FlipCutNodeSimpleWeight> setT = new HashSet<FlipCutNodeSimpleWeight>(tmpCut.getCutSet());
                 setT.addAll(tSet);
 
                 currentCut = new VaziraniNode(setT, minCutValue, k + 1);
@@ -231,7 +229,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                 //todo implement
                 break;
             }
-            case HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW: {
+            case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
                 cutGraph = new GoldbergTarjanCutGraph<>();
                 createGoldbergTarjanCharacterWeights(cutGraph);
                 createTarjanGoldbergHyperGraph(cutGraph);
@@ -241,7 +239,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
 
 
         minCut = cutGraph.calculateMinSTCut(taxa.get(0), taxa.get(1));
-        lightestCut = new VaziraniNode(new HashSet<FlipCutNodeSimpleWeight>(minCut.getSinkSet()), minCut.minCutValue, 1);
+        lightestCut = new VaziraniNode(new HashSet<FlipCutNodeSimpleWeight>(minCut.getCutSet()), minCut.minCutValue, 1);
         initCuts[0] = lightestCut;
 
         //ATTENTION this is  the undirected graph version as tweak for flipCut Graph
@@ -269,7 +267,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                     //todo implement
                     break;
                 }
-                case HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW: {
+                case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
                     createGoldbergTarjanCharacterWeights(cutGraph);
                     break;
                 }
@@ -295,7 +293,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                             //todo implement
                             break;
                         }
-                        case HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW: {
+                        case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
                             weight = CostComputer.ACCURACY * INFINITY;
                             break;
                         }
@@ -315,7 +313,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
             }
 
             minCut = cutGraph.calculateMinSTCut(s, t);
-            currentNode = new VaziraniNode(new HashSet<FlipCutNodeSimpleWeight>(minCut.getSinkSet()), minCut.minCutValue, 1);
+            currentNode = new VaziraniNode(new HashSet<FlipCutNodeSimpleWeight>(minCut.getCutSet()), minCut.minCutValue, 1);
             initCuts[j] = currentNode;
             //save lightest cut for HEAP init
             if (currentNode.cutWeight < lightestCut.cutWeight) lightestCut = currentNode;

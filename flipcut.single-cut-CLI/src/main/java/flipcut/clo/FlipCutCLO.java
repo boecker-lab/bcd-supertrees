@@ -60,7 +60,7 @@ public abstract class FlipCutCLO<A extends AbstractFlipCut>{
         if (algo == Algorithm.FC)
             setGraphType(CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
         else
-            setGraphType(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW);
+            setGraphType(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
     }//default value is true
 
     //Weighting

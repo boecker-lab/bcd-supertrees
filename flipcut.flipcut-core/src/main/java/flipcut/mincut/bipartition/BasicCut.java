@@ -8,15 +8,15 @@ import java.util.*;
 public class BasicCut<V> implements Comparable<BasicCut<V>> {
     public final static BasicCut MAX_CUT_DUMMY = new BasicCut(null,Long.MAX_VALUE);
 
-    protected final LinkedHashSet<V> sinkSet;
+    protected final LinkedHashSet<V> cutSet;
 
     public final V source;
     public final V sink;
     public final long minCutValue;
 
 
-    public BasicCut(LinkedHashSet<V> sinkSet, V source, V sink, long minCutValue) {
-        this.sinkSet = sinkSet;
+    public BasicCut(LinkedHashSet<V> cutSet, V source, V sink, long minCutValue) {
+        this.cutSet = cutSet;
         this.source = source;
         this.sink = sink;
         this.minCutValue = minCutValue;
@@ -26,8 +26,8 @@ public class BasicCut<V> implements Comparable<BasicCut<V>> {
         this(part,null,null,minCutValue);
     }
 
-    public LinkedHashSet<V> getSinkSet() {
-        return sinkSet;
+    public LinkedHashSet<V> getCutSet() {
+        return cutSet;
     }
 
     @Override

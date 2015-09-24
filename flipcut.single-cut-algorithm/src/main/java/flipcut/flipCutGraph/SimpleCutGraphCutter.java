@@ -3,8 +3,8 @@ package flipcut.flipCutGraph;
 
 import flipcut.costComputer.CostComputer;
 import flipcut.mincut.CutGraph;
-import flipcut.mincut.DirectedCutGraph;
-import flipcut.mincut.MultiThreadedCutGraph;
+import flipcut.mincut.MaxFlowCutGraph;
+import flipcut.mincut.ahuja_orlin.AhujaOrlinCutGraph;
 import flipcut.mincut.bipartition.BasicCut;
 import flipcut.mincut.goldberg_tarjan.GoldbergTarjanCutGraph;
 
@@ -30,7 +30,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     }
 
     //################### graph creation ######################
-    protected void createTarjanGoldbergHyperGraph(GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
+    protected void createTarjanGoldbergHyperGraph(MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         addTaxa(cutGraph);
 
         // add edges
@@ -44,7 +44,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         }
     }
 
-    protected void createTarjanGoldbergHyperGraphMerged(GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
+    protected void createTarjanGoldbergHyperGraphMerged(MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         addTaxa(cutGraph);
         Set<FlipCutNodeSimpleWeight> edgesAlreadySet = new HashSet<FlipCutNodeSimpleWeight>(dummyToMerged.size());
         // add edges
@@ -74,7 +74,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     }
 
     //helper method for the goldberg tarjan graphs
-    protected void createTarjanGoldbergHyperGraphTaxaMerged(GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph, Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> taxonToMerged, Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> taxonGroupTotrivialcharacters) {
+    protected void createTarjanGoldbergHyperGraphTaxaMerged(MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph, Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> taxonToMerged, Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> taxonGroupTotrivialcharacters) {
         //init local merge map
         int size = source.characters.size();
         dummyToMerged = new HashMap<>(size);
@@ -161,7 +161,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     }
 
 
-    protected void createGoldbergTarjan(GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
+    protected void createGoldbergTarjan(MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         addTaxa(cutGraph);
         // add edges
         for (FlipCutNodeSimpleWeight character : source.characters) {
@@ -174,7 +174,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         //return cutGraph;
     }
 
-    protected void createGoldbergTarjanMerged(GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
+    protected void createGoldbergTarjanMerged(MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         addTaxa(cutGraph);
         Set<FlipCutNodeSimpleWeight> edgesAlreadySet = new HashSet<FlipCutNodeSimpleWeight>(dummyToMerged.size());
 
@@ -229,7 +229,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         return characterCap;
     }
 
-    protected void createGoldbergTarjanCharacterWeights(GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
+    protected void createGoldbergTarjanCharacterWeights(MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         // add characters, character clones and edges between them
         for (FlipCutNodeSimpleWeight character : source.characters) {
             cutGraph.addNode(character);
@@ -243,7 +243,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
 
     //helper method for the goldberg tarjan graphs
-    protected void createGoldbergTarjanCharacterWeightsMerged(GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
+    protected void createGoldbergTarjanCharacterWeightsMerged(MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         Set<FlipCutNodeSimpleWeight> inGraph = new HashSet<FlipCutNodeSimpleWeight>();
         // add characters, character clones and edges between them
         for (FlipCutNodeSimpleWeight character : source.characters) {
@@ -265,7 +265,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
 
     //micut calculation
-    protected BasicCut<FlipCutNodeSimpleWeight> calculateTarjanMinCut(GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
+    protected BasicCut<FlipCutNodeSimpleWeight> calculateTarjanMinCut(MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         // get the mincut, fix s iterate over t
         BasicCut<FlipCutNodeSimpleWeight> minCut = BasicCut.MAX_CUT_DUMMY;
         try {
@@ -288,140 +288,132 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
     @Override
     protected void calculateMinCut() {
-        GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph;
-        switch (type) {
-            case MAXFLOW_TARJAN_GOLDBERG:
+        MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph;
+        if (type == CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG || type == CutGraphTypes.MAXFLOW_AHOJI_ORLIN) {
 
-            {
-//              if (source.GLOBAL_CHARACTER_MERGE) {
-                if (false) {
-                    System.out.println("WARNING: static character map is not implemented for edge! The slower NON STATIC Version is used instead");
+            if (type == CutGraphTypes.MAXFLOW_AHOJI_ORLIN)
+                cutGraph = new AhujaOrlinCutGraph<>();
+            else
+                cutGraph = new GoldbergTarjanCutGraph<>();
+            //              if (source.GLOBAL_CHARACTER_MERGE) {
+            if (false) {
+                System.out.println("WARNING: static character map is not implemented for edge! The slower NON STATIC Version is used instead");
 //                    //todo make ompatible
-                    // int merged = buildCharacterMergingMap(source);
+                // int merged = buildCharacterMergingMap(source);
 //                    if (DEBUG) System.out.println(merged + "characters merged before mincut");
-                    cutGraph = new GoldbergTarjanCutGraph<>();
-                    createGoldbergTarjanCharacterWeightsMerged(cutGraph);
-                    createGoldbergTarjanMerged(cutGraph);
-                    BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph);
+                createGoldbergTarjanCharacterWeightsMerged(cutGraph);
+                createGoldbergTarjanMerged(cutGraph);
+                BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph);
 
-                    mincut = new LinkedHashSet<>(source.characters.size() + source.taxa.size());
-                    for (FlipCutNodeSimpleWeight node : newMinCut.getSinkSet()) {
-                        Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
-                        if (realNodes == null) {
-                            mincut.add(node);//has to be a taxon
-                        } else {
-                            mincut.addAll(realNodes);
-                        }
+                mincut = new LinkedHashSet<>(source.characters.size() + source.taxa.size());
+                for (FlipCutNodeSimpleWeight node : newMinCut.getCutSet()) {
+                    Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
+                    if (realNodes == null) {
+                        mincut.add(node);//has to be a taxon
+                    } else {
+                        mincut.addAll(realNodes);
                     }
-                } else {
-                    cutGraph = new GoldbergTarjanCutGraph<>();
-                    createGoldbergTarjanCharacterWeights(cutGraph);
-                    createGoldbergTarjan(cutGraph);
-                    mincut = calculateTarjanMinCut(cutGraph).getSinkSet();
                 }
-
-
-                break;
+            } else {
+                createGoldbergTarjanCharacterWeights(cutGraph);
+                createGoldbergTarjan(cutGraph);
+                mincut = calculateTarjanMinCut(cutGraph).getCutSet();
             }
-          /*  case HYPERGRAPH_MINCUT: {
-                //Todo implement if hypergraph mincut immplemetation is avalible
-                if (mergeCharacters) {
 
-                } else {
+        } else if (type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG || type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN) {
+            if (type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN)
+                cutGraph = new AhujaOrlinCutGraph<>();
+            else
+                cutGraph = new GoldbergTarjanCutGraph<>();
 
+            if (source.SCAFF_TAXA_MERGE && !source.activePartitions.isEmpty()) {
+                //create mapping
+                //todo optimize all these mapping stuff if it works well
+                Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> taxonToDummy = new HashMap<>();
+                Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToTaxa = new HashMap<>();
+                Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> trivialcharacters = new HashMap<>();
+
+                int mergedTaxonIndex = 0;
+                for (FlipCutNodeSimpleWeight scaffChar : source.activePartitions) {
+                    FlipCutNodeSimpleWeight mergeTaxon = new FlipCutNodeSimpleWeight("TaxonGroup_" + mergedTaxonIndex);
+                    for (FlipCutNodeSimpleWeight taxon : scaffChar.edges) {
+                        taxonToDummy.put(taxon, mergeTaxon);
+                    }
+                    dummyToTaxa.put(mergeTaxon, scaffChar.edges);
+                    mergedTaxonIndex++;
                 }
-                break;
-            }*/
-            case HYPERGRAPH_MINCUT_VIA_TARJAN_MAXFLOW: {
-                if (source.SCAFF_TAXA_MERGE && !source.activePartitions.isEmpty()) {
-                    //create mapping
-                    //todo optimize all these mapping stuff if it works well
-                    Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> taxonToDummy = new HashMap<>();
-                    Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToTaxa = new HashMap<>();
-                    Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> trivialcharacters = new HashMap<>();
-
-                    int mergedTaxonIndex = 0;
-                    for (FlipCutNodeSimpleWeight scaffChar : source.activePartitions) {
-                        FlipCutNodeSimpleWeight mergeTaxon = new FlipCutNodeSimpleWeight("TaxonGroup_" + mergedTaxonIndex);
-                        for (FlipCutNodeSimpleWeight taxon : scaffChar.edges) {
-                            taxonToDummy.put(taxon, mergeTaxon);
-                        }
-                        dummyToTaxa.put(mergeTaxon, scaffChar.edges);
-                        mergedTaxonIndex++;
+                for (FlipCutNodeSimpleWeight taxon : source.taxa) {
+                    if (!taxonToDummy.containsKey(taxon)) {
+                        taxonToDummy.put(taxon, taxon);
                     }
-                    for (FlipCutNodeSimpleWeight taxon : source.taxa) {
-                        if (!taxonToDummy.containsKey(taxon)) {
-                            taxonToDummy.put(taxon, taxon);
-                        }
-                    }
-
-                    if (taxonToDummy.containsKey(null) || taxonToDummy.containsValue(null)) {
-                        System.out.println("null already here");
-                    }
-
-                    //create cutgraph
-                    cutGraph = new GoldbergTarjanCutGraph<>();
-                    createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, taxonToDummy, trivialcharacters);
-
-                    //calculate mincut
-                    BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph);
-
-                    //undo mapping
-                    mincut = new LinkedHashSet<>(source.characters.size() + source.taxa.size());
-                    for (FlipCutNodeSimpleWeight node : newMinCut.getSinkSet()) {
-                        //undo taxa mapping
-                        if (node.isTaxon()) {
-                            Set<FlipCutNodeSimpleWeight> trivials = trivialcharacters.get(node);
-                            if (trivials != null) {
-                                for (FlipCutNodeSimpleWeight trivial : trivials) {
-                                    mincut.addAll(source.dummyToCharacters.get(trivial));
-                                }
-
-                            }
-                            Set<FlipCutNodeSimpleWeight> realT = dummyToTaxa.get(node);
-                            if (realT != null)
-                                mincut.addAll(realT);
-                            else
-                                mincut.add(node);
-
-                            //undo character mapping
-                        } else {
-                            Set<FlipCutNodeSimpleWeight> realNodes = new HashSet<>(source.characters.size());
-                            for (FlipCutNodeSimpleWeight realNode : dummyToMerged.get(node)) {
-                                realNodes.addAll(source.dummyToCharacters.get(realNode));
-                            }
-                            mincut.addAll(realNodes);
-                        }
-                    }
-                } else if (source.GLOBAL_CHARACTER_MERGE) {
-                    dummyToMerged = source.dummyToCharacters;
-                    nodeToDummy = source.characterToDummy;
-                    int merged = nodeToDummy.size() - dummyToMerged.size();
-                    if (DEBUG) System.out.println(merged + "characters merged before mincut");
-
-                    cutGraph = new GoldbergTarjanCutGraph<>();
-                    createTarjanGoldbergHyperGraphMerged(cutGraph);
-                    BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph);
-
-                    mincut = new LinkedHashSet<>(source.characters.size() + source.taxa.size());
-                    for (FlipCutNodeSimpleWeight node : newMinCut.getSinkSet()) {
-                        Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
-
-                        if (realNodes == null) {
-                            mincut.add(node); // node has to be a taxon
-                        } else {
-                            mincut.addAll(realNodes);
-                        }
-                    }
-                } else {
-                    cutGraph = new GoldbergTarjanCutGraph<>();
-                    createGoldbergTarjanCharacterWeights(cutGraph);
-                    createTarjanGoldbergHyperGraph(cutGraph);
-                    mincut = calculateTarjanMinCut((GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight>) cutGraph).getSinkSet();
                 }
-                break;
+
+                if (taxonToDummy.containsKey(null) || taxonToDummy.containsValue(null)) {
+                    System.out.println("null already here");
+                }
+
+                //create cutgraph
+//                cutGraph = new GoldbergTarjanCutGraph<>();
+                createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, taxonToDummy, trivialcharacters);
+
+                //calculate mincut
+                BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph);
+
+                //undo mapping
+                mincut = new LinkedHashSet<>(source.characters.size() + source.taxa.size());
+                for (FlipCutNodeSimpleWeight node : newMinCut.getCutSet()) {
+                    //undo taxa mapping
+                    if (node.isTaxon()) {
+                        Set<FlipCutNodeSimpleWeight> trivials = trivialcharacters.get(node);
+                        if (trivials != null) {
+                            for (FlipCutNodeSimpleWeight trivial : trivials) {
+                                mincut.addAll(source.dummyToCharacters.get(trivial));
+                            }
+
+                        }
+                        Set<FlipCutNodeSimpleWeight> realT = dummyToTaxa.get(node);
+                        if (realT != null)
+                            mincut.addAll(realT);
+                        else
+                            mincut.add(node);
+
+                        //undo character mapping
+                    } else {
+                        Set<FlipCutNodeSimpleWeight> realNodes = new HashSet<>(source.characters.size());
+                        for (FlipCutNodeSimpleWeight realNode : dummyToMerged.get(node)) {
+                            realNodes.addAll(source.dummyToCharacters.get(realNode));
+                        }
+                        mincut.addAll(realNodes);
+                    }
+                }
+            } else if (source.GLOBAL_CHARACTER_MERGE) {
+                dummyToMerged = source.dummyToCharacters;
+                nodeToDummy = source.characterToDummy;
+                int merged = nodeToDummy.size() - dummyToMerged.size();
+                if (DEBUG) System.out.println(merged + "characters merged before mincut");
+
+//                cutGraph = new GoldbergTarjanCutGraph<>();
+                createTarjanGoldbergHyperGraphMerged(cutGraph);
+                BasicCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph);
+
+                mincut = new LinkedHashSet<>(source.characters.size() + source.taxa.size());
+                for (FlipCutNodeSimpleWeight node : newMinCut.getCutSet()) {
+                    Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
+
+                    if (realNodes == null) {
+                        mincut.add(node); // node has to be a taxon
+                    } else {
+                        mincut.addAll(realNodes);
+                    }
+                }
+            } else {
+                cutGraph = new GoldbergTarjanCutGraph<>();
+                createGoldbergTarjanCharacterWeights(cutGraph);
+                createTarjanGoldbergHyperGraph(cutGraph);
+                mincut = calculateTarjanMinCut(cutGraph).getCutSet();
             }
         }
+
     }
 
     //merges characters with same edgeset and sums up the weights to reduce node and edgeset before mincut!

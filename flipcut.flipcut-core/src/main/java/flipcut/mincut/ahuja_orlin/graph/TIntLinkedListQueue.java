@@ -1,4 +1,4 @@
-package flipcut.mincut.ahuja_orlin.algorithms;
+package flipcut.mincut.ahuja_orlin.graph;
 
 import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.queue.TIntQueue;

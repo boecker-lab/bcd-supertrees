@@ -21,9 +21,6 @@ package flipcut.mincut.goldberg_tarjan;/*
 import flipcut.mincut.bipartition.BasicCut;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -59,14 +56,15 @@ public class GoldbergTarjanCutGraphTest {
 
         BasicCut cut = hp.calculateMinSTCut(1, 8);
         System.out.println(cut.minCutValue);
+        System.out.println(cut.getCutSet());
 
 
         assertEquals(4, cut.minCutValue);
-        assertEquals(4, cut.getSinkSet().size());
-        assertTrue(cut.getSinkSet().contains(5));
-        assertTrue(cut.getSinkSet().contains(6));
-        assertTrue(cut.getSinkSet().contains(7));
-        assertTrue(cut.getSinkSet().contains(8));
+        assertEquals(4, cut.getCutSet().size());
+        assertTrue(cut.getCutSet().contains(5));
+        assertTrue(cut.getCutSet().contains(6));
+        assertTrue(cut.getCutSet().contains(7));
+        assertTrue(cut.getCutSet().contains(8));
 
         /*
         p max 8 11
