@@ -139,7 +139,21 @@ public abstract class FlipCutCLO<A extends AbstractFlipCut>{
     public boolean noRootingOptimization = false;
 
     @Option(name = "-v", aliases = "--verbose", usage = "Minimal console output")
-    public boolean verbose = false;
+    public void setVerbose(boolean verbose){
+        algorithm.setVerbose(verbose);
+        algorithm.setPrintProgress(!verbose);
+    }
+    public boolean isVerbose(){
+        return algorithm.isVerbose();
+    }
+
+    @Option(name = "-V", aliases = "--progress", usage = "Enable progress bar")
+    public void setPrintProgress(boolean printProgress){
+        algorithm.setPrintProgress(printProgress);
+    }
+    public boolean isPrintProgress(){
+        return algorithm.isPrintProgress();
+    }
 
     @Option(name = "-i", aliases = "--insufficient", usage = "Skip if input trees have insufficient taxa overlap", hidden = true)
     public boolean skipInsufficientOverlapInstances = false; //todo warn if taxa hav insufficient taxa overlap taxa overlap check

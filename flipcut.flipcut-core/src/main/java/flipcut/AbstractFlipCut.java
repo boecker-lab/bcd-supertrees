@@ -28,17 +28,17 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
     /**
      * number of thread that should be used 0 -> automatic
      */
-    protected boolean printProgress = false;
+    protected boolean printProgress = false;//todo merge verbose and print progress
+    /**
+     * Verbose logs
+     */
+    protected boolean verbose = false;
 
     protected C.CutGraphTypes type;
     /**
      * Use edge weights
      */
     protected FlipCutWeights.Weights weights = FlipCutWeights.Weights.UNIT_COST;
-    /**
-     * Verbose logs
-     */
-    protected boolean verbose = false;
     /**
      * Set minimum bootstrap value of a clade to be part of the analysis ()
      */
@@ -89,6 +89,19 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
         this.verbose = verbose;
     }
 
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    public void setPrintProgress(boolean printProgress) {
+        this.printProgress = printProgress;
+    }
+
+    public boolean isPrintProgress() {
+        return printProgress;
+    }
+
+
     /**
      * Sets the edge weights function
      *
@@ -125,10 +138,6 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
         return bootstrapThreshold;
     }
 
-    public void setPrintProgress(boolean printProgress) {
-        this.printProgress = printProgress;
-    }
-
     public void setNumberOfThreads(int numberOfThreads) {
         this.numberOfThreads = numberOfThreads;
     }
@@ -136,4 +145,6 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
     protected abstract T createInitGraph(CostComputer costsComputer);
 
     protected abstract CostComputer initCosts(List<Tree> inputTrees, Tree scaffoldTree);
+
+
 }

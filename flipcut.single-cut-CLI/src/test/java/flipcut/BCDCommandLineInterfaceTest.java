@@ -138,7 +138,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
         parser.parseArgument(test_String);
 
         //assert
-        assertEquals(true, verbose);
+        assertEquals(true, isVerbose());
 
     }
 
