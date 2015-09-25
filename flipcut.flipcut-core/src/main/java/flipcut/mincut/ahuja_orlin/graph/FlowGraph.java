@@ -7,7 +7,10 @@ import gnu.trove.queue.TIntQueue;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Semplice implementazione di un grafo orientato e pesato per problemi di flusso con liste di adiacenza e incidenza
@@ -20,19 +23,16 @@ public class FlowGraph {
     private TIntObjectHashMap<LinkedList<Edge>> adjacencies = new TIntObjectHashMap<LinkedList<Edge>>();
     // id nodo -> lista di archi entranti
     private TIntObjectHashMap<LinkedList<Edge>> incidences = new TIntObjectHashMap<LinkedList<Edge>>();
-    // id nodo -> nodo
-//	private Map<Integer, Node> nodes = new HashMap<Integer, Node>();
     // nodo sorgente
     private int source = NULL;
     // nodo pozzo
     private int sink = NULL;
-
-    private DistanceLabels labels;
-    private final List<Edge> backEdges = new LinkedList<>();
-
+    // value of the maximum flow
     private double maximumFlow = Double.NEGATIVE_INFINITY;
 
-
+    //Algorithm data structures
+    private DistanceLabels labels;
+    private final List<Edge> backEdges = new LinkedList<>();
 
 
     public void addNode(int n) {
@@ -174,9 +174,9 @@ public class FlowGraph {
         incidences.clear();
         maximumFlow = Double.NEGATIVE_INFINITY;
         backEdges.clear();
-        labels=null;
-        source=NULL;
-        sink=NULL;
+        labels = null;
+        source = NULL;
+        sink = NULL;
     }
 
     /**
@@ -264,8 +264,8 @@ public class FlowGraph {
         return "Adiacenze: " + adjacencies.toString() + "\nIncidenze: " + incidences.toString();
     }
 
-    //Algorithmic Part
 
+    //Algorithmic Part
 
     /**
      * Calcola il massimo flusso inviabile dal nodo source al nodo sink sul grafo g
@@ -302,28 +302,22 @@ public class FlowGraph {
     }
 
     public TIntHashSet calculateSTCut() {
-//        System.out.println("Max Flow...");
         calculateSTFlow();
-//        System.out.println("...Max Flow DONE!");
-        final TIntHashSet sourceSet =  new TIntHashSet(numNodes());
-//        System.out.println("Searching CUT...");
+        final TIntHashSet sourceSet = new TIntHashSet(numNodes());
         sourceSet.add(source);
         dfs(sourceSet, adjacencies.get(source));
-//        System.out.println("DONE!!!");
         return sourceSet;
     }
 
-    private void dfs(final TIntHashSet sourceSet, LinkedList<Edge> edges){
+    private void dfs(final TIntHashSet sourceSet, LinkedList<Edge> edges) {
         for (Edge edge : edges) {
             int target = edge.dest;
-            if (edge.getResidualCap() != 0 && !sourceSet.contains(target)){
+            if (edge.getResidualCap() != 0 && !sourceSet.contains(target)) {
                 sourceSet.add(target);
-                dfs(sourceSet,adjacencies.get(target));
+                dfs(sourceSet, adjacencies.get(target));
             }
         }
     }
-
-
 
 
     /**
@@ -354,13 +348,11 @@ public class FlowGraph {
 
         while (!queue.isEmpty()) {
             int j = queue.poll();
-            //System.out.println("Nj: "+j);
 
             for (Edge e : incident(j)) {
                 int i = e.getSource();
                 if (!visited.contains(i)) {
                     labels.setLabel(i, labels.getLabel(j) + 1);
-                    //		System.out.println("d[" + i + "] = " + labels.getLabel(i));
                     visited.add(i);
                     queue.offer(i);
                 }

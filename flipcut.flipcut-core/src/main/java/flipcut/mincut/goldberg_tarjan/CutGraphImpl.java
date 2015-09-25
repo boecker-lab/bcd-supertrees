@@ -29,24 +29,23 @@ import java.util.concurrent.Callable;
  * <p>
  * See:
  * <pre>
-  Goldberg and Tarjan, "A New Approach to the Maximum Flow Problem,"
-  J. ACM Vol. 35, 921--940, 1988
- </pre>and
+ * Goldberg and Tarjan, "A New Approach to the Maximum Flow Problem,"
+ * J. ACM Vol. 35, 921--940, 1988
+ * </pre>and
  * <pre>
-  Cherkassky and Goldberg, "On Implementing Push-Relabel Method for the
-  Maximum Flow Problem," Proc. IPCO-4, 157--171, 1995.</pre>
+ * Cherkassky and Goldberg, "On Implementing Push-Relabel Method for the
+ * Maximum Flow Problem," Proc. IPCO-4, 157--171, 1995.</pre>
  * <br>
  * We use the same data structures here, but the structure is not that obvious, so
  * please use {@link flipcut.mincut.goldberg_tarjan.GoldbergTarjanCutGraph} as access point and
  * to call functions in this class.
- *
  *
  * @author Thasso Griebel (thasso.griebel@gmail.com)
  */
 /*
 This class is not cleaned up ! This is more or less a translation from the C code, so don't expect too much ;)
  */
-class CutGraphImpl{
+class CutGraphImpl {
     //#define MAXLONG 1073741824
     private static final long MAXLONG = Long.MAX_VALUE - 1;
 
@@ -68,8 +67,6 @@ class CutGraphImpl{
     Bucket[] buckets;             /* array of buckets */
     Node source;              /* source node pointer */
     Node sink;                /* sink node pointer */
-//node   **queue;              /* queue for BFS */
-//node   **qHead, **qTail, **qLast;     /* queue pointers */
     long dMax;                 /* maximum label */
     long aMax;                 /* maximum actie node label */
     long aMin;                 /* minimum active node label */
@@ -79,7 +76,6 @@ class CutGraphImpl{
     long updateCnt = 0;       /* number of updates */
     long gapCnt = 0;           /* number of gaps */
     long gNodeCnt = 0;           /* number of nodes after gap */
-    float t, t2;                 /* for saving times */
     long workSinceUpdate = 0;      /* the number of arc scans since last update */
     float globUpdtFreq;          /* global update frequency */
 
@@ -155,13 +151,13 @@ class CutGraphImpl{
         qInit();
         */
         //buckets = (bucket*) calloc ( n+2, sizeof (bucket) );        
-        if(buckets == null){
+        if (buckets == null) {
             buckets = new Bucket[(int) (n + 2)];
             for (int i = 0; i < buckets.length; i++) {
                 buckets[i] = new Bucket();
                 buckets[i].index = i;
             }
-        }else{
+        } else {
             for (int i = 0; i < buckets.length; i++) {
                 buckets[i].index = i;
                 buckets[i].firstActive = null;
@@ -169,11 +165,6 @@ class CutGraphImpl{
             }
 
         }
-
-
-
-//  sentinelNode = nodes + n;
-//  sentinelNode->first = arcs + 2*m;
 
         return (0);
 
@@ -221,7 +212,6 @@ class CutGraphImpl{
 
 
         /*  setup labels and buckets */
-        //l = buckets + 1;
         Bucket l = buckets[1];
 
         aMax = 0;
@@ -248,10 +238,6 @@ class CutGraphImpl{
             }
         }
         dMax = 1;
-
-        //  dMax = n-1;
-        //  flow = 0.0;
-
     } /* end of init */
 
 
@@ -275,10 +261,8 @@ class CutGraphImpl{
             i.d = n;
         }
 
-
         sink.d = 0;
 
-        //for (l = buckets; l <= buckets + dMax; l++) {
         for (int l = 0; l <= dMax; l++) {
             buckets[l].firstActive = null; // was sentinelNode
             buckets[l].firstInactive = null; // was sentinelNode
@@ -368,22 +352,18 @@ class CutGraphImpl{
     } /* end of global update */
 
 
-/* second stage -- preflow to flow */
-
-    void stageTwo()
+    /* second stage -- preflow to flow */
 /*
    do dsf in the reverse flow graph from nodes with excess
    cancel cycles if found
    return excess flow in topological order
 */
-
 /*
    i->d is used for dfs labels
    i->bNext is used for topological order list
    buckets[i-nodes]->firstActive is used for DSF tree
 */
-
-    {
+    void stageTwo() {
         //node *i, *j, *tos, *bos, *restart, *r;
         //arc *a;
         long delta;
@@ -416,10 +396,8 @@ class CutGraphImpl{
                 r = i;
                 r.d = GREY;
                 do {
-                    //for ( ; i->current != (i+1)->first; i->current++) {
                     for (; i.current != i.arcs.length; i.current++) {
                         Arc a = i.current();
-                        //if (( cap[a - arcs] == 0 ) && ( a -> resCap > 0 )) {
                         if ((a.cap == 0) && (a.resCap > 0)) {
                             Node j = a.head;
                             if (j.d == WHITE) {
@@ -470,7 +448,6 @@ class CutGraphImpl{
                         }
                     }
 
-                    //if (i->current == (i+1)->first) {
                     if (i.current == i.arcs.length) {
                         /* scan of i complete */
                         i.d = BLACK;
@@ -483,7 +460,6 @@ class CutGraphImpl{
                                 tos = i;
                             }
                         }
-
                         if (i != r) {
                             i = buckets[i.bucketIndex].firstActive;
                             i.current++;
@@ -501,7 +477,6 @@ class CutGraphImpl{
                 int ac = 0;
                 while (i.excess > 0) {
                     Arc a = i.arcs[ac];
-                    //if (( cap[a - arcs] == 0 ) && ( a -> resCap > 0 )) {
                     if ((a.cap == 0) && (a.resCap > 0)) {
                         if (a.resCap < i.excess)
                             delta = a.resCap;
@@ -562,25 +537,14 @@ class CutGraphImpl{
         Bucket l;
         Node i;
         long r;           /* index of the bucket before l  */
-        int cc;          /* cc = 1 if no nodes with positive excess before
-                  the gap */
+        int cc;          /* cc = 1 if no nodes with positive excess before */
 
+//       the gap
         gapCnt++;
-        //r = ( emptyB - buckets ) - 1;
         r = emptyB.index - 1;
 
         /* set labels of nodes beyond the gap to "infinity" */
-        //for ( l = emptyB + 1; l <= buckets + dMax; l ++ ) {
-
-        //for ( l = emptyB + 1; l <= buckets + dMax; l ++ ) {
         for (int index = emptyB.index + 1; index <= dMax; index++) {
-            /* this does nothing for high level selection
-            for (i = l -> firstActive; i != sentinelNode; i = i -> bNext) {
-              i -> d = n;
-              gNodeCnt++;
-            }
-            l -> firstActive = sentinelNode;
-            */
             l = buckets[index];
             for (i = l.firstInactive; i != null; i = i.bNext) {
                 i.d = n;
@@ -654,7 +618,6 @@ class CutGraphImpl{
         assert (i.excess > 0);
         assert (i != sink);
         do {
-
             jD = i.d - 1;
             //l = buckets + i->d;
             l = buckets[((int) i.d)];
@@ -718,26 +681,14 @@ class CutGraphImpl{
         } while (true);
     }
 
-/* first stage  -- maximum preflow*/
 
-    void stageOne()
-
-    {
-
+    /* first stage  -- maximum preflow*/
+    void stageOne() {
         Node i;
-        Bucket l;             /* current bucket */
-
-
-        //#if defined(INIT_UPDATE) || defined(OLD_INIT) || defined(WAVE_INIT)
-        //  globalUpdate ();
-        //#endif
+        /* current bucket */
+        Bucket l;
 
         workSinceUpdate = 0;
-
-        //#ifdef WAVE_INIT
-        //  wave();
-        //#endif
-
         /* main loop */
         while (aMax >= aMin) {
             //l = buckets + aMax;
@@ -837,7 +788,7 @@ class CutGraphImpl{
             }
         }
 
-        LinkedHashSet<Object> cut =  new LinkedHashSet<>();
+        LinkedHashSet<Object> cut = new LinkedHashSet<>();
         /// original :
         for (Node j : nodes) {
             if (j.d < n) {
@@ -845,148 +796,6 @@ class CutGraphImpl{
             }
         }
         return cut;
-    }
-
-    /*
-    This was the coriginal main method --- somehow
-     */
-    /*void run(Node source, Node sink) {
-
-
-        long sum;
-        Bucket l;
-
-
-        globUpdtFreq = GLOB_UPDT_FREQ;
-        this.source = source;
-        this.sink = sink;
-
-        System.out.printf("c\nc hi_pr version 3.6\n");
-        System.out.printf("c Copyright C by IG Systems, igsys@eclipse.net\nc\n");
-
-        //parse( &n, &m, &nodes, &arcs, &cap, &source, &sink, &nMin );
-
-        System.out.printf("c nodes:       %d\nc arcs:        %d\nc\n", n, m);
-
-        allocDS();
-
-        t = timer();
-        t2 = t;
-
-        init();
-        stageOne();
-
-        t2 = timer() - t2;
-
-        System.out.printf("c flow:       %f\n", flow);
-
-        //#ifndef CUT_ONLY
-        stageTwo();
-
-        t = timer() - t;
-
-        System.out.printf("c time:        %f\n", t);
-
-        //#endif
-
-        System.out.printf("c cut tm:      %f\n", t2);
-
-        *//* check if you have a flow (pseudoflow) *//*
-        *//* check arc flows *//*
-        for (Node i : nodes) {
-            for (Arc a : i.arcs) {
-                if (a.cap > 0) *//* original arc *//*
-                    if ((a.resCap + a.rev.resCap != a.cap)
-                            || (a.resCap < 0)
-                            || (a.rev.resCap < 0)) {
-                        System.err.printf("ERROR: bad arc flow\n");
-                        System.exit(2);
-                    }
-            }
-        }
-
-        *//* check conservation *//*
-        for (Node i : nodes)
-            if ((i != source) && (i != sink)) {
-                *//*
-                #ifdef CUT_ONLY
-                  if (i->excess < 0) {
-                printf("ERROR: nonzero node excess\n");
-                exit(2);
-                  }
-                #else
-                *//*
-                if (i.excess != 0) {
-                    System.err.printf("ERROR: nonzero node excess\n");
-                    System.exit(2);
-                }
-
-
-                sum = 0;
-
-                for (Arc a : i.arcs) {
-
-                    if (a.cap > 0) *//* original arc *//*
-                        sum -= a.cap - a.resCap;
-                    else
-                        sum += a.resCap;
-                }
-
-                if (i.excess != sum) {
-                    System.err.printf("ERROR: conservation constraint violated\n");
-                    System.exit(2);
-                }
-            }
-
-        *//* check if mincut is saturated *//*
-        aMax = dMax = 0;
-        for (Bucket bucket : buckets) {
-            bucket.firstActive = null;
-            bucket.firstInactive = null;
-        }
-//  for (l = buckets; l < buckets + n; l++) {
-//    l->firstActive = sentinelNode;
-//    l->firstInactive = sentinelNode;
-//  }
-        globalUpdate();
-        if (source.d < n) {
-            System.err.printf("ERROR: the solution is not optimal\n");
-            System.exit(2);
-        }
-
-        System.out.printf("c\nc Solution checks (feasible and optimal)\nc\n");
-
-
-        System.out.printf("c pushes:      %d\n", pushCnt);
-        System.out.printf("c relabels:    %d\n", relabelCnt);
-        System.out.printf("c updates:     %d\n", updateCnt);
-        System.out.printf("c gaps:        %d\n", gapCnt);
-        System.out.printf("c gap nodes:   %d\n", gNodeCnt);
-        System.out.printf("c\n");
-
-
-        System.out.printf("c flow values\n");
-        for (Node i : nodes) {
-            //ni = nNode(i);
-            for (Arc a : i.arcs) {
-                //na = nArc(a);
-                if (a.cap > 0)
-                    System.out.printf("f %s %s %d\n", i, a.head, a.cap - (a.resCap));
-            }
-        }
-        System.out.printf("c\n");
-
-
-        globalUpdate();
-        System.out.printf("c nodes on the sink side\n");
-        for (Node j : nodes)
-            if (j.d < n)
-                System.out.printf("c %s\n", j.toString());
-
-    }*/
-
-    long timer() {
-        return System.currentTimeMillis();
     }
 
 
