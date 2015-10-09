@@ -1,4 +1,4 @@
-package flipcut.mincut.cutGraphImpl.goldberg_tarjan;
+package flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan;
 
 /**
  * Created by fleisch on 09.10.15.

@@ -1,7 +1,7 @@
 package flipcut.mincut.cutGraphAPI;
 
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
-import flipcut.mincut.cutGraphImpl.ahuja_orlin.FlowGraph;
+import flipcut.mincut.cutGraphImpl.maxFlowAhujaOrlin.FlowGraph;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;

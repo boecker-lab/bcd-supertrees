@@ -21,11 +21,10 @@
 package flipcut.mincut.cutGraphAPI;
 
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
-import flipcut.mincut.cutGraphImpl.goldberg_tarjan.CutGraphImpl;
-import flipcut.mincut.cutGraphImpl.goldberg_tarjan.Node;
+import flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan.CutGraphImpl;
+import flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan.Node;
 
 import java.util.*;
-import java.util.concurrent.*;
 
 /**
  * This is an implementation of the push-relabel method to compute minimum mincut/maximum flows

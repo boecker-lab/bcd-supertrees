@@ -1,4 +1,4 @@
-package flipcut.mincut.cutGraphImpl.kargerStein;
+package flipcut.mincut.cutGraphImpl.minCutKargerStein;
 
 /**
  * Created by fleisch on 09.10.15.

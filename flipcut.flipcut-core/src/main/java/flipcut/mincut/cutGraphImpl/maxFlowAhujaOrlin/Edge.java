@@ -1,4 +1,4 @@
-package flipcut.mincut.cutGraphImpl.ahuja_orlin;
+package flipcut.mincut.cutGraphImpl.maxFlowAhujaOrlin;
 
 /**
  * Classe che rappresenta un arco del grafo

@@ -1,4 +1,4 @@
-package flipcut.mincut.cutGraphImpl.ahuja_orlin;
+package flipcut.mincut.cutGraphImpl.maxFlowAhujaOrlin;
 
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntIntHashMap;

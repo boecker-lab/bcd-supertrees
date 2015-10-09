@@ -1,4 +1,4 @@
-package flipcut.mincut.cutGraphImpl.ahuja_orlin;
+package flipcut.mincut.cutGraphImpl.maxFlowAhujaOrlin;
 
 import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.queue.TIntQueue;

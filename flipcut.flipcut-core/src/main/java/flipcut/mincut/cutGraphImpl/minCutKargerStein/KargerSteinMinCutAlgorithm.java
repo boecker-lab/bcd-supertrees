@@ -1,4 +1,4 @@
-package flipcut.mincut.cutGraphImpl.kargerStein;
+package flipcut.mincut.cutGraphImpl.minCutKargerStein;
 
 
 import java.util.HashMap;

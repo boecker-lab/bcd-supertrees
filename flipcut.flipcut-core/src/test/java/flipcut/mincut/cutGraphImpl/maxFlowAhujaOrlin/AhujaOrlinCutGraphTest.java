@@ -1,9 +1,8 @@
-package flipcut.mincut.cutGraphImpl.ahuja_orlin;
+package flipcut.mincut.cutGraphImpl.maxFlowAhujaOrlin;
 
 import flipcut.mincut.cutGraphAPI.AhujaOrlinCutGraph;
 import flipcut.mincut.cutGraphAPI.MaxFlowCutGraph;
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
-import flipcut.mincut.cutGraphImpl.ahuja_orlin.FlowGraph;
 import org.junit.Test;
 
 import java.util.HashSet;

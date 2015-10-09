@@ -18,7 +18,7 @@
  * along with Epos.  If not, see <http://www.gnu.org/licenses/>;.
  */
 
-package flipcut.mincut.cutGraphImpl.goldberg_tarjan;
+package flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan;
 
 import flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 
