@@ -49,7 +49,11 @@ public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipC
         if (executorService == null) {
             return new SingleCutGraphCutter(type);
         }else{
-            return new SingleCutGraphCutter(type,executorService,numberOfThreads);
+            if (numberOfThreads > 0) {
+                return new SingleCutGraphCutter(type,executorService,numberOfThreads);
+            } else {
+                return new SingleCutGraphCutter(type,executorService,CORES_AVAILABLE);
+            }
         }
     }
 

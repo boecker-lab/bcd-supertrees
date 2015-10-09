@@ -15,8 +15,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by fleisch on 07.05.15.
  */
 public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
-    public final static int CORES_AVAILABLE = Runtime.getRuntime().availableProcessors();
-
     private ExecutorService executorService;
     private int threads;
 
@@ -52,7 +50,7 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
 
     @Override
     public BasicCut<V> calculateMinCut() throws ExecutionException, InterruptedException {
-        if (threads == 1 || CORES_AVAILABLE == 1 || executorService == null) {
+        if (threads == 1 || executorService == null) {
             return calculatMinCutSingle();
         } else {
             return calculatMinCutParallel(); //minus 1 because it is daster if 1 thread is left for other things

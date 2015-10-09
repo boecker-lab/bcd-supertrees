@@ -20,8 +20,9 @@ import java.util.concurrent.ExecutorService;
  */
 public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends CutGraphCutter> extends SupertreeAlgorithm {
     protected static final boolean DEBUG = false;
+    public static final int CORES_AVAILABLE = Runtime.getRuntime().availableProcessors();
     /**
-     * number of thread that should be used 0 -> automatic
+     * number of thread that should be used 0 -> automatic <0 massive parralel
      */
     protected int numberOfThreads = 0;
 

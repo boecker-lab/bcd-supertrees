@@ -292,11 +292,11 @@ public class FlipCutSingleCutSimpleWeightTest {
 
     @Test
     public void testManyInputTrees(){
-//        File inputFile =  new File(getClass().getResource("/flipcut/omm.source.Trees.tre").getFile());
+        File inputFile =  new File(getClass().getResource("/flipcut/omm.source.Trees.tre").getFile());
 //        File inputFile =  new File(getClass().getResource("/flipcut/mcmahon.source_trees").getFile());
 //        File inputFile =  new File(getClass().getResource("/flipcut/berrysemple-sourcetrees.tre").getFile());
 //        File inputFile =  new File(getClass().getResource("/flipcut/smo.9.sourceTrees.tre").getFile());
-        File inputFile =  new File(getClass().getResource("/flipcut/sm.9.sourceTrees_OptSCM-Rooting.tre").getFile());
+//        File inputFile =  new File(getClass().getResource("/flipcut/sm.9.sourceTrees_OptSCM-Rooting.tre").getFile());
 //        File inputFile =  new File(getClass().getResource("/flipcut/smo.8.sourceTrees.tre").getFile());
         Tree[] trees =  Newick.getTreeFromFile(inputFile);
 
@@ -306,11 +306,12 @@ public class FlipCutSingleCutSimpleWeightTest {
         System.out.println("SCM time : " + (System.currentTimeMillis()-t));
 
         t = System.currentTimeMillis();
-//        FlipCutSingleCutSimpleWeight a = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
-        FlipCutSingleCutSimpleWeight a = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN);
+        FlipCutSingleCutSimpleWeight a = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+//        FlipCutSingleCutSimpleWeight a = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN);
         a.setWeights(FlipCutWeights.Weights.UNIT_COST);
 //        a.setInput(Arrays.asList(trees),guideTree);
         a.setInput(Arrays.asList(trees));
+        a.setNumberOfThreads(2);
         a.run();
         Tree sTree =  a.getResult();
         System.out.println("time : " + (System.currentTimeMillis()-t));

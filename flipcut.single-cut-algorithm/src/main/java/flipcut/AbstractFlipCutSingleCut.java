@@ -85,16 +85,21 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
 
             Tree supertree = null;
             try {
-                if (numberOfThreads < 1) {
+                //this is the all parralel version
+                if (numberOfThreads < 0) {
                     if (executorService == null)
                         executorService = Executors.newWorkStealingPool();
-                    supertree = computeSTIterativeMultiThreaded();
-                } else if (numberOfThreads == 1) {
-                    supertree = computeSTIterativeSingleThreaded();
+                        supertree = computeSTIterativeMultiThreaded();
+                //only max flow calculation is parralel, more efficient
                 } else {
-                    if (executorService == null)
-                        executorService = Executors.newWorkStealingPool(numberOfThreads);
-                    supertree = computeSTIterativeMultiThreaded();
+                    if (executorService == null) {
+                        if (numberOfThreads == 0) {
+                            executorService = Executors.newFixedThreadPool(CORES_AVAILABLE);
+                        }else if(numberOfThreads > 1){
+                            executorService = Executors.newFixedThreadPool(numberOfThreads);
+                        }
+                    }
+                    supertree = computeSTIterativeSingleThreaded();
                 }
             } catch (ExecutionException e) {
                 e.printStackTrace();
