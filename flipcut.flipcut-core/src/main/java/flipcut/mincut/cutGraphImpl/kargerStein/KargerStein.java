@@ -1,4 +1,4 @@
-package flipcut.mincut.kargerStein;
+package flipcut.mincut.cutGraphImpl.kargerStein;
 
 
 import epos.model.tree.Tree;
@@ -11,37 +11,36 @@ import java.util.*;
 
 
 public class KargerStein {
-    Karger_Graph graphI;
-    Karger_Graph graphII;
+    private static final double SQRT2 = Math.sqrt(2) + 1;
 
-    public KargerStein(Edge[] edgearray, int vertexCount) { //start algorithm
-        graphI = new Karger_Graph(edgearray);
-        graphI.dfs_map = new HashMap<Integer, Integer>();
-        for (int key : graphI.vertex_map.keySet()) {
-            graphI.dfs_map.put(key, 0);
+    public KargerStein(Edge[] edgearray) { //start algorithm
+        Karger_Graph inititalGraph = new Karger_Graph(edgearray);
+        inititalGraph.dfs_map = new HashMap<Integer, Integer>();
+        for (int key : inititalGraph.vertex_map.keySet()) {
+            inititalGraph.dfs_map.put(key, 0);
         }
         int start=0;
-        for(int i=0;i<graphI.edge_array_global.length;i++){
-            if(graphI.edge_array_global[i].weight>0){
-                start=graphI.edge_array_global[i].ingoing;
+        for(int i=0;i< inititalGraph.edge_array_global.length;i++){
+            if(inititalGraph.edge_array_global[i].weight>0){
+                start= inititalGraph.edge_array_global[i].ingoing;
             }
         }
 
-        dfs(graphI, start);
-        System.out.println("DFS:" + graphI.dfs_count);
-        System.out.println("Vertexcount:"+graphI.vertexCount);
-        for(int x: graphI.dfs_map.keySet()){
-            if (graphI.dfs_map.get(x)==0){
+        dfs(inititalGraph, start);
+        System.out.println("DFS:" + inititalGraph.dfs_count);
+        System.out.println("Vertexcount:"+ inititalGraph.vertexCount);
+        for(int x: inititalGraph.dfs_map.keySet()){
+            if (inititalGraph.dfs_map.get(x)==0){
                 System.out.println(x);
             }
         }
 
-        recursive_Contract(graphI, graphI.vertexCount);
+        recursive_Contract(inititalGraph, inititalGraph.vertexCount);
 
 
     }
 
-    void recursive_Contract(Karger_Graph graphI, int n) {
+    void recursive_Contract(Karger_Graph currentGraph, final int n) {
 
        /* if(!graphI.ongoing){
             System.out.println("mincut:" + graphI.mincut);
@@ -49,45 +48,49 @@ public class KargerStein {
 
         //stop recursion at <6 vertices
 
-        if (graphI.vertexCount < 6 && graphI.ongoing ) {
+        Karger_Graph contractedGraph = null;
+        if (currentGraph.vertexCount < 6 && currentGraph.ongoing ) {
 
-            graphII = contract(graphI, 2);
-            System.out.println(graphII.vertexCount);
+            contractedGraph = contract(currentGraph, 2);
+            System.out.println(contractedGraph.vertexCount);
 
             //print mincut value    //THis is not he mincut (sum of cut edges)
             HashSet<Integer> colorset = new HashSet<>();
 
-            for(int i=0;i<graphII.edge_array_global.length;i++){
-                if (graphII.edge_array_global[i].weight>0 && !colorset.contains(graphII.edge_array_global[i].color)){
-                    graphII.mincut+=graphII.edge_array_global[i].weight;
-                    colorset.add(graphII.edge_array_global[i].color);
+            for(int i=0;i<contractedGraph.edge_array_global.length;i++){
+                if (contractedGraph.edge_array_global[i].weight>0 && !colorset.contains(contractedGraph.edge_array_global[i].color)){
+                    contractedGraph.mincut+=contractedGraph.edge_array_global[i].weight;
+                    colorset.add(contractedGraph.edge_array_global[i].color);
 
                    //System.out.println(graphII.edge_array_global[i].outgoing+":"+graphII.edge_array_global[i].ingoing+":"+graphII.edge_array_global[i].weight+":"+graphII.edge_array_global[i].color);
                 }
             }
 
-            System.out.println("mincut:" + graphII.mincut); //TODO: give partitions
+            System.out.println("mincut:" + contractedGraph.mincut); //TODO: give partitions
 
-            //if >6 vertices
+        //if >6 vertices
+        } else if(currentGraph.ongoing) {
+            int repeats = (int) Math.ceil(n/SQRT2);
+            contractedGraph = contract(new Karger_Graph(currentGraph),repeats);
+            recursive_Contract(contractedGraph, repeats);
+            contractedGraph = contract(currentGraph,repeats);
+            recursive_Contract(contractedGraph, repeats);
 
-        } else if(graphI.ongoing) {
-            Karger_Graph temp = new Karger_Graph(graphI);
+            /*Karger_Graph temp = new Karger_Graph(currentGraph);
             for (int i = 0; i < 2; i++) {
                 if (i == 0) {
-                    graphII = contract(graphI, (int) Math.ceil(n / (Math.sqrt(2) + 1)));
-                    recursive_Contract(graphII, (int) Math.ceil(n / (Math.sqrt(2) + 1)));
+                    contractedGraph = contract(currentGraph, (int) Math.ceil(n / (Math.sqrt(2) + 1)));
+                    recursive_Contract(contractedGraph, (int) Math.ceil(n / (Math.sqrt(2) + 1)));
                 } else {
-                    graphII = contract(temp, (int) Math.ceil(n / (Math.sqrt(2) + 1)));
-                    recursive_Contract(graphII, (int) Math.ceil(n / (Math.sqrt(2) + 1)));
+                    contractedGraph = contract(temp, (int) Math.ceil(n / (Math.sqrt(2) + 1)));
+                    recursive_Contract(contractedGraph, (int) Math.ceil(n / (Math.sqrt(2) + 1)));
                 }
-            }
+            }*/
         }
 
     }
 
     private Karger_Graph contract(Karger_Graph graph, int goal_vertex_nr) {
-
-
 
         while (graph.vertexCount >= goal_vertex_nr) {
 
@@ -314,7 +317,8 @@ public class KargerStein {
         //parse trees
 
         Newick newick = new Newick();
-        File file = new File("/home/martin-laptop/trees/SMIDGenOG_Martin/1000.100/smo.1.sourceTrees.tre");
+//        File file = new File("/home/martin-laptop/trees/SMIDGenOG_Martin/500.75/smo.1.sourceTrees.tre");
+        File file = new File("/home/fleisch/Work/data/simulated/SMIDGenOG_Martin/500.75/smo.1.sourceTrees.tre");
         Tree[] tree_arr = newick.getTreeFromFile(file);
         ArrayList<Edge> edge_list = new ArrayList<Edge>();
 
@@ -326,7 +330,7 @@ public class KargerStein {
             for (TreeNode vert : tree_arr[i].vertices()) {
 
 
-                if (!vert.isLeaf() && vert.isInnerNode() && tree_arr[i].getRoot() != vert) {
+                if (vert.isInnerNode() /*&& tree_arr[i].getRoot() != vert*/) {//lets test this with roots
                     //System.out.println(vert.getLabel());
 
                     TreeNode[] leaves = vert.getLeaves();
@@ -334,8 +338,6 @@ public class KargerStein {
 
                     ArrayList<Integer> leavelist = new ArrayList<Integer>();
                     for (TreeNode leave : leaves) {
-
-
                         leavelist.add(Integer.parseInt(leave.getLabel().substring(1)));
                         globallist.add(leave.getLabel());
                     }
@@ -344,8 +346,13 @@ public class KargerStein {
 
                     for (int x = 0; x < leavelist.size() - 1; x++) {
                         for (int j = x + 1; j < leavelist.size(); j++) {
-
-                            Edge new_edge = new Edge(leavelist.get(x), leavelist.get(j), Integer.parseInt(vert.getLabel()), color_2);
+                            int weight = 10;
+                            if (!tree_arr[i].getRoot().equals(vert)) {
+                                weight =  Integer.parseInt(vert.getLabel());
+                            }else{
+                                System.out.println("add root");
+                            }
+                            Edge new_edge = new Edge(leavelist.get(x), leavelist.get(j),weight , color_2);
                            // System.out.println(new_edge.outgoing + ":" + new_edge.ingoing + ":" + new_edge.weight + ":" + new_edge.color);
                             edge_list.add(new_edge);
                         }
@@ -373,7 +380,7 @@ public class KargerStein {
 
        // Edge[] edgearr = {new Edge(1,4,4,1), new Edge(1,3,4,2),new Edge(2, 4, 4, 3), new Edge(2, 3, 4, 1)};
 
-        test = new KargerStein(edgearr, 100);
+        test = new KargerStein(edgearr);
 
 //creates random connected Graph with n vertices and n-1 edges
 

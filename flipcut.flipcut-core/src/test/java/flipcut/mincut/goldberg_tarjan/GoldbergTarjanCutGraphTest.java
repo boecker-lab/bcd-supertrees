@@ -18,8 +18,19 @@ package flipcut.mincut.goldberg_tarjan;/*
  * along with Epos.  If not, see <http://www.gnu.org/licenses/>
  */
 
-import flipcut.mincut.bipartition.BasicCut;
+import epos.model.tree.Tree;
+import epos.model.tree.TreeNode;
+import epos.model.tree.io.Newick;
+import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import org.junit.Test;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -84,4 +95,75 @@ public class GoldbergTarjanCutGraphTest {
         */
 
     }
+
+    @Test
+    public void multiThreadingTest(){
+        Newick newick = new Newick();
+        File file = new File(getClass().getResource("/flipcut/sm.9.sourceTrees_OptSCM-Rooting.tre").getFile());
+        Tree[] tree_arr = newick.getTreeFromFile(file);
+        int CORES_AVAILABLE =  Runtime.getRuntime().availableProcessors();
+        for (int t = 1;t <= CORES_AVAILABLE; t++ ) {
+
+            ExecutorService s =  Executors.newFixedThreadPool(t);
+            GoldbergTarjanCutGraph gold = new GoldbergTarjanCutGraph();
+            gold.setThreads(t);
+            gold.setExecutorService(s);
+
+            HashMap<String, TreeNode> taxalist = new HashMap<String, TreeNode>();
+
+            for (Tree tree : tree_arr) { //For every tree in the file
+                for (TreeNode node : tree.getLeaves()) {
+                    if (!taxalist.containsKey(node.getLabel()))     //Add all leaves to the taxalist
+                        taxalist.put(node.getLabel(), node);
+                }
+                for (TreeNode vert : tree.vertices()) {
+                    if (vert.isInnerNode()) {
+                        TreeNode out = vert;
+                        TreeNode in = vert.cloneNode();
+                        in.setLabel(out.toString() + "in");
+                        long weight = 10;
+                        if (!vert.equals(tree.getRoot())) {
+                            weight = Long.parseLong(vert.getLabel());
+                        }
+                        gold.addEdge(out, in, weight); //add edge with label weight
+                        TreeNode[] leaves = vert.getLeaves();
+                        for (TreeNode leave : leaves) {  //add edges with inf weight between nodes
+                            TreeNode l = taxalist.get(leave.getLabel());
+                            if (l != null) {
+                                gold.addEdge(in, l, 1000000);
+                                gold.addEdge(l, out, 1000000);
+                            } else {
+                                System.out.println("strange!!!!!!!!");
+                            }
+                        }
+                    }
+                }
+            }
+            TreeNode[] leavearr = new TreeNode[taxalist.size()];
+            leavearr = new ArrayList<>(taxalist.values()).toArray(leavearr);
+
+            System.out.println("Starting mitcut calculation...");
+            for (int i = 0; i < leavearr.length - 1; i++) {
+                for (int j = i + 1; j < leavearr.length; j++) {
+                    try {
+                        gold.submitSTCutCalculation(leavearr[i], leavearr[j]);
+                    } catch (Exception e) {
+                        System.out.println(leavearr[i] + "." + leavearr[j]);
+                    }
+                }
+            }
+            try {
+                long time =  System.currentTimeMillis();
+                BasicCut cut = gold.calculateMinCut();
+                System.out.println("time" +  (System.currentTimeMillis()-time)/1000d + " with " + t + " threads");
+                System.out.println("Golderg mincut value: " + cut.minCutValue);
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            s.shutdownNow();
+        }
+    }
+
 }

@@ -1,4 +1,4 @@
-package flipcut.mincut.bipartition;
+package flipcut.mincut.cutGraphAPI.bipartition;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -7,17 +7,17 @@ import java.util.Set;
  * Created by fleisch on 16.04.15.
  */
 public class MutliCut<V> extends BasicCut<V> {
-    protected int hashCode = 0;
-    protected final LinkedHashSet<V> sourceSet;
+    private int hashCode = 0;
+    private final LinkedHashSet<V> sourceSet;
 
 
     public MutliCut(LinkedHashSet<V> sourceSet, LinkedHashSet<V> sinkList, V source, V sink, long minCutValue) {
         super(sinkList, source, sink, minCutValue);
-        this.sourceSet=sourceSet;
+        this.sourceSet = sourceSet;
     }
 
     public MutliCut(LinkedHashSet<V> p1, LinkedHashSet<V> p2, long minCutValue) {
-        this(p1,p2, null, null, minCutValue);
+        this(p1, p2, null, null, minCutValue);
     }
 
     @Override
@@ -26,7 +26,7 @@ public class MutliCut<V> extends BasicCut<V> {
         if (!(o instanceof BasicCut)) return false;
 
         MutliCut cut = (MutliCut) o;
-        if (! (hashCode == o.hashCode()))
+        if (!(hashCode == o.hashCode()))
             return false;
 
         if (!(
@@ -44,11 +44,11 @@ public class MutliCut<V> extends BasicCut<V> {
             int sourceSize = sourceSet.size();
             int sinkSize = cutSet.size();
 
-            if (sourceSize < sinkSize){
+            if (sourceSize < sinkSize) {
                 hashCode = 31 * sourceSize * sourceSet.hashCode() + 67 * sinkSize * cutSet.hashCode();
-            }else if (sourceSize > sinkSize){
-                hashCode = 31 * sinkSize * cutSet.hashCode()  + 67 * sourceSize * sourceSet.hashCode() ;
-            }else{
+            } else if (sourceSize > sinkSize) {
+                hashCode = 31 * sinkSize * cutSet.hashCode() + 67 * sourceSize * sourceSet.hashCode();
+            } else {
                 hashCode = sinkSize + cutSet.hashCode() + sourceSize + sourceSet.hashCode();
             }
         }

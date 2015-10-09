@@ -18,10 +18,14 @@
  * along with Epos.  If not, see <http://www.gnu.org/licenses/>;.
  */
 
-package flipcut.mincut.goldberg_tarjan;
+package flipcut.mincut.cutGraphImpl.goldberg_tarjan;
 
-import java.util.*;
-import java.util.concurrent.Callable;
+import flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 /**
  * The actual implementation the the push-relabel maxflow min cut method based on the C
@@ -37,7 +41,7 @@ import java.util.concurrent.Callable;
  * Maximum Flow Problem," Proc. IPCO-4, 157--171, 1995.</pre>
  * <br>
  * We use the same data structures here, but the structure is not that obvious, so
- * please use {@link flipcut.mincut.goldberg_tarjan.GoldbergTarjanCutGraph} as access point and
+ * please use {@link GoldbergTarjanCutGraph} as access point and
  * to call functions in this class.
  *
  * @author Thasso Griebel (thasso.griebel@gmail.com)
@@ -45,7 +49,7 @@ import java.util.concurrent.Callable;
 /*
 This class is not cleaned up ! This is more or less a translation from the C code, so don't expect too much ;)
  */
-class CutGraphImpl {
+public class CutGraphImpl {
     //#define MAXLONG 1073741824
     private static final long MAXLONG = Long.MAX_VALUE - 1;
 
@@ -733,12 +737,9 @@ class CutGraphImpl {
      * @param activateChecks check the results
      * @return cut all elements of the component that contains the sink
      */
-    LinkedHashSet<Object> calculateMaxSTFlow(final boolean activateChecks) {
+    public LinkedHashSet<Object> calculateMaxSTFlow(final boolean activateChecks) {
         long sum;
         globUpdtFreq = GLOB_UPDT_FREQ;
-        this.source = source;
-        this.sink = sink;
-
 
         allocDS();
         init();
@@ -804,69 +805,8 @@ class CutGraphImpl {
      *
      * @return flow the flow value
      */
-    long getValue() {
+    public long getValue() {
         return flow;
-    }
-
-    /**
-     * Internal edge representation
-     */
-    private class Arc {
-        long cap;    /* capacity */
-        long resCap;          /* residual capasity */
-        Node head;           /* arc head */
-        Arc rev;            /* reverse arc */
-
-    }
-
-    /**
-     * Internal node representation
-     */
-    class Node {
-        Arc[] arcs;           /* first outgoing arc */
-        long excess;           /* excess at the node
-                         change to double if needed */
-        long d;                /* distance label */
-        Node bNext;           /* next node in bucket */
-        Node bPrev;           /* previous node in bucket */
-        int current;          /* arc pointer */
-        int bucketIndex;
-        Object name;
-
-        private int createdArcs = 0;
-
-        Node(int edges, Object name) {
-            this.name = name;
-            this.arcs = new Arc[edges];
-        }
-
-        Arc current() {
-            return arcs[current];
-        }
-
-        @Override
-        public String toString() {
-            return name.toString();
-        }
-
-        void addArc(Node head, long cap) {
-            Arc a = new Arc();
-            a.head = head;
-            a.cap = cap;
-            a.resCap = cap;
-            addArc(a);
-
-
-            Arc rev = new Arc();
-            rev.head = this;
-            rev.rev = a;
-            a.rev = rev;
-            head.addArc(rev);
-        }
-
-        private void addArc(Arc arc) {
-            arcs[createdArcs++] = arc;
-        }
     }
 
     /**

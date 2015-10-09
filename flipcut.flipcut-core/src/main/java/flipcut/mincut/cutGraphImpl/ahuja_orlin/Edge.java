@@ -1,11 +1,11 @@
-package flipcut.mincut.ahuja_orlin.graph;
+package flipcut.mincut.cutGraphImpl.ahuja_orlin;
 
 /**
  * Classe che rappresenta un arco del grafo
  * @author Stefano Scerra
  *
  */
-public class Edge
+class Edge
 {
 	final int source; // nodo sorgente
 	final int dest; // nodo destinazione

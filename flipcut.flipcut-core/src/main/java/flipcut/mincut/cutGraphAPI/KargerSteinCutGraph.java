@@ -1,8 +1,7 @@
-package flipcut.mincut.kargerStein;
+package flipcut.mincut.cutGraphAPI;
 
-import flipcut.mincut.MaxFlowCutGraph;
-import flipcut.mincut.MultiCutGraph;
-import flipcut.mincut.bipartition.BasicCut;
+import flipcut.mincut.cutGraphAPI.MultiCutGraph;
+import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -10,9 +9,9 @@ import java.util.concurrent.ExecutionException;
 /**
  * Created by fleisch on 15.04.15.
  */
-public class KargerSteinMultiCutGraph<V> implements MultiCutGraph<V> {
+public class KargerSteinCutGraph<V> implements MultiCutGraph<V> {
     private int nextEdgeColor = 0; // we nee this for uncolored version
-
+    //todo fill me
 
     @Override
     public List<BasicCut<V>> calculateMinCuts() {

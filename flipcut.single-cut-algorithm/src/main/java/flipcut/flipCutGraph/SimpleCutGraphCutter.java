@@ -2,11 +2,11 @@ package flipcut.flipCutGraph;
 
 
 import flipcut.costComputer.CostComputer;
-import flipcut.mincut.CutGraph;
-import flipcut.mincut.MaxFlowCutGraph;
-import flipcut.mincut.ahuja_orlin.AhujaOrlinCutGraph;
-import flipcut.mincut.bipartition.BasicCut;
-import flipcut.mincut.goldberg_tarjan.GoldbergTarjanCutGraph;
+import flipcut.mincut.cutGraphAPI.CutGraph;
+import flipcut.mincut.cutGraphAPI.MaxFlowCutGraph;
+import flipcut.mincut.cutGraphAPI.AhujaOrlinCutGraph;
+import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;

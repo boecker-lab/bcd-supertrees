@@ -1,9 +1,9 @@
 package flipcut.mincut.ahuja_orlin;
 
-import flipcut.mincut.MaxFlowCutGraph;
-import flipcut.mincut.ahuja_orlin.graph.Edge;
-import flipcut.mincut.ahuja_orlin.graph.FlowGraph;
-import flipcut.mincut.bipartition.BasicCut;
+import flipcut.mincut.cutGraphAPI.AhujaOrlinCutGraph;
+import flipcut.mincut.cutGraphAPI.MaxFlowCutGraph;
+import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import flipcut.mincut.cutGraphImpl.ahuja_orlin.FlowGraph;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -11,7 +11,6 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Created by fleisch on 24.09.15.
@@ -40,18 +39,18 @@ public class AhujaOrlinCutGraphTest {
         graph.addNode(nb);
         graph.setSink(nb);
 
-        graph.addEdge(new Edge(na, n1, 3));
-        graph.addEdge(new Edge(na, n3, 5));
-        graph.addEdge(new Edge(na, n2, 3));
-        graph.addEdge(new Edge(n1, n3, 4));
-        graph.addEdge(new Edge(n1, n4, 3));
-        graph.addEdge(new Edge(n3, n4, 2));
-        graph.addEdge(new Edge(n3, nb, 1));
-        graph.addEdge(new Edge(n3, n5, 4));
-        graph.addEdge(new Edge(n2, n3, 2));
-        graph.addEdge(new Edge(n2, n5, 2));
-        graph.addEdge(new Edge(n4, nb, 4));
-        graph.addEdge(new Edge(n5, nb, 4));
+        graph.addEdge(na, n1, 3);
+        graph.addEdge(na, n3, 5);
+        graph.addEdge(na, n2, 3);
+        graph.addEdge(n1, n3, 4);
+        graph.addEdge(n1, n4, 3);
+        graph.addEdge(n3, n4, 2);
+        graph.addEdge(n3, nb, 1);
+        graph.addEdge(n3, n5, 4);
+        graph.addEdge(n2, n3, 2);
+        graph.addEdge(n2, n5, 2);
+        graph.addEdge(n4, nb, 4);
+        graph.addEdge(n5, nb, 4);
 
         return graph;
     }

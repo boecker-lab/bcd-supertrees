@@ -1,4 +1,4 @@
-package flipcut.mincut.ahuja_orlin.graph;
+package flipcut.mincut.cutGraphImpl.ahuja_orlin;
 
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntIntHashMap;
@@ -41,8 +41,11 @@ public class FlowGraph {
         incidences.put(n, new LinkedList<Edge>());
     }
 
+    public void addEdge(int source, int dest, double cap) {
+        addEdge(new Edge(source,dest,cap));
+    }
 
-    public void addEdge(Edge e) {
+    private void addEdge(Edge e) {
         if (!containsNode(e.source) || !containsNode(e.dest))
             throw new IllegalArgumentException("Impossibile inserire l'arco " + e);
         List<Edge> adjacent = adjacencies.get(e.source);

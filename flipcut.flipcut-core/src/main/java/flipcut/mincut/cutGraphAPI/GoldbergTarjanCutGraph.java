@@ -18,11 +18,11 @@
  * along with Epos.  If not, see <http://www.gnu.org/licenses/>
  */
 
-package flipcut.mincut.goldberg_tarjan;
+package flipcut.mincut.cutGraphAPI;
 
-import flipcut.mincut.MaxFlowCutGraph;
-import flipcut.mincut.bipartition.BasicCut;
-import flipcut.mincut.DirectedCutGraph;
+import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import flipcut.mincut.cutGraphImpl.goldberg_tarjan.CutGraphImpl;
+import flipcut.mincut.cutGraphImpl.goldberg_tarjan.Node;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -74,61 +74,41 @@ import java.util.concurrent.*;
  */
 public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
     /**
-     * The complete cut with score, source set and sink set
-     */
-//    protected BasicCut<V> cut;
-    protected CutGraphImpl hipri;
-    /**
-     * The internal nodes to simplify graph construction
-     */
-    final Map<V, N> nodes = new HashMap<>();
-    final Map<CutGraphImpl, Map<N, CutGraphImpl.Node>> algoNodeMaps = new ConcurrentHashMap<>(CORES_AVAILABLE);
-    /**
      * Global edge counter
      */
     private int edges = 0;
+    /**
+     * hipri graph for single threaded execution and mapping
+     */
+    private CutGraphImpl hipri;
+    private Map<N, Node> algoNodes;
+
+    /**
+     * The internal nodes to simplify graph construction: not private because of inner class access
+     */
+    final Map<V, N> nodes = new HashMap<>();
 
 
-    private CutGraphImpl createHipri() {
+
+    CutGraphImpl createHipri(final Map<N, Node> algoNodeMapToFill) {
         CutGraphImpl hipri = new CutGraphImpl(nodes.size(), edges);
-        Map<N, CutGraphImpl.Node> algoNodes = new HashMap<>(nodes.size());
-        algoNodeMaps.put(hipri, algoNodes);
-            /*
-            Remap to internal structure
-             */
+        //Remap to internal structure
         for (Map.Entry<V, N> entry : nodes.entrySet()) {
             N node = entry.getValue();
             V vertex = entry.getKey();
 
-            algoNodes.put(node, hipri.createNode(
+            algoNodeMapToFill.put(node, hipri.createNode(
                     vertex, node.edges.size() + node.revEdges.size()));
         }
 
         for (N node : nodes.values()) {
             for (E edge : node.edges) {
-                hipri.addEdge(algoNodes.get(node), algoNodes.get(edge.target), edge.cap);
+                hipri.addEdge(algoNodeMapToFill.get(node), algoNodeMapToFill.get(edge.target), edge.cap);
             }
         }
         return hipri;
     }
 
-    /**
-     * Internal: does the mincut execution
-     *
-     * @param source the source
-     * @param sink   the sink
-     */
-    @Override
-    public BasicCut<V> calculateMinSTCut(V source, V sink) {
-        if (hipri == null)
-            hipri = createHipri();
-        Map<N, CutGraphImpl.Node> map = algoNodeMaps.get(hipri);
-        hipri.setSource(map.get(nodes.get(source)));
-        hipri.setSink(map.get(nodes.get(sink)));
-
-        LinkedHashSet<V> sinkList = (LinkedHashSet<V>) hipri.calculateMaxSTFlow(false);
-        return new BasicCut(sinkList, source, sink, hipri.getValue());
-    }
 
     public void addNode(V source) {
         if (hipri != null)
@@ -161,27 +141,94 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
     }
 
     @Override
-    protected MaxFlowCallable createCallable() {
-        return new HipriCallable();
-    }
-
-    @Override
     public void clear() {
         super.clear();
         nodes.clear();
-        algoNodeMaps.clear();
         hipri = null;
+        algoNodes = null;
         edges = 0;
     }
 
     public Map<Object, Object> getNodes() {
-        return new HashMap<Object, Object>(nodes);
+        return new HashMap<>(nodes);
+    }
+
+
+    /**
+     * Does the mincut execution
+     *
+     * @param source the source
+     * @param sink   the sink
+     */
+    @Override
+    public BasicCut<V> calculateMinSTCut(V source, V sink) {
+        if (hipri == null) {
+            algoNodes = new HashMap<>(nodes.size());
+            hipri = createHipri(algoNodes);
+        }
+        return calculateMinSTCut(source, sink, hipri, algoNodes);
+    }
+
+    BasicCut<V> calculateMinSTCut(final V source, final V sink, final CutGraphImpl hipri, Map<N, Node> algoNodeMap) {
+        hipri.setSource(algoNodeMap.get(nodes.get(source)));
+        hipri.setSink(algoNodeMap.get(nodes.get(sink)));
+
+        LinkedHashSet<V> sinkList = (LinkedHashSet<V>) hipri.calculateMaxSTFlow(false);
+        return new BasicCut(sinkList, source, sink, hipri.getValue());
+    }
+
+    @Override
+    MaxFlowCallable createCallable(int start, int stop) {
+        return new HipriCallable(start,stop);
+    }
+
+    private class HipriCallable extends MaxFlowCallable {
+        private CutGraphImpl hipri;
+        private Map<N, Node> algoNodeMap;
+
+        HipriCallable(int start, int stop) {
+            super(start, stop);
+        }
+
+        @Override
+        void initGraph() {
+            if (hipri == null) {
+                algoNodeMap = new HashMap<>(nodes.size());
+                this.hipri = createHipri(algoNodeMap);
+            }
+        }
+
+        @Override
+        BasicCut<V> calculate(V source, V sink) {
+            return calculateMinSTCut(source, sink, hipri, algoNodeMap);
+        }
+    }
+
+    /**
+     * Internal builder representation for Nodes
+     */
+    private class N {
+        private List<E> edges = new ArrayList<E>();
+        private List<E> revEdges = new ArrayList<E>();
+    }
+
+    /**
+     * Internal representation for edges
+     */
+    private class E {
+        long cap;
+        N target;
+        E reverseEdge;
+
+        public E(N target, long capacity) {
+            this.target = target;
+            this.cap = capacity;
+        }
     }
 
 
 
-
-    public void printGraph() {
+    /*public void printGraph() {
         System.out.println("##### Start Printing CutGraph #####");
         Map<N, Object> reverseMap = new HashMap<N, Object>(nodes.size());
         for (Map.Entry<V, N> node : nodes.entrySet()) {
@@ -208,68 +255,5 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
             }
         }
         return edges;
-    }
-
-
-
-
-
-
-    /**
-     * Internal builder representation for Nodes
-     */
-    private class N {
-        private List<E> edges = new ArrayList<E>();
-        private List<E> revEdges = new ArrayList<E>();
-    }
-
-    /**
-     * Internal representation for edges
-     */
-    private class E {
-        long cap;
-        N target;
-        E reverseEdge;
-
-        public E(N target, long capacity) {
-            this.target = target;
-            this.cap = capacity;
-        }
-    }
-
-    private class HipriCallable extends MaxFlowCallable {
-        private CutGraphImpl hipri = null;
-
-        public HipriCallable(CutGraphImpl hipri) {
-            this.hipri = hipri;
-        }
-
-        public HipriCallable() {}
-
-        @Override
-        public BasicCut<V> call() throws Exception {
-            if (hipri == null)
-                hipri = createHipri();
-
-            Map<N, CutGraphImpl.Node> m = algoNodeMaps.get(hipri);
-            hipri.setSource(m.get(nodes.get(source)));
-            hipri.setSink(m.get(nodes.get(sink)));
-
-            LinkedHashSet<V> sinkList = (LinkedHashSet<V>) hipri.calculateMaxSTFlow(false);
-            BasicCut<V> cut = new BasicCut(sinkList, source, sink, hipri.getValue());
-
-            SS ss = stToCalculate.poll();
-            if (ss != null) {
-                HipriCallable nuCallable = new HipriCallable(hipri);
-                hipri = null;
-                nuCallable.setSourceAndSink(ss);
-                busyMaxFlow.offer(executorService.submit(nuCallable));
-            }
-            return cut;
-        }
-    }
-
-
-
-
+    }*/
 }

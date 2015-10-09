@@ -1,6 +1,6 @@
-package flipcut.mincut;
+package flipcut.mincut.cutGraphAPI;
 
-import flipcut.mincut.bipartition.BasicCut;
+import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 
 import java.util.List;
 

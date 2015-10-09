@@ -88,14 +88,12 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                 if (numberOfThreads < 1) {
                     if (executorService == null)
                         executorService = Executors.newWorkStealingPool();
-//                        executorService = Executors.newCachedThreadPool();
                     supertree = computeSTIterativeMultiThreaded();
                 } else if (numberOfThreads == 1) {
                     supertree = computeSTIterativeSingleThreaded();
                 } else {
                     if (executorService == null)
                         executorService = Executors.newWorkStealingPool(numberOfThreads);
-//                        executorService = Executors.newFixedThreadPool(numberOfThreads);
                     supertree = computeSTIterativeMultiThreaded();
                 }
             } catch (ExecutionException e) {

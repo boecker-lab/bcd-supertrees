@@ -97,7 +97,7 @@ public abstract class FlipCutCLO<A extends AbstractFlipCut>{
     
     public Tree getSupertree(){
         algorithm.run();
-        return (Tree)algorithm.getResult();
+        return (Tree) algorithm.getResult();
     }
 
     private List<Tree> getSupertrees() {

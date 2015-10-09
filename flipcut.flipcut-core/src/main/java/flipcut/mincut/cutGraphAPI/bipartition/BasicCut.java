@@ -1,18 +1,18 @@
-package flipcut.mincut.bipartition;
+package flipcut.mincut.cutGraphAPI.bipartition;
 
-import java.util.*;
+import java.util.LinkedHashSet;
 
 /**
  * Created by fleisch on 15.04.15.
  */
 public class BasicCut<V> implements Comparable<BasicCut<V>> {
-    public final static BasicCut MAX_CUT_DUMMY = new BasicCut(null,Long.MAX_VALUE);
-
-    protected final LinkedHashSet<V> cutSet;
+    public final static BasicCut MAX_CUT_DUMMY = new BasicCut(null, Long.MAX_VALUE);
 
     public final V source;
     public final V sink;
     public final long minCutValue;
+
+    final LinkedHashSet<V> cutSet;
 
 
     public BasicCut(LinkedHashSet<V> cutSet, V source, V sink, long minCutValue) {
@@ -23,7 +23,7 @@ public class BasicCut<V> implements Comparable<BasicCut<V>> {
     }
 
     public BasicCut(LinkedHashSet<V> part, long minCutValue) {
-        this(part,null,null,minCutValue);
+        this(part, null, null, minCutValue);
     }
 
     public LinkedHashSet<V> getCutSet() {
