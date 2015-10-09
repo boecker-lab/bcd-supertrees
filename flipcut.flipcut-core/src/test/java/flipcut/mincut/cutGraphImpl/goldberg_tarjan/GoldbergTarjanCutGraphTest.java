@@ -1,4 +1,4 @@
-package flipcut.mincut.goldberg_tarjan;/*
+package flipcut.mincut.cutGraphImpl.goldberg_tarjan;/*
  * Epos Phylogeny Framework
  * Copyright (C) 2009.  University of Jena
  *

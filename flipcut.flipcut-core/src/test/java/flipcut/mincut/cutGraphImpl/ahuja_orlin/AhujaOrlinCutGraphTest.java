@@ -1,4 +1,4 @@
-package flipcut.mincut.ahuja_orlin;
+package flipcut.mincut.cutGraphImpl.ahuja_orlin;
 
 import flipcut.mincut.cutGraphAPI.AhujaOrlinCutGraph;
 import flipcut.mincut.cutGraphAPI.MaxFlowCutGraph;
