@@ -23,6 +23,7 @@ package flipcut.mincut.cutGraphAPI;
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 import flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan.CutGraphImpl;
 import flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan.Node;
+import parallel.ArrayPartitionCallableFactory;
 
 import java.util.*;
 
@@ -81,6 +82,8 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
      */
     private CutGraphImpl hipri;
     private Map<N, Node> algoNodes;
+
+    private HipriCallableFactory factory;
 
     /**
      * The internal nodes to simplify graph construction: not private because of inner class access
@@ -176,11 +179,6 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
         return new BasicCut(sinkList, source, sink, hipri.getValue());
     }
 
-    @Override
-    MaxFlowCallable createCallable(int start, int stop) {
-        return new HipriCallable(start,stop);
-    }
-
     private class HipriCallable extends MaxFlowCallable {
         private CutGraphImpl hipri;
         private Map<N, Node> algoNodeMap;
@@ -200,6 +198,20 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
         @Override
         BasicCut<V> calculate(V source, V sink) {
             return calculateMinSTCut(source, sink, hipri, algoNodeMap);
+        }
+    }
+
+    @Override
+    HipriCallableFactory getMaxFlowCallableFactory() {
+        if (factory == null)
+            factory = new HipriCallableFactory();
+        return factory;
+    }
+
+    private class HipriCallableFactory extends ArrayPartitionCallableFactory<HipriCallable>{
+        @Override
+        public HipriCallable newArrayPartitionCallable(int start, int stop) {
+            return new HipriCallable(start,stop);
         }
     }
 

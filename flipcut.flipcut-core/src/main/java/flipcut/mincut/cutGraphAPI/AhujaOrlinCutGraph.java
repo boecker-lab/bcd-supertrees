@@ -6,6 +6,7 @@ import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
+import parallel.ArrayPartitionCallableFactory;
 
 import java.util.LinkedHashSet;
 
@@ -18,6 +19,8 @@ public class AhujaOrlinCutGraph<V> extends MaxFlowCutGraph<V> {
      */
     private TObjectIntHashMap<V> vertexToNode = new TObjectIntHashMap<>();
     TIntObjectHashMap<V> nodeToVertex = new TIntObjectHashMap<>();
+
+    private AhujaOrlinCallableFactory factory;
 
     /**
      * The internal graph
@@ -84,11 +87,6 @@ public class AhujaOrlinCutGraph<V> extends MaxFlowCutGraph<V> {
         return set;
     }
 
-    @Override
-    MaxFlowCallable createCallable(int start, int stop) {
-        return new AhujaOrlinCallable(start,stop);
-    }
-
     private class AhujaOrlinCallable extends MaxFlowCallable {
         private FlowGraph flowGraph = null;
 
@@ -105,6 +103,20 @@ public class AhujaOrlinCutGraph<V> extends MaxFlowCutGraph<V> {
         @Override
         BasicCut<V> calculate(V source, V sink) {
             return calculateMinSTCut(source, sink, flowGraph);
+        }
+    }
+
+    @Override
+    AhujaOrlinCallableFactory getMaxFlowCallableFactory() {
+        if (factory == null)
+            factory = new AhujaOrlinCallableFactory();
+        return factory;
+    }
+
+    private class AhujaOrlinCallableFactory extends ArrayPartitionCallableFactory<AhujaOrlinCallable> {
+        @Override
+        public AhujaOrlinCallable newArrayPartitionCallable(int start, int stop) {
+            return new AhujaOrlinCallable(start,stop);
         }
     }
 }

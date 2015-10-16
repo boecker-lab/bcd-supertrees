@@ -1,6 +1,9 @@
 package flipcut.mincut.cutGraphAPI;
 
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import parallel.ArrayPartitionCallable;
+import parallel.ArrayPartitionCallableFactory;
+import parallel.ParallelUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -20,6 +23,7 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
 
     final ArrayList<V> sToCalculate = new ArrayList<>();
     final ArrayList<V> tToCalculate = new ArrayList<>();
+
 
 
     public void setExecutorService(ExecutorService executorService) {
@@ -71,27 +75,9 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
     }
 
     private BasicCut<V> calculatMinCutParallel() throws ExecutionException, InterruptedException {
-        final ArrayList<Future<BasicCut<V>>> busyMaxFlow = new ArrayList<>(threads);
 
-        final int size = sToCalculate.size();
-        final int bigparts = size % threads;
-        final int minSize =  size / threads;
-
-
-        int start = 0;
-        //submit worker
-        for (int i = 0; i < bigparts; i++) {
-            int stop = start + minSize + 1;
-            MaxFlowCallable callable = createCallable(start,stop);
-            busyMaxFlow.add(executorService.submit(callable));
-            start = stop;
-        }
-        for (int i = bigparts; i < threads; i++) {
-            int stop = start + minSize;
-            MaxFlowCallable callable = createCallable(start,stop);
-            busyMaxFlow.add(executorService.submit(callable));
-            start = stop;
-        }
+        final List<Future<BasicCut<V>>> busyMaxFlow = ParallelUtils.
+                createAndSubmitArrayPartitionCallables(executorService, getMaxFlowCallableFactory(), sToCalculate.size(), threads);
 
         BasicCut<V> cut = BasicCut.MAX_CUT_DUMMY;
         for (Future<BasicCut<V>> future : busyMaxFlow) {
@@ -103,21 +89,17 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
         return cut;
     }
 
-    abstract MaxFlowCallable createCallable(int start, int stop);
-
     @Override
     public void clear() {
         sToCalculate.clear();
         tToCalculate.clear();
     }
 
-    abstract class MaxFlowCallable implements Callable<BasicCut<V>> {
-        private final int start;
-        private final int stop;
+    abstract <T extends MaxFlowCallable> ArrayPartitionCallableFactory<T> getMaxFlowCallableFactory();
 
+    abstract class MaxFlowCallable extends ArrayPartitionCallable<BasicCut<V>> {
         MaxFlowCallable(int start, int stop) {
-            this.start = start;
-            this.stop = stop;
+            super(start,stop);
         }
 
         abstract void initGraph();
