@@ -1,18 +1,16 @@
 package flipcut.mincut.cutGraphAPI;
 
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
-import parallel.ArrayPartitionCallable;
-import parallel.ArrayPartitionCallableFactory;
 import parallel.ParallelUtils;
+import parallel.PartitionIterationCallable;
+import parallel.PartitionIterationCallableFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by fleisch on 07.05.15.
@@ -21,9 +19,7 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
     private ExecutorService executorService;
     private int threads;
 
-    final ArrayList<V> sToCalculate = new ArrayList<>();
-    final ArrayList<V> tToCalculate = new ArrayList<>();
-
+    final ArrayList<SS> stToCalculate = new ArrayList<>();
 
 
     public void setExecutorService(ExecutorService executorService) {
@@ -35,19 +31,17 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
     }
 
     public void submitSTCutCalculation(V source, V sink) {
-        sToCalculate.add(source);
-        tToCalculate.add(sink);
+        stToCalculate.add(new SS(source, sink));
     }
 
     @Override
     public List<BasicCut<V>> calculateMinSTCuts() {//todo parralelize if really used
         List<BasicCut<V>> stCuts = new LinkedList<>();
-        final int max = sToCalculate.size();
+        final int max = stToCalculate.size();
         for (int i = 0; i < max; i++) {
+            SS st = stToCalculate.get(i);
             stCuts.add(
-                    calculateMinSTCut(
-                            sToCalculate.get(i),
-                            tToCalculate.get(i)));
+                    calculateMinSTCut(st.source, st.sink));
         }
         return stCuts;
     }
@@ -63,11 +57,12 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
 
     private BasicCut<V> calculatMinCutSingle() {
         BasicCut<V> cut = BasicCut.MAX_CUT_DUMMY;
-        final int max = sToCalculate.size();
+        final int max = stToCalculate.size();
         for (int i = 0; i < max; i++) {
+            SS st = stToCalculate.get(i);
             BasicCut<V> next = calculateMinSTCut(
-                    sToCalculate.get(i),
-                    tToCalculate.get(i));
+                    st.source,
+                    st.sink);
             if (next.minCutValue < cut.minCutValue)
                 cut = next;
         }
@@ -76,8 +71,7 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
 
     private BasicCut<V> calculatMinCutParallel() throws ExecutionException, InterruptedException {
 
-        final List<Future<BasicCut<V>>> busyMaxFlow = ParallelUtils.
-                createAndSubmitArrayPartitionCallables(executorService, getMaxFlowCallableFactory(), sToCalculate.size(), threads);
+        final List<Future<BasicCut<V>>> busyMaxFlow = ParallelUtils.parallelBucketForEach(executorService, getMaxFlowCallableFactory(), stToCalculate, threads);
 
         BasicCut<V> cut = BasicCut.MAX_CUT_DUMMY;
         for (Future<BasicCut<V>> future : busyMaxFlow) {
@@ -91,18 +85,18 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
 
     @Override
     public void clear() {
-        sToCalculate.clear();
-        tToCalculate.clear();
+        stToCalculate.clear();
     }
 
-    abstract <T extends MaxFlowCallable> ArrayPartitionCallableFactory<T> getMaxFlowCallableFactory();
+    abstract <T extends MaxFlowCallable> PartitionIterationCallableFactory<T, SS> getMaxFlowCallableFactory();
 
-    abstract class MaxFlowCallable extends ArrayPartitionCallable<BasicCut<V>> {
-        MaxFlowCallable(int start, int stop) {
-            super(start,stop);
+    abstract class MaxFlowCallable extends PartitionIterationCallable<SS, BasicCut<V>> {
+        MaxFlowCallable(List<SS> jobs) {
+            super(jobs);
         }
 
         abstract void initGraph();
+
         abstract BasicCut<V> calculate(V source, V sink);
 
         @Override
@@ -110,12 +104,22 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
             initGraph();
             BasicCut<V> best = BasicCut.MAX_CUT_DUMMY;
 
-            for (int i = start; i < stop; i++) {
-                BasicCut<V> next = calculate(sToCalculate.get(i), tToCalculate.get(i));
+            for (SS job : jobs) {
+                BasicCut<V> next = calculate(job.source, job.sink);
                 if (next.minCutValue < best.minCutValue)
                     best = next;
             }
             return best;
+        }
+    }
+
+    class SS {
+        final V source;
+        final V sink;
+
+        public SS(V source, V sink) {
+            this.source = source;
+            this.sink = sink;
         }
     }
 }

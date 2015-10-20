@@ -6,9 +6,10 @@ import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
-import parallel.ArrayPartitionCallableFactory;
+import parallel.PartitionIterationCallableFactory;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 
 /**
  * Created by fleisch on 21.09.15.
@@ -90,9 +91,10 @@ public class AhujaOrlinCutGraph<V> extends MaxFlowCutGraph<V> {
     private class AhujaOrlinCallable extends MaxFlowCallable {
         private FlowGraph flowGraph = null;
 
-        AhujaOrlinCallable(int start, int stop) {
-            super(start, stop);
+        AhujaOrlinCallable(List<SS> jobs) {
+            super(jobs);
         }
+
 
         @Override
         void initGraph() {
@@ -113,10 +115,10 @@ public class AhujaOrlinCutGraph<V> extends MaxFlowCutGraph<V> {
         return factory;
     }
 
-    private class AhujaOrlinCallableFactory extends ArrayPartitionCallableFactory<AhujaOrlinCallable> {
+    private class AhujaOrlinCallableFactory extends PartitionIterationCallableFactory<AhujaOrlinCallable, SS> {
         @Override
-        public AhujaOrlinCallable newArrayPartitionCallable(int start, int stop) {
-            return new AhujaOrlinCallable(start,stop);
+        public AhujaOrlinCallable newArrayPartitionCallable(List<SS> list) {
+            return new AhujaOrlinCallable(list);
         }
     }
 }

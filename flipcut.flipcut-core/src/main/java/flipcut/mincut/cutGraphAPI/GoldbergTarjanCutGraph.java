@@ -23,7 +23,7 @@ package flipcut.mincut.cutGraphAPI;
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 import flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan.CutGraphImpl;
 import flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan.Node;
-import parallel.ArrayPartitionCallableFactory;
+import parallel.PartitionIterationCallableFactory;
 
 import java.util.*;
 
@@ -183,8 +183,8 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
         private CutGraphImpl hipri;
         private Map<N, Node> algoNodeMap;
 
-        HipriCallable(int start, int stop) {
-            super(start, stop);
+        public HipriCallable(List<MaxFlowCutGraph<V>.SS> jobs) {
+            super(jobs);
         }
 
         @Override
@@ -208,10 +208,10 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
         return factory;
     }
 
-    private class HipriCallableFactory extends ArrayPartitionCallableFactory<HipriCallable>{
+    private class HipriCallableFactory extends PartitionIterationCallableFactory<HipriCallable,SS> {
         @Override
-        public HipriCallable newArrayPartitionCallable(int start, int stop) {
-            return new HipriCallable(start,stop);
+        public HipriCallable newArrayPartitionCallable(List<SS> list) {
+            return new HipriCallable(list);
         }
     }
 

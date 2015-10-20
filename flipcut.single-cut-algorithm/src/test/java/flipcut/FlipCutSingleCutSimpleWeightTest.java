@@ -311,7 +311,7 @@ public class FlipCutSingleCutSimpleWeightTest {
         a.setWeights(FlipCutWeights.Weights.UNIT_COST);
 //        a.setInput(Arrays.asList(trees),guideTree);
         a.setInput(Arrays.asList(trees));
-        a.setNumberOfThreads(2);
+        a.setNumberOfThreads(4);
         a.run();
         Tree sTree =  a.getResult();
         System.out.println("time : " + (System.currentTimeMillis()-t));
