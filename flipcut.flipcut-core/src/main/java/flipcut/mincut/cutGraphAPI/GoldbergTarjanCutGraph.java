@@ -23,7 +23,7 @@ package flipcut.mincut.cutGraphAPI;
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 import flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan.CutGraphImpl;
 import flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan.Node;
-import parallel.IterationCallableFactory;
+import utils.parallel.IterationCallableFactory;
 
 import java.util.*;
 

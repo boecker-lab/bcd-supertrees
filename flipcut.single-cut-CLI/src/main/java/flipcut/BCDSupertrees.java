@@ -1,25 +1,24 @@
 package flipcut;
 
 import epos.algo.consensus.nconsensus.NConsensus;
-import epos.model.tree.Tree;
-import epos.model.tree.io.Newick;
-import epos.model.tree.io.SimpleNexus;
-import epos.model.tree.io.TreeFileUtils;
-import epos.model.tree.treetools.ReductionModifier;
-import epos.model.tree.treetools.TreeUtilsBasic;
-import epos.model.tree.treetools.UnsupportedCladeReduction;
 import flipcut.clo.FlipCutCLO;
-import net.openhft.affinity.Affinity;
-import net.openhft.affinity.AffinityStrategies;
-import net.openhft.affinity.AffinityThreadFactory;
 import org.apache.log4j.*;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
-import scmAlgorithm.AbstractSCMAlgorithm;
-import scmAlgorithm.GreedySCMAlgorithm;
-import scmAlgorithm.RandomizedSCMAlgorithm;
-import scmAlgorithm.treeScorer.*;
-import scmAlgorithm.treeSelector.GreedyTreeSelector;
+import phyloTree.io.Newick;
+import phyloTree.io.SimpleNexus;
+import phyloTree.io.TreeFileUtils;
+import phyloTree.model.tree.Tree;
+import phyloTree.model.tree.TreeUtils;
+import phyloTree.treetools.ReductionModifier;
+import phyloTree.treetools.UnsupportedCladeReduction;
+import scm.algorithm.AbstractSCMAlgorithm;
+import scm.algorithm.GreedySCMAlgorithm;
+import scm.algorithm.RandomizedSCMAlgorithm;
+import scm.algorithm.treeSelector.GreedyTreeSelector;
+import scm.algorithm.treeSelector.RandomizedGreedyTreeSelector;
+import scm.algorithm.treeSelector.TreeScorer;
+import scm.algorithm.treeSelector.TreeSelector;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,8 +31,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static flipcut.clo.FlipCutCLO.FileType.*;
 
@@ -101,10 +98,10 @@ public class BCDSupertrees {
                     System.out.println("Calculating SCM Guide Tree...");
                     scmRuntime = System.currentTimeMillis();
                     if (bcdCLI.scmMethod != FlipCutCLO.SCM.SUPPORT) {
-                        guideTree = calculateSCM(TreeUtilsBasic.cloneTrees(TreeUtilsBasic.cloneTrees(inputTreesUntouched)), bcdCLI.scmMethod);
+                        guideTree = calculateSCM(TreeUtils.cloneTrees(TreeUtils.cloneTrees(inputTreesUntouched)), bcdCLI.scmMethod);
                     } else {
-                        guideTree = calculateSCM(TreeUtilsBasic.cloneTrees(TreeUtilsBasic.cloneTrees(inputTreesUntouched)), FlipCutCLO.SCM.COLLISION);
-                        suppportTree = calculateSCMSupportTree(TreeUtilsBasic.cloneTrees(inputTreesUntouched));
+                        guideTree = calculateSCM(TreeUtils.cloneTrees(TreeUtils.cloneTrees(inputTreesUntouched)), FlipCutCLO.SCM.COLLISION);
+                        suppportTree = calculateSCMSupportTree(TreeUtils.cloneTrees(inputTreesUntouched));
                     }
 
                     scmRuntime = ((double) System.currentTimeMillis() - scmRuntime) / 1000d;
@@ -221,35 +218,41 @@ public class BCDSupertrees {
 
 
     private static Tree calculateSCM(Tree[] inputTrees, final FlipCutCLO.SCM method) {
-        //todo add to executor sevice
+        //todo add to executor sevice  and maybe add logging
         AbstractSCMAlgorithm algo;
-        switch (method) {
-            case OVERLAP:
-                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new OverlapScorer(TreeScorer.ConsensusMethods.STRICT,LOGGER,true,true), inputTrees));
-                break;
-            case UNIQUE_TAXA:
-                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new UniqueTaxaNumberScorer(TreeScorer.ConsensusMethods.STRICT,LOGGER,true,true), inputTrees));
-                break;
-            case COLLISION:
-                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new CollisionLostCladesNumberScorer(TreeScorer.ConsensusMethods.STRICT,LOGGER,true,true), inputTrees));
-                break;
-            case RESOLUTION:
-                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new ConsensusResolutionScorer(TreeScorer.ConsensusMethods.STRICT,LOGGER,true,true), inputTrees));
-                break;
-            case RANDOMIZED:
-                algo = new RandomizedSCMAlgorithm(bcdCLI.scmiterations, inputTrees, new OverlapScorer(TreeScorer.ConsensusMethods.STRICT,LOGGER,true,true));
-                break;
-            default:
-                algo = new GreedySCMAlgorithm(new GreedyTreeSelector(new CollisionLostCladesNumberScorer(TreeScorer.ConsensusMethods.STRICT,LOGGER,true,true), inputTrees));
-                break;
+        TreeSelector selector;
+        if (method != FlipCutCLO.SCM.RANDOMIZED) {
+            selector = new GreedyTreeSelector();
+            algo = new GreedySCMAlgorithm(selector);
+            switch (method) {
+                case OVERLAP:
+                    selector.setScorer(new TreeScorer.OverlapScorer());
+                    break;
+                case UNIQUE_TAXA:
+                    selector.setScorer(new TreeScorer.UniqueTaxaNumberScorer());
+                    break;
+                case COLLISION:
+                    selector.setScorer(new TreeScorer.CollisionLostCladesNumberScorer());
+                    break;
+                case RESOLUTION:
+                    selector.setScorer(new TreeScorer.ConsensusResolutionScorer());
+                    break;
+                default:
+                    selector.setScorer(new TreeScorer.CollisionLostCladesNumberScorer());
+                    break;
+            }
+        } else {
+            selector = new RandomizedGreedyTreeSelector();
+            algo = new RandomizedSCMAlgorithm(bcdCLI.scmiterations, new TreeScorer.OverlapScorer(true));
         }
+        algo.setInput(Arrays.asList(inputTrees));
         algo.run();
         return algo.getResult();
     }
 
     private static Tree calculateSCMSupportTree(Tree[] inputTrees) {
         //todo add to executor sevice --> ist can be done perfectly parralel
-        AbstractSCMAlgorithm scmSupportAlgorithm = new RandomizedSCMAlgorithm(bcdCLI.scmiterations, inputTrees, new OverlapScorer(TreeScorer.ConsensusMethods.SEMI_STRICT,LOGGER,true,true));
+        AbstractSCMAlgorithm scmSupportAlgorithm = new RandomizedSCMAlgorithm(bcdCLI.scmiterations, inputTrees, new TreeScorer.OverlapScorer());//todo semi strict needed
         scmSupportAlgorithm.run();
         List<Tree> temp = scmSupportAlgorithm.getResults();
         NConsensus c = new NConsensus();

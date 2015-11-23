@@ -26,12 +26,16 @@ allprojects {
     }
 
     dependencies {
-        compile 'de.unijena.bioinf:phyloTree-lib:0.9.9-SNAPSHOT'
-        compile 'de.unijena.bioinf:algorithmUtils:0.9-SNAPSHOT'
+        compile 'de.unijena.bioinf:phyloTree.model:0.9.9-SNAPSHOT'
+        compile 'de.unijena.bioinf:phyloTree.algorithm:0.9.9-SNAPSHOT'
+        compile 'de.unijena.bioinf:core-lib.utils:0.9-SNAPSHOT'
+
+
         compile 'com.google.guava:guava:18.0'
         compile 'net.sf.trove4j:trove4j:3.0.3'
         compile 'net.openhft:affinity:3.0'
 
+        testCompile'de.unijena.bioinf:phyloTree.utils:0.9.9-SNAPSHOT'
         testCompile group: 'junit', name: 'junit', version: '4.11'
     }
 
@@ -48,7 +52,6 @@ project(':flipcut.flipcut-core') {
     version = '0.9-SNAPSHOT'
 
     dependencies {
-        compile 'de.unijena.bioinf:phyloTree-lib:0.9.9-SNAPSHOT'
     }
 }
 
@@ -58,7 +61,7 @@ project(':flipcut.single-cut-algorithm') {
 
     dependencies {
         compile project(':flipcut.flipcut-core')
-        testCompile 'de.unijena.bioinf:scm_Algorithm:0.8-SNAPSHOT'
+        testCompile 'de.unijena.bioinf:scm.algorithm:0.8-SNAPSHOT'
     }
 }
 
@@ -68,7 +71,8 @@ project(':flipcut.single-cut-CLI') {
 
     dependencies {
         compile project(':flipcut.single-cut-algorithm')
-        compile 'de.unijena.bioinf:scm_Algorithm:0.8-SNAPSHOT'
+        compile 'de.unijena.bioinf:scm.algorithm:0.8-SNAPSHOT'
+        compile'de.unijena.bioinf:phyloTree.utils:0.9.9-SNAPSHOT'
         compile 'args4j:args4j:2.0.29'
     }
 }

@@ -1,13 +1,12 @@
-package flipcut;//import epos.model.tree.Tree;
-
-import epos.model.algo.SupertreeAlgorithm;
-import epos.model.tree.Tree;
+package flipcut;
 import flipcut.costComputer.CostComputer;
 import flipcut.costComputer.FlipCutWeights;
 import flipcut.flipCutGraph.AbstractFlipCutGraph;
 import flipcut.flipCutGraph.AbstractFlipCutNode;
 import flipcut.flipCutGraph.CutGraphCutter;
 import org.apache.log4j.Logger;
+import phyloTree.algorithm.SupertreeAlgorithm;
+import phyloTree.model.tree.Tree;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;

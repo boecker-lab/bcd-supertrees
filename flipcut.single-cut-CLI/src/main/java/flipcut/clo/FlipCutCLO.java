@@ -1,7 +1,6 @@
 package flipcut.clo;
 
 
-import epos.model.tree.Tree;
 import flipcut.AbstractFlipCut;
 import flipcut.costComputer.FlipCutWeights;
 import flipcut.flipCutGraph.CutGraphCutter;
@@ -9,6 +8,7 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler;
+import phyloTree.model.tree.Tree;
 
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
@@ -34,7 +34,6 @@ public abstract class FlipCutCLO<A extends AbstractFlipCut>{
     protected abstract A initAlgorithm();
 
     // receives other command line parameters than options
-
     @Argument(usage = "Path of the file containing the input trees", index = 0, required = true)
     public Path inputFile;
 

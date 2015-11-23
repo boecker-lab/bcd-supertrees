@@ -1,6 +1,5 @@
 package flipcut.mincut.cutGraphAPI;
 
-import flipcut.mincut.cutGraphAPI.MultiCutGraph;
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 
 import java.util.List;

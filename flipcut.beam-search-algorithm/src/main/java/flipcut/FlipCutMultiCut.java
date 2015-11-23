@@ -1,6 +1,6 @@
 package flipcut;
 
-import epos.model.tree.Tree;
+import phyloTree.model.tree.Tree;
 import flipcut.costComputer.CostComputer;
 import flipcut.costComputer.FlipCutWeights;
 import flipcut.costComputer.UnitCostComputer;

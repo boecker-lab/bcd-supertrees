@@ -1,8 +1,6 @@
 package flipcut;
 
 
-import epos.model.tree.Tree;
-import epos.model.tree.TreeNode;
 import flipcut.costComputer.CostComputer;
 import flipcut.costComputer.FlipCutWeights;
 import flipcut.costComputer.UnitCostComputer;
@@ -12,6 +10,8 @@ import flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
 import flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 import flipcut.flipCutGraph.SingleCutGraphCutter;
 import org.apache.log4j.Logger;
+import phyloTree.model.tree.Tree;
+import phyloTree.model.tree.TreeNode;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;

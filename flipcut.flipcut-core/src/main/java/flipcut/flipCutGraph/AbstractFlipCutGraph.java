@@ -1,8 +1,8 @@
 package flipcut.flipCutGraph;
 
 
-import epos.model.tree.TreeNode;
 import flipcut.costComputer.CostComputer;
+import phyloTree.model.tree.TreeNode;
 
 import java.util.*;
 

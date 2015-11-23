@@ -1,9 +1,9 @@
 package flipcut.io;
 
-import epos.model.tree.Tree;
-import epos.model.tree.io.Newick;
 import org.biojavax.bio.phylo.io.nexus.NexusBlock;
 import org.biojavax.bio.phylo.io.nexus.NexusFileFormat;
+import phyloTree.io.Newick;
+import phyloTree.model.tree.Tree;
 
 import java.io.*;
 import java.util.Arrays;

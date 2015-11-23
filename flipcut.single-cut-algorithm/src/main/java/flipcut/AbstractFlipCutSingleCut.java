@@ -1,17 +1,18 @@
 package flipcut;
 
-import epos.model.tree.Tree;
-import epos.model.tree.TreeNode;
 import flipcut.flipCutGraph.AbstractFlipCutGraph;
 import flipcut.flipCutGraph.AbstractFlipCutNode;
 import flipcut.flipCutGraph.CutGraphCutter;
-import flipcut.flipCutGraph.SingleCutGraphCutter;
 import org.apache.log4j.Logger;
-import utils.CLIProgressBar;
+import phyloTree.model.tree.Tree;
+import phyloTree.model.tree.TreeNode;
+import utils.progressBar.CLIProgressBar;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)

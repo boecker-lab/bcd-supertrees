@@ -1,7 +1,7 @@
 package flipcut.flipCutGraph;
 
 
-import epos.model.tree.TreeNode;
+import phyloTree.model.tree.TreeNode;
 import flipcut.costComputer.CostComputer;
 import flipcut.model.Cut;
 

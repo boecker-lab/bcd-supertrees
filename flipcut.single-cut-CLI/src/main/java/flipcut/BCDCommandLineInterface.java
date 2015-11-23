@@ -60,10 +60,10 @@ public class BCDCommandLineInterface extends FlipCutCLO<FlipCutSingleCutSimpleWe
     @Override
     protected void printUsage(PrintStream stream) {
         stream.println("Usage:");
-        stream.println(" " + NAME + " [options...] NEWICK_TREE_FILE");
+        stream.println(" " + NAME + " [options...] INPUT_TREE_FILE");
         stream.println("    The only required argument is the input tree file in newick format");
         stream.println();
-        stream.println(" " + NAME + " [options...] NEWICK_TREE_FILE NEWICK_GUIDE_TREE_FILE");
+        stream.println(" " + NAME + " [options...] INPUT_TREE_FILE GUIDE_TREE_FILE");
         stream.println("    Additionally, a guide tree can be specified. Otherwise SCM tree gets calculated as default guide tree");
         stream.println();
 //        stream.println(" " + NAME + " NEXUS_FILE");

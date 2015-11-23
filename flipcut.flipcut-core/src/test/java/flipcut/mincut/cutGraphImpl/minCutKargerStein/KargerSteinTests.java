@@ -1,11 +1,11 @@
 package flipcut.mincut.cutGraphImpl.minCutKargerStein;
 
-import epos.model.tree.Tree;
-import epos.model.tree.TreeNode;
-import epos.model.tree.io.Newick;
 import flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 import org.junit.Test;
+import phyloTree.io.Newick;
+import phyloTree.model.tree.Tree;
+import phyloTree.model.tree.TreeNode;
 
 import java.io.File;
 import java.util.ArrayList;

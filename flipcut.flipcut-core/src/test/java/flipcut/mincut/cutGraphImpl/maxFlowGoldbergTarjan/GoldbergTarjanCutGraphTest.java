@@ -18,12 +18,12 @@ package flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan;/*
  * along with Epos.  If not, see <http://www.gnu.org/licenses/>
  */
 
-import epos.model.tree.Tree;
-import epos.model.tree.TreeNode;
-import epos.model.tree.io.Newick;
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 import flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import org.junit.Test;
+import phyloTree.io.Newick;
+import phyloTree.model.tree.Tree;
+import phyloTree.model.tree.TreeNode;
 
 import java.io.File;
 import java.util.ArrayList;

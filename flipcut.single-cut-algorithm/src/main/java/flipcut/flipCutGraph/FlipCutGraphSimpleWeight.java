@@ -1,13 +1,11 @@
 package flipcut.flipCutGraph;
 
-import EDU.oswego.cs.dl.util.concurrent.SyncSet;
-import epos.model.tree.Tree;
-import epos.model.tree.TreeNode;
 import flipcut.costComputer.CostComputer;
+import phyloTree.model.tree.Tree;
+import phyloTree.model.tree.TreeNode;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -25,7 +23,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     }
 
     public FlipCutGraphSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, final boolean checkEdges) {
-        super(nodes, parentNode,checkEdges);
+        super(nodes, parentNode, checkEdges);
     }
 
     @Override
@@ -45,7 +43,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         System.out.println("Creating intitial FC graph...");
         List<Tree> inputTrees = new ArrayList<>(costs.getTrees());
         Tree scaff = costs.getScaffoldTree();
-        if (SCAFF_TAXA_MERGE ) {
+        if (SCAFF_TAXA_MERGE) {
             final int size;
             if (scaff != null)
                 size = scaff.vertexCount() - scaff.getNumTaxa();
@@ -304,13 +302,13 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         // check edges from characters
         for (FlipCutNodeSimpleWeight character : characters) {
             if (edgeDeletion)
-                deleted =  deleted || character.edges.retainAll(taxa);
+                deleted = deleted || character.edges.retainAll(taxa);
             character.imaginaryEdges.retainAll(taxa);
         }
         if (edgeDeletion) {
             // check reverse edges from taxa
             for (FlipCutNodeSimpleWeight taxon : taxa) {
-                deleted =  deleted || taxon.edges.retainAll(characters);
+                deleted = deleted || taxon.edges.retainAll(characters);
             }
         }
         return deleted;

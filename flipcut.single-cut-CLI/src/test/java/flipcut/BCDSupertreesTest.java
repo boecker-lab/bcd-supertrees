@@ -1,11 +1,11 @@
 package flipcut;
 
-import epos.model.tree.Tree;
-import epos.model.tree.io.Newick;
-import epos.model.tree.io.SimpleNexus;
-import epos.model.tree.io.TreeFileUtils;
 import flipcut.clo.FlipCutCLO;
 import org.junit.Test;
+import phyloTree.io.Newick;
+import phyloTree.io.SimpleNexus;
+import phyloTree.io.TreeFileUtils;
+import phyloTree.model.tree.Tree;
 
 import java.io.File;
 import java.io.IOException;
