@@ -306,7 +306,7 @@ public class FlipCutSingleCutSimpleWeightTest {
         t = System.currentTimeMillis();
         FlipCutSingleCutSimpleWeight a = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
 //        FlipCutSingleCutSimpleWeight a = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN);
-        a.setWeights(FlipCutWeights.Weights.UNIT_COST);
+        a.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
 //        a.setInput(Arrays.asList(trees),guideTree);
         a.setInput(Arrays.asList(trees));
         a.setNumberOfThreads(4);

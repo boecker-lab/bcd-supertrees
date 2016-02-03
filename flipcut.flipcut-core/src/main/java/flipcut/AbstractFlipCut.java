@@ -4,12 +4,12 @@ import flipcut.costComputer.FlipCutWeights;
 import flipcut.flipCutGraph.AbstractFlipCutGraph;
 import flipcut.flipCutGraph.AbstractFlipCutNode;
 import flipcut.flipCutGraph.CutGraphCutter;
-import org.apache.log4j.Logger;
 import phyloTree.algorithm.SupertreeAlgorithm;
 import phyloTree.model.tree.Tree;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Logger;
 
 
 /**
@@ -29,10 +29,7 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
      * number of thread that should be used 0 -> automatic
      */
     protected boolean printProgress = false;//todo merge verbose and print progress
-    /**
-     * Verbose logs
-     */
-    protected boolean verbose = false;
+
 
     protected C.CutGraphTypes type;
     /**
@@ -65,7 +62,7 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
      *
      * @param log the logger
      */
-    protected AbstractFlipCut(Logger log,C.CutGraphTypes type) {
+    protected AbstractFlipCut(Logger log, C.CutGraphTypes type) {
         super(log);
         this.type = type;
     }
@@ -78,19 +75,6 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
     protected AbstractFlipCut(Logger log, ExecutorService executorService1,C.CutGraphTypes type) {
         super(log,executorService1);
         this.type = type;
-    }
-
-    /**
-     * Activate verbose log output
-     *
-     * @param verbose
-     */
-    public void setVerbose(boolean verbose) {
-        this.verbose = verbose;
-    }
-
-    public boolean isVerbose() {
-        return verbose;
     }
 
     public void setPrintProgress(boolean printProgress) {

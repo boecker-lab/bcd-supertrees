@@ -3,7 +3,6 @@ package flipcut;
 import flipcut.flipCutGraph.AbstractFlipCutGraph;
 import flipcut.flipCutGraph.AbstractFlipCutNode;
 import flipcut.flipCutGraph.CutGraphCutter;
-import org.apache.log4j.Logger;
 import phyloTree.model.tree.Tree;
 import phyloTree.model.tree.TreeNode;
 import utils.progressBar.CLIProgressBar;
@@ -13,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.*;
+import java.util.logging.Logger;
 
 /**
  * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -127,7 +127,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
     }
 
     private Tree computeSTIterativeMultiThreaded() throws ExecutionException, InterruptedException {
-        logger.info("Computing Supertree during iterative graph splitting (MultiThreaded)");
+        LOGGER.info("Computing Supertree during iterative graph splitting (MultiThreaded)");
         Tree supertree = null;
 
         supertree = new Tree();
@@ -163,7 +163,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
         Queue<T> graphs = new LinkedList<T>();
         graphs.offer(initialGraph);
 
-        logger.info("Computing Supertree during iterative graph splitting (SingleThreaded)");
+        LOGGER.info("Computing Supertree during iterative graph splitting (SingleThreaded)");
 
         int pcount = 1;
         while (graphs.size() > 0) {

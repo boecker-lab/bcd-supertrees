@@ -1,6 +1,5 @@
 package flipcut;
 
-import flipcut.clo.FlipCutCLO;
 import org.junit.Test;
 import phyloTree.io.Newick;
 import phyloTree.io.SimpleNexus;
@@ -37,83 +36,81 @@ public class BCDSupertreesTest {
     public final static String nexusSCM = "flipcut/sm.11.sourceTrees.scmTree.nex";
 
 
-
-
+    //todo move this tests to phylotree lib or core lib
     //File Hndling tests
     //test auto detection of same input type
     @Test
     public void test_newick_scm_input() throws Exception {
-        testAutoFileTypeDetection(newickInput, newickSCM, newickOut,null,null);
+        testAutoFileTypeDetection(newickInput, newickSCM, newickOut, null, null);
     }
 
     @Test
     public void test_nexus_scm_input() throws Exception {
-        testAutoFileTypeDetection(nexusInput, nexusSCM, nexusOut,null,null);
+        testAutoFileTypeDetection(nexusInput, nexusSCM, nexusOut, null, null);
     }
 
     //test auto detection without guide tree
     @Test
     public void test_newick_input() throws Exception {
-        testAutoFileTypeDetection(newickInput, null, newickOut,null,null);
+        testAutoFileTypeDetection(newickInput, null, newickOut, null, null);
     }
 
     @Test
     public void test_nexus_input() throws Exception {
-        testAutoFileTypeDetection(nexusInput, null, nexusOut,null,null);
+        testAutoFileTypeDetection(nexusInput, null, nexusOut, null, null);
     }
 
     //Test Autodetection of different input Type
     @Test
     public void test_newick_nexus_scm_input() throws Exception {
-        testAutoFileTypeDetection(newickInput, nexusSCM, newickOut,null,null);
+        testAutoFileTypeDetection(newickInput, nexusSCM, newickOut, null, null);
     }
 
     @Test
     public void test_nexus_newick_scm_input() throws Exception {
-        testAutoFileTypeDetection(nexusInput, newickSCM, nexusOut,null,null);
+        testAutoFileTypeDetection(nexusInput, newickSCM, nexusOut, null, null);
     }
 
     //test specify file type
     @Test
     public void test_newick_scm_input_parameter() throws Exception {
-        testAutoFileTypeDetection(newickInput, newickSCM, newickOut, FlipCutCLO.FileType.NEWICK,null);
+        testAutoFileTypeDetection(newickInput, newickSCM, newickOut, TreeFileUtils.FileType.NEWICK, null);
     }
 
     @Test
     public void test_nexus_scm_input_parameter() throws Exception {
-        testAutoFileTypeDetection(nexusInput, nexusSCM, nexusOut,FlipCutCLO.FileType.NEXUS,null);
+        testAutoFileTypeDetection(nexusInput, nexusSCM, nexusOut, TreeFileUtils.FileType.NEXUS, null);
     }
 
     @Test
     public void test_newick_scm_input_same_parameter() throws Exception {
-        testAutoFileTypeDetection(newickInput, newickSCM, newickOut, FlipCutCLO.FileType.NEWICK,FlipCutCLO.FileType.NEWICK);
+        testAutoFileTypeDetection(newickInput, newickSCM, newickOut, TreeFileUtils.FileType.NEWICK, TreeFileUtils.FileType.NEWICK);
     }
 
     @Test
     public void test_nexus_scm_input_same_parameter() throws Exception {
-        testAutoFileTypeDetection(nexusInput, nexusSCM, nexusOut,FlipCutCLO.FileType.NEXUS,FlipCutCLO.FileType.NEXUS);
+        testAutoFileTypeDetection(nexusInput, nexusSCM, nexusOut, TreeFileUtils.FileType.NEXUS, TreeFileUtils.FileType.NEXUS);
     }
 
     @Test
     public void test_newick_scm_input_diff_parameter() throws Exception {
-        testAutoFileTypeDetection(newickInput, newickSCM, nexusOut, null,FlipCutCLO.FileType.NEXUS);
+        testAutoFileTypeDetection(newickInput, newickSCM, nexusOut, null, TreeFileUtils.FileType.NEXUS);
     }
 
     @Test
     public void test_nexus_scm_input_diff_parameter() throws Exception {
-        testAutoFileTypeDetection(nexusInput, nexusSCM, newickOut,null,FlipCutCLO.FileType.NEWICK);
+        testAutoFileTypeDetection(nexusInput, nexusSCM, newickOut, null, TreeFileUtils.FileType.NEWICK);
     }
 
     @Test
     public void test_newick_scm_input_diff_parameter2() throws Exception {
-        testAutoFileTypeDetection(newickInput, nexusSCM, nexusOut, null,FlipCutCLO.FileType.NEXUS);
+        testAutoFileTypeDetection(newickInput, nexusSCM, nexusOut, null, TreeFileUtils.FileType.NEXUS);
     }
 
     @Test
     public void test_nexus_scm_input_diff_parameter2() throws Exception {
-        testAutoFileTypeDetection(nexusInput, newickSCM, newickOut,null,FlipCutCLO.FileType.NEWICK);
+        testAutoFileTypeDetection(nexusInput, newickSCM, newickOut, null, TreeFileUtils.FileType.NEWICK);
     }
-
 
 
     /*@Test
@@ -136,11 +133,11 @@ public class BCDSupertreesTest {
 
     }
 */
-    @Test
+    /*@Test
     public void debugTest() throws IOException {
         Path inputPath = Paths.get(getClass().getResource("/" + newickInput).getFile());
         final Path tempDir = getTmpDir();
-        final List<String> toargs =  new LinkedList<>();
+        final List<String> toargs = new LinkedList<>();
 
         //set parameter
 
@@ -160,22 +157,21 @@ public class BCDSupertreesTest {
         toargs.add(inputPath.toString());
         System.out.println(inputPath);
 
-        String[] args =  new String[toargs.size()];
+        String[] args = new String[toargs.size()];
         args = toargs.toArray(args);
         System.out.println("Arguments:");
         System.out.println(Arrays.toString(args));
         BCDSupertrees.main(args);
 
-    }
+    }*/
 
 
-
-    private void  testAutoFileTypeDetection(String in,String scm, String outPath, FlipCutCLO.FileType inputType, FlipCutCLO.FileType outputType) throws IOException {
+    private void testAutoFileTypeDetection(String in, String scm, String outPath, TreeFileUtils.FileType inputType, TreeFileUtils.FileType outputType) throws IOException {
         final Path tempDir = getTmpDir();
-        final List<String> toargs =  new LinkedList<>();
+        final List<String> toargs = new LinkedList<>();
 
         //set parameter
-        if (inputType != null){
+        if (inputType != null) {
             toargs.add("-f");
             toargs.add(inputType.toString());
         }
@@ -196,10 +192,10 @@ public class BCDSupertreesTest {
             scmPath = Files.copy(scmPath, tempDir.resolve(scmPath.getFileName()));
             System.out.println(scmPath);
 
-           toargs.add(scmPath.toString());
+            toargs.add(scmPath.toString());
         }
 
-        String[] args =  new String[toargs.size()];
+        String[] args = new String[toargs.size()];
         args = toargs.toArray(args);
         System.out.println("Arguments:");
         System.out.println(Arrays.toString(args));
@@ -217,7 +213,7 @@ public class BCDSupertreesTest {
             superTree = SimpleNexus.getTreesFromFile(out)[0];
         else if (TreeFileUtils.newickMatcher.matches(out.toPath()))
             superTree = Newick.getTreeFromFile(out)[0];
-        else{
+        else {
             superTree = null;
             System.out.println("ERROR, file unknown");
         }

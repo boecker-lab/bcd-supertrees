@@ -1,9 +1,10 @@
 package flipcut;
 
-import flipcut.clo.FlipCutCLO;
+import flipcut.cli.BCDCLI;
 import flipcut.flipCutGraph.CutGraphCutter;
 import org.junit.Test;
 import org.kohsuke.args4j.CmdLineParser;
+import phyloTree.io.TreeFileUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,9 +15,13 @@ import static org.junit.Assert.assertEquals;
  * Created by Florian on 22.04.2014.
  */
 
-
-public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //extending from class to test to get protected access
+//todo check test
+public class BCDCLITest extends BCDCLI { //extending from class to test to get protected access
     public final String requiredInputPath = "/home/user/inputTrees.tre";
+
+    public BCDCLITest() {
+        super(BCDCLI.DEFAULT_PROPERTIES_FILE);
+    }
 
     //Test if parameter gets translated into flipcut parameters in the right way
     @Test
@@ -26,12 +31,12 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
         String[] test_string = new String[]{"-a", Algorithm.BCD.name(), requiredInputPath};
         parser.parseArgument(test_string);
         //assert
-        assertEquals(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG, algorithm.getCutterType());
+        assertEquals(CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG, getGraphType());
 
         test_string = new String[]{"-a", Algorithm.FC.name(), requiredInputPath};
         parser.parseArgument(test_string);
         //assert
-        assertEquals(CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG, algorithm.getCutterType());
+        assertEquals(CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG, getGraphType());
     }
 
     @Test
@@ -43,19 +48,19 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
         initWheightMapping();
 
         //assert
-        assertEquals("UNIT_COST", algorithm.weights.name());
+        assertEquals("UNIT_COST", getWeights().name());
     }
 
     @Test
     public void test_supported_weights() throws Exception {           //TODO: Test every weight? --> you can iterate over the common weights
         final CmdLineParser parser = new CmdLineParser(this);
 
-        for (FlipCutCLO.SuppportedWeights weight : SuppportedWeights.values()) {
+        for (BCDCLI.SuppportedWeights weight : SuppportedWeights.values()) {
             String[] test_String = {"-w", weight.name(), requiredInputPath};
             parser.parseArgument(test_String);
 
             //assert
-            assertEquals(weightMapping.get(weight), algorithm.weights);
+            assertEquals(weightMapping.get(weight), getWeights());
 
         }
     }
@@ -68,7 +73,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
         //assert
 
-        assertEquals(33, algorithm.bootstrapThreshold);
+        assertEquals(33, getBootstrapThreshold());
 
     }
 
@@ -87,14 +92,14 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
     @Test
     public void test_output_path() throws Exception {
-        final String path = "C:\\fictional.txt";
+        final String path = System.getProperty("user.home");
         String[] test_String = {"-o", path, requiredInputPath};
         final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
 
         //assert
 
-        assertEquals(path, output.toString());
+        assertEquals(path, getOutputFile().toAbsolutePath().toString());
 
     }
 
@@ -121,7 +126,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
     }
 
     @Test
-    public void test_noRooting() throws Exception{
+    public void test_noRooting() throws Exception {
         String[] test_String = {"-r", requiredInputPath};
         final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
@@ -131,19 +136,20 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
 
     }
 
-    @Test
+    //todo should be tested in the libary not here
+    /*@Test
     public void test_verbose() throws Exception{
         String[] test_String = {"-v", requiredInputPath};
         final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
 
         //assert
-        assertEquals(true, isVerbose());
+        assertEquals(true,);
 
     }
-
+*/
     @Test
-    public void test_insufficient() throws Exception{
+    public void test_insufficient() throws Exception {
         String[] test_String = {"-i", requiredInputPath};
         final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
@@ -154,8 +160,8 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
     }
 
     @Test
-    public void test_in_file_type() throws Exception{
-        final FileType file_type=FileType.AUTO;
+    public void test_in_file_type() throws Exception {
+        final TreeFileUtils.FileType file_type = TreeFileUtils.FileType.AUTO;
         String[] test_String = {"-f", file_type.name(), requiredInputPath};
 
         final CmdLineParser parser = new CmdLineParser(this);
@@ -167,9 +173,9 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
     }
 
     @Test
-    public void test_out_file_type() throws Exception{
-        final FileType file_type=FileType.AUTO;
-        String[] test_String = {"-d",file_type.name(), requiredInputPath};
+    public void test_out_file_type() throws Exception {
+        final TreeFileUtils.FileType file_type = TreeFileUtils.FileType.AUTO;
+        String[] test_String = {"-d", file_type.name(), requiredInputPath};
         final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
 
@@ -179,9 +185,9 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
     }
 
     @Test
-    public void test_work_dir() throws Exception{
+    public void test_work_dir() throws Exception {
         final Path work_dir_path = Paths.get("/fictional/path");
-        String[] test_String = {"-p", work_dir_path.toString(),requiredInputPath};
+        String[] test_String = {"-p", work_dir_path.toString(), requiredInputPath};
         final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
 
@@ -191,7 +197,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
     }
 
     @Test
-    public void test_help() throws Exception{
+    public void test_help() throws Exception {
         String[] test_String = {"-h", requiredInputPath};
         final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
@@ -202,7 +208,7 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
     }
 
     @Test
-    public void test_full_help() throws Exception{
+    public void test_full_help() throws Exception {
         String[] test_String = {"-H", requiredInputPath};
         final CmdLineParser parser = new CmdLineParser(this);
         parser.parseArgument(test_String);
@@ -211,10 +217,6 @@ public class BCDCommandLineInterfaceTest extends BCDCommandLineInterface { //ext
         assertEquals(true, fullHelp);
 
     }
-
-
-
-
 
 
     @Test

@@ -36,7 +36,8 @@ allprojects {
         compile 'net.openhft:affinity:3.0'
 
         testCompile'de.unijena.bioinf:phyloTree.utils:0.9.9-SNAPSHOT'
-        testCompile group: 'junit', name: 'junit', version: '4.11'
+        testCompile'junit:junit:4.12'
+
     }
 
 
@@ -73,7 +74,8 @@ project(':flipcut.single-cut-CLI') {
         compile project(':flipcut.single-cut-algorithm')
         compile 'de.unijena.bioinf:scm.algorithm:0.8-SNAPSHOT'
         compile'de.unijena.bioinf:phyloTree.utils:0.9.9-SNAPSHOT'
-        compile 'args4j:args4j:2.0.29'
+        compile 'de.unijena.bioinf:core-lib.cli:0.9-SNAPSHOT'
+        compile 'de.unijena.bioinf:phyloTree.cli:0.9.9-SNAPSHOT'
     }
 }
 

@@ -7,10 +7,10 @@ import flipcut.costComputer.UnitCostComputer;
 import flipcut.costComputer.WeightCostComputer;
 import flipcut.flipCutGraph.*;
 import flipcut.model.Partition;
-import org.apache.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Logger;
 
 /**
  * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -27,6 +27,11 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
 
     public FlipCutMultiCut() {
         super();
+    }
+
+    @Override
+    protected String name() {
+        return getClass().getSimpleName();
     }
 
     public FlipCutMultiCut(CutGraphCutter.CutGraphTypes type) {
@@ -186,13 +191,13 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
     protected CostComputer initCosts(List<Tree> inputTrees, Tree scaffoldTree) {
         CostComputer costs = null;
         if (UnitCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
-            logger.info("Using Unit Costs");
+            LOGGER.info("Using Unit Costs");
             costs = new UnitCostComputer(inputTrees,scaffoldTree);
         } else if (WeightCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
             costs = new WeightCostComputer(inputTrees,weights,scaffoldTree);
-            logger.info("Using " + weights);
+            LOGGER.info("Using " + weights);
         }else{
-            logger.warn("No supported weight option set. Setting to standard: " + FlipCutWeights.Weights.EDGE_AND_LEVEL);
+            LOGGER.warning("No supported weight option set. Setting to standard: " + FlipCutWeights.Weights.EDGE_AND_LEVEL);
             setWeights(FlipCutWeights.Weights.EDGE_AND_LEVEL);
             initCosts(inputTrees, scaffoldTree);
         }
