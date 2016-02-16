@@ -3,7 +3,6 @@
 .svn
 *.class
 .classpath
-build
 gradle
 gradlew
 gradlew.bat

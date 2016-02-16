@@ -41,7 +41,7 @@ public class BCDSupertreesTest {
     //test auto detection of same input type
     @Test
     public void test_newick_scm_input() throws Exception {
-        testAutoFileTypeDetection(newickInput, newickSCM, newickOut, null, null);
+        assertTrue(testAutoFileTypeDetection(newickInput, newickSCM, newickOut, null, null));
     }
 
     @Test
@@ -166,7 +166,7 @@ public class BCDSupertreesTest {
     }*/
 
 
-    private void testAutoFileTypeDetection(String in, String scm, String outPath, TreeFileUtils.FileType inputType, TreeFileUtils.FileType outputType) throws IOException {
+    public boolean testAutoFileTypeDetection(String in, String scm, String outPath, TreeFileUtils.FileType inputType, TreeFileUtils.FileType outputType) throws IOException {
         final Path tempDir = getTmpDir();
         final List<String> toargs = new LinkedList<>();
 
@@ -219,9 +219,10 @@ public class BCDSupertreesTest {
         }
         assertNotNull(superTree);
         System.out.println(Newick.getStringFromTree(superTree));
+        return superTree != null;
     }
 
-    private Path getTmpDir() throws IOException {
+    public Path getTmpDir() throws IOException {
         Random r = new Random();
         final Path tmpDir = Paths.get(System.getProperty("java.io.tmpdir"));
         Path t = Files.createTempDirectory(tmpDir, "flipCut-test-tmp-" + r.nextInt());

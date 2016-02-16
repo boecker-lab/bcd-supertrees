@@ -63,11 +63,14 @@ public class BCDSupertrees {
             if (guideTree == null && CLI.useSCM) { //scm tree option is hidden because should be activated
                 CLI.LOGGER.info("Calculating SCM Guide Tree...");
                 scmRuntime = System.currentTimeMillis();
-                if (CLI.scmMethod != BCDCLI.SCM.SUPPORT) {
-                    guideTree = calculateSCM(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])), CLI.scmMethod);
+                if (CLI.useSupportTree()) {
+                    guideTree = calculateSCM(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
+                    //todo implement support tree stuff, if this is really helpful
+//                    suppportTree = calculateSCMSupportTree(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
+                    suppportTree = calculateSCM(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
+
                 } else {
-                    guideTree = calculateSCM(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])), BCDCLI.SCM.COLLISION);
-                    suppportTree = calculateSCMSupportTree(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
+                    guideTree = calculateSCM(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
                 }
 
                 scmRuntime = ((double) System.currentTimeMillis() - scmRuntime) / 1000d;
@@ -144,42 +147,17 @@ public class BCDSupertrees {
     }
 
 
-    private static Tree calculateSCM(Tree[] inputTrees, final BCDCLI.SCM method) {
-        //todo add to executor sevice  and maybe add logging
-        AbstractSCMAlgorithm algo;
-        TreeSelector selector;
-        if (method != BCDCLI.SCM.RANDOMIZED) {
-            selector = new GreedyTreeSelector();
-            algo = new GreedySCMAlgorithm(selector);
-            switch (method) {
-                case OVERLAP:
-                    selector.setScorer(new TreeScorer.OverlapScorer());
-                    break;
-                case UNIQUE_TAXA:
-                    selector.setScorer(new TreeScorer.UniqueTaxaNumberScorer());
-                    break;
-                case COLLISION:
-                    selector.setScorer(new TreeScorer.CollisionNumberScorer());
-                    break;
-                case RESOLUTION:
-                    selector.setScorer(new TreeScorer.ConsensusResolutionScorer());
-                    break;
-                default:
-                    selector.setScorer(new TreeScorer.CollisionNumberScorer());
-                    break;
-            }
-        } else {
-            selector = new RandomizedGreedyTreeSelector();
-            algo = new RandomizedSCMAlgorithm(CLI.scmiterations, new TreeScorer.OverlapScorer(true));
-        }
-        algo.setInput(Arrays.asList(inputTrees));
+    private static Tree calculateSCM(Tree[] inputTrees) {
+        AbstractSCMAlgorithm algo = CLI.getSCMInstance();
+        algo.setInput(inputTrees);
         algo.run();
         return algo.getResult();
     }
 
-    private static Tree calculateSCMSupportTree(Tree[] inputTrees) {
+    //todo support tree stuff
+    /*private static Tree calculateSCMSupportTree(Tree[] inputTrees) {
         //todo add to executor sevice --> ist can be done perfectly parralel
-        AbstractSCMAlgorithm scmSupportAlgorithm = new RandomizedSCMAlgorithm(CLI.scmiterations, inputTrees, new TreeScorer.OverlapScorer());//todo semi strict needed
+        RandomizedSCMAlgorithm scmSupportAlgorithm = new RandomizedSCMAlgorithm(CLI.scmiterations, inputTrees, CLI.get);//todo semi strict needed
         scmSupportAlgorithm.run();
         List<Tree> temp = scmSupportAlgorithm.getResults();
         NConsensus c = new NConsensus();
@@ -189,7 +167,7 @@ public class BCDSupertrees {
         Tree scmSupportTree = c.getResult();
         scmSupportTree.getRoot().setLabel(Double.toString((double) inputTrees.length / 2d));
         return scmSupportTree;
-    }
+    }*/
 
     private static ReductionModifier removeUndisputedSiblings(List<Tree> inputTrees) {
         ReductionModifier reducer = new ReductionModifier(null, false);

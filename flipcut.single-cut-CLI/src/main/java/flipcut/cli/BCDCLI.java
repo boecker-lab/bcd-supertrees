@@ -97,11 +97,11 @@ public class BCDCLI extends BasicBCDCLI<FlipCutSingleCutSimpleWeight> {
     }
 
     public Tree parseSCM() throws IOException {
-        if (inputSCMFile == null)
+        if (getSCMInputFile() == null)
             return null;
 
         LOGGER.info("Reading guide tree input File...");
-        Tree[] result = TreeFileUtils.parseFileToTrees(inputSCMFile, this.inputType);
+        Tree[] result = TreeFileUtils.parseFileToTrees(getSCMInputFile(), this.inputType);
         if (result == null) {
             throw new FileNotFoundException("ERROR: Unknown input file extension. Please specify the correct input file type (--fileType) or use a typical file extension for NEWICK (tree|TREE|tre|TRE|phy|PHY|nwk|NWK) or NEXUS (nex|NEX|ne|NE|nexus|NEXUS)");
         } else if (result.length < 1) {
