@@ -123,7 +123,7 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
         this.scorerTypes = scorerTypes;
     }
 
-    private TreeScorers.ScorerType[] scorerTypes = new TreeScorers.ScorerType[]{TreeScorers.ScorerType.UNIQUE_TAXA};
+    private TreeScorers.ScorerType[] scorerTypes = new TreeScorers.ScorerType[]{TreeScorers.ScorerType.UNIQUE_TAXA, TreeScorers.ScorerType.OVERLAP, TreeScorers.ScorerType.UNIQUE_CLADE_NUMBER};
 
     @Option(name = "-Sr", aliases = {"--scmRandomized"}, usage = "Enables randomization (standard iterations are numberOfTrees^2 per scoring)", forbids = {"-s", "-SR"}, hidden = true)
     private void setRandomized(boolean r) {
