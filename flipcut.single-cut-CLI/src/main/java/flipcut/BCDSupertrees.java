@@ -100,7 +100,6 @@ public class BCDSupertrees {
                     inputTrees.add(suppportTree);
             }
 
-            //todo do not run via cli, run directly, in executor service --> multiple runs in parralel possible
             //set input trees
             algorithm.setInput(inputTrees, guideTree);
             //run bcd supertrees
@@ -116,7 +115,7 @@ public class BCDSupertrees {
                 removeUnsupportedClades(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()]), superTree);
 
             //write output file
-            CLI.writeOutput(Arrays.asList(superTree)); //todo do something
+            CLI.writeOutput(Arrays.asList(superTree));
 
             //calculate runtime
             double calcTime = (System.currentTimeMillis() - startTime) / 1000d;
@@ -156,7 +155,6 @@ public class BCDSupertrees {
 
     //todo support tree stuff
     /*private static Tree calculateSCMSupportTree(Tree[] inputTrees) {
-        //todo add to executor sevice --> ist can be done perfectly parralel
         RandomizedSCMAlgorithm scmSupportAlgorithm = new RandomizedSCMAlgorithm(CLI.scmiterations, inputTrees, CLI.get);//todo semi strict needed
         scmSupportAlgorithm.run();
         List<Tree> temp = scmSupportAlgorithm.getResults();
