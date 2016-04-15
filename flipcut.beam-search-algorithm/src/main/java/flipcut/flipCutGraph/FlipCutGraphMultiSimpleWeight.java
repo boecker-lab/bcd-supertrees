@@ -1,9 +1,9 @@
 package flipcut.flipCutGraph;
 
 
-import phyloTree.model.tree.TreeNode;
 import flipcut.costComputer.CostComputer;
 import flipcut.model.Cut;
+import phyloTree.model.tree.TreeNode;
 
 import java.util.*;
 

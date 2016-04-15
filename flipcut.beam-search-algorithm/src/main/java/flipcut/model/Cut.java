@@ -43,10 +43,6 @@ public class Cut implements Comparable<Cut> {
         return (minCutValue < o.minCutValue) ? -1 : ((minCutValue == o.minCutValue) ? 0 : 1);
     }
 
-    /*public List<FlipCutGraphMultiSimpleWeight> getSplittedGraphs() {
-        return new ArrayList<FlipCutGraphMultiSimpleWeight>(splittedGraphs); //todo new object needed? proof it!
-    }*/
-
     public List<FlipCutGraphMultiSimpleWeight> getSplittedGraphs() {
 
         if (splittedGraphs == null) {

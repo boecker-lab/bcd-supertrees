@@ -1,8 +1,8 @@
 package flipcut.flipCutGraph;
 
 import flipcut.costComputer.CostComputer;
-import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 import flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
+import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 import flipcut.model.Cut;
 import flipcut.model.VaziraniNode;
 

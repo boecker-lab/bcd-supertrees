@@ -87,17 +87,6 @@ public abstract class CostComputer{
         System.out.println("...Done!");
     }
 
-    //todo maybe not needed because of infinity option
-    protected double getScaffoldWeight(){
-        //Attention: unchecked
-        if (scaffoldWeight == 0d ){
-            for (Tree tree : trees) {
-                scaffoldWeight += Double.valueOf(tree.getRoot().getLabel());
-            }
-        }
-        return scaffoldWeight;
-    }
-
     protected double parseBSValueFromLabel(TreeNode node){
         if (node.getLabel() != null) {
             try {

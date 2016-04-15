@@ -9,8 +9,6 @@ import java.util.concurrent.ExecutorService;
  * Date: 29.11.12
  * Time: 16:37
  */
-
-//todo useful comments how to use and extend this class
 public class SingleCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphSimpleWeight> {
     public SingleCutGraphCutter(CutGraphTypes type) {
         super(type);

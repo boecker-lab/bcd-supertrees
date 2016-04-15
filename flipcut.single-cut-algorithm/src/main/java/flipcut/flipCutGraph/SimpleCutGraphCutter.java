@@ -2,11 +2,11 @@ package flipcut.flipCutGraph;
 
 
 import flipcut.costComputer.CostComputer;
-import flipcut.mincut.cutGraphAPI.CutGraph;
-import flipcut.mincut.cutGraphAPI.MaxFlowCutGraph;
 import flipcut.mincut.cutGraphAPI.AhujaOrlinCutGraph;
-import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import flipcut.mincut.cutGraphAPI.CutGraph;
 import flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
+import flipcut.mincut.cutGraphAPI.MaxFlowCutGraph;
+import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -298,7 +298,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
             //              if (source.GLOBAL_CHARACTER_MERGE) {
             if (false) {
                 System.out.println("WARNING: static character map is not implemented for edge! The slower NON STATIC Version is used instead");
-//                    //todo make ompatible
+//                    //todo make compatible
                 // int merged = buildCharacterMergingMap(source);
 //                    if (DEBUG) System.out.println(merged + "characters merged before mincut");
                 createGoldbergTarjanCharacterWeightsMerged(cutGraph);
@@ -415,51 +415,4 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         }
 
     }
-
-    //merges characters with same edgeset and sums up the weights to reduce node and edgeset before mincut!
-    /*@Override
-    protected int buildCharacterMergingMap(T source){
-            Set<FlipCutNodeSimpleWeight> alreadyInMergeSet = new HashSet<FlipCutNodeSimpleWeight>();
-            dummyToMerged = new HashMap<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>>();
-            nodeToDummy = new HashMap<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight>();
-            List<FlipCutNodeSimpleWeight> characters = new ArrayList<>(source.characters);
-            List<FlipCutNodeSimpleWeight> charactersAdded = new ArrayList<>(source.characters);
-            int dupletsCounter = 0;
-            //ATTENTION: size -1 does not work, because if last note is alone in a group, it wont be added to the cut graph
-            for (int i = 0; i < characters.size(); i++) {
-                FlipCutNodeSimpleWeight charac1 = characters.get(i);
-                if (!alreadyInMergeSet.contains(charac1)) {
-                    FlipCutNodeSimpleWeight dummy = new FlipCutNodeSimpleWeight(charac1.edges);
-                    dummy.edgeWeight = charac1.edgeWeight;
-                    Set<FlipCutNodeSimpleWeight> toMerge = new HashSet<FlipCutNodeSimpleWeight>();
-                    toMerge.add(charac1);
-                    Set<FlipCutNodeSimpleWeight> toMergeClones = new HashSet<FlipCutNodeSimpleWeight>();
-                    toMergeClones.add(charac1.clone);
-                    alreadyInMergeSet.add(charac1); //not really needed but consistent
-                    //just for debugging
-                    charactersAdded.add(charac1);
-
-                    for (int j = i + 1; j < characters.size(); j++) {
-                        FlipCutNodeSimpleWeight charac2 = characters.get(j);
-                        if (!alreadyInMergeSet.contains(charac2)) {
-                            if (charac1.compareCharLazy(charac2)) {
-                                alreadyInMergeSet.add(charac2);
-                                toMerge.add(charac2);
-                                toMergeClones.add(charac2.clone);
-                                nodeToDummy.put(charac2,dummy);
-                                //sum up edge weights
-                                dummy.edgeWeight += charac2.edgeWeight;
-                                charactersAdded.add(charac2);
-                                dupletsCounter++;
-                            }
-                        }
-                    }
-                    dummyToMerged.put(dummy,toMerge);
-                    dummyToMerged.put(dummy.clone,toMergeClones);
-                    nodeToDummy.put(charac1,dummy);
-                    dummy.edges.addAll(charac1.edges);
-                }
-            }
-        return dupletsCounter;
-    }*/
 }

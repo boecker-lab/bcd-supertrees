@@ -28,7 +28,7 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
     /**
      * number of thread that should be used 0 -> automatic
      */
-    protected boolean printProgress = false;//todo merge verbose and print progress
+    protected boolean printProgress = false;
 
 
     protected C.CutGraphTypes type;

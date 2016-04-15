@@ -1,9 +1,9 @@
 
 package flipcut.model;
 
+import flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 import phyloTree.model.tree.Tree;
 import phyloTree.model.tree.TreeNode;
-import flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 
 import java.util.*;
 

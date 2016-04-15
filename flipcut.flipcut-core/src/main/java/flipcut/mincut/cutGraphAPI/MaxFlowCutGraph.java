@@ -36,7 +36,7 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
     }
 
     @Override
-    public List<BasicCut<V>> calculateMinSTCuts() {//todo parralelize if really used
+    public List<BasicCut<V>> calculateMinSTCuts() {//todo palatalize if really used
         List<BasicCut<V>> stCuts = new LinkedList<>();
         final int max = stToCalculate.size();
         for (int i = 0; i < max; i++) {
