@@ -115,19 +115,19 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
 
     //##### command line parameter #####
     @Option(name = "-s", aliases = "--scm", handler = ExplicitBooleanOptionHandler.class, usage = "Use SCM-tree as guide tree", forbids = {"-S", "-SR"})
-    public boolean useSCM = true;  //default value true
+    public boolean useSCM = true;  //default value has to be true because of -S
 
     @Option(name = "-S", aliases = "--scmScoring", usage = "Enable the usage of a GSCM-tree as guide tree and specify the scorings that will be used to construct this GSCM-tree", forbids = "-s", hidden = true, handler = SCMCLI.ScorerTypeArrayOptionHandler.class)
+    private TreeScorers.ScorerType[] scorerTypes = new TreeScorers.ScorerType[]{TreeScorers.ScorerType.COLLISION_SUBTREES, TreeScorers.ScorerType.UNIQUE_CLADE_RATE, TreeScorers.ScorerType.UNIQUE_CLADES_LOST};
     public void setScorerTypes(TreeScorers.ScorerType[] scorerTypes) {
-        useSCM = true;
         this.scorerTypes = scorerTypes;
     }
 
-    private TreeScorers.ScorerType[] scorerTypes = new TreeScorers.ScorerType[]{TreeScorers.ScorerType.UNIQUE_TAXA, TreeScorers.ScorerType.OVERLAP, TreeScorers.ScorerType.UNIQUE_CLADE_NUMBER};
+
 
     @Option(name = "-Sr", aliases = {"--scmRandomized"}, usage = "Enables randomization (standard iterations are numberOfTrees^2 per scoring)", forbids = {"-s", "-SR"}, hidden = true)
     private void setRandomized(boolean r) {
-        useSCM = true;
+//        useSCM = true;
         if (r) {
             randomIterations = 0;
         } else {
@@ -137,7 +137,7 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
 
     @Option(name = "-SR", aliases = {"--scmRandomIterations"}, usage = "Enables randomization and specifies the number of iterations per scoring", forbids = {"-s", "-Sr"}, hidden = true)
     private void setRandomIterations(int iter) {
-        useSCM = true;
+//        useSCM = true;
         if (iter < 0) {
             randomIterations = -1;
         } else {

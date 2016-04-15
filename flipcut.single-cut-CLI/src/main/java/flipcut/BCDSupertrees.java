@@ -1,6 +1,5 @@
 package flipcut;
 
-import epos.algo.consensus.nconsensus.NConsensus;
 import flipcut.cli.BCDCLI;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -10,14 +9,10 @@ import phyloTree.model.tree.TreeUtils;
 import phyloTree.treetools.ReductionModifier;
 import phyloTree.treetools.UnsupportedCladeReduction;
 import scm.algorithm.AbstractSCMAlgorithm;
-import scm.algorithm.GreedySCMAlgorithm;
-import scm.algorithm.RandomizedSCMAlgorithm;
-import scm.algorithm.treeSelector.GreedyTreeSelector;
-import scm.algorithm.treeSelector.RandomizedGreedyTreeSelector;
-import scm.algorithm.treeSelector.TreeScorer;
-import scm.algorithm.treeSelector.TreeSelector;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -119,9 +114,15 @@ public class BCDSupertrees {
 
             //calculate runtime
             double calcTime = (System.currentTimeMillis() - startTime) / 1000d;
+
+
             if (!Double.isNaN(scmRuntime)) {
                 CLI.LOGGER.info("...SCM runs in " + (scmRuntime) + "s");
                 CLI.LOGGER.info("...FlipCut runs in " + (calcTime - scmRuntime) + "s");
+                Files.deleteIfExists(CLI.getRuntimeFile());
+                Files.write(CLI.getRuntimeFile(),("gscm " + Double.toString(scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.CREATE_NEW);
+                Files.write(CLI.getRuntimeFile(),("bcd " + Double.toString(calcTime - scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+                Files.write(CLI.getRuntimeFile(),("complete " + Double.toString(calcTime)).getBytes(), StandardOpenOption.APPEND);
             }
 
             CLI.LOGGER.info("Supertree calculation Done in: " + calcTime + "s");

@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "eu.appsatori:gradle-fatjar-plugin:0.3"
+    }
+}
 apply plugin: 'java'
 apply plugin: 'maven'
 
@@ -14,6 +24,7 @@ dependencies {
 
 
 allprojects {
+
     apply plugin: 'java'
     apply plugin: 'maven'
 
@@ -68,6 +79,8 @@ project(':flipcut.single-cut-algorithm') {
 
 //singe CLI Project specific stuff
 project(':flipcut.single-cut-CLI') {
+    apply plugin: "eu.appsatori.fatjar"
+
     version = '0.8-SNAPSHOT'
 
     dependencies {
@@ -77,6 +90,20 @@ project(':flipcut.single-cut-CLI') {
         compile 'de.unijena.bioinf:phyloTree.utils:0.9.9-SNAPSHOT'
         compile 'de.unijena.bioinf:core-lib.cli:0.9-SNAPSHOT'
         compile 'de.unijena.bioinf:phyloTree.cli:0.9.9-SNAPSHOT'
+    }
+
+    jar {
+        manifest {
+            attributes 'Main-Class': 'flipcut.BCDSupertrees'
+        }
+    }
+
+    fatJar {
+        classifier 'fat'
+        manifest {
+            attributes 'Main-Class': 'flipcut.BCDSupertrees'
+        }
+        exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
     }
 }
 
