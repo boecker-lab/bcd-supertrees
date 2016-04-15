@@ -34,7 +34,7 @@ public class BCDCLI extends BasicBCDCLI<FlipCutSingleCutSimpleWeight> {
 
 
     //##### flip cut parameter #####
-    //this is a simple mapping from experimental weighting strategies to
+    //this is a simple mapping from experimental weighting names to public naming
     @Override
     protected final EnumMap<BasicBCDCLI.SuppportedWeights, FlipCutWeights.Weights> initWheightMapping() {
         final EnumMap<BasicBCDCLI.SuppportedWeights, FlipCutWeights.Weights> weightMapping = new EnumMap<>(BasicBCDCLI.SuppportedWeights.class);
@@ -64,7 +64,7 @@ public class BCDCLI extends BasicBCDCLI<FlipCutSingleCutSimpleWeight> {
 
     //##### Methods ####
     private void checkForNexus() throws IOException {
-        //TOdo: parameter aus nexus file auslesen und setzen see below for usage
+        //TOdo: parse parameters from our own NEXUS block see below for usage
     }
 
 

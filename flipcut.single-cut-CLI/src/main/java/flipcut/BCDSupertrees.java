@@ -12,6 +12,7 @@ import scm.algorithm.AbstractSCMAlgorithm;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,21 +58,15 @@ public class BCDSupertrees {
 
             if (guideTree == null && CLI.useSCM) { //scm tree option is hidden because should be activated
                 CLI.LOGGER.info("Calculating SCM Guide Tree...");
+
                 scmRuntime = System.currentTimeMillis();
-                if (CLI.useSupportTree()) {
-                    guideTree = calculateSCM(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
-                    //todo implement support tree stuff, if this is really helpful
-//                    suppportTree = calculateSCMSupportTree(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
-                    suppportTree = calculateSCM(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
-
-                } else {
-                    guideTree = calculateSCM(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
-                }
-
+                guideTree = calculateSCM(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
                 scmRuntime = ((double) System.currentTimeMillis() - scmRuntime) / 1000d;
+
                 CLI.LOGGER.info("...SCM Guide Tree calculation DONE in " + scmRuntime + "s");
-//                System.out.println(Newick.getStringFromTree(guideTree));
             }
+            Tree guideTreeToCut = guideTree;
+            guideTree = TreeUtils.deleteInnerLabels(guideTreeToCut);
 
             ReductionModifier reducer = null;
             if (CLI.removeUndisputedSiblings) { //ATTENTION this is an Error prone method
@@ -79,14 +74,13 @@ public class BCDSupertrees {
                 for (Tree tree : inputTreesUntouched) {
                     inputTrees.add(tree.cloneTree());
                 }
+
                 if (suppportTree != null)
                     inputTrees.add(suppportTree); //put support tree temporary in input list
-                if (guideTree != null)
-                    inputTrees.add(guideTree); //put guide tree temporary in input list
-
+                if (guideTreeToCut != null)
+                    inputTrees.add(guideTreeToCut); //put guide tree temporary in input list
                 reducer = removeUndisputedSiblings(inputTrees);
-
-                if (guideTree != null)
+                if (guideTreeToCut != null)
                     inputTrees.remove(inputTrees.size() - 1); //remove guide tree again from input list
             } else {
                 inputTrees = new ArrayList<>(inputTreesUntouched.size() + 1);
@@ -96,7 +90,7 @@ public class BCDSupertrees {
             }
 
             //set input trees
-            algorithm.setInput(inputTrees, guideTree);
+            algorithm.setInput(inputTrees, guideTreeToCut);
             //run bcd supertrees
             algorithm.run();
             //collect results
@@ -110,7 +104,11 @@ public class BCDSupertrees {
                 removeUnsupportedClades(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()]), superTree);
 
             //write output file
-            CLI.writeOutput(Arrays.asList(superTree));
+            if (CLI.isFullOutput() && guideTree != null) {
+                CLI.writeOutput(Arrays.asList(superTree, guideTree));
+            } else {
+                CLI.writeOutput(Arrays.asList(superTree));
+            }
 
             //calculate runtime
             double calcTime = (System.currentTimeMillis() - startTime) / 1000d;
@@ -119,10 +117,13 @@ public class BCDSupertrees {
             if (!Double.isNaN(scmRuntime)) {
                 CLI.LOGGER.info("...SCM runs in " + (scmRuntime) + "s");
                 CLI.LOGGER.info("...FlipCut runs in " + (calcTime - scmRuntime) + "s");
-                Files.deleteIfExists(CLI.getRuntimeFile());
-                Files.write(CLI.getRuntimeFile(),("gscm " + Double.toString(scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.CREATE_NEW);
-                Files.write(CLI.getRuntimeFile(),("bcd " + Double.toString(calcTime - scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
-                Files.write(CLI.getRuntimeFile(),("complete " + Double.toString(calcTime)).getBytes(), StandardOpenOption.APPEND);
+                Path timeFile = CLI.getRuntimeFile();
+                if (timeFile != null) {
+                    Files.deleteIfExists(timeFile);
+                    Files.write(timeFile, ("gscm " + Double.toString(scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.CREATE_NEW);
+                    Files.write(timeFile, ("bcd " + Double.toString(calcTime - scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+                    Files.write(timeFile, ("complete " + Double.toString(calcTime)).getBytes(), StandardOpenOption.APPEND);
+                }
             }
 
             CLI.LOGGER.info("Supertree calculation Done in: " + calcTime + "s");
@@ -153,20 +154,6 @@ public class BCDSupertrees {
         algo.run();
         return algo.getResult();
     }
-
-    //todo support tree stuff
-    /*private static Tree calculateSCMSupportTree(Tree[] inputTrees) {
-        RandomizedSCMAlgorithm scmSupportAlgorithm = new RandomizedSCMAlgorithm(CLI.scmiterations, inputTrees, CLI.get);//todo semi strict needed
-        scmSupportAlgorithm.run();
-        List<Tree> temp = scmSupportAlgorithm.getResults();
-        NConsensus c = new NConsensus();
-        c.setMethod(NConsensus.METHOD_MAJORITY);
-        c.setInput(temp);
-        c.run();
-        Tree scmSupportTree = c.getResult();
-        scmSupportTree.getRoot().setLabel(Double.toString((double) inputTrees.length / 2d));
-        return scmSupportTree;
-    }*/
 
     private static ReductionModifier removeUndisputedSiblings(List<Tree> inputTrees) {
         ReductionModifier reducer = new ReductionModifier(null, false);
