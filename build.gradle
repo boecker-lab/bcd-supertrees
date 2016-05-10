@@ -94,14 +94,14 @@ project(':flipcut.single-cut-CLI') {
 
     jar {
         manifest {
-            attributes 'Main-Class': 'flipcut.BCDSupertrees'
+            attributes 'Main-Class': 'BCDSupertrees'
         }
     }
 
     fatJar {
         classifier 'fat'
         manifest {
-            attributes 'Main-Class': 'flipcut.BCDSupertrees'
+            attributes 'Main-Class': 'BCDSupertrees'
         }
         exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
     }
