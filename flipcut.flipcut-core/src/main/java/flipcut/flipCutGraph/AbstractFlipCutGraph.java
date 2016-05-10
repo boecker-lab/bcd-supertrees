@@ -2,7 +2,7 @@ package flipcut.flipCutGraph;
 
 
 import flipcut.costComputer.CostComputer;
-import phyloTree.model.tree.TreeNode;
+import phylo.tree.model.tree.TreeNode;
 
 import java.util.*;
 

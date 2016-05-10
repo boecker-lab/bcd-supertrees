@@ -4,7 +4,7 @@ import flipcut.cli.BCDCLI;
 import flipcut.flipCutGraph.CutGraphCutter;
 import org.junit.Test;
 import org.kohsuke.args4j.CmdLineParser;
-import phyloTree.io.TreeFileUtils;
+import phylo.tree.io.TreeFileUtils;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

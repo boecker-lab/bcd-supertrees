@@ -1,10 +1,10 @@
 package flipcut;
 
 import org.junit.Test;
-import phyloTree.io.Newick;
-import phyloTree.io.SimpleNexus;
-import phyloTree.io.TreeFileUtils;
-import phyloTree.model.tree.Tree;
+import phylo.tree.io.Newick;
+import phylo.tree.io.SimpleNexus;
+import phylo.tree.io.TreeFileUtils;
+import phylo.tree.model.tree.Tree;
 
 import java.io.File;
 import java.io.IOException;

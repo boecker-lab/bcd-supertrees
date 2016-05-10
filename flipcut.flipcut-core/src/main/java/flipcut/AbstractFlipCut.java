@@ -4,8 +4,8 @@ import flipcut.costComputer.FlipCutWeights;
 import flipcut.flipCutGraph.AbstractFlipCutGraph;
 import flipcut.flipCutGraph.AbstractFlipCutNode;
 import flipcut.flipCutGraph.CutGraphCutter;
-import phyloTree.algorithm.SupertreeAlgorithm;
-import phyloTree.model.tree.Tree;
+import phylo.tree.algorithm.SupertreeAlgorithm;
+import phylo.tree.model.tree.Tree;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;

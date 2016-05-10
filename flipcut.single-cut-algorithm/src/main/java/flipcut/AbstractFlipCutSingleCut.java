@@ -1,11 +1,12 @@
 package flipcut;
 
+import core.algorithm.Algorithm;
+import core.utils.progressBar.CLIProgressBar;
 import flipcut.flipCutGraph.AbstractFlipCutGraph;
 import flipcut.flipCutGraph.AbstractFlipCutNode;
 import flipcut.flipCutGraph.CutGraphCutter;
-import phyloTree.model.tree.Tree;
-import phyloTree.model.tree.TreeNode;
-import utils.progressBar.CLIProgressBar;
+import phylo.tree.model.tree.Tree;
+import phylo.tree.model.tree.TreeNode;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -60,8 +61,9 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
     }
 
     @Override
-    public void run() {
+    public Algorithm<List<Tree>, Tree> call() {
         calculateST();
+        return this;
     }
 
     private void calculateST() {

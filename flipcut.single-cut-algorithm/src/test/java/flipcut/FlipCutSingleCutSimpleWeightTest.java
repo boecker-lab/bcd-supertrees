@@ -4,11 +4,11 @@ import flipcut.costComputer.FlipCutWeights;
 import flipcut.flipCutGraph.SingleCutGraphCutter;
 import org.junit.Assert;
 import org.junit.Test;
-import phyloTree.io.Newick;
-import phyloTree.model.tree.Tree;
-import phyloTree.treetools.RFDistance;
-import phyloTree.treetools.TreeSorter;
-import phyloTree.treetools.UnsupportedCladeReduction;
+import phylo.tree.io.Newick;
+import phylo.tree.model.tree.Tree;
+import phylo.tree.treetools.RFDistance;
+import phylo.tree.treetools.TreeSorter;
+import phylo.tree.treetools.UnsupportedCladeReduction;
 
 import java.io.File;
 import java.util.Arrays;

@@ -1,11 +1,11 @@
 package flipcut.cli;
 
-import epos.algo.consensus.loose.LooseConsensus;
 import flipcut.FlipCutSingleCutSimpleWeight;
 import flipcut.costComputer.FlipCutWeights;
 import flipcut.flipCutGraph.CutGraphCutter;
-import phyloTree.io.TreeFileUtils;
-import phyloTree.model.tree.Tree;
+import phylo.tree.algorithm.consensus.Consensus;
+import phylo.tree.io.TreeFileUtils;
+import phylo.tree.model.tree.Tree;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -110,10 +110,7 @@ public class BCDCLI extends BasicBCDCLI<FlipCutSingleCutSimpleWeight> {
             Tree scm;
             if (result.length > 1) {
                 LOGGER.info("...more than 1 guide tree found. Calculating semi-strict consensus to merge them... ");
-                LooseConsensus cons = new LooseConsensus();
-                cons.setInput(Arrays.asList(result));
-                cons.run();
-                scm = cons.getResult();
+                scm = Consensus.getLoosConsensus(Arrays.asList(result));
             } else {
                 scm = result[0];
             }

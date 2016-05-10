@@ -1,20 +1,20 @@
 package flipcut.cli;
 
-import cli.Multithreaded;
-import cli.Progressbar;
+import core.cli.Multithreaded;
+import core.cli.Progressbar;
 import flipcut.AbstractFlipCut;
 import flipcut.costComputer.FlipCutWeights;
 import flipcut.flipCutGraph.CutGraphCutter;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler;
-import phyloTree.SupertreeAlgortihmCLI;
-import scm.algorithm.AbstractSCMAlgorithm;
-import scm.algorithm.GreedySCMAlgorithm;
-import scm.algorithm.MultiGreedySCMAlgorithm;
-import scm.algorithm.RandomizedSCMAlgorithm;
-import scm.algorithm.treeSelector.TreeScorers;
-import scm.cli.SCMCLI;
+import phylo.tree.algorithm.gscm.GreedySCMAlgorithm;
+import phylo.tree.algorithm.gscm.MultiGreedySCMAlgorithm;
+import phylo.tree.algorithm.gscm.RandomizedGreedySCMAlgorithm;
+import phylo.tree.algorithm.gscm.SCMAlgorithm;
+import phylo.tree.algorithm.gscm.treeMerger.TreeScorers;
+import phylo.tree.cli.SupertreeAlgortihmCLI;
+import phylo.tree.cli.gscm.SCMCLI;
 
 import java.nio.file.Path;
 import java.util.EnumMap;
@@ -160,8 +160,8 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
     public boolean skipInsufficientOverlapInstances = false; //todo warn if taxa have insufficient taxa overlap taxa overlap check
 
 
-    public AbstractSCMAlgorithm getSCMInstance() {
-        AbstractSCMAlgorithm algo = null;
+    public SCMAlgorithm getSCMInstance() {
+        SCMAlgorithm algo = null;
         if (randomIterations < 0) {
             //non random
             if (scorerTypes.length > 1) {
@@ -173,7 +173,7 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
             }
         } else {
             //randomized
-            algo = new RandomizedSCMAlgorithm(randomIterations, TreeScorers.getScorerArray(isMultiThreaded(), scorerTypes));
+            algo = new RandomizedGreedySCMAlgorithm(randomIterations, TreeScorers.getScorerArray(isMultiThreaded(), scorerTypes));
         }
         algo.setThreads(numberOfThreads);
         return algo;

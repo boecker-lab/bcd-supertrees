@@ -21,9 +21,9 @@ package flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan;/*
 import flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 import org.junit.Test;
-import phyloTree.io.Newick;
-import phyloTree.model.tree.Tree;
-import phyloTree.model.tree.TreeNode;
+import phylo.tree.io.Newick;
+import phylo.tree.model.tree.Tree;
+import phylo.tree.model.tree.TreeNode;
 
 import java.io.File;
 import java.util.ArrayList;

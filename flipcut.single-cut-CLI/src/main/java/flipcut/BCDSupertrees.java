@@ -4,11 +4,11 @@ import flipcut.cli.BCDCLI;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.InterfaceCmdLineParser;
-import phyloTree.model.tree.Tree;
-import phyloTree.model.tree.TreeUtils;
-import phyloTree.treetools.ReductionModifier;
-import phyloTree.treetools.UnsupportedCladeReduction;
-import scm.algorithm.AbstractSCMAlgorithm;
+import phylo.tree.algorithm.gscm.SCMAlgorithm;
+import phylo.tree.model.tree.Tree;
+import phylo.tree.model.tree.TreeUtils;
+import phylo.tree.treetools.ReductionModifier;
+import phylo.tree.treetools.UnsupportedCladeReduction;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -149,8 +149,8 @@ public class BCDSupertrees {
 
 
     private static Tree calculateSCM(Tree[] inputTrees) {
-        AbstractSCMAlgorithm algo = CLI.getSCMInstance();
-        algo.setInput(inputTrees);
+        SCMAlgorithm algo = CLI.getSCMInstance();
+        algo.setInput(Arrays.asList(inputTrees));
         algo.run();
         return algo.getResult();
     }

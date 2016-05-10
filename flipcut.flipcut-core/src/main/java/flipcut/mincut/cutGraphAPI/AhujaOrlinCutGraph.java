@@ -1,12 +1,12 @@
 package flipcut.mincut.cutGraphAPI;
 
+import core.utils.parallel.IterationCallableFactory;
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 import flipcut.mincut.cutGraphImpl.maxFlowAhujaOrlin.FlowGraph;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
-import utils.parallel.IterationCallableFactory;
 
 import java.util.LinkedHashSet;
 import java.util.List;

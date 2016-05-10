@@ -1,8 +1,8 @@
 package flipcut.flipCutGraph;
 
 import flipcut.costComputer.CostComputer;
-import phyloTree.model.tree.Tree;
-import phyloTree.model.tree.TreeNode;
+import phylo.tree.model.tree.Tree;
+import phylo.tree.model.tree.TreeNode;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,9 +1,9 @@
 package flipcut.mincut.cutGraphAPI;
 
+import core.utils.parallel.DefaultIterationCallable;
+import core.utils.parallel.IterationCallableFactory;
+import core.utils.parallel.ParallelUtils;
 import flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
-import utils.parallel.DefaultIterationCallable;
-import utils.parallel.IterationCallableFactory;
-import utils.parallel.ParallelUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

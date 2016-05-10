@@ -2,8 +2,8 @@ package flipcut.costComputer;
 
 
 import flipcut.flipCutGraph.AbstractFlipCutNode;
-import phyloTree.model.tree.Tree;
-import phyloTree.model.tree.TreeNode;
+import phylo.tree.model.tree.Tree;
+import phylo.tree.model.tree.TreeNode;
 
 import java.util.ArrayList;
 import java.util.Collections;
