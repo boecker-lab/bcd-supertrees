@@ -1,8 +1,8 @@
 rootProject.name = 'flipcut'
 
-include 'flipcut.flipcut-core',
-        'flipcut.single-cut-algorithm',
-        'flipcut.beam-search-algorithm',
-        'flipcut.single-cut-CLI',
-        'flipcut.beam-search-CLI';
+include 'flipcut-core',
+        'flipcut-lib',
+        'flipcut-lib.beam-search',
+        'flipcut-cli',
+        'flipcut-cli.beam-search';
 

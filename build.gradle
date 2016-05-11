@@ -14,11 +14,11 @@ apply plugin: 'maven'
 version = '0.9-SNAPSHOT'
 
 dependencies {
-    compile project(':flipcut.flipcut-core')
-    compile project(':flipcut.single-cut-algorithm')
-    compile project(':flipcut.beam-search-algorithm')
-    compile project(':flipcut.single-cut-CLI')
-    compile project(':flipcut.beam-search-CLI')
+    compile project(':flipcut-core')
+    compile project(':flipcut-lib')
+    compile project(':flipcut-lib.beam-search')
+    compile project(':flipcut-cli')
+    compile project(':flipcut-cli.beam-search')
 }
 
 
@@ -60,7 +60,7 @@ subprojects {
 }
 
 //Core Project specific stuff
-project(':flipcut.flipcut-core') {
+project(':flipcut-core') {
     version = '0.9-SNAPSHOT'
 
     dependencies {
@@ -68,23 +68,23 @@ project(':flipcut.flipcut-core') {
 }
 
 //single algo Project specific stuff
-project(':flipcut.single-cut-algorithm') {
+project(':flipcut-lib') {
     version = '0.9-SNAPSHOT'
 
     dependencies {
-        compile project(':flipcut.flipcut-core')
+        compile project(':flipcut-core')
         testCompile 'de.unijena.bioinf:gscm-lib:1.0'
     }
 }
 
 //singe CLI Project specific stuff
-project(':flipcut.single-cut-CLI') {
+project(':flipcut-cli') {
     apply plugin: "eu.appsatori.fatjar"
 
     version = '0.8-SNAPSHOT'
 
     dependencies {
-        compile project(':flipcut.single-cut-algorithm')
+        compile project(':flipcut-lib')
         compile 'de.unijena.bioinf:gscm-lib:1.0'
         compile 'de.unijena.bioinf:gscm-cli:1.0'
         compile 'de.unijena.bioinf:phyloTree-lib.utils:0.9.9'
@@ -108,19 +108,19 @@ project(':flipcut.single-cut-CLI') {
 }
 
 //beam algo Project specific stuff
-project(':flipcut.beam-search-algorithm') {
+project(':flipcut-lib.beam-search') {
     version = '0.8-SNAPSHOT'
 
     dependencies {
-        compile project(':flipcut.single-cut-algorithm')
+        compile project(':flipcut-lib')
     }
 }
 
 //beam CLI Project specific stuff
-project(':flipcut.beam-search-CLI') {
+project(':flipcut-cli.beam-search') {
     version = '0.8-SNAPSHOT'
     dependencies {
-        compile project(':flipcut.beam-search-algorithm'), project(':flipcut.single-cut-CLI')
+        compile project(':flipcut-lib.beam-search'), project(':flipcut-cli')
     }
 }
 
