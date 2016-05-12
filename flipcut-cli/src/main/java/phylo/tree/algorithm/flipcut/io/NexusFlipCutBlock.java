@@ -3,7 +3,7 @@ package phylo.tree.algorithm.flipcut.io;
 import org.biojavax.bio.phylo.io.nexus.NexusBlock;
 import org.biojavax.bio.phylo.io.nexus.NexusFileFormat;
 import phylo.tree.io.Newick;
-import phylo.tree.model.tree.Tree;
+import phylo.tree.model.Tree;
 
 import java.io.*;
 import java.util.Arrays;

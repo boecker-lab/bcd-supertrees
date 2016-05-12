@@ -5,8 +5,8 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.InterfaceCmdLineParser;
 import phylo.tree.algorithm.gscm.SCMAlgorithm;
-import phylo.tree.model.tree.Tree;
-import phylo.tree.model.tree.TreeUtils;
+import phylo.tree.model.Tree;
+import phylo.tree.model.TreeUtils;
 import phylo.tree.treetools.ReductionModifier;
 import phylo.tree.treetools.UnsupportedCladeReduction;
 

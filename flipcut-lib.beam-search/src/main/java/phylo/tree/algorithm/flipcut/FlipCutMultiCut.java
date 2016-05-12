@@ -7,7 +7,7 @@ import phylo.tree.algorithm.flipcut.costComputer.UnitCostComputer;
 import phylo.tree.algorithm.flipcut.costComputer.WeightCostComputer;
 import phylo.tree.algorithm.flipcut.model.Partition;
 import phylo.tree.algorithm.flipcut.flipCutGraph.*;
-import phylo.tree.model.tree.Tree;
+import phylo.tree.model.Tree;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;

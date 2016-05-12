@@ -5,7 +5,7 @@ import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
 import phylo.tree.algorithm.SupertreeAlgorithm;
-import phylo.tree.model.tree.Tree;
+import phylo.tree.model.Tree;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;

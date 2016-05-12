@@ -4,7 +4,7 @@ import org.junit.Test;
 import phylo.tree.io.Newick;
 import phylo.tree.io.SimpleNexus;
 import phylo.tree.io.TreeFileUtils;
-import phylo.tree.model.tree.Tree;
+import phylo.tree.model.Tree;
 
 import java.io.File;
 import java.io.IOException;

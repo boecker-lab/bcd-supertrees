@@ -9,8 +9,8 @@ import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.SingleCutGraphCutter;
-import phylo.tree.model.tree.Tree;
-import phylo.tree.model.tree.TreeNode;
+import phylo.tree.model.Tree;
+import phylo.tree.model.TreeNode;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;

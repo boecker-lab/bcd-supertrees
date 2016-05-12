@@ -5,7 +5,7 @@ import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
 import phylo.tree.algorithm.consensus.Consensus;
 import phylo.tree.io.TreeFileUtils;
-import phylo.tree.model.tree.Tree;
+import phylo.tree.model.Tree;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

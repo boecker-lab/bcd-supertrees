@@ -5,8 +5,8 @@ import core.utils.progressBar.CLIProgressBar;
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
-import phylo.tree.model.tree.Tree;
-import phylo.tree.model.tree.TreeNode;
+import phylo.tree.model.Tree;
+import phylo.tree.model.TreeNode;
 
 import java.util.Arrays;
 import java.util.LinkedList;

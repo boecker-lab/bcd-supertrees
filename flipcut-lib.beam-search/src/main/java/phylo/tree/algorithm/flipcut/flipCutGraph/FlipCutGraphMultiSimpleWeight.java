@@ -3,7 +3,7 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.model.Cut;
-import phylo.tree.model.tree.TreeNode;
+import phylo.tree.model.TreeNode;
 
 import java.util.*;
 

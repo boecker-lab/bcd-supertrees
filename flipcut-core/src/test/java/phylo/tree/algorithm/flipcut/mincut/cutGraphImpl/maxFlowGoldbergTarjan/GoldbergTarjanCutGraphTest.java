@@ -22,8 +22,8 @@ import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 import org.junit.Test;
 import phylo.tree.io.Newick;
-import phylo.tree.model.tree.Tree;
-import phylo.tree.model.tree.TreeNode;
+import phylo.tree.model.Tree;
+import phylo.tree.model.TreeNode;
 
 import java.io.File;
 import java.util.ArrayList;

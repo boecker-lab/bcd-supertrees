@@ -5,7 +5,7 @@ import phylo.tree.algorithm.flipcut.flipCutGraph.SingleCutGraphCutter;
 import org.junit.Assert;
 import org.junit.Test;
 import phylo.tree.io.Newick;
-import phylo.tree.model.tree.Tree;
+import phylo.tree.model.Tree;
 import phylo.tree.treetools.RFDistance;
 import phylo.tree.treetools.TreeSorter;
 import phylo.tree.treetools.UnsupportedCladeReduction;

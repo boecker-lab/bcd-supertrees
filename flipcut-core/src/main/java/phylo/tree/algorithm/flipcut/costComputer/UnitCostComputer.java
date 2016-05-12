@@ -2,8 +2,8 @@ package phylo.tree.algorithm.flipcut.costComputer;
 
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
-import phylo.tree.model.tree.Tree;
-import phylo.tree.model.tree.TreeNode;
+import phylo.tree.model.Tree;
+import phylo.tree.model.TreeNode;
 
 import java.util.*;
 
