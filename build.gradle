@@ -77,35 +77,6 @@ project(':flipcut-lib') {
     }
 }
 
-//singe CLI Project specific stuff
-project(':flipcut-cli') {
-    apply plugin: "eu.appsatori.fatjar"
-
-    version = '0.8-SNAPSHOT'
-
-    dependencies {
-        compile project(':flipcut-lib')
-        compile 'de.unijena.bioinf:gscm-lib:1.0'
-        compile 'de.unijena.bioinf:gscm-cli:1.0'
-        compile 'de.unijena.bioinf:phyloTree-lib.utils:0.9.9'
-        compile 'de.unijena.bioinf:core-lib.cli:0.9'
-        compile 'de.unijena.bioinf:phyloTree-lib.cli:0.9.9'
-    }
-
-    jar {
-        manifest {
-            attributes 'Main-Class': 'BCDSupertrees'
-        }
-    }
-
-    fatJar {
-        classifier 'fat'
-        manifest {
-            attributes 'Main-Class': 'BCDSupertrees'
-        }
-        exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
-    }
-}
 
 //beam algo Project specific stuff
 project(':flipcut-lib.beam-search') {

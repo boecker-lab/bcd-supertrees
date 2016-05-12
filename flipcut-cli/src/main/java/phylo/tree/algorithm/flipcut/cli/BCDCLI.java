@@ -41,7 +41,7 @@ public class BCDCLI extends BasicBCDCLI<FlipCutSingleCutSimpleWeight> {
         weightMapping.put(BasicBCDCLI.SuppportedWeights.UNIT_WEIGHT, FlipCutWeights.Weights.UNIT_COST);
         weightMapping.put(BasicBCDCLI.SuppportedWeights.TREE_WEIGHT, FlipCutWeights.Weights.TREE_WEIGHT);
         weightMapping.put(BasicBCDCLI.SuppportedWeights.BRANCH_LENGTH, FlipCutWeights.Weights.EDGE_WEIGHTS);
-        weightMapping.put(BasicBCDCLI.SuppportedWeights.BOOTSTRAP_VALUES, FlipCutWeights.Weights.BOOTSTRAP_VALUES);
+        weightMapping.put(BasicBCDCLI.SuppportedWeights.BOOTSTRAP_WEIGHT, FlipCutWeights.Weights.BOOTSTRAP_VALUES);
         weightMapping.put(BasicBCDCLI.SuppportedWeights.LEVEL, FlipCutWeights.Weights.NODE_LEVEL);
         weightMapping.put(BasicBCDCLI.SuppportedWeights.BRANCH_AND_LEVEL, FlipCutWeights.Weights.EDGE_AND_LEVEL);
         weightMapping.put(BasicBCDCLI.SuppportedWeights.BOOTSTRAP_AND_LEVEL, FlipCutWeights.Weights.BOOTSTRAP_AND_LEVEL);

@@ -58,7 +58,7 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
     //##### flip cut parameter #####
     public enum Algorithm {BCD, FC}
 
-    public enum SuppportedWeights {UNIT_WEIGHT, TREE_WEIGHT, BRANCH_LENGTH, BOOTSTRAP_VALUES, LEVEL, BRANCH_AND_LEVEL, BOOTSTRAP_AND_LEVEL}
+    public enum SuppportedWeights {UNIT_WEIGHT, TREE_WEIGHT, BRANCH_LENGTH, BOOTSTRAP_WEIGHT, LEVEL, BRANCH_AND_LEVEL, BOOTSTRAP_AND_LEVEL}
 
     protected final EnumMap<SuppportedWeights, FlipCutWeights.Weights> weightMapping = initWheightMapping();
 

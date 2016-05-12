@@ -144,7 +144,7 @@ public class BCDSupertreesTest {
         toargs.add("-S");
         toargs.add("SUPPORT");
         toargs.add("-w");
-        toargs.add("BOOTSTRAP_VALUES");
+        toargs.add("BOOTSTRAP_WEIGHT");
 
         //timeFile
         Path timeFile = tempDir.resolve("timeFile");

@@ -244,8 +244,8 @@ public class BCDCLITest extends BCDCLI { //extending from class to test to get p
         assertNotEquals(test2.getAlgorithm().weights, FlipCutWeights.Weights.UNIT_COST);
         //EDGE_AND_LEVEL
         assertEquals(test2.getAlgorithm().weights,FlipCutWeights.Weights.EDGE_AND_LEVEL);
-        //BOOTSTRAP_VALUES
-        assertNotEquals(test2.getAlgorithm().weights, FlipCutWeights.Weights.BOOTSTRAP_VALUES);
+        //BOOTSTRAP_WEIGHT
+        assertNotEquals(test2.getAlgorithm().weights, FlipCutWeights.Weights.BOOTSTRAP_WEIGHT);
         //BOOTSTRAP_AND_LEVEL
         assertNotEquals(test2.getAlgorithm().weights, FlipCutWeights.Weights.BOOTSTRAP_AND_LEVEL);
 */
@@ -259,7 +259,7 @@ public class BCDCLITest extends BCDCLI { //extending from class to test to get p
 
         //arrange
 
-        String[] test = {"-w","BOOTSTRAP_VALUES",this.getClass().getResource("/mincut_sourcetrees.nwk").getPath(),this.getClass().getResource("/mincut_sourcetrees.nwk").getPath(), "-b", "1"};
+        String[] test = {"-w","BOOTSTRAP_WEIGHT",this.getClass().getResource("/mincut_sourcetrees.nwk").getPath(),this.getClass().getResource("/mincut_sourcetrees.nwk").getPath(), "-b", "1"};
 
 
         BCDCommandLineInterface test2 = new BCDCommandLineInterface();
@@ -275,7 +275,7 @@ public class BCDCLITest extends BCDCLI { //extending from class to test to get p
         boolean unitCost = control.getBCDInstance().weights.equals(test2.getBCDInstance().weights);
         control.getBCDInstance().setWeights(FlipCutWeights.Weights.EDGE_AND_LEVEL);
         boolean edgeAndLevel = control.getBCDInstance().weights.equals(test2.getBCDInstance().weights);
-        control.getBCDInstance().setWeights(FlipCutWeights.Weights.BOOTSTRAP_VALUES);
+        control.getBCDInstance().setWeights(FlipCutWeights.Weights.BOOTSTRAP_WEIGHT);
         boolean bootstrapValue = control.getBCDInstance().weights.equals(test2.getBCDInstance().weights);
         control.getBCDInstance().setWeights(FlipCutWeights.Weights.BOOTSTRAP_AND_LEVEL);
         boolean bootstrapAndLevel = control.getBCDInstance().weights.equals(test2.getBCDInstance().weights);
@@ -290,7 +290,7 @@ public class BCDCLITest extends BCDCLI { //extending from class to test to get p
         assertEquals(false, FlipCutWeights.Weights.UNIT_COST);
         //EDGE_AND_LEVEL
         assertEquals(false, edgeAndLevel);
-        //BOOTSTRAP_VALUES
+        //BOOTSTRAP_WEIGHT
         assertEquals(true, bootstrapValue);
         //BOOTSTRAP_AND_LEVEL
         assertEquals(false,bootstrapAndLevel);

@@ -1,0 +1,138 @@
+
+buildscript {
+    repositories {
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+    dependencies {
+        classpath 'eu.appsatori:gradle-fatjar-plugin:0.3'
+        classpath 'gradle.plugin.edu.sc.seis.gradle:launch4j:1.6.1'
+    }
+}
+
+//command line interface stuff
+version = '0.8-SNAPSHOT'
+
+dependencies {
+    compile project(':flipcut-lib')
+    compile 'de.unijena.bioinf:gscm-lib:1.0'
+    compile 'de.unijena.bioinf:gscm-cli:1.0'
+    compile 'de.unijena.bioinf:phyloTree-lib.utils:0.9.9'
+    compile 'de.unijena.bioinf:core-lib.cli:0.9'
+    compile 'de.unijena.bioinf:phyloTree-lib.cli:0.9.9'
+}
+
+
+project.ext.set("mainClassName", "phylo.tree.algorithm.flipcut.BCDSupertrees")
+
+jar {
+    manifest {
+        attributes 'Main-Class': project.mainClassName
+    }
+}
+
+apply plugin: "eu.appsatori.fatjar"
+
+fatJar {
+    classifier 'fat'
+    manifest {
+        attributes 'Main-Class': project.mainClassName
+    }
+    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
+}
+
+
+apply plugin: 'edu.sc.seis.launch4j'
+
+copyL4jLib.dependsOn fatJar
+fatJarPrepareFiles.dependsOn jar
+
+launch4j {
+    outfile = 'bcd.exe'
+    mainClassName = project.mainClassName
+    copyConfigurable = project.tasks.fatJar.outputs.files
+    jar = "lib/${project.tasks.fatJar.archiveName}"
+//    icon = project.projectDir.toPath().resolve('src/main/resources/dist/icon.ico')
+}
+
+apply plugin: 'distribution'
+
+def fatJarFile = project.tasks.fatJar.outputs.files.singleFile
+println(fatJarFile.toString())
+def linSuffix = '-Linux'
+def winSuffix = '-Win'
+
+
+distributions {
+
+    linux {
+        baseName = project.getName() + linSuffix
+        contents {
+            from {'src/main/resources/dist/'}
+            from {fatJarFile}
+            from { 'src/main/resources/dist-linux/' }
+        }
+    }
+
+    win {
+        baseName = project.getName() + winSuffix
+        contents {
+            from {'src/main/dist/'}
+            from {'build/launch4j/'}
+        }
+    }
+
+    jar {
+        baseName = project.getName()
+        contents {
+            from {'src/main/resources/dist/'}
+            from {fatJarFile}
+        }
+    }
+
+
+}
+
+task distribute {}
+distribute.dependsOn 'linuxDistZip', /*'winDistZip',*/ 'jarDistZip'
+
+
+linuxDistZip.doLast {
+        File file = project.tasks.linuxDistZip.outputs.files.singleFile
+        println(file)
+        file.renameTo(file.toString().replace((linSuffix + "-" + version + ".") ,"-" + version + linSuffix + "."))
+}
+
+winDistZip.doLast {
+    File file = project.tasks.winDistZip.outputs.files.singleFile
+    println(file)
+    file.renameTo(file.toString().replace((winSuffix + "-" + version + ".") ,"-" + version + winSuffix + "."))
+}
+
+distZip.dependsOn 'fatJar'
+distTar.dependsOn 'fatJar'
+installDist.dependsOn 'fatJar'
+
+linuxDistZip.dependsOn 'fatJar'
+linuxDistTar.dependsOn 'fatJar'
+installLinuxDist.dependsOn 'fatJar'
+
+winDistZip.dependsOn 'createExe'
+winDistTar.dependsOn 'createExe'
+installWinDist.dependsOn 'createExe'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
