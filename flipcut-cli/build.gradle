@@ -19,6 +19,8 @@ dependencies {
     compile 'de.unijena.bioinf:phyloTree-lib.utils:0.9.9'
     compile 'de.unijena.bioinf:core-lib.cli:0.9'
     compile 'de.unijena.bioinf:phyloTree-lib.cli:0.9.9'
+
+    testCompile 'com.github.stefanbirkner:system-rules:1.5.0'
 }
 
 

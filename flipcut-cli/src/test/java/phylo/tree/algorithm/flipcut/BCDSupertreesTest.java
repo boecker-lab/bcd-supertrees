@@ -1,6 +1,8 @@
 package phylo.tree.algorithm.flipcut;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.contrib.java.lang.system.ExpectedSystemExit;
 import phylo.tree.io.Newick;
 import phylo.tree.io.SimpleNexus;
 import phylo.tree.io.TreeFileUtils;
@@ -25,16 +27,18 @@ import static org.junit.Assert.assertTrue;
 public class BCDSupertreesTest {
     public final static String newickInput = "phylo/tree/algorithm/flipcut/sm.11.sourceTrees_OptSCM-Rooting.tre";
     public final static String newickSCM = "phylo/tree/algorithm/flipcut/sm.11.sourceTrees.scmTree.tre";
-    public final static String newickOut = "sm.11.sourceTrees_OptSCM-Rooting_bcd-supertree.tre";
+    public final static String newickOut = "phylo/tree/algorithm/flipcut/sm.11.sourceTrees_OptSCM-Rooting_bcd-supertree.tre";
 
     public final static String newickInput16 = "phylo/tree/algorithm/flipcut/sm.16.sourceTrees_OptSCM-Rooting.tre";
     public final static String newickInputNoRoot16 = "phylo/tree/algorithm/flipcut/sm.16.sourceTrees.tre";
     public final static String newickSCMNoRoot16 = "phylo/tree/algorithm/flipcut/sm.16.sourceTrees.scmTree.tre";
 
     public final static String nexusInput = "phylo/tree/algorithm/flipcut/sm.11.sourceTrees_OptSCM-Rooting.nex";
-    public final static String nexusOut = "sm.11.sourceTrees_OptSCM-Rooting_bcd-supertree.nex";
+    public final static String nexusOut = "phylo/tree/algorithm/flipcut/sm.11.sourceTrees_OptSCM-Rooting_bcd-supertree.nex";
     public final static String nexusSCM = "phylo/tree/algorithm/flipcut/sm.11.sourceTrees.scmTree.nex";
 
+    @Rule
+    public final ExpectedSystemExit exit = ExpectedSystemExit.none();
 
     //todo move this tests to phylotree lib or core lib
     //File Hndling tests
@@ -113,60 +117,13 @@ public class BCDSupertreesTest {
     }
 
 
-    /*@Test
-    public void testRootOptimization() throws IOException {
-        final Path tempDir = getTmpDir();
-        final List<String> toargs =  new LinkedList<>();
-
-
-        //add input file
-        Path inputPath = Paths.get(getClass().getResource("/" + newickInput16).getFile());
-        inputPath = Files.copy(inputPath, tempDir.resolve(inputPath.getFileName()));
-        toargs.add(inputPath.toString());
-        System.out.println(inputPath);
-
-        String[] args =  new String[toargs.size()];
-        args = toargs.toArray(args);
-        System.out.println("Arguments:");
-        System.out.println(Arrays.toString(args));
-        BCDSupertrees.main(args);
-
-    }
-*/
-    /*@Test
-    public void debugTest() throws IOException {
-        Path inputPath = Paths.get(getClass().getResource("/" + newickInput).getFile());
-        final Path tempDir = getTmpDir();
-        final List<String> toargs = new LinkedList<>();
-
-        //set parameter
-
-        toargs.add("-S");
-        toargs.add("SUPPORT");
-        toargs.add("-w");
-        toargs.add("BOOTSTRAP_WEIGHT");
-
-        //timeFile
-        Path timeFile = tempDir.resolve("timeFile");
-        toargs.add("-R");
-        toargs.add(timeFile.toString());
-        System.out.println(timeFile);
-
-        //add input file
-        inputPath = Files.copy(inputPath, tempDir.resolve(inputPath.getFileName()));
-        toargs.add(inputPath.toString());
-        System.out.println(inputPath);
-
-        String[] args = new String[toargs.size()];
-        args = toargs.toArray(args);
-        System.out.println("Arguments:");
-        System.out.println(Arrays.toString(args));
-        BCDSupertrees.main(args);
-
-    }*/
-
 
     public boolean testAutoFileTypeDetection(String in, String scm, String outPath, TreeFileUtils.FileType inputType, TreeFileUtils.FileType outputType) throws IOException {
+        return testAutoFileTypeDetection(in,scm,outPath,inputType,outputType,0);
+    }
+    public boolean testAutoFileTypeDetection(String in, String scm, String outPath, TreeFileUtils.FileType inputType, TreeFileUtils.FileType outputType, int expectedExit) throws IOException {
+        exit.expectSystemExitWithStatus(expectedExit);
+
         final Path tempDir = getTmpDir();
         final List<String> toargs = new LinkedList<>();
 

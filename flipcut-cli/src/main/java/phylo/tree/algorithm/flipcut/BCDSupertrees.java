@@ -17,6 +17,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 
 
 /**
@@ -56,17 +57,20 @@ public class BCDSupertrees {
             Tree suppportTree = null;
             double scmRuntime = Double.NaN;
 
-            if (guideTree == null && CLI.useSCM) { //scm tree option is hidden because should be activated
-                CLI.LOGGER.info("Calculating SCM Guide Tree...");
+            Tree guideTreeToCut = null;
+            if (CLI.useSCM) {
+                if (guideTree == null) { //scm tree option is hidden because should be activated
+                    CLI.LOGGER.info("Calculating SCM Guide Tree...");
 
-                scmRuntime = System.currentTimeMillis();
-                guideTree = calculateSCM(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
-                scmRuntime = ((double) System.currentTimeMillis() - scmRuntime) / 1000d;
+                    scmRuntime = System.currentTimeMillis();
+                    guideTree = calculateSCM(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
+                    scmRuntime = ((double) System.currentTimeMillis() - scmRuntime) / 1000d;
 
-                CLI.LOGGER.info("...SCM Guide Tree calculation DONE in " + scmRuntime + "s");
+                    CLI.LOGGER.info("...SCM Guide Tree calculation DONE in " + scmRuntime + "s");
+                }
+                guideTreeToCut = guideTree;
+                guideTree = TreeUtils.deleteInnerLabels(guideTreeToCut);
             }
-            Tree guideTreeToCut = guideTree;
-            guideTree = TreeUtils.deleteInnerLabels(guideTreeToCut);
 
             ReductionModifier reducer = null;
             if (CLI.removeUndisputedSiblings) { //ATTENTION this is an Error prone method
@@ -127,23 +131,24 @@ public class BCDSupertrees {
             }
 
             CLI.LOGGER.info("Supertree calculation Done in: " + calcTime + "s");
-            System.exit(0);
+            algorithm.shutdown();
+             System.exit(0);
 
         } catch (CmdLineException e) {
             // if there's a problem in the command line,
             // you'll get this exception. this will report
             // an error message.
-            CLI.LOGGER.severe(e.getMessage());
+            CLI.LOGGER.log(Level.SEVERE,e.getMessage(),e);
+            System.err.println(e.getMessage());
             System.err.println();
-            System.err.println();
-            CLI.printHelp(parser, System.out);
+            CLI.printHelp(parser, System.err);
             System.exit(1);
         } catch (IOException e) {
-            CLI.LOGGER.severe(e.getMessage());
+            CLI.LOGGER.log(Level.SEVERE,e.getMessage(),e);
+            System.err.println(e.getMessage());
             System.err.println();
-            System.err.println();
-            CLI.printHelp(parser, System.out);
-            System.exit(1);
+            CLI.printHelp(parser, System.err);
+            System.exit(2);
         }
     }
 
@@ -152,6 +157,7 @@ public class BCDSupertrees {
         SCMAlgorithm algo = CLI.getSCMInstance();
         algo.setInput(Arrays.asList(inputTrees));
         algo.run();
+        algo.shutdown();
         return algo.getResult();
     }
 
