@@ -16,7 +16,7 @@ import java.util.concurrent.*;
 import java.util.logging.Logger;
 
 /**
- * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
+ * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 29.11.12
  * Time: 14:42
  */

@@ -3,7 +3,7 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 import java.util.Set;
 
 /**
- * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
+ * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 30.11.12
  * Time: 11:29
  */

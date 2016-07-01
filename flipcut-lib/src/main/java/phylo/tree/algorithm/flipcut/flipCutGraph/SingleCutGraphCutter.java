@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
- * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
+ * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 29.11.12
  * Time: 16:37
  */

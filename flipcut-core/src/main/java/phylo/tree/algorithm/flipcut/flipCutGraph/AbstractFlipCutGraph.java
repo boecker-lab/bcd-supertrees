@@ -7,7 +7,7 @@ import phylo.tree.model.TreeNode;
 import java.util.*;
 
 /**
- * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
+ * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 29.11.12
  * Time: 14:36
  */
@@ -31,7 +31,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     protected Set<T> activePartitions = null;
 
     /**
-     * Turn on/off global character merging for characters with identical edgeset --> works for hypergraph version only
+     * Turn on/off global character merging for characters with identical edgeset {@literal ->} works for hypergraph version only
      */
     public static final boolean GLOBAL_CHARACTER_MERGE = true;
     /**

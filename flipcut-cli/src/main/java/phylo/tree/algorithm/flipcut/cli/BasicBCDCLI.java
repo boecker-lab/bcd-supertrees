@@ -16,6 +16,7 @@ import phylo.tree.algorithm.gscm.treeMerger.TreeScorers;
 import phylo.tree.cli.SupertreeAlgortihmCLI;
 import phylo.tree.cli.gscm.SCMCLI;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.EnumMap;
 
@@ -27,7 +28,7 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
         super(appHomeParent, appHomeFolderName, logDir, maxLogFileSize, logRotation);
     }
 
-    public BasicBCDCLI(Path propertiesFile) {
+    public BasicBCDCLI(InputStream propertiesFile) {
         super(propertiesFile);
     }
 

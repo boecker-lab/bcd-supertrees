@@ -17,7 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
 
 /**
- * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
+ * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 15.01.13
  * Time: 18:13
  */

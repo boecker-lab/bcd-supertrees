@@ -10,7 +10,7 @@ import phylo.tree.algorithm.flipcut.model.Cut;
 import java.util.*;
 
 /**
- * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
+ * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 19.04.13
  * Time: 12:02
  */
