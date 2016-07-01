@@ -46,24 +46,21 @@ public class BCDSupertrees {
             FlipCutSingleCutSimpleWeight algorithm = new FlipCutSingleCutSimpleWeight();
             CLI.setParameters(algorithm);
 
-            //parse input trees
-            List<Tree> inputTreesUntouched = CLI.parseInput();
-
             //parse guide trees
             Tree guideTree = CLI.parseSCM();
 
 
-            List<Tree> inputTrees;
-            Tree suppportTree = null;
+
+
             double scmRuntime = Double.NaN;
 
             Tree guideTreeToCut = null;
             if (CLI.useSCM) {
                 if (guideTree == null) { //scm tree option is hidden because should be activated
                     CLI.LOGGER.info("Calculating SCM Guide Tree...");
-
                     scmRuntime = System.currentTimeMillis();
-                    guideTree = calculateSCM(TreeUtils.cloneTrees(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()])));
+                    List<Tree> inputTrees = CLI.parseInput();
+                    guideTree = calculateSCM(inputTrees.toArray(new Tree[inputTrees.size()]));
                     scmRuntime = ((double) System.currentTimeMillis() - scmRuntime) / 1000d;
 
                     CLI.LOGGER.info("...SCM Guide Tree calculation DONE in " + scmRuntime + "s");
@@ -72,13 +69,10 @@ public class BCDSupertrees {
                 guideTree = TreeUtils.deleteInnerLabels(guideTreeToCut);
             }
 
+            Tree suppportTree = null;
             ReductionModifier reducer = null;
+            List<Tree>inputTrees = CLI.parseInput();
             if (CLI.removeUndisputedSiblings) { //ATTENTION this is an Error prone method
-                inputTrees = new ArrayList<>(inputTreesUntouched.size() + 2);
-                for (Tree tree : inputTreesUntouched) {
-                    inputTrees.add(tree.cloneTree());
-                }
-
                 if (suppportTree != null)
                     inputTrees.add(suppportTree); //put support tree temporary in input list
                 if (guideTreeToCut != null)
@@ -87,8 +81,6 @@ public class BCDSupertrees {
                 if (guideTreeToCut != null)
                     inputTrees.remove(inputTrees.size() - 1); //remove guide tree again from input list
             } else {
-                inputTrees = new ArrayList<>(inputTreesUntouched.size() + 1);
-                inputTrees.addAll(inputTreesUntouched);
                 if (suppportTree != null)
                     inputTrees.add(suppportTree);
             }
@@ -104,9 +96,10 @@ public class BCDSupertrees {
             if (CLI.removeUndisputedSiblings)
                 reducer.unmodify(Arrays.asList(superTree));
 
-            if (CLI.unsupportedCladeReduction)
+            if (CLI.unsupportedCladeReduction) {
+                List<Tree>inputTreesUntouched = CLI.parseInput();
                 removeUnsupportedClades(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()]), superTree);
-
+            }
             //write output file
             if (CLI.isFullOutput() && guideTree != null) {
                 CLI.writeOutput(Arrays.asList(superTree, guideTree));
