@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
@@ -50,8 +49,6 @@ public class BCDSupertrees {
             Tree guideTree = CLI.parseSCM();
 
 
-
-
             double scmRuntime = Double.NaN;
 
             Tree guideTreeToCut = null;
@@ -71,7 +68,7 @@ public class BCDSupertrees {
 
             Tree suppportTree = null;
             ReductionModifier reducer = null;
-            List<Tree>inputTrees = CLI.parseInput();
+            List<Tree> inputTrees = CLI.parseInput();
             if (CLI.removeUndisputedSiblings) { //ATTENTION this is an Error prone method
                 if (suppportTree != null)
                     inputTrees.add(suppportTree); //put support tree temporary in input list
@@ -97,7 +94,7 @@ public class BCDSupertrees {
                 reducer.unmodify(Arrays.asList(superTree));
 
             if (CLI.unsupportedCladeReduction) {
-                List<Tree>inputTreesUntouched = CLI.parseInput();
+                List<Tree> inputTreesUntouched = CLI.parseInput();
                 removeUnsupportedClades(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()]), superTree);
             }
             //write output file
