@@ -9,6 +9,7 @@ import phylo.tree.model.Tree;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -23,7 +24,7 @@ public class BCDCLI extends BasicBCDCLI<FlipCutSingleCutSimpleWeight> {
         super(appHomeParent, appHomeFolderName, logDir, maxLogFileSize, logRotation);
     }
 
-    public BCDCLI(Path propertiesFile) {
+    public BCDCLI(InputStream propertiesFile) {
         super(propertiesFile);
     }
 

@@ -9,7 +9,7 @@ import phylo.tree.algorithm.flipcut.model.VaziraniNode;
 import java.util.*;
 
 /**
- * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
+ * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 17.01.13
  * Time: 14:05
  */

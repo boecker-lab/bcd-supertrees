@@ -1,9 +1,9 @@
 package phylo.tree.algorithm.flipcut;
 
-import phylo.tree.algorithm.flipcut.cli.BCDCLI;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.InterfaceCmdLineParser;
+import phylo.tree.algorithm.flipcut.cli.BCDCLI;
 import phylo.tree.algorithm.gscm.SCMAlgorithm;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeUtils;
@@ -132,24 +132,31 @@ public class BCDSupertrees {
 
             CLI.LOGGER.info("Supertree calculation Done in: " + calcTime + "s");
             algorithm.shutdown();
-             System.exit(0);
+            System.exit(0);
 
         } catch (CmdLineException e) {
             // if there's a problem in the command line,
             // you'll get this exception. this will report
             // an error message.
-            CLI.LOGGER.log(Level.SEVERE,e.getMessage(),e);
+            CLI.LOGGER.log(Level.SEVERE, e.getMessage(), e);
             System.err.println(e.getMessage());
             System.err.println();
             CLI.printHelp(parser, System.err);
             System.exit(1);
         } catch (IOException e) {
-            CLI.LOGGER.log(Level.SEVERE,e.getMessage(),e);
+            CLI.LOGGER.log(Level.SEVERE, e.getMessage(), e);
             System.err.println(e.getMessage());
             System.err.println();
             CLI.printHelp(parser, System.err);
             System.exit(2);
+        } catch (Exception e) {
+            CLI.LOGGER.log(Level.SEVERE, e.getMessage(), e);
+            System.err.println(e.getMessage());
+            System.err.println();
+            System.exit(666);
         }
+
+        System.exit(888);
     }
 
 

@@ -1,44 +1,29 @@
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "eu.appsatori:gradle-fatjar-plugin:0.3"
-    }
+import java.nio.file.Paths
+
+plugins {
+    id "com.jfrog.artifactory" version "4.3.0"
 }
-apply plugin: 'java'
-apply plugin: 'maven'
-
-version = '0.9-SNAPSHOT'
-
-dependencies {
-    compile project(':flipcut-core')
-    compile project(':flipcut-lib')
-    compile project(':flipcut-lib.beam-search')
-    compile project(':flipcut-cli')
-    compile project(':flipcut-cli.beam-search')
-}
-
-
 
 allprojects {
 
     apply plugin: 'java'
-    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+    apply plugin: "com.jfrog.artifactory"
 
-    group = 'de.unijena.bioinf'
+    sourceCompatibility = 1.8
+
+    group = 'de.unijena.bioinf.phylo'
 
     repositories {
         mavenCentral()
 //        mavenLocal()
-        maven { url "http://bio.informatik.uni-jena.de/artifactory/repo" }
+//        maven { url "http://bio.informatik.uni-jena.de/artifactory/repo" }
+        maven { url "http://bio.informatik.uni-jena.de/repository/local" }
     }
 
     dependencies {
-        compile 'de.unijena.bioinf:phyloTree-lib.model:0.9.9'
-        compile 'de.unijena.bioinf:phyloTree-lib.algorithm:0.9.9'
+        compile 'de.unijena.bioinf.phylo:phyloTree-lib.model:0.9.9'
+        compile 'de.unijena.bioinf.phylo:phyloTree-lib.algorithm:0.9.9'
         compile 'de.unijena.bioinf:core-lib.utils:0.9'
 
 
@@ -46,18 +31,39 @@ allprojects {
         compile 'net.sf.trove4j:trove4j:3.0.3'
         compile 'net.openhft:affinity:3.0'
 
-        testCompile 'de.unijena.bioinf:phyloTree-lib.utils:0.9.9'
+        testCompile 'de.unijena.bioinf.phylo:phyloTree-lib.utils:0.9.9'
         testCompile 'junit:junit:4.12'
 
     }
-
-
 }
-
 
 subprojects {
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        group = 'build'
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
 
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        group = 'documentation'
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                if (version.toString().endsWith('-SNAPSHOT'))
+                    setArtifacts([jar, sourcesJar])
+                else
+                    setArtifacts([jar, javadocJar, sourcesJar])
+
+            }
+        }
+    }
 }
+
 
 //Core Project specific stuff
 project(':flipcut-core') {
@@ -73,7 +79,7 @@ project(':flipcut-lib') {
 
     dependencies {
         compile project(':flipcut-core')
-        testCompile 'de.unijena.bioinf:gscm-lib:1.0'
+        testCompile 'de.unijena.bioinf.phylo:gscm-lib:1.0'
     }
 }
 
@@ -94,4 +100,59 @@ project(':flipcut-cli.beam-search') {
         compile project(':flipcut-lib.beam-search'), project(':flipcut-cli')
     }
 }
+
+
+version = '0.9-SNAPSHOT'
+
+dependencies {
+    compile project(':flipcut-core')
+    compile project(':flipcut-lib')
+    compile project(':flipcut-lib.beam-search')
+    compile project(':flipcut-cli')
+    compile project(':flipcut-cli.beam-search')
+}
+
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            setArtifacts([])
+        }
+    }
+}
+
+artifactory {
+    contextUrl = 'https://bio.informatik.uni-jena.de/repository/'
+    publish {
+        repository {
+            if (version.toString().endsWith('-SNAPSHOT'))
+                repoKey = 'libs-snapshot-local'
+            else
+                repoKey = 'libs-release-local'
+            Properties properties = new Properties()
+            File propertiesFile = Paths.get(System.properties['user.home'], 'artifactory.properties').toFile()
+            propertiesFile.withInputStream {
+                properties.load(it)
+            }
+
+            username = properties['username']
+            password = properties['password']
+        }
+        defaults {
+            publications('mavenJava')
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
 

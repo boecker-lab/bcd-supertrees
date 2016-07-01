@@ -8,7 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
- * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
+ * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 18.01.13
  * Time: 18:10
  */

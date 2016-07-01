@@ -8,7 +8,7 @@ import phylo.tree.model.TreeNode;
 import java.util.*;
 
 /**
- * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
+ * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 17.01.13
  * Time: 17:59
  */

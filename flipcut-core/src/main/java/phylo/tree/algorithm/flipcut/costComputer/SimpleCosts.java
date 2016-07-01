@@ -9,7 +9,7 @@ import phylo.tree.model.TreeNode;
 import java.util.List;
 
 /**
- * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
+ * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 14.01.13
  * Time: 17:47
  */

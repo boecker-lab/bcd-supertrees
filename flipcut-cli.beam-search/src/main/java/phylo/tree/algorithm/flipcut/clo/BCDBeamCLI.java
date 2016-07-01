@@ -6,6 +6,7 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.BooleanOptionHandler;
 import org.kohsuke.args4j.spi.IntOptionHandler;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 
 /**
@@ -20,7 +21,7 @@ public abstract class BCDBeamCLI extends BCDCLI {
         super(appHomeParent, appHomeFolderName, logDir, maxLogFileSize, logRotation);
     }
 
-    public BCDBeamCLI(Path propertiesFile) {
+    public BCDBeamCLI(InputStream propertiesFile) {
         super(propertiesFile);
     }
 

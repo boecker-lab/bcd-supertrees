@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 
 /**
- * @Author Markus Fleischauer (markus.fleischauer@uni-jena.de)
+ * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 29.11.12
  * Time: 14:10
  */
@@ -21,12 +21,12 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
     protected static final boolean DEBUG = false;
     public static final int CORES_AVAILABLE = Runtime.getRuntime().availableProcessors();
     /**
-     * number of thread that should be used 0 -> automatic <0 massive parralel
+     * number of thread that should be used 0 {@literal ->} automatic {@literal <} 0 massive parralel
      */
     protected int numberOfThreads = 0;
 
     /**
-     * number of thread that should be used 0 -> automatic
+     * number of thread that should be used 0 {@literal ->} automatic
      */
     protected boolean printProgress = false;
 
@@ -37,7 +37,7 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
      */
     protected FlipCutWeights.Weights weights = FlipCutWeights.Weights.UNIT_COST;
     /**
-     * Set minimum bootstrap value of a clade to be part of the analysis ()
+     * Set minimum bootstrap value of a clade to be part of the analysis
      */
     protected int bootstrapThreshold = 0;
     /**
