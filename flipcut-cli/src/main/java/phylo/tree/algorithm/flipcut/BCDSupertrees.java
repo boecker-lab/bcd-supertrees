@@ -41,13 +41,8 @@ public class BCDSupertrees {
                 System.exit(0);
             }
 
-            // configure algorithm
-            FlipCutSingleCutSimpleWeight algorithm = new FlipCutSingleCutSimpleWeight();
-            CLI.setParameters(algorithm);
-
-            //parse guide trees
+             //parse guide trees
             Tree guideTree = CLI.parseSCM();
-
 
             double scmRuntime = Double.NaN;
 
@@ -56,15 +51,20 @@ public class BCDSupertrees {
                 if (guideTree == null) { //scm tree option is hidden because should be activated
                     CLI.LOGGER.info("Calculating SCM Guide Tree...");
                     scmRuntime = System.currentTimeMillis();
-                    List<Tree> inputTrees = CLI.parseInput();
-                    guideTree = calculateSCM(inputTrees.toArray(new Tree[inputTrees.size()]));
+                    SCMAlgorithm algo = CLI.getSCMInstance();
+                    algo.setInput(CLI.parseInput());
+                    algo.call();
+                    algo.shutdown();
+                    guideTree =  algo.getResult();
                     scmRuntime = ((double) System.currentTimeMillis() - scmRuntime) / 1000d;
-
                     CLI.LOGGER.info("...SCM Guide Tree calculation DONE in " + scmRuntime + "s");
                 }
                 guideTreeToCut = guideTree;
                 guideTree = TreeUtils.deleteInnerLabels(guideTreeToCut);
             }
+
+
+
 
             Tree suppportTree = null;
             ReductionModifier reducer = null;
@@ -82,8 +82,12 @@ public class BCDSupertrees {
                     inputTrees.add(suppportTree);
             }
 
+            // configure algorithm
+            FlipCutSingleCutSimpleWeight algorithm = new FlipCutSingleCutSimpleWeight();
+            CLI.setParameters(algorithm);
             //set input trees
             algorithm.setInput(inputTrees, guideTreeToCut);
+            inputTrees = null;
             //run bcd supertrees
             algorithm.run();
             //collect results
@@ -149,14 +153,6 @@ public class BCDSupertrees {
         System.exit(888);
     }
 
-
-    private static Tree calculateSCM(Tree[] inputTrees) {
-        SCMAlgorithm algo = CLI.getSCMInstance();
-        algo.setInput(Arrays.asList(inputTrees));
-        algo.run();
-        algo.shutdown();
-        return algo.getResult();
-    }
 
     private static ReductionModifier removeUndisputedSiblings(List<Tree> inputTrees) {
         ReductionModifier reducer = new ReductionModifier(null, false);

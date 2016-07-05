@@ -79,7 +79,7 @@ project(':flipcut-lib') {
 
     dependencies {
         compile project(':flipcut-core')
-        testCompile 'de.unijena.bioinf.phylo:gscm-lib:1.0'
+        testCompile 'de.unijena.bioinf.phylo:gscm-lib:1.0.1'
     }
 }
 
