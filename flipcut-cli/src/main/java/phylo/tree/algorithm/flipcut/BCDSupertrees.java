@@ -41,7 +41,7 @@ public class BCDSupertrees {
                 System.exit(0);
             }
 
-             //parse guide trees
+            //parse guide trees
             Tree guideTree = CLI.parseSCM();
 
             double scmRuntime = Double.NaN;
@@ -55,15 +55,13 @@ public class BCDSupertrees {
                     algo.setInput(CLI.parseInput());
                     algo.call();
                     algo.shutdown();
-                    guideTree =  algo.getResult();
+                    guideTree = algo.getResult();
                     scmRuntime = ((double) System.currentTimeMillis() - scmRuntime) / 1000d;
                     CLI.LOGGER.info("...SCM Guide Tree calculation DONE in " + scmRuntime + "s");
                 }
                 guideTreeToCut = guideTree;
                 guideTree = TreeUtils.deleteInnerLabels(guideTreeToCut);
             }
-
-
 
 
             Tree suppportTree = null;
@@ -115,13 +113,19 @@ public class BCDSupertrees {
             if (!Double.isNaN(scmRuntime)) {
                 CLI.LOGGER.info("...SCM runs in " + (scmRuntime) + "s");
                 CLI.LOGGER.info("...FlipCut runs in " + (calcTime - scmRuntime) + "s");
-                Path timeFile = CLI.getRuntimeFile();
-                if (timeFile != null) {
-                    Files.deleteIfExists(timeFile);
-                    Files.write(timeFile, ("gscm " + Double.toString(scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.CREATE_NEW);
-                    Files.write(timeFile, ("bcd " + Double.toString(calcTime - scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
-                    Files.write(timeFile, ("complete " + Double.toString(calcTime)).getBytes(), StandardOpenOption.APPEND);
+            }
+
+            //todo move this to write output???
+            Path timeFile = CLI.getRuntimeFile();
+            if (timeFile != null) {
+                Files.deleteIfExists(timeFile);
+                if (!Double.isNaN(scmRuntime)) {
+                    Files.write(timeFile, ("gscm=" + Double.toString(scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.CREATE_NEW);
+                    Files.write(timeFile, ("bcd=" + Double.toString(calcTime - scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
+                    Files.write(timeFile, ("complete=" + Double.toString(calcTime)).getBytes(), StandardOpenOption.APPEND);
                 }
+                Files.write(timeFile, ("bcd=" + Double.toString(calcTime)).getBytes(), StandardOpenOption.CREATE_NEW);
+
             }
 
             CLI.LOGGER.info("Supertree calculation Done in: " + calcTime + "s");
