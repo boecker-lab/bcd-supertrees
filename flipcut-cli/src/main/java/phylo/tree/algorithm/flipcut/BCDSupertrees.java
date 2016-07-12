@@ -123,8 +123,10 @@ public class BCDSupertrees {
                     Files.write(timeFile, ("gscm=" + Double.toString(scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.CREATE_NEW);
                     Files.write(timeFile, ("bcd=" + Double.toString(calcTime - scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
                     Files.write(timeFile, ("complete=" + Double.toString(calcTime)).getBytes(), StandardOpenOption.APPEND);
+                }else{
+                    Files.write(timeFile, ("bcd=" + Double.toString(calcTime)).getBytes(), StandardOpenOption.CREATE_NEW);
                 }
-                Files.write(timeFile, ("bcd=" + Double.toString(calcTime)).getBytes(), StandardOpenOption.CREATE_NEW);
+
 
             }
 
