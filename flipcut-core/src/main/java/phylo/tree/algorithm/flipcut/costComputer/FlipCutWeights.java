@@ -78,6 +78,20 @@ public interface FlipCutWeights {
          * Uses only bootstrap Values of the corresponding chararacter as multiplier
          */
         BOOTSTRAP_VALUES,
+
+        /**
+         * Uses only bootstrap Values of the corresponding chararacter as multiplier
+         */
+        BOOTSTRAP_VALUES_LOG_75_01,
+
+        /**
+         * Uses only bootstrap Values of the corresponding chararacter as multiplier
+         */
+        BOOTSTRAP_VALUES_LOG_66_01,
+        /**
+         * Uses only bootstrap Values of the corresponding chararacter as multiplier
+         */
+        BOOTSTRAP_VALUES_LOG_50_01,
         /**
          * Uses weight of the incoming edge of the corresponding chraracter and it's bootstrap Value as multiplier
          */

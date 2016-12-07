@@ -61,6 +61,18 @@ public class WeightCostComputer extends SimpleCosts {
                 //ATTENTION: labels unchecked
                 //get bootstrap value from label
                 edgeWeight = calcBSValueFromLabel(node);
+            } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_VALUES_LOG_75_01) {
+                //ATTENTION: labels unchecked
+                //get bootstrap value from label
+                edgeWeight = logisticFunction(.1,75d,parseBSValueFromLabel(node));
+            } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_VALUES_LOG_66_01) {
+                //ATTENTION: labels unchecked
+                //get bootstrap value from label
+                edgeWeight = logisticFunction(.1,(2d/3d*100d),parseBSValueFromLabel(node));
+            } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_VALUES_LOG_50_01) {
+                //ATTENTION: labels unchecked
+                //get bootstrap value from label
+                edgeWeight = logisticFunction(.1,50d,parseBSValueFromLabel(node));
             }else if (weights == FlipCutWeights.Weights.BOOTSTRAP_AND_LEVEL) {
                 //ATTENTION: labels unchecked
                 //get bootstrap value from label
@@ -81,7 +93,7 @@ public class WeightCostComputer extends SimpleCosts {
             }else if (weights == FlipCutWeights.Weights.BOOTSTRAP_AND_EDGEWEIGHTS) {
                 //ATTENTION: labels unchecked
                 //get bootstrap value from label
-                edgeWeight = (1000d * calcBSValueFromLabel(node)) + calcEdgeWeight(node);
+                edgeWeight = (100d * calcBSValueFromLabel(node)) + calcEdgeWeight(node);
 
             //UNIT_COST with treeweighting
             }else if (weights == FlipCutWeights.Weights.TREE_WEIGHT) {
@@ -162,6 +174,10 @@ public class WeightCostComputer extends SimpleCosts {
 
     private double calcBSValueFromLabel(TreeNode node){
         return parseBSValueFromLabel(node) / maxBSValue;
+    }
+
+    private double logisticFunction(double k,double x0, double x){
+        return 1/(1+(Math.exp( (-k*(x-x0)) )));
     }
 
     private double calcNodeLevel(TreeNode node){

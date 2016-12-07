@@ -21,6 +21,7 @@ package phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan;/
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
 import org.junit.Test;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.GraphUtils;
 import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
@@ -94,6 +95,39 @@ public class GoldbergTarjanCutGraphTest {
         a 7 8 1
         */
 
+    }
+
+    @Test
+    public void KargerExample()  {
+
+        String testFile = getClass().getResource("/kargerAdj.txt").getFile();
+        int[][] arr = GraphUtils.getArray(testFile);
+        long time =  System.currentTimeMillis();
+        GoldbergTarjanCutGraph gold = new GoldbergTarjanCutGraph();
+        for (int i = 0; i < arr.length; i++) {
+            Integer s = i;
+            int[] ints = arr[i];
+            for (int j = 0; j < ints.length; j++) {
+                Integer t = ints[j];
+                gold.addEdge(s,t,1);
+                gold.addEdge(t,s,1);
+            }
+        }
+        for (int i = 0; i < arr.length-1; i++) {
+            for (int j = i+1; j < arr.length; j++) {
+                gold.submitSTCutCalculation(i,j);
+            }
+        }
+
+        try {
+            BasicCut cut = gold.calculateMinCut();
+            System.out.println("time" +  (System.currentTimeMillis()-time)/1000d);
+            System.out.println("Golderg mincut value: " + cut.minCutValue);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
