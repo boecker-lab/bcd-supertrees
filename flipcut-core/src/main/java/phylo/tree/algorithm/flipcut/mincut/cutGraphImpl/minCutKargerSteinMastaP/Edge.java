@@ -5,33 +5,63 @@ package phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP
  * 07.12.16.
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import phylo.tree.algorithm.flipcut.mincut.Colorable;
+import phylo.tree.algorithm.flipcut.mincut.EdgeColor;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-class Edge {
+public class Edge implements Colorable {
 
-    final List<Vertex> ends = new ArrayList<Vertex>();
+    private final Set<Vertex> ends = new HashSet<>(2);
+    double weight;
+    EdgeColor color;
 
     public Edge(Vertex fst, Vertex snd) {
+        this(fst, snd, 1d, null);
+    }
+
+    public Edge(Vertex fst, Vertex snd, double weight) {
+        this(fst, snd, weight, null);
+    }
+
+    public Edge(Vertex fst, Vertex snd, double weight, EdgeColor color) {
         if (fst == null || snd == null) {
             throw new IllegalArgumentException("Both vertices are required");
         }
         ends.add(fst);
         ends.add(snd);
+        this.weight = weight;
+        if (color != null)
+            color.add(this);
     }
 
     public boolean contains(Vertex v1, Vertex v2) {
         return ends.contains(v1) && ends.contains(v2);
     }
 
+    public boolean contains(Vertex v) {
+        return ends.contains(v);
+    }
+
+    public Iterator<Vertex> iterator() {
+        return ends.iterator();
+    }
+
     public Vertex getOppositeVertex(Vertex v) {
         if (!ends.contains(v)) {
             throw new IllegalArgumentException("Vertex " + v.lbl);
         }
-        return ends.get(1 - ends.indexOf(v));
+        final Iterator<Vertex> it = ends.iterator();
+        Vertex v2 = it.next();
+        if (v2 != v)
+            return v2;
+        else
+            return it.next();
     }
 
     public void replaceVertex(Vertex oldV, Vertex newV) {
@@ -40,5 +70,15 @@ class Edge {
         }
         ends.remove(oldV);
         ends.add(newV);
+    }
+
+    @Override
+    public void setColor(EdgeColor color) {
+        this.color = color;
+    }
+
+    @Override
+    public EdgeColor getColor() {
+        return color;
     }
 }

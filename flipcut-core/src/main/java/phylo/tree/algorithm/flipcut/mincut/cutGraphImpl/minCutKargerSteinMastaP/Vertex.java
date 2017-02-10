@@ -14,11 +14,11 @@ import java.util.Set;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-class Vertex {
+public class Vertex {
 
     final int lbl;
     final TIntSet mergedLbls;
-    final Set<Edge> edges = new HashSet<Edge>();
+    final Set<Edge> edges = new HashSet<Edge>(); //todo remove edges as interanl structures to save mem
 
     public Vertex(int lbl) {
         this.lbl = lbl;
