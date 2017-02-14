@@ -45,8 +45,10 @@ public class Partition implements Comparable<Partition> {
         finishedGraphs = finished;
     }
 
-    /*This method constructs the k best new partitions based on this
-    * Attention this may be calculates time critical minimum Cuts*/
+    /*
+    * This method constructs the k best new partitions based on this
+    * Attention this may calculate time critical minimum Cuts
+    */
     //todo parallelize this step
     public List<Partition> getKBestNew(int k, long upperBound) {
         PriorityQueue<Cut> cutsDesc = new PriorityQueue<Cut>(k,new Comparator<Cut>() {

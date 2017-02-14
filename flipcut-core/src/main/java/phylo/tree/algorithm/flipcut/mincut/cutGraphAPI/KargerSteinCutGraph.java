@@ -6,6 +6,7 @@ import gnu.trove.set.TIntSet;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.mincut.EdgeColor;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.EdgeWeighter;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.Graph;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.KargerStein;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.Vertex;
@@ -19,18 +20,29 @@ import java.util.concurrent.ExecutionException;
 public class KargerSteinCutGraph<V> implements MultiCutGraph<V>, EdgeColorableUndirectedGraph<V> {
     private TIntObjectMap<V> vertexMap = new TIntObjectHashMap<V>();
     private Map<V, Vertex> vertexMapBack = new HashMap<V, Vertex>();
-    private Graph g = new Graph();
+    private Graph g;
     private int vertexIndex = 0;
+    private EdgeWeighter weighter;
 
     private TreeMap<Double, TIntSet> calculate() {
         KargerStein cutter = new KargerStein();
         return cutter.getMinCut(g);
     }
 
+    public KargerSteinCutGraph(EdgeWeighter weighter) {
+        this.weighter = weighter;
+        clear();
+    }
+
+    public KargerSteinCutGraph() {
+        this(new EdgeWeighter() {});
+    }
+
+
     @Override
-    public List<BasicCut<V>> calculateMinCuts() {
+    public LinkedList<BasicCut<V>> calculateMinCuts() {
         TreeMap<Double, TIntSet> cuts = calculate();
-        List<BasicCut<V>> basicCuts = new ArrayList<>(cuts.size());
+        LinkedList<BasicCut<V>> basicCuts = new LinkedList<>();
 
         for (Map.Entry<Double, TIntSet> c : cuts.entrySet()) {
             LinkedHashSet<V> cutset = new LinkedHashSet<V>(c.getValue().size());
@@ -79,7 +91,7 @@ public class KargerSteinCutGraph<V> implements MultiCutGraph<V>, EdgeColorableUn
     @Override
     public void clear() {
         vertexMap.clear();
-        g = new Graph();
+        g = new Graph(weighter);
         vertexIndex = 0;
     }
 

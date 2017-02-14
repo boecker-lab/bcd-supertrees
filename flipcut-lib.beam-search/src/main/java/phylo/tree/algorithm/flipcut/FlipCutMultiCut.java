@@ -5,8 +5,8 @@ import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.costComputer.UnitCostComputer;
 import phylo.tree.algorithm.flipcut.costComputer.WeightCostComputer;
-import phylo.tree.algorithm.flipcut.model.Partition;
 import phylo.tree.algorithm.flipcut.flipCutGraph.*;
+import phylo.tree.algorithm.flipcut.model.Partition;
 import phylo.tree.model.Tree;
 
 import java.util.*;
@@ -15,14 +15,14 @@ import java.util.logging.Logger;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
- * Date: 17.01.13
- * Time: 13:56
+ *         Date: 17.01.13
+ *         Time: 13:56
  */
-public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight,MultiCutGraphCutter> {
+public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight, MultiCutGraphCutter> {
     protected int numberOfCuts = 1;
     private List<Partition> partitions;
     //map to store partitions which are already cutted in more parts than the others
-    private final TreeMap<Integer,Set<Partition>> subsBench = new TreeMap<>();
+    private final TreeMap<Integer, Set<Partition>> subsBench = new TreeMap<>();
 
     protected List<Tree> result;
 
@@ -51,15 +51,15 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
     @Override
     public Tree getResult() {
         if (result == null || result.isEmpty())
-            return getResults().get(0);
-        return null;
+            return null;
+        return getResults().get(0);
     }
 
     @Override
     public List<Tree> getResults() {
         if (result == null || result.isEmpty())
-            return result;
-        return null;
+            return null;
+        return result;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
 
             //initial step to generate
 
-            partitions =  new Partition(0, initialGraph).getKBestNew(numberOfCuts, Long.MAX_VALUE);
+            partitions = new Partition(0, initialGraph).getKBestNew(numberOfCuts, Long.MAX_VALUE);
             initialGraph = null; //get rid of these large graph
 
             int partitionningSteps = 0; //DEBUG variable
@@ -94,7 +94,7 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
                 System.out.println("NUM Partitions after sorting: " + partitions.size() + "");
 
 
-            Set<AbstractFlipCutGraph> allGraphsDebug =  new HashSet<>();
+            Set<AbstractFlipCutGraph> allGraphsDebug = new HashSet<>();
             int numAllGraphPointer = 0;
             //iterates as long as all taxa are separated
             while (minimalPartSize < numTaxa) {
@@ -113,7 +113,7 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
                 long upperBound = Long.MAX_VALUE;
                 for (Partition partition : partitions) {
                     counter++;
-                    List<Partition> part = partition.getKBestNew(numberOfCuts,upperBound);
+                    List<Partition> part = partition.getKBestNew(numberOfCuts, upperBound);
 
                     //todo remove debug stuff
                     int s = allNewPartitionsSet.size();
@@ -122,7 +122,7 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
                             System.out.println((part.size() - (allNewPartitionsSet.size() - s)) + " DUPLICATION(s)!!!!!!!!!!!!!!!!!!!!!!!");
                     }
 
-                    if (counter >= numberOfCuts && (allNewPartitionsSet.size() >= (2 * numberOfCuts))){
+                    if (counter >= numberOfCuts && (allNewPartitionsSet.size() >= (2 * numberOfCuts))) {
                         if (DEBUG)
                             System.out.println(counter + " partitions used to get " + allNewPartitionsSet.size() + " new partitions");
                         break;
@@ -160,10 +160,8 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
                 }
 
 
-
-
             }
-            System.out.println("...DONE in " + ((double)(System.currentTimeMillis() - calctime)/1000d) + "s");
+            System.out.println("...DONE in " + ((double) (System.currentTimeMillis() - calctime) / 1000d) + "s");
             System.out.println();
 
             //this ist just to build the supertree edgelist finally! //todo do in supertree building method!
@@ -171,21 +169,21 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
             System.out.println("Builing Supertrees...");
             int treeNumber = 1;
             if (partitions.size() > numberOfCuts)
-                partitions = partitions.subList(0,numberOfCuts); //todo output all trees?
+                partitions = partitions.subList(0, numberOfCuts); //todo output all trees?
             for (Partition partition : partitions) {
                 //build the supertree from this partition..
-                partition.getKBestNew(numberOfCuts,-1l); //needed to remove the single graphs
+                partition.getKBestNew(numberOfCuts, -1l); //needed to remove the single graphs
                 supertrees.add(partition.createSupertree(treeNumber));
                 treeNumber++;
             }
-            System.out.println("...DONE in " + ((double)(System.currentTimeMillis() - supertreetime)/1000d) + "s");
+            System.out.println("...DONE in " + ((double) (System.currentTimeMillis() - supertreetime) / 1000d) + "s");
         }
         result = supertrees;
     }
 
     @Override
     protected FlipCutGraphMultiSimpleWeight createInitGraph(CostComputer costsComputer) {
-        return new FlipCutGraphMultiSimpleWeight(costsComputer, numberOfCuts,type);
+        return new FlipCutGraphMultiSimpleWeight(costsComputer, numberOfCuts, type);
     }
 
     //this method contains only simple weightings //todo redundant with singlecut version... make better!
@@ -194,11 +192,11 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
         CostComputer costs = null;
         if (UnitCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
             LOGGER.info("Using Unit Costs");
-            costs = new UnitCostComputer(inputTrees,scaffoldTree);
+            costs = new UnitCostComputer(inputTrees, scaffoldTree);
         } else if (WeightCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
-            costs = new WeightCostComputer(inputTrees,weights,scaffoldTree);
+            costs = new WeightCostComputer(inputTrees, weights, scaffoldTree);
             LOGGER.info("Using " + weights);
-        }else{
+        } else {
             LOGGER.warning("No supported weight option set. Setting to standard: " + FlipCutWeights.Weights.EDGE_AND_LEVEL);
             setWeights(FlipCutWeights.Weights.EDGE_AND_LEVEL);
             initCosts(inputTrees, scaffoldTree);
@@ -216,12 +214,12 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
     }
 
     // this mehtod builds the new Partition list with respect to the subsBench ;-)
-    private int  buildPartitionList(List<Partition> newPartitions){
+    private int buildPartitionList(List<Partition> newPartitions) {
         int minimalPartSize = Integer.MAX_VALUE;
 
         Collections.sort(newPartitions);
-        if (newPartitions.size() > (2*numberOfCuts))
-            newPartitions = newPartitions.subList(0,(2*numberOfCuts));
+        if (newPartitions.size() > (2 * numberOfCuts))
+            newPartitions = newPartitions.subList(0, (2 * numberOfCuts));
 
         if (!subsBench.isEmpty())
             minimalPartSize = subsBench.firstKey();
@@ -235,14 +233,14 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight,Fli
         while (partIt.hasNext()) {
             Partition partition = partIt.next();
 
-            if (partition.getSize() > minimalPartSize){
+            if (partition.getSize() > minimalPartSize) {
                 partIt.remove();
-                if (subsBench.containsKey(partition.getSize())){
+                if (subsBench.containsKey(partition.getSize())) {
                     subsBench.get(partition.getSize()).add(partition);
-                }else{
+                } else {
                     HashSet<Partition> p = new HashSet<Partition>();
                     p.add(partition);
-                    subsBench.put(partition.getSize(),p);
+                    subsBench.put(partition.getSize(), p);
                 }
             }
         }

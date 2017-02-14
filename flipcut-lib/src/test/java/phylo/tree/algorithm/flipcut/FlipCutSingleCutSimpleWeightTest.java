@@ -1,17 +1,24 @@
 package phylo.tree.algorithm.flipcut;
 
-import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
-import phylo.tree.algorithm.flipcut.flipCutGraph.SingleCutGraphCutter;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import phylo.tree.algorithm.SupertreeAlgorithm;
+import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
+import phylo.tree.algorithm.flipcut.flipCutGraph.SingleCutGraphCutter;
+import phylo.tree.algorithm.gscm.GreedySCMAlgorithm;
+import phylo.tree.algorithm.gscm.treeMerger.TreeScorers;
 import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
+import phylo.tree.model.TreeUtils;
 import phylo.tree.treetools.RFDistance;
 import phylo.tree.treetools.TreeSorter;
-import phylo.tree.treetools.UnsupportedCladeReduction;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -19,62 +26,226 @@ import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
- * Date: 13.12.12
- * Time: 12:29
+ *         Date: 13.12.12
+ *         Time: 12:29
  */
+@RunWith(Parameterized.class)
 public class FlipCutSingleCutSimpleWeightTest {
 
     private static final String t1String = "((((((t41:0.51127305213250950899,(((t10:0.48018958596953098539,t44:0.51766121345282511967):0.37820800065158260983,((t2:0.00660106631918401174,t48:0.17901438694030952226):0.70069290697404085222,((t22:0.30608032081197839025,t45:0.32910726217930208470):0.13907138931720755548,t13:0.62789722173030759755):0.03783312466452365408):0.07573942024422802843):0.24348427124218707807,((t33:1.33857077555221026799,t34:0.81864697245480877452):0.08302957632262716881,(t6:0.67556512379037569893,t26:0.11416850776113425525):0.11285620720599905120):0.01269845244828135024):0.18148015183588295240):0.28669353968909555563,t35:0.99780919637598053384):0.02105833720180345578,(t46:0.88804532403322122835,(t5:0.10720249642171776616,t47:0.01618975705603504026):0.44723029560503752000):0.54641703682636777462):0.14885030353660033686,((t15:0.38881653114071035304,t38:0.67610437039192539110):0.86911725442375309392,((t32:1.22047097150285499545,(t29:1.14954243502324104931,t12:0.77920252832655489961):0.52560846837640073925):0.00000554872119392131,(t19:0.06164572518812583973,t31:0.16194276841398644318):0.93228146111935794593):0.27711156885639709468):0.05322190115640378777):0.00220218528042856682,(((((t40:0.22419064499467949991,t36:0.32852964025943387494):0.27509704658405398359,((t4:0.47075940401174559691,((t8:0.21578610695362226979,t37:0.12369789172827899693):0.29415648915142633690,t9:0.45639359231824716545):0.01195645149457751077):0.06231642973057911761,t18:0.89459654150627965219):0.09238968056475078960):0.52051074407778008535,t11:0.75643709739575382134):0.44310312146190178328,(t28:0.09705344675146689026,t25:0.09581362862889745979):0.98563758006327650829):0.10030868980958286552,(t30:2.02661657844797815642,(t7:0.20943807439325906605,t24:0.16850223084845714072):0.68724964545983480146):0.11336248408125269849):0.03623679306498845537):1.24245817089725174576,OUTGOUP:1.24245817089725174576);";
     private static final String t2String = "(((t19:0.76851186613957689353,((t29:1.06511293584646438148,t12:0.57551667214169643927):0.48146775966657029411,t32:1.27456629785236663643):0.10871501349219915566):0.19905266068350777053,(((t30:1.73686687040379927893,(t25:0.09308655740498866793,t28:0.11714121416339394466):0.31593918290617012401):0.28861579427440231527,(((t7:0.11381254553479662472,t24:0.09919280566902602403):0.06693334548668478101,t1:0.43777283635603053691):0.01926286910012516007,t43:0.27900191452324607511):0.83123201010036917857):0.01056317505101037751,((((t48:0.13818818295665824536,t2:0.02172251892758649688):0.46030015647880745400,(((t22:0.30170653775239181238,t45:0.46210860694036692831):0.04998708374295702389,t13:0.50093349419156196767):0.18688716729956442175,((t10:0.47606526165174345433,t42:0.64463156797583576196):0.26969597717720450447,((t27:0.43693562626233761748,t34:0.50467398072554769950):0.11323892175753487443,(t16:1.07372540293411966594,t33:1.48415037187143106223):0.11239244135045381445):0.12443418609919322526):0.00000439759789274463):0.07014822425269182093):0.35706437472627405860,(t46:0.65477710857634952024,(t23:0.26688025947077614886,(t5:0.14986974493162311117,(t47:0.03578300174512620557,t14:0.08046779586736808876):0.01744560126236641140):0.23829753409763010374):0.32088584435621120283):0.60899763979712817630):0.16076004800453957966,(((t36:0.65093963650537556287,t18:0.74924744525920916605):0.04412271886537624116,((t9:0.58325891521505202064,(t4:0.33692049974871485229,t8:0.52673158689223520401):0.04074981656869958169):0.32179059900046791398,t3:0.19899561058090420307):0.00231658272502263587):0.70764766351057650784,((t20:0.16793658301978156566,t15:0.40945167238803842347):0.18412785296032174731,t38:0.64021773270992554661):0.51919154824647950619):0.04788728470109086116):0.09182422225671280080):0.02595483928734209841):1.41955781856683360687,OUTGOUP:1.41955781856683360687);";
 
-    //    @Test
-    public void testSimpleExample() {
-        Tree t1 = Newick.getTreeFromString("((A,B),C);");
-        Tree t2 = Newick.getTreeFromString("((A,B),C);");
+    public static final List<Tree> trivialSource = Arrays.asList(Newick.getTreeFromString("((A,B),C);"), Newick.getTreeFromString("((A,B),C);"));
+    public static final List<Tree> caterpillar = Arrays.asList(
+            Newick.getTreeFromString("(((a,b),c),d)"),
+            Newick.getTreeFromString("(((a,c),e),d);"),
+            Newick.getTreeFromString("(((a,b),c),e);")
+    );
 
-        FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
-        fs.setInput(Arrays.asList(t1, t2));
+
+    public static final List<Tree> checkRoot1Source = Arrays.asList(
+//            Newick.getTreeFromString("((b,c),(x,y,z));"),
+//            Newick.getTreeFromString("((b,d),(x,y,z));"),
+            Newick.getTreeFromString("((e,f),(x,y,z));"),
+            Newick.getTreeFromString("((e,g),(x,y,z));")
+    );
+
+    public static final List<Tree> checkRoot2Source = Arrays.asList(
+//            Newick.getTreeFromString("((b,c),(x,y,z));"),
+//            Newick.getTreeFromString("((b,d),(x,y,z));"),
+            Newick.getTreeFromString("((e,f),x,y,z);"),
+            Newick.getTreeFromString("((e,g),x,y,z);")
+    );
+
+    public static final List<Tree> bryant1aSource = Arrays.asList(
+            Newick.getTreeFromString("((b,c),(x,y,z));"),
+            Newick.getTreeFromString("((b,d),(x,y,z));"),
+            Newick.getTreeFromString("((e,f),(x,y,z));"),
+            Newick.getTreeFromString("((e,g),(x,y,z));")
+    );
+
+    public static final List<Tree> bryant1bSource = Arrays.asList(
+            Newick.getTreeFromString("((b,c),x,y,z);"),
+            Newick.getTreeFromString("((b,d),x,y,z);"),
+            Newick.getTreeFromString("((e,f),x,y,z);"),
+            Newick.getTreeFromString("((e,g),x,y,z);")
+    );
+
+    public static final List<Tree> bryant1cSource = Arrays.asList(
+            Newick.getTreeFromString("(((b,c),x,y,z),m);"),
+            Newick.getTreeFromString("(((b,d),x,y,z),n);"),
+            Newick.getTreeFromString("(((e,f),x,y,z),o);"),
+            Newick.getTreeFromString("(((e,g),x,y,z),p);")
+    );
+
+    public static final List<Tree> bryant1dSource = Arrays.asList(
+            Newick.getTreeFromString("(((b,c),(x,y,z)),m);"),
+            Newick.getTreeFromString("(((b,d),(x,y,z)),n);"),
+            Newick.getTreeFromString("(((e,f),(x,y,z)),o);"),
+            Newick.getTreeFromString("(((e,g),(x,y,z)),p);")
+    );
+
+    public static final List<Tree> bryant2Source = Arrays.asList(
+            Newick.getTreeFromString("((b,c),a);"),
+            Newick.getTreeFromString("((b,d),a);"),
+            Newick.getTreeFromString("((e,f),a);"),
+            Newick.getTreeFromString("((e,g),a);"),
+            Newick.getTreeFromString("((x,y),a);"),
+            Newick.getTreeFromString("((x,z),a);")
+    );
+
+    public static final List<Tree> bryant3Source = Arrays.asList(
+            Newick.getTreeFromString("((b,c),a);"),
+            Newick.getTreeFromString("((b,d),a);"),
+            Newick.getTreeFromString("((e,f),a);"),
+            Newick.getTreeFromString("((e,g),a);"),
+            Newick.getTreeFromString("((x,y),a);"),
+            Newick.getTreeFromString("((x,z),a);")
+    );
+
+    public static final List<Tree> bryant4Source = Arrays.asList(
+            Newick.getTreeFromString("((b,c),a);"),
+            Newick.getTreeFromString("((b,d),a);"),
+            Newick.getTreeFromString("((e,f),v);"),
+            Newick.getTreeFromString("((e,g),v);"),
+            Newick.getTreeFromString("((x,y),w);"),
+            Newick.getTreeFromString("((x,z),w);")
+    );
+
+    public static final List<Tree> bryant5Source = Arrays.asList(
+            Newick.getTreeFromString("((b,c),a);"),
+            Newick.getTreeFromString("((b,d),v);"),
+            Newick.getTreeFromString("((e,f),a);"),
+            Newick.getTreeFromString("((e,g),v);")
+    );
+
+    public static final List<Tree> bryant6Source = Arrays.asList(
+            Newick.getTreeFromString("(((b1,b2),(c1,c2)),a);"),
+            Newick.getTreeFromString("(((b1,b2),(d1,d2)),a);"),
+            Newick.getTreeFromString("(((e1,e2),(f1,f2)),a);"),
+            Newick.getTreeFromString("(((e1,e2),(g1,g2)),a);")
+    );
+
+    public static final List<Tree> bryant7Source = Arrays.asList(
+            Newick.getTreeFromString("((b,c),a);"),
+            Newick.getTreeFromString("((b,d),a);"),
+            Newick.getTreeFromString("((e,f),v);"),
+            Newick.getTreeFromString("((e,g),v);")
+    );
+
+    @Parameterized.Parameter(0)
+    public Tree expected;
+
+    @Parameterized.Parameter(1)
+    public Tree guideExpected;
+
+    @Parameterized.Parameter(2)
+    public List<Tree> source;
+
+   /* @Parameterized.Parameter(2)
+    public Tree guide = null;*/
+
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> parameters() {
+        Collection<Object[]> params = new ArrayList<>();
+        //trivial example
+        params.add(new Object[]{Newick.getTreeFromString("((A,B),C);"), Newick.getTreeFromString("((A,B),C);"), trivialSource});
+        params.add(new Object[]{Newick.getTreeFromString("(((a,b),c),e),d);"), Newick.getTreeFromString("(((a,b),c),e),d);"), caterpillar});
+
+        //bryant example
+        params.add(new Object[]{Newick.getTreeFromString("((e,f,g),(x,y,z));"), Newick.getTreeFromString("((e,f,g),(x,y,z));"), checkRoot1Source});
+        params.add(new Object[]{Newick.getTreeFromString("((e,f,g),x,y,z);"), Newick.getTreeFromString("((e,f,g),x,y,z);"), checkRoot2Source});
+        params.add(new Object[]{Newick.getTreeFromString("((b,c,d),(e,f,g),(x,y,z));"), Newick.getTreeFromString("((b,c,d),(e,f,g),(x,y,z));"), bryant1aSource});
+        params.add(new Object[]{Newick.getTreeFromString("((b,c,d),(e,f,g),x,y,z);"), Newick.getTreeFromString("((b,c,d),(e,f,g),x,y,z);"), bryant1bSource});
+        params.add(new Object[]{Newick.getTreeFromString("(((b,c,d),(e,f,g),x,y,z),m,n,o,p);"), Newick.getTreeFromString("(((b,c,d),(e,f,g),x,y,z),m,n,o,p);"), bryant1cSource});
+        params.add(new Object[]{Newick.getTreeFromString("(((b,c,d),(e,f,g),(x,y,z)),m,n,o,p);"),Newick.getTreeFromString("((b,c,d),(e,f,g),(x,y,z),m,n,o,p);"), bryant1dSource});
+
+        return params;
+    }
+
+
+    public List<Tree> calculateSupertrees(SupertreeAlgorithm fs, Tree expected){
+        return calculateSupertrees(fs,expected,null);
+    }
+
+    public List<Tree> calculateSupertrees(SupertreeAlgorithm fs, Tree expected, Tree guide) {
         fs.run();
         Tree supertree = fs.getResult();
         assertNotNull(supertree);
-        Assert.assertEquals(5, supertree.vertexCount());
-        Assert.assertEquals(3, supertree.getLeaves().length);
-        int rfdist = RFDistance.getDifference(supertree, Newick.getTreeFromString("((A,B),C);"), false);
+
+        supertree = TreeUtils.deleteInnerLabels(supertree);
+        ArrayList<String> s = new ArrayList<>(TreeUtils.getLeafLabels(supertree));
+
+        if (guide != null) {
+            guide = TreeUtils.deleteInnerLabels(guide);
+            TreeUtils.sortTree(guide,s);
+            System.out.println(Newick.getStringFromTree(guide,true,false) + " Guide");
+        }
+        TreeUtils.sortTree(supertree,s);
+        System.out.println(Newick.getStringFromTree(supertree,true,false) + " Estimated");
+        TreeUtils.sortTree(expected,s);
+        System.out.println(Newick.getStringFromTree(expected,true,false) + " Expected");
+
+        Assert.assertEquals(TreeUtils.getLeafCount(source), supertree.getLeaves().length);
+        int rfdist = RFDistance.getDifference(supertree, expected, false);
         assertEquals(0, rfdist);
 
-        System.out.println(Newick.getStringFromTree(supertree));
+        return fs.getResults();
     }
 
+
+
     @Test
-    public void testBryantSample1() {
-        Tree t1 = Newick.getTreeFromString("((b,c),a);");
-        Tree t2 = Newick.getTreeFromString("((b,d),a);");
-        Tree t3 = Newick.getTreeFromString("((e,f),a);");
-        Tree t4 = Newick.getTreeFromString("((e,g),a);");
-        List<Tree> input = Arrays.asList(t1, t2, t3, t4);
+    public void bcdNoGuideTests() {
+        FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+        fs.setWeights(FlipCutWeights.Weights.UNIT_COST);
+        fs.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
+        calculateSupertrees(fs, expected);
+    }
+
+    /*@Test
+    public void bcdBryant() {
+        List<Tree> source = TreeUtils.cloneTrees(bryant1aSource);
+
+        Tree guide = Newick.getTreeFromString("((b,c,d,e,f,g),(x,y,z));");
+        System.out.println(Newick.getStringFromTree(guide));
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
         fs.setWeights(FlipCutWeights.Weights.UNIT_COST);
-        fs.setInput(input);
-        UnsupportedCladeReduction r = new UnsupportedCladeReduction(input);
 
-        fs.run();
-        Tree supertree = fs.getResult();
-        Tree toReduce = supertree.cloneTree();
-        r.reduceUnsupportedClades(toReduce);
+//        fs.setInput(TreeUtils.cloneTrees(source));
+//        Tree sNoGuide = calculateSupertrees(fs, Newick.getTreeFromString("((b,c,d),(e,f,g),(x,y,z));")).get(0);
 
-        assertNotNull(supertree);
-        assertNotNull(toReduce);
-        System.out.println(Newick.getStringFromTree(supertree));
-        System.out.println(Newick.getStringFromTree(toReduce));
-    }
+        fs.setInput(TreeUtils.cloneTrees(source), guide);
+        Tree sGuide = calculateSupertrees(fs, guide,guide).get(0);
+        //todo check difference?
+    }*/
+
 
     @Test
+    public void bcdGuideTests() {
+        GreedySCMAlgorithm prepro = new GreedySCMAlgorithm();
+        prepro.setInput(TreeUtils.cloneTrees(source));
+        prepro.setScorer(TreeScorers.getScorer(TreeScorers.ScorerType.OVERLAP));
+        prepro.run();
+        Tree guide = prepro.getResult();
+        System.out.println(Newick.getStringFromTree(guide));
+
+        FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+        fs.setWeights(FlipCutWeights.Weights.UNIT_COST);
+
+        fs.setInput(TreeUtils.cloneTrees(source));
+        Tree sNoGuide = calculateSupertrees(fs, expected).get(0);
+
+        fs.setInput(TreeUtils.cloneTrees(source), guide);
+        Tree sGuide = calculateSupertrees(fs, expected,guide).get(0);
+        //todo check difference?
+    }
+
+    /*@Test
     public void testBryantSample2() {
-        Tree t1 = Newick.getTreeFromString("((b,c),a);");
-        Tree t2 = Newick.getTreeFromString("((b,d),a);");
-        Tree t3 = Newick.getTreeFromString("((e,f),v);");
-        Tree t4 = Newick.getTreeFromString("((e,g),v);");
+
         List<Tree> input = Arrays.asList(t1, t2, t3, t4);
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
@@ -95,12 +266,7 @@ public class FlipCutSingleCutSimpleWeightTest {
 
     @Test
     public void testBryantSample3() {
-        Tree t1 = Newick.getTreeFromString("((b,c),a);");
-        Tree t2 = Newick.getTreeFromString("((b,d),a);");
-        Tree t3 = Newick.getTreeFromString("((e,f),a);");
-        Tree t4 = Newick.getTreeFromString("((e,g),a);");
-        Tree t5 = Newick.getTreeFromString("((x,y),a);");
-        Tree t6 = Newick.getTreeFromString("((x,z),a);");
+
         List<Tree> input = Arrays.asList(t1, t2, t3, t4, t5, t6);
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
@@ -121,12 +287,7 @@ public class FlipCutSingleCutSimpleWeightTest {
 
     @Test
     public void testBryantSample4() {
-        Tree t1 = Newick.getTreeFromString("((b,c),a);");
-        Tree t2 = Newick.getTreeFromString("((b,d),a);");
-        Tree t3 = Newick.getTreeFromString("((e,f),v);");
-        Tree t4 = Newick.getTreeFromString("((e,g),v);");
-        Tree t5 = Newick.getTreeFromString("((x,y),w);");
-        Tree t6 = Newick.getTreeFromString("((x,z),w);");
+
         List<Tree> input = Arrays.asList(t1, t2, t3, t4, t5, t6);
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
@@ -147,10 +308,7 @@ public class FlipCutSingleCutSimpleWeightTest {
 
     @Test
     public void testBryantSample5() {
-        Tree t1 = Newick.getTreeFromString("((b,c),a);");
-        Tree t2 = Newick.getTreeFromString("((b,d),v);");
-        Tree t3 = Newick.getTreeFromString("((e,f),a);");
-        Tree t4 = Newick.getTreeFromString("((e,g),v);");
+
         List<Tree> input = Arrays.asList(t1, t2, t3, t4);
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
@@ -171,10 +329,7 @@ public class FlipCutSingleCutSimpleWeightTest {
 
     @Test
     public void testBryantSample6() {
-        Tree t1 = Newick.getTreeFromString("(((b1,b2),(c1,c2)),a);");
-        Tree t2 = Newick.getTreeFromString("(((b1,b2),(d1,d2)),a);");
-        Tree t3 = Newick.getTreeFromString("(((e1,e2),(f1,f2)),a);");
-        Tree t4 = Newick.getTreeFromString("(((e1,e2),(g1,g2)),a);");
+
         List<Tree> input = Arrays.asList(t1, t2, t3, t4);
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
@@ -191,9 +346,9 @@ public class FlipCutSingleCutSimpleWeightTest {
         assertNotNull(toReduce);
         System.out.println(Newick.getStringFromTree(supertree));
         System.out.println(Newick.getStringFromTree(toReduce));
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void testBryantSample7Negative() {
         Tree t1 = Newick.getTreeFromString("((b,c),a);");
         Tree t2 = Newick.getTreeFromString("((b,d),a);");
@@ -216,19 +371,17 @@ public class FlipCutSingleCutSimpleWeightTest {
         assertNotNull(toReduce);
         System.out.println(Newick.getStringFromTree(supertree));
         System.out.println(Newick.getStringFromTree(toReduce));
-    }
+    }*/
 
 
-    @Test
+    /*@Test
     public void testMalteExample() {
-        /*
+        *//*
         (((a,b),c),d);
         (((a,c),e),d);
         (((a,b),c),e);
-         */
-        Tree t1 = Newick.getTreeFromString("(((a,b),c),d)");
-        Tree t2 = Newick.getTreeFromString("(((a,c),e),d);");
-        Tree t3 = Newick.getTreeFromString("(((a,b),c),e);");
+         *//*
+
 
         FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
         fs.setInput(Arrays.asList(t1, t2, t3));
@@ -236,7 +389,7 @@ public class FlipCutSingleCutSimpleWeightTest {
         Tree supertree = fs.getResult();
         System.out.println(Newick.getStringFromTree(supertree));
     }
-
+*/
     @Test
     public void scaffoldFail() {
         Tree t1 = Newick.getTreeFromString("(((c,b),a),(d,e,f));");
@@ -288,7 +441,7 @@ public class FlipCutSingleCutSimpleWeightTest {
         System.out.println(RFDistance.getDifference(tree, mtt, true));
     }
 
-//    @Test
+    //    @Test
     public void testManyInputTrees() {
         File inputFile = new File(getClass().getResource("/phylo/tree/algorithm/flipcut/omm.source.Trees.tre").getFile());
 //        File inputFile =  new File(getClass().getResource("/flipcut/mcmahon.source_trees").getFile());

@@ -33,7 +33,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     /**
      * Turn on/off global character merging for characters with identical edgeset {@literal ->} works for hypergraph version only
      */
-    public static final boolean GLOBAL_CHARACTER_MERGE = true;
+    public static final boolean GLOBAL_CHARACTER_MERGE = false;
     /**
      * Mapping for edge  based character merging (Global character Map)
      */
