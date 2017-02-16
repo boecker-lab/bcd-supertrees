@@ -7,6 +7,7 @@ import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 import phylo.tree.algorithm.flipcut.model.VaziraniNode;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -19,7 +20,7 @@ import java.util.*;
  */
 //TODO THE VAZIRANI should be an own Cutgraph not a cut graph cutter --> it should extend directed cut graph an use some max flow implemetation
 
-public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter {
+public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight> {
 
     private static final boolean PRINT_GRAPHS = false;
     private PriorityQueue<VaziraniNode> queueAscHEAP = null;
@@ -77,10 +78,6 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                     createGoldbergTarjanCharacterWeights(cutGraph);
                     break;
                 }
-                case HYPERGRAPH_MINCUT: {
-                    //todo implement
-                    break;
-                }
                 case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
                     createGoldbergTarjanCharacterWeights(cutGraph);
                     break;
@@ -107,10 +104,6 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                         switch (type) {
                             case MAXFLOW_TARJAN_GOLDBERG: {
                                 weight = character.edgeWeight;
-                                break;
-                            }
-                            case HYPERGRAPH_MINCUT: {
-                                //todo implement
                                 break;
                             }
                             case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
@@ -225,10 +218,6 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                 createGoldbergTarjan(cutGraph);
                 break;
             }
-            case HYPERGRAPH_MINCUT: {
-                //todo implement
-                break;
-            }
             case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
                 cutGraph = new GoldbergTarjanCutGraph<>();
                 createGoldbergTarjanCharacterWeights(cutGraph);
@@ -263,10 +252,6 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                     createGoldbergTarjanCharacterWeights(cutGraph);
                     break;
                 }
-                case HYPERGRAPH_MINCUT: {
-                    //todo implement
-                    break;
-                }
                 case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
                     createGoldbergTarjanCharacterWeights(cutGraph);
                     break;
@@ -287,10 +272,6 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                     switch (type) {
                         case MAXFLOW_TARJAN_GOLDBERG: {
                             weight = character.edgeWeight;
-                            break;
-                        }
-                        case HYPERGRAPH_MINCUT: {
-                            //todo implement
                             break;
                         }
                         case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
@@ -328,5 +309,38 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
     public List<FlipCutGraphMultiSimpleWeight> cut(FlipCutGraphMultiSimpleWeight source) {
         return getNextCut().getSplittedGraphs();
 
+    }
+
+    /*@Override
+    public CutterFactory<MultiCutGraphCutter, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> getFactory(CutGraphTypes type) {
+        return new Factory(type);
+    }
+
+    @Override
+    public CutterFactory<MultiCutGraphCutter, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> getFactory() {
+        return new Factory(CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+    }*/
+
+    static class Factory implements MultiCutterFactory<MultiCutGraphCutter,FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutter,FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight>{
+        private final CutGraphTypes type;
+
+        Factory(CutGraphTypes type) {
+            this.type = type;
+        }
+
+        @Override
+        public MultiCutGraphCutter newInstance(FlipCutGraphMultiSimpleWeight graph) {
+            return new MultiCutGraphCutter(type,graph);
+        }
+
+        @Override
+        public MultiCutGraphCutter newInstance(FlipCutGraphMultiSimpleWeight graph, ExecutorService executorService, int threads) {
+            return newInstance(graph);
+        }
+
+        @Override
+        public CutGraphTypes getType() {
+            return type;
+        }
     }
 }

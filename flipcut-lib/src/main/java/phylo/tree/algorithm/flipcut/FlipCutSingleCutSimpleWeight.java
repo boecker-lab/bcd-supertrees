@@ -5,10 +5,7 @@ import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.costComputer.UnitCostComputer;
 import phylo.tree.algorithm.flipcut.costComputer.WeightCostComputer;
-import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
-import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
-import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
-import phylo.tree.algorithm.flipcut.flipCutGraph.SingleCutGraphCutter;
+import phylo.tree.algorithm.flipcut.flipCutGraph.*;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
@@ -24,7 +21,18 @@ import java.util.logging.Logger;
 public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipCutNodeSimpleWeight,FlipCutGraphSimpleWeight,SingleCutGraphCutter> {
 
     public FlipCutSingleCutSimpleWeight() {
-        super();
+    }
+
+    public FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.Factory type) {
+        super(type);
+    }
+
+    public FlipCutSingleCutSimpleWeight(Logger log, SingleCutGraphCutter.Factory type) {
+        super(log, type);
+    }
+
+    public FlipCutSingleCutSimpleWeight(Logger log, ExecutorService executorService1, SingleCutGraphCutter.Factory type) {
+        super(log, executorService1, type);
     }
 
     @Override
@@ -32,34 +40,9 @@ public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipC
         return getClass().getSimpleName();
     }
 
-    public FlipCutSingleCutSimpleWeight(CutGraphCutter.CutGraphTypes type) {
-        super(type);
-    }
-
-    public FlipCutSingleCutSimpleWeight(Logger log, CutGraphCutter.CutGraphTypes type) {
-        super(log, type);
-    }
-
-    public FlipCutSingleCutSimpleWeight(Logger log, ExecutorService executorService1, CutGraphCutter.CutGraphTypes type) {
-        super(log, executorService1, type);
-    }
-
     @Override
-    protected FlipCutGraphSimpleWeight createGraph(List<FlipCutNodeSimpleWeight> component, TreeNode treeNode, final boolean checkEdges) {
-        return new FlipCutGraphSimpleWeight(component,treeNode,checkEdges);
-    }
-
-    @Override
-    protected SingleCutGraphCutter createCutter() {
-        if (executorService == null) {
-            return new SingleCutGraphCutter(type);
-        }else{
-            if (numberOfThreads > 0) {
-                return new SingleCutGraphCutter(type,executorService,numberOfThreads);
-            } else {
-                return new SingleCutGraphCutter(type,executorService,CORES_AVAILABLE);
-            }
-        }
+    protected FlipCutGraphSimpleWeight createGraph(List<FlipCutNodeSimpleWeight> component, TreeNode treeNode) {
+        return new FlipCutGraphSimpleWeight(component,treeNode,!((SingleCutGraphCutter.Factory)type).isHyperGraphCutter());
     }
 
     @Override

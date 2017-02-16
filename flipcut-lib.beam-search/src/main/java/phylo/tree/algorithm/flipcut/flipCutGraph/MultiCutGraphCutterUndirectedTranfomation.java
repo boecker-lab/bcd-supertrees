@@ -6,10 +6,8 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
  */
 
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.KargerSteinCutGraph;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.HyperCut;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.NormalizePerColorWeighter;
-import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 import phylo.tree.algorithm.flipcut.model.HyperMultiCut;
 
 import java.util.List;
@@ -19,17 +17,18 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> implements MultiCutter {
+public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+    private static final Factory FACTORY = new Factory();
     Queue<HyperCut<FlipCutNodeSimpleWeight>> mincuts = null;
 
 
-    public MultiCutGraphCutterUndirectedTranfomation(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut) {
-        super(type);
+    public MultiCutGraphCutterUndirectedTranfomation(FlipCutGraphMultiSimpleWeight graphToCut) {
+        super();
         source = graphToCut;
     }
 
-    public MultiCutGraphCutterUndirectedTranfomation(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut, ExecutorService executorService, int threads) {
-        super(type, executorService, threads);
+    public MultiCutGraphCutterUndirectedTranfomation(FlipCutGraphMultiSimpleWeight graphToCut, ExecutorService executorService, int threads) {
+        super(executorService, threads);
         source = graphToCut;
     }
 
@@ -63,5 +62,22 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
         }
         HyperCut<FlipCutNodeSimpleWeight> c = mincuts.poll();
         return new HyperMultiCut(source,c);
+    }
+
+
+    public static Factory getFactory(){
+        return FACTORY;
+    }
+
+    static class Factory implements MultiCutterFactory<MultiCutGraphCutterUndirectedTranfomation,FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight>{
+        @Override
+        public MultiCutGraphCutterUndirectedTranfomation newInstance(FlipCutGraphMultiSimpleWeight graph) {
+            return new MultiCutGraphCutterUndirectedTranfomation(graph);
+        }
+
+        @Override
+        public MultiCutGraphCutterUndirectedTranfomation newInstance(FlipCutGraphMultiSimpleWeight graph, ExecutorService executorService, int threads) {
+            return new MultiCutGraphCutterUndirectedTranfomation(graph,executorService,threads);
+        }
     }
 }

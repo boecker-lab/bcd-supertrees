@@ -22,6 +22,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      * Turn on/off guide tree based taxa merging
      */
     public static final boolean SCAFF_TAXA_MERGE = true;
+    public static final boolean CHECK_EDGES = false;
     /**
      * Mapping for guide tree based taxa merging
      */
@@ -114,7 +115,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      *
      * @param nodes the nodes
      */
-    public AbstractFlipCutGraph(List<T> nodes, TreeNode parentNode, final boolean checkEdges) {
+    public AbstractFlipCutGraph(List<T> nodes, TreeNode parentNode, final boolean edgeDeletion) {
         characters = new LinkedHashSet<>(nodes.size());
         taxa = new LinkedHashSet<>(nodes.size());
         for (T node : nodes) {
@@ -126,7 +127,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         }
 
         // checks an removes edges to taxa that are not in this component!!!
-        if (checkEdges(checkEdges))
+        if (checkEdges(edgeDeletion))
             System.out.println("INFO: Edges between graphs deleted! - Not possible for BCD");
 
         this.parentNode = parentNode;

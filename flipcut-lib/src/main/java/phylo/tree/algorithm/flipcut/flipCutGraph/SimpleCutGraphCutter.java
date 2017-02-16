@@ -18,15 +18,34 @@ import java.util.concurrent.ExecutorService;
  * Time: 11:12
  */
 public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> extends CutGraphCutter<FlipCutNodeSimpleWeight, T> {
+    public enum CutGraphTypes {MAXFLOW_TARJAN_GOLDBERG, MAXFLOW_AHOJI_ORLIN, HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG, type, HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN}
+
     protected static final boolean DEBUG = false;
+
+    public static final boolean MAX_FLIP_NORMALIZATION = false;
+
+    //THE "real" bcd without flip weighting
+    public static final boolean IGNORE_MATRIX_ENTRIES = true;
+    //only if ignore matrix entries (flips) false
+    public static final boolean REAL_CHAR_DELETION = true;
+    //if real char deletion false:
+    public static final boolean ZEROES = true;
+
+    protected final CutGraphTypes type;
+
+    /*public CutGraphTypes getType() {
+        return type;
+    }*/
 
 
     public SimpleCutGraphCutter(CutGraphTypes type) {
-        super(type);
+        super();
+        this.type = type;
     }
 
     public SimpleCutGraphCutter(CutGraphTypes type, ExecutorService executorService, int threads) {
-        super(type, executorService, threads);
+        super(executorService, threads);
+        this.type = type;
     }
 
     //################### graph creation ######################
@@ -415,4 +434,6 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         }
 
     }
+
+//    public abstract CutterFactory<? extends GraphCutter<FlipCutNodeSimpleWeight,T>,FlipCutNodeSimpleWeight,T> getFactory (CutGraphTypes type);
 }

@@ -10,91 +10,48 @@ import java.util.*;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
- * Date: 17.01.13
- * Time: 17:59
+ *         Date: 17.01.13
+ *         Time: 17:59
  */
 
 public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
-    public enum  MultiCutterType {VAZIRANI, GREEDY, MC};
-    private MultiCutterType multiCutterType = MultiCutterType.MC;
-
     private int maxCutNumber;
     private int nextCutIndexToCalculate;
     private final MultiCut[] cuts;
-    private final MultiCutter cutter;
+    private final MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutter;
+    private final MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory;
 
     //todo k needed?
-    public FlipCutGraphMultiSimpleWeight(CostComputer costs, int k, CutGraphCutter.CutGraphTypes cutterType) {
-        super(costs,0); //todo dummy bootstrapthreshold --> implement it
-
-        //todo factory for this stuff
-        switch (multiCutterType) {
-            case VAZIRANI:
-                this.cutter = new MultiCutGraphCutter(cutterType,this);
-                break;
-            case GREEDY:
-                this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
-                break;
-            case MC:
-                this.cutter = new MultiCutGraphCutterUndirectedTranfomation(cutterType,this);
-                break;
-            default:
-                this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
-                break;
-        }
-
-
+    public FlipCutGraphMultiSimpleWeight(CostComputer costs, int k, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory) {
+        super(costs, 0); //todo dummy bootstrapthreshold --> implement it
+        this.cutter = cutterFactory.newInstance(this);
+        this.cutterFactory = cutterFactory;
         maxCutNumber = k;
         cuts = new MultiCut[maxCutNumber];
         nextCutIndexToCalculate = 0;
     }
 
-    protected FlipCutGraphMultiSimpleWeight(LinkedHashSet<FlipCutNodeSimpleWeight> characters, LinkedHashSet<FlipCutNodeSimpleWeight> taxa, TreeNode parentNode, int k, CutGraphCutter.CutGraphTypes cutterType) {
+    protected FlipCutGraphMultiSimpleWeight(LinkedHashSet<FlipCutNodeSimpleWeight> characters, LinkedHashSet<FlipCutNodeSimpleWeight> taxa, TreeNode parentNode, int k, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory) {
         super(characters, taxa, parentNode);
-
-        switch (multiCutterType) {
-            case VAZIRANI:
-                this.cutter = new MultiCutGraphCutter(cutterType,this);
-                break;
-            case GREEDY:
-                this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
-                break;
-            case MC:
-                this.cutter = new MultiCutGraphCutterUndirectedTranfomation(cutterType,this);
-                break;
-            default:
-                this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
-                break;
-        }
+        this.cutter = cutterFactory.newInstance(this);
+        this.cutterFactory = cutterFactory;
 
         maxCutNumber = k;
         cuts = new MultiCut[maxCutNumber];
         nextCutIndexToCalculate = 0;
     }
 
-    public FlipCutGraphMultiSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, int k, CutGraphCutter.CutGraphTypes cutterType) {
-        super(nodes, parentNode, (cutterType == CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG));
-        switch (multiCutterType) {
-            case VAZIRANI:
-                this.cutter = new MultiCutGraphCutter(cutterType,this);
-                break;
-            case GREEDY:
-                this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
-                break;
-            case MC:
-                this.cutter = new MultiCutGraphCutterUndirectedTranfomation(cutterType,this);
-                break;
-            default:
-                this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
-                break;
-        }
+    public FlipCutGraphMultiSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, int k, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory, boolean edgeDeletion) {
+        super(nodes, parentNode, edgeDeletion);
+        this.cutter = cutterFactory.newInstance(this);
+        this.cutterFactory = cutterFactory;
         maxCutNumber = k;
         cuts = new MultiCut[maxCutNumber];
         nextCutIndexToCalculate = 0;
     }
 
 
-    public Iterator<MultiCut> getCutIterator(){
+    public Iterator<MultiCut> getCutIterator() {
         return new CutIterator();
     }
 
@@ -113,14 +70,14 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
 
     @Override
     public List<? extends FlipCutGraphMultiSimpleWeight> split(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes) {
-        Map<FlipCutNodeSimpleWeight,FlipCutNodeSimpleWeight> oldToNew = copyNodes();
+        Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew = copyNodes();
         List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> graphData = splitToGraphData(new LinkedHashSet<>(sinkNodes), oldToNew);
         List<FlipCutGraphMultiSimpleWeight> graphs = new LinkedList<FlipCutGraphMultiSimpleWeight>();
-        graphs.add(new FlipCutGraphMultiSimpleWeight(graphData.get(0).get(0),graphData.get(0).get(1),treeNode, cuts.length, cutter.getType()));
-        graphs.add(new FlipCutGraphMultiSimpleWeight(graphData.get(1).get(0),graphData.get(1).get(1),treeNode, cuts.length, cutter.getType()));
+        graphs.add(new FlipCutGraphMultiSimpleWeight(graphData.get(0).get(0), graphData.get(0).get(1), treeNode, cuts.length, cutterFactory));
+        graphs.add(new FlipCutGraphMultiSimpleWeight(graphData.get(1).get(0), graphData.get(1).get(1), treeNode, cuts.length, cutterFactory));
         if (SCAFF_TAXA_MERGE) {
             for (FlipCutGraphMultiSimpleWeight graph : graphs) {
-                graph.insertScaffPartData(this,oldToNew);
+                graph.insertScaffPartData(this, oldToNew);
             }
         }
         return graphs;
@@ -128,7 +85,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
 
     //overwritten --> creates cloned nodes for multiple splits
 //    @Override
-    protected List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> splitToGraphData(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes, final Map<FlipCutNodeSimpleWeight,FlipCutNodeSimpleWeight> oldToNew) {
+    protected List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> splitToGraphData(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes, final Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew) {
 
 
         LinkedHashSet<FlipCutNodeSimpleWeight> g1Characters = new LinkedHashSet<>();
@@ -176,10 +133,10 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
 
         //todo maybe use iterator and delete removed from toRemove list
         // remove characters from g1 if we have to remove any
-        removeCharacters(charactersToRemove,g1Characters);
+        removeCharacters(charactersToRemove, g1Characters);
 
         // remove characters from g2 if we have to remove any
-        removeCharacters(charactersToRemove,g2Characters);
+        removeCharacters(charactersToRemove, g2Characters);
 
         // remove all edges between g2 characters and g1 taxa
         removeEdgesToOtherGraph(g2Characters, g1Taxa);
@@ -194,7 +151,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         return Arrays.asList(g1, g2);
     }
 
-    public List<FlipCutNodeSimpleWeight> checkRemoveCharacter(Set<FlipCutNodeSimpleWeight> sinkNodes){
+    public List<FlipCutNodeSimpleWeight> checkRemoveCharacter(Set<FlipCutNodeSimpleWeight> sinkNodes) {
         List<FlipCutNodeSimpleWeight> charactersToRemove = new LinkedList<FlipCutNodeSimpleWeight>();
         for (FlipCutNodeSimpleWeight node : sinkNodes) {
             if (!node.isTaxon()) {
@@ -207,10 +164,6 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
             }
         }
         return charactersToRemove;
-    }
-
-    public CutGraphCutter.CutGraphTypes getCutterType() {
-        return cutter.getType();
     }
 
     public List<FlipCutGraphMultiSimpleWeight> buildComponentGraphs(List<List<FlipCutNodeSimpleWeight>> comp) {
@@ -235,16 +188,21 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
                         FlipCutNodeSimpleWeight tClone = oldToNew.get(taxon);
                         if (tClone != null) {
                             nClone.addImaginaryEdgeTo(tClone);
-                        }else{
+                        } else {
                             //todo check!!!
                             //nClone.characterWeight -= nClone.edgeWeight;
                         }
                     }
                 }
             }
-            FlipCutGraphMultiSimpleWeight g = new FlipCutGraphMultiSimpleWeight(new ArrayList<FlipCutNodeSimpleWeight>(oldToNew.values()),treeNode,cuts.length,getCutterType());
-            if (SCAFF_TAXA_MERGE )
-                g.insertScaffPartData(this,oldToNew);
+            FlipCutGraphMultiSimpleWeight g;
+            if (cutterFactory instanceof MaxFlowCutterFactory) {
+                g = new FlipCutGraphMultiSimpleWeight(new ArrayList<>(oldToNew.values()), treeNode, cuts.length, cutterFactory,!((MaxFlowCutterFactory)cutterFactory).isHyperGraphCutter());
+            }else{
+                g = new FlipCutGraphMultiSimpleWeight(new ArrayList<>(oldToNew.values()), treeNode, cuts.length, cutterFactory,false);
+            }
+            if (SCAFF_TAXA_MERGE)
+                g.insertScaffPartData(this, oldToNew);
             splittedGraphs.add(g);
 
         }
@@ -255,16 +213,16 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         return nextCutIndexToCalculate > 0;
     }
 
-    private DefaultMultiCut getCompCut(List<List<FlipCutNodeSimpleWeight>> comp){
-        return new DefaultMultiCut(comp,this);
+    private DefaultMultiCut getCompCut(List<List<FlipCutNodeSimpleWeight>> comp) {
+        return new DefaultMultiCut(comp, this);
     }
 
-    class CutIterator implements Iterator<MultiCut>{
+    class CutIterator implements Iterator<MultiCut> {
         CutIterator() {
             //check if graph is already disconnected
-            if (nextCutIndexToCalculate == 0 && maxCutNumber == cuts.length){
+            if (nextCutIndexToCalculate == 0 && maxCutNumber == cuts.length) {
                 List<List<FlipCutNodeSimpleWeight>> comp = getComponents();
-                if (comp.size() > 1){//graph is already disconnected we have to build subgraph from parts
+                if (comp.size() > 1) {//graph is already disconnected we have to build subgraph from parts
                     cuts[nextCutIndexToCalculate] = getCompCut(comp);
                     nextCutIndexToCalculate++;
                     maxCutNumber = nextCutIndexToCalculate;
@@ -273,8 +231,9 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         }
 
         int index = 0;
+
         public boolean hasNext() {
-            if (index >= nextCutIndexToCalculate){
+            if (index >= nextCutIndexToCalculate) {
                 if (nextCutIndexToCalculate < maxCutNumber) {
                     return calculateNextCut();
                 } else {
@@ -300,7 +259,6 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
             }
         }
     }
-
 
 
 }

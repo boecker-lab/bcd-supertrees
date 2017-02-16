@@ -2,9 +2,7 @@ package phylo.tree.algorithm.flipcut;
 
 import core.algorithm.Algorithm;
 import core.utils.progressBar.CLIProgressBar;
-import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
-import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
-import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
+import phylo.tree.algorithm.flipcut.flipCutGraph.*;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
@@ -20,7 +18,7 @@ import java.util.logging.Logger;
  * Date: 29.11.12
  * Time: 14:42
  */
-public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends CutGraphCutter<N, T>> extends AbstractFlipCut<N, T, C> {
+public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends CutGraphCutter<N, T>> extends AbstractFlipCut<N, T, C,MaxFlowCutterFactory<C, N, T>> {
     private static final boolean CALCULATE_SCORE = true;
     private long globalWeight;
 
@@ -34,19 +32,18 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
 
     protected Tree supertree = null;
 
-    protected AbstractFlipCutSingleCut() {
-        super();
+    public AbstractFlipCutSingleCut() {
     }
 
-    protected AbstractFlipCutSingleCut(C.CutGraphTypes type) {
+    public AbstractFlipCutSingleCut(MaxFlowCutterFactory<C, N, T> type) {
         super(type);
     }
 
-    protected AbstractFlipCutSingleCut(Logger log, C.CutGraphTypes type) {
+    public AbstractFlipCutSingleCut(Logger log, MaxFlowCutterFactory<C, N, T> type) {
         super(log, type);
     }
 
-    protected AbstractFlipCutSingleCut(Logger log, ExecutorService executorService1, C.CutGraphTypes type) {
+    public AbstractFlipCutSingleCut(Logger log, ExecutorService executorService1, MaxFlowCutterFactory<C, N, T> type) {
         super(log, executorService1, type);
     }
 
@@ -159,7 +156,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
     }
 
     private Tree computeSTIterativeSingleThreaded() {
-        final C cutter = createCutter();
+        final C cutter = ((MaxFlowCutterFactory<C,N,T>)type).newInstance(initialGraph);
         final Tree supertree = new Tree();
 
         Queue<T> graphs = new LinkedList<T>();
@@ -226,9 +223,9 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                     if (DEBUG)
                         debugInfo.currentStartTime = System.currentTimeMillis();
                     // create the component graphs
-                    boolean checkEdges = (getCutterType() == CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
+//                    boolean checkEdges = (getCutterType() == CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
                     for (List<N> component : components) {
-                        T g = createGraph(component, initialGraph.treeNode, checkEdges);
+                        T g = createGraph(component, initialGraph.treeNode);
                         //actualize scaffold partition data
                         if (initialGraph.SCAFF_TAXA_MERGE) {
                             g.insertScaffPartData(initialGraph, null);
@@ -248,9 +245,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
         return supertree;
     }
 
-    protected abstract T createGraph(List<N> component, TreeNode treeNode, final boolean checkEdges);
-
-    protected abstract C createCutter();
+    protected abstract T createGraph(List<N> component, TreeNode treeNode);
 
     private class GraphSplitterIterative implements Callable<Queue<TreeNode>> {
         final T currentGraph;
@@ -282,7 +277,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                     // just one component, we have to cut
                     C cutter = cutterQueue.poll();
                     if (cutter == null)
-                        cutter = createCutter();
+                        cutter = type.newInstance(currentGraph);
 
                     List<T> componentGraphs = cutter.cut(currentGraph);
                     //mincut value in graph needed?
@@ -302,9 +297,8 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                     cutterQueue.offer(cutter);
                 } else {
                     // create the component graphs
-                    boolean checkEdges = (getCutterType() == CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
                     for (List<N> component : components) {
-                        T g = createGraph(component, currentGraph.treeNode, checkEdges);
+                        T g = createGraph(component, currentGraph.treeNode);
                         //actualize scaffold partition data
                         if (currentGraph.SCAFF_TAXA_MERGE) {
                             g.insertScaffPartData(currentGraph, null);

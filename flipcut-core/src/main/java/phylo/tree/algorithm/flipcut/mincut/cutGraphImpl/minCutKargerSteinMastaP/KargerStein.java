@@ -26,7 +26,6 @@ public class KargerStein {
         gr.setCutted(true);
     }
 
-    //todo maybe edge drawer class
     private Edge drawEdge(Graph g) {
         int upper = g.getNumOfEdges();
         int downer = 0;

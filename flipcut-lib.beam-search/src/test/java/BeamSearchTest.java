@@ -12,6 +12,8 @@ import phylo.tree.algorithm.SupertreeAlgorithm;
 import phylo.tree.algorithm.flipcut.FlipCutMultiCut;
 import phylo.tree.algorithm.flipcut.FlipCutSingleCutSimpleWeight;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
+import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutGrapCutterFactories;
+import phylo.tree.algorithm.flipcut.flipCutGraph.SimpleCutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.SingleCutGraphCutter;
 import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
@@ -215,12 +217,27 @@ public class BeamSearchTest {
 
     @Test
     public void bcdNoGuideTests() {
-        FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+        FlipCutSingleCutSimpleWeight fs = new FlipCutSingleCutSimpleWeight(new SingleCutGraphCutter.Factory(SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
         fs.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fs.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
         Tree exp = calculateSupertrees(fs, null).get(0);
 
-        FlipCutMultiCut fcm = new FlipCutMultiCut(SingleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+        /*System.out.println("Vazi");
+        FlipCutMultiCut fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.VAZIRANI,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
+        fcm.setNumberOfCuts(1);
+        fcm.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
+        fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
+        calculateSupertrees(fcm, exp);*/
+
+        /*System.out.println("Greedy");
+        FlipCutMultiCut fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.GREEDY,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
+        fcm.setNumberOfCuts(10);
+        fcm.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
+        fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
+        calculateSupertrees(fcm, exp);*/
+
+        System.out.println("MC");
+        FlipCutMultiCut fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.MC));
         fcm.setNumberOfCuts(1);
         fcm.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));

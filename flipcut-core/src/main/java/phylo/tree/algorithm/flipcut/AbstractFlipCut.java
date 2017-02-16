@@ -1,10 +1,12 @@
 package phylo.tree.algorithm.flipcut;
+
+import phylo.tree.algorithm.SupertreeAlgorithm;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
-import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
-import phylo.tree.algorithm.SupertreeAlgorithm;
+import phylo.tree.algorithm.flipcut.flipCutGraph.CutterFactory;
+import phylo.tree.algorithm.flipcut.flipCutGraph.GraphCutter;
 import phylo.tree.model.Tree;
 
 import java.util.List;
@@ -14,10 +16,10 @@ import java.util.logging.Logger;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
- * Date: 29.11.12
- * Time: 14:10
+ *         Date: 29.11.12
+ *         Time: 14:10
  */
-public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends CutGraphCutter> extends SupertreeAlgorithm {
+public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends GraphCutter<N, T>, F extends CutterFactory<C, N, T>> extends SupertreeAlgorithm {
     protected static final boolean DEBUG = true;
     public static final int CORES_AVAILABLE = Runtime.getRuntime().availableProcessors();
     /**
@@ -31,7 +33,7 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
     protected boolean printProgress = false;
 
 
-    protected C.CutGraphTypes type;
+    protected F type;
     /**
      * Use edge weights
      */
@@ -46,23 +48,24 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
     protected T initialGraph;
 
 
-
     protected AbstractFlipCut() {
         super();
     }
+
     /**
      * Create new instace with logger
      */
-    protected AbstractFlipCut(C.CutGraphTypes type) {
+    protected AbstractFlipCut(F type) {
         super();
         this.type = type;
     }
+
     /**
      * Create new instace with logger
      *
      * @param log the logger
      */
-    protected AbstractFlipCut(Logger log, C.CutGraphTypes type) {
+    protected AbstractFlipCut(Logger log, F type) {
         super(log);
         this.type = type;
     }
@@ -72,8 +75,8 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
      *
      * @param log the logger
      */
-    protected AbstractFlipCut(Logger log, ExecutorService executorService1,C.CutGraphTypes type) {
-        super(log,executorService1);
+    protected AbstractFlipCut(Logger log, ExecutorService executorService1, F type) {
+        super(log, executorService1);
         this.type = type;
     }
 
@@ -106,11 +109,11 @@ public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extend
         initialGraph = createInitGraph(costs);
     }
 
-    public void setCutter(CutGraphCutter.CutGraphTypes type) {
+    public void setCutter(F type) {
         this.type = type;
     }
 
-    public CutGraphCutter.CutGraphTypes getCutterType() {
+    public F getCutterType() {
         return type;
     }
 

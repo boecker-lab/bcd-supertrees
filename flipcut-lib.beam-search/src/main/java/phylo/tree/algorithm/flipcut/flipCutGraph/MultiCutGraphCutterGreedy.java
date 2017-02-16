@@ -8,13 +8,14 @@ import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 19.04.13
  * Time: 12:02
  */
-public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter  {
+public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight>  {
 
     Set<FlipCutNodeSimpleWeight> blacklist = new HashSet<>();
     private boolean stopCutting;
@@ -238,12 +239,41 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
         return new DefaultMultiCut(mincut,mincutValue,source);
     }
 
-    public CutGraphTypes getType() {
-        return type;
-    }
-
     @Override
     public List<FlipCutGraphMultiSimpleWeight> cut(FlipCutGraphMultiSimpleWeight source) {
         return getNextCut().getSplittedGraphs();
+    }
+
+    /*@Override
+    public CutterFactory<MultiCutGraphCutterGreedy, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> getFactory(CutGraphTypes type) {
+        return new Factory(type);
+    }
+
+    @Override
+    public CutterFactory<MultiCutGraphCutterGreedy, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> getFactory() {
+        return new Factory(CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+    }*/
+
+    static class Factory implements MultiCutterFactory<MultiCutGraphCutterGreedy,FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutterGreedy,FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight>{
+        private final CutGraphTypes type;
+
+        Factory(CutGraphTypes type) {
+            this.type = type;
+        }
+
+        @Override
+        public MultiCutGraphCutterGreedy newInstance(FlipCutGraphMultiSimpleWeight graph) {
+            return new MultiCutGraphCutterGreedy(type,graph);
+        }
+
+        @Override
+        public MultiCutGraphCutterGreedy newInstance(FlipCutGraphMultiSimpleWeight graph, ExecutorService executorService, int threads) {
+            return newInstance(graph);
+        }
+
+        @Override
+        public CutGraphTypes getType() {
+            return type;
+        }
     }
 }

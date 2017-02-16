@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutorService;
  * Time: 16:37
  */
 public class SingleCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphSimpleWeight> {
+
+
     public SingleCutGraphCutter(CutGraphTypes type) {
         super(type);
     }
@@ -25,6 +27,35 @@ public class SingleCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphSimpl
             split = (List<FlipCutGraphSimpleWeight>) source.split(minCut);
         }
         return split;
+    }
+
+
+    public static class Factory implements MaxFlowCutterFactory<SingleCutGraphCutter, FlipCutNodeSimpleWeight,FlipCutGraphSimpleWeight>{
+        private final CutGraphTypes type;
+
+        public Factory(CutGraphTypes type) {
+            this.type = type;
+        }
+
+
+        public SingleCutGraphCutter newInstance() {
+            return new SingleCutGraphCutter(type);
+        }
+
+        @Override
+        public SingleCutGraphCutter newInstance(FlipCutGraphSimpleWeight graph) {
+            return newInstance();
+        }
+
+        @Override
+        public SingleCutGraphCutter newInstance(FlipCutGraphSimpleWeight graph, ExecutorService executorService, int threads) {
+            return  new SingleCutGraphCutter(type,executorService,threads);
+        }
+
+        @Override
+        public CutGraphTypes getType() {
+            return type;
+        }
     }
 
 

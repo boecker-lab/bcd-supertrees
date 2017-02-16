@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  *         Date: 17.01.13
  *         Time: 13:56
  */
-public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight, MultiCutGraphCutter> {
+public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight, MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>,MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>> {
     protected int numberOfCuts = 1;
     private List<Partition> partitions;
     //map to store partitions which are already cutted in more parts than the others
@@ -35,15 +35,15 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, Fl
         return getClass().getSimpleName();
     }
 
-    public FlipCutMultiCut(CutGraphCutter.CutGraphTypes type) {
+    public FlipCutMultiCut(MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> type) {
         super(type);
     }
 
-    public FlipCutMultiCut(Logger log, CutGraphCutter.CutGraphTypes type) {
+    public FlipCutMultiCut(Logger log,MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>,FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> type) {
         super(log, type);
     }
 
-    public FlipCutMultiCut(Logger log, ExecutorService executorService1, CutGraphCutter.CutGraphTypes type) {
+    public FlipCutMultiCut(Logger log, ExecutorService executorService1, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>,FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> type) {
         super(log, executorService1, type);
     }
 

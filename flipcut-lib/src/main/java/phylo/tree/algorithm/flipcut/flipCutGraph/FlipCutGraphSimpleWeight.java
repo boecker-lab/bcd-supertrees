@@ -22,8 +22,8 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         super(characters, taxa, parentNode);
     }
 
-    public FlipCutGraphSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, final boolean checkEdges) {
-        super(nodes, parentNode, checkEdges);
+    public FlipCutGraphSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, final  boolean edgeDeletion) {
+        super(nodes, parentNode,edgeDeletion);
     }
 
     @Override

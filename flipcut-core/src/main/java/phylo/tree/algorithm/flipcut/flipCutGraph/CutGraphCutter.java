@@ -11,31 +11,14 @@ import java.util.concurrent.ExecutorService;
  * Date: 15.01.13
  * Time: 14:15
  */
-public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends AbstractFlipCutGraph<N>> {
-
-
-    public enum CutGraphTypes {MAXFLOW_TARJAN_GOLDBERG, MAXFLOW_AHOJI_ORLIN, HYPERGRAPH_MINCUT, HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG, HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN}
+public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends AbstractFlipCutGraph<N>> implements GraphCutter<N,T>{
     public static final long INFINITY = 1000000;
-
-    public static final boolean MAX_FLIP_NORMALIZATION = false;
-
-    //THE "real" bcd without flip weighting
-    public static final boolean IGNORE_MATRIX_ENTRIES = true;
-        //only if ignore matrix entries (flips) false
-        public static final boolean REAL_CHAR_DELETION = true;
-            //if real char deletion false:
-            public static final boolean ZEROES = true;
 
     protected final ExecutorService executorService;
     protected final int threads;
 
     protected Map<N, N> nodeToDummy;
     protected Map<N, Set<N>> dummyToMerged;
-
-    protected final CutGraphTypes type;
-    public CutGraphTypes getType() {
-        return type;
-    }
 
     protected T source = null;
     protected List<N> cutGraphTaxa = null;
@@ -44,13 +27,11 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
     protected long mincutValue;
     protected List<T> split = null;
 
-    protected CutGraphCutter(CutGraphTypes type) {
-        this.type = type;
+    protected CutGraphCutter() {
         this.executorService = null;
         this.threads=1;
     }
-    protected CutGraphCutter(CutGraphTypes type, ExecutorService executorService, int threads) {
-        this.type = type;
+    protected CutGraphCutter(ExecutorService executorService, int threads) {
         this.executorService = executorService;
         this.threads =  threads;
     }
@@ -81,6 +62,5 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>,T extends 
 
     }
 
-    public abstract List<T> cut(T source);
     protected abstract void calculateMinCut();
 }
