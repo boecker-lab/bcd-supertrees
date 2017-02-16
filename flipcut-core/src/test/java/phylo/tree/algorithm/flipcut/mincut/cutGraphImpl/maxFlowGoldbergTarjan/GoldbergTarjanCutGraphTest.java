@@ -19,7 +19,7 @@ package phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan;/
  */
 
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
 import org.junit.Test;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.GraphUtils;
 import phylo.tree.io.Newick;
@@ -66,7 +66,7 @@ public class GoldbergTarjanCutGraphTest {
         hp.addEdge(7, 5, 5);
         hp.addEdge(7, 8, 1);
 
-        BasicCut cut = hp.calculateMinSTCut(1, 8);
+        STCut cut = hp.calculateMinSTCut(1, 8);
         System.out.println(cut.minCutValue);
         System.out.println(cut.getCutSet());
 
@@ -120,7 +120,7 @@ public class GoldbergTarjanCutGraphTest {
         }
 
         try {
-            BasicCut cut = gold.calculateMinCut();
+            STCut cut = gold.calculateMinCut();
             System.out.println("time" +  (System.currentTimeMillis()-time)/1000d);
             System.out.println("Golderg mincut value: " + cut.minCutValue);
         } catch (ExecutionException e) {
@@ -188,7 +188,7 @@ public class GoldbergTarjanCutGraphTest {
             }
             try {
                 long time =  System.currentTimeMillis();
-                BasicCut cut = gold.calculateMinCut();
+                STCut cut = gold.calculateMinCut();
                 System.out.println("time" +  (System.currentTimeMillis()-time)/1000d + " with " + t + " threads");
                 System.out.println("Golderg mincut value: " + cut.minCutValue);
             } catch (ExecutionException e) {

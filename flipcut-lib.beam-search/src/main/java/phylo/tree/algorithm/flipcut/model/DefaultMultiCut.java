@@ -9,42 +9,36 @@ import java.util.List;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
- * Date: 18.01.13
- * Time: 18:10
+ *         Date: 18.01.13
+ *         Time: 18:10
  */
-public class Cut implements Comparable<Cut> {
+public class DefaultMultiCut extends MultiCut<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
     private LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes;
     private List<List<FlipCutNodeSimpleWeight>> comp;
-    private List<FlipCutGraphMultiSimpleWeight> splittedGraphs;
-    final long minCutValue;
-    final FlipCutGraphMultiSimpleWeight sourceGraph;
 
-    public Cut(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes, long minCutValue, FlipCutGraphMultiSimpleWeight sourceGraph) {
-        //splittedGraphs = (List<FlipCutGraphMultiSimpleWeight>) sourceGraph.split(sinkNodes);
-        this.sinkNodes = sinkNodes;
+    private final long minCutValue;
+
+
+    public DefaultMultiCut(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes, long minCutValue, FlipCutGraphMultiSimpleWeight sourceGraph) {
+        super(sourceGraph);
         this.minCutValue = minCutValue;
-        this.sourceGraph = sourceGraph;
+        this.sinkNodes = sinkNodes;
         comp = null;
     }
 
-    public Cut(List<List<FlipCutNodeSimpleWeight>> comp, FlipCutGraphMultiSimpleWeight graph) {
+    public DefaultMultiCut(List<List<FlipCutNodeSimpleWeight>> comp, FlipCutGraphMultiSimpleWeight graph) {
+        super(graph);
+        this.minCutValue = 0;
         sinkNodes = null;
-        minCutValue = 0;
-        sourceGraph = graph;
         this.comp = comp;
-        //splittedGraphs = sourceGraph.buildComponentGraphs(comp);
     }
 
-    public long getMinCutValue() {
+    @Override
+    public long minCutValue() {
         return minCutValue;
     }
 
-    public int compareTo(Cut o) {
-        return (minCutValue < o.minCutValue) ? -1 : ((minCutValue == o.minCutValue) ? 0 : 1);
-    }
-
     public List<FlipCutGraphMultiSimpleWeight> getSplittedGraphs() {
-
         if (splittedGraphs == null) {
             if (comp != null) {
                 splittedGraphs = sourceGraph.buildComponentGraphs(comp);

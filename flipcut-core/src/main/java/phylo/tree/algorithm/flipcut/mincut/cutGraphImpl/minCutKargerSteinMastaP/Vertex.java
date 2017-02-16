@@ -38,4 +38,11 @@ public class Vertex {
         return null;
     }
 
+    public TIntSet getMergedLbls() {
+        return mergedLbls;
+    }
+
+    public Set<Edge> getEdges() {
+        return edges;
+    }
 }

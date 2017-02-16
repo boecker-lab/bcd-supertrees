@@ -8,21 +8,22 @@ package phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP
  */
 
 import gnu.trove.list.TDoubleList;
-import gnu.trove.set.TIntSet;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.TreeMap;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class KargerStein {
 
-    public double contract(Graph gr) {
+    public void contract(Graph gr) {
         while (gr.vertices.size() > 2) {
             Edge edge = drawEdge(gr);
             Iterator<Vertex> it = edge.iterator();
             reorganizeEdges(gr, it.next(), it.next());
         }
-        return gr.edges.stream().mapToDouble(e -> e.weight).sum();
+        gr.setCutted(true);
     }
 
     //todo maybe edge drawer class
@@ -57,26 +58,39 @@ public class KargerStein {
         return g.edges.get(mid);
     }
 
-    public TreeMap<Double, TIntSet> getMinCut(final Graph gr) {
-        TreeMap<Double, TIntSet> results = new TreeMap<>();
+    public List<Graph> getMinCuts(final Graph gr) {
         int iter = gr.vertices.size() * gr.vertices.size();
+        List<Graph> cuts = new ArrayList<>(iter);
+
         gr.refreshWeights();
         for (int i = 0; i < iter; i++) {
             Graph grc = gr.clone();
-            double currMin = contract(grc);
-            results.put(currMin, ((Vertex) grc.vertices.values()[0]).mergedLbls);
+            contract(grc);
+            cuts.add(grc);
         }
-        return results;
+        return cuts;
     }
 
-    public TreeMap<Double, TIntSet> getMinCut(final int[][] arr) {
+    public List<Graph> getMinCuts(final int[][] arr) {
         Graph gr = GraphUtils.createGraph(arr);
-        return getMinCut(gr);
+        return getMinCuts(gr);
+    }
+
+    public Graph getMinCut(final Graph gr) {
+        List<Graph> cuts = getMinCuts(gr);
+        Collections.sort(cuts);
+        return cuts.get(0);
+    }
+
+    public Graph getMinCut(final int[][] arr) {
+        List<Graph> cuts = getMinCuts(arr);
+        Collections.sort(cuts);
+        return cuts.get(0);
     }
 
     private void reorganizeEdges(Graph gr, Vertex v1, Vertex v2) {
         //remove old vertex from graph
-        Vertex v = gr.vertices.remove(v2.lbl);
+        gr.vertices.remove(v2.lbl);
 
         //add merged labels to v1
         v1.mergedLbls.addAll(v2.mergedLbls);

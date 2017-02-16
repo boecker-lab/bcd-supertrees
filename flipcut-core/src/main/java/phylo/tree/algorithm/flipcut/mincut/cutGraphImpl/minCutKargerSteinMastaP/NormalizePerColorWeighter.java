@@ -10,8 +10,9 @@ package phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP
  */
 public class NormalizePerColorWeighter implements EdgeWeighter {
     @Override
-    public double weightEdge(Graph g, Edge e) {
-        e.weight = e.color.getWeight() / e.color.numOfEdges();
-        return e.weight;
+    public double weightEdge(Edge e) {
+        if (e.color != null)
+            return e.color.getWeight() / e.color.numOfEdges();
+        return 1d;
     }
 }

@@ -50,6 +50,10 @@ public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
         }
     }
 
+    public T getClone() {
+        return clone;
+    }
+
     public void addEdgeTo(T node) {
         edges.add(node);
     }

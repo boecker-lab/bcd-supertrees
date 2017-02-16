@@ -1,7 +1,7 @@
 package phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerStein;
 
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
 import org.junit.Test;
 import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
@@ -75,7 +75,7 @@ public class KargerSteinTests {
         }
         try {
             long time = System.currentTimeMillis();
-            BasicCut cut = gold.calculateMinCut();
+            STCut cut = gold.calculateMinCut();
             System.out.println("time" + (System.currentTimeMillis() - time) / 1000d);
             System.out.println("Golderg mincut value: " + cut.minCutValue);
         } catch (ExecutionException e) {

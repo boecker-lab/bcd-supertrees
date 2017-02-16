@@ -1,7 +1,7 @@
 package phylo.tree.algorithm.flipcut.mincut.cutGraphAPI;
 
 import core.utils.parallel.IterationCallableFactory;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.maxFlowAhujaOrlin.FlowGraph;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -64,16 +64,16 @@ public class AhujaOrlinCutGraph<V> extends MaxFlowCutGraph<V> {
      * @param sink   the sink
      */
     @Override
-    public BasicCut<V> calculateMinSTCut(V source, V sink) {
+    public STCut<V> calculateMinSTCut(V source, V sink) {
         return calculateMinSTCut(source, sink, ahujaGraph);
     }
 
-    BasicCut<V> calculateMinSTCut(final V source, final V sink, final FlowGraph ahujaGraph) {
+    STCut<V> calculateMinSTCut(final V source, final V sink, final FlowGraph ahujaGraph) {
         ahujaGraph.setSource(vertexToNode.get(source));
         ahujaGraph.setSink(vertexToNode.get(sink));
 
         LinkedHashSet<V> sourceList = creatCut(ahujaGraph);
-        BasicCut<V> cut = new BasicCut(sourceList, source, sink, (long) ahujaGraph.getMaximumFlow());
+        STCut<V> cut = new STCut(sourceList, source, sink, (long) ahujaGraph.getMaximumFlow());
         return cut;
     }
 
@@ -103,7 +103,7 @@ public class AhujaOrlinCutGraph<V> extends MaxFlowCutGraph<V> {
         }
 
         @Override
-        public BasicCut<V> doJob(SS ss) {
+        public STCut<V> doJob(SS ss) {
             return calculateMinSTCut(ss.source, ss.sink, flowGraph);
         }
     }

@@ -1,6 +1,6 @@
 package phylo.tree.algorithm.flipcut.mincut.cutGraphAPI;
 
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
 
 import java.util.List;
 
@@ -14,8 +14,8 @@ public interface DirectedCutGraph<V> extends CutGraph<V>{
      *
      * @return mincut all connected components of the input graph
      */
-    BasicCut<V> calculateMinSTCut(V source, V sink);
+    STCut<V> calculateMinSTCut(V source, V sink);
 
     void submitSTCutCalculation(V source, V sink);
-    List<BasicCut<V>>calculateMinSTCuts();
+    List<STCut<V>>calculateMinSTCuts();
 }

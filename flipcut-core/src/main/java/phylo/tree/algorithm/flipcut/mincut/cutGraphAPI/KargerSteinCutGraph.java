@@ -1,15 +1,12 @@
 package phylo.tree.algorithm.flipcut.mincut.cutGraphAPI;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.TIntSet;
-import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.mincut.EdgeColor;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.EdgeWeighter;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.Graph;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.KargerStein;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.Vertex;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.HyperCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.*;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -18,15 +15,17 @@ import java.util.concurrent.ExecutionException;
  * Created by fleisch on 15.04.15.
  */
 public class KargerSteinCutGraph<V> implements MultiCutGraph<V>, EdgeColorableUndirectedGraph<V> {
-    private TIntObjectMap<V> vertexMap = new TIntObjectHashMap<V>();
-    private Map<V, Vertex> vertexMapBack = new HashMap<V, Vertex>();
+    private TIntObjectMap<V> vertexMap = new TIntObjectHashMap<>();
+    private Map<V, Vertex> vertexMapBack = new HashMap<>();
+    private BiMap<V, EdgeColor> charactermap = HashBiMap.create();
+
     private Graph g;
     private int vertexIndex = 0;
     private EdgeWeighter weighter;
 
-    private TreeMap<Double, TIntSet> calculate() {
+    private List<Graph> calculate() {
         KargerStein cutter = new KargerStein();
-        return cutter.getMinCut(g);
+        return cutter.getMinCuts(g);
     }
 
     public KargerSteinCutGraph(EdgeWeighter weighter) {
@@ -35,33 +34,49 @@ public class KargerSteinCutGraph<V> implements MultiCutGraph<V>, EdgeColorableUn
     }
 
     public KargerSteinCutGraph() {
-        this(new EdgeWeighter() {});
+        this(new EdgeWeighter() {
+        });
     }
 
 
     @Override
-    public LinkedList<BasicCut<V>> calculateMinCuts() {
-        TreeMap<Double, TIntSet> cuts = calculate();
-        LinkedList<BasicCut<V>> basicCuts = new LinkedList<>();
+    public LinkedList<HyperCut<V>> calculateMinCuts() {
+        List<Graph> cuts = calculate();
+        LinkedList<HyperCut<V>> basicCuts = new LinkedList<>();
 
-        for (Map.Entry<Double, TIntSet> c : cuts.entrySet()) {
-            LinkedHashSet<V> cutset = new LinkedHashSet<V>(c.getValue().size());
-            c.getValue().forEach(v -> {
+        for (Graph c : cuts) {
+            LinkedHashSet<V> cutset = new LinkedHashSet<>();
+            Vertex source = c.getVertices().valueCollection().iterator().next();
+
+            source.getMergedLbls().forEach(v -> {
                 cutset.add(vertexMap.get(v));
                 return true;
             });
-            basicCuts.add(new BasicCut<V>(cutset, (long) (c.getKey() * CostComputer.ACCURACY)));
+
+            LinkedHashSet<V> cutEdges = new LinkedHashSet<>(source.getEdges().size());
+            for (Edge edge : source.getEdges()) {
+                EdgeColor color = edge.getColor();
+                cutEdges.add(charactermap.inverse().get(color));
+            }
+
+
+            long mincutValue = (long) c.mincutValue();
+            if (!charactermap.isEmpty()) {
+                mincutValue = (long) cutEdges.stream().mapToDouble(cc -> charactermap.get(cc).getWeight()).sum();
+            }
+            basicCuts.add(new HyperCut<V>(cutset, cutEdges, mincutValue));
         }
+        Collections.sort(basicCuts);
         return basicCuts;
     }
 
     @Override
-    public List<BasicCut<V>> calculateMinCuts(int numberOfCuts) {
+    public List<HyperCut<V>> calculateMinCuts(int numberOfCuts) {
         return calculateMinCuts().subList(0, numberOfCuts);
     }
 
     @Override
-    public BasicCut<V> calculateMinCut() throws ExecutionException, InterruptedException {
+    public HyperCut<V> calculateMinCut() throws ExecutionException, InterruptedException {
         return calculateMinCuts(1).get(0);
     }
 
@@ -74,18 +89,25 @@ public class KargerSteinCutGraph<V> implements MultiCutGraph<V>, EdgeColorableUn
         vertexIndex++;
     }
 
+
     @Override
     public void addEdge(V vertex1, V vertex2, long capacity) {
         addEdge(vertex1, vertex2, capacity, null);
     }
 
     @Override
-    public void addEdge(V vertex1, V vertex2, long capacity, EdgeColor color) {
+    public void addEdge(V vertex1, V vertex2, long capacity, V hyperedge) {
         if (!vertexMapBack.containsKey(vertex1))
             addNode(vertex1);
         if (!vertexMapBack.containsKey(vertex2))
             addNode(vertex2);
-        g.addEdge(vertexMapBack.get(vertex1), vertexMapBack.get(vertex2), capacity, color);
+        EdgeColor color = charactermap.get(hyperedge);
+        if (color == null) {
+            color = new EdgeColor(capacity);
+            if (hyperedge != null) //todo proof
+                charactermap.put(hyperedge, color);
+        }
+        g.addEdge(vertexMapBack.get(vertex1), vertexMapBack.get(vertex2), color);
     }
 
     @Override
@@ -93,6 +115,7 @@ public class KargerSteinCutGraph<V> implements MultiCutGraph<V>, EdgeColorableUn
         vertexMap.clear();
         g = new Graph(weighter);
         vertexIndex = 0;
+        charactermap.clear();
     }
 
 

@@ -27,7 +27,7 @@ allprojects {
         compile 'de.unijena.bioinf:core-lib.utils:0.9'
 
 
-        compile 'com.google.guava:guava:18.0'
+        compile 'com.google.guava:guava:18.0' //todo go to 21??
         compile 'net.sf.trove4j:trove4j:3.0.3'
         compile 'net.openhft:affinity:3.0'
 

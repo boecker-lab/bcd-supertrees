@@ -2,8 +2,8 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
-import phylo.tree.algorithm.flipcut.model.Cut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
+import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 import phylo.tree.algorithm.flipcut.model.VaziraniNode;
 
 import java.util.*;
@@ -140,7 +140,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
 
 
                 // compute mincut an put it to results
-                BasicCut<FlipCutNodeSimpleWeight> tmpCut = cutGraph.calculateMinSTCut(randomS, randomT);
+                STCut<FlipCutNodeSimpleWeight> tmpCut = cutGraph.calculateMinSTCut(randomS, randomT);
                 long minCutValue = tmpCut.minCutValue;
                 Set<FlipCutNodeSimpleWeight> setT = new HashSet<FlipCutNodeSimpleWeight>(tmpCut.getCutSet());
                 setT.addAll(tSet);
@@ -170,7 +170,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
 
 
 
-    public Cut getNextCut() {
+    public DefaultMultiCut getNextCut() {
         if (queueAscHEAP != null && queueAscHEAP.isEmpty()) {
             // all mincut calculated
             return null;
@@ -181,7 +181,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
             nextCut();
             mincut = new LinkedHashSet<>(currentNode.cut); //todo not really needed remove later!
             mincutValue = currentNode.cutWeight; //todo not really needed remove later!
-            return new Cut(mincut,mincutValue,source);
+            return new DefaultMultiCut(mincut,mincutValue,source);
         }
     }
 
@@ -209,7 +209,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
         VaziraniNode currentNode;
 
         //ArrayList<FlipCutNodeSimpleWeight> innerNodes;
-        BasicCut minCut;
+        STCut minCut;
 //        long minCutValue;
 
         VaziraniNode lightestCut;

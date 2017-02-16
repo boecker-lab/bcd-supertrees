@@ -9,7 +9,7 @@ package phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP
  */
 public interface EdgeWeighter {
 
-    default double weightEdge(final Graph g, final Edge e){
-        return e.weight;
+    default double weightEdge(final Edge e){
+        return e.color != null ? e.color.getWeight() : 1d;
     };
 }

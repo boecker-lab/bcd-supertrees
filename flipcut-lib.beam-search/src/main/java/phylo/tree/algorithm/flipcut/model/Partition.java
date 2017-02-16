@@ -51,13 +51,13 @@ public class Partition implements Comparable<Partition> {
     */
     //todo parallelize this step
     public List<Partition> getKBestNew(int k, long upperBound) {
-        PriorityQueue<Cut> cutsDesc = new PriorityQueue<Cut>(k,new Comparator<Cut>() {
-            public int compare(Cut o1, Cut o2) {
+        PriorityQueue<MultiCut> cutsDesc = new PriorityQueue<>(k,new Comparator<MultiCut>() {
+            public int compare(MultiCut o1, MultiCut o2) {
                 return - o1.compareTo(o2);
             }
         });
 
-        List<Iterator<Cut>> graphIterList = new LinkedList<Iterator<Cut>>();
+        List<Iterator<MultiCut>> graphIterList = new LinkedList<>();
         List<FlipCutGraphMultiSimpleWeight> toRemove = new LinkedList<FlipCutGraphMultiSimpleWeight>();
         for (FlipCutGraphMultiSimpleWeight graph : graphs) {
             //only 1 taxon left --> labeling node corresponding to the graph with the label of the last taxon
@@ -72,13 +72,13 @@ public class Partition implements Comparable<Partition> {
                 if (!graph.containsCuts())
                     graph.deleteSemiUniversals();
                 //get first partition of every graph to preselect and save time and memory
-                Iterator<Cut> iter = graph.getCutIterator();
-                Cut c = iter.next();
+                Iterator<MultiCut> iter = graph.getCutIterator();
+                MultiCut c = iter.next();
                 //check if this partition can be better than one outside
-                if ((c.minCutValue + currentscore) < upperBound) {
+                if ((c.minCutValue() + currentscore) < upperBound) {
                     //add the graphs that have a chance
                     if (cutsDesc.size() >= k) {
-                        if (c.minCutValue < cutsDesc.peek().minCutValue){
+                        if (c.minCutValue() < cutsDesc.peek().minCutValue()){
                             cutsDesc.add(c);
                             graphIterList.add(iter);
                             //remove last cut
@@ -95,16 +95,16 @@ public class Partition implements Comparable<Partition> {
 
         //find the k-best mincut of all k^2
         while (!graphIterList.isEmpty()) {
-            Iterator<Iterator<Cut>> graphIter = graphIterList.iterator();
+            Iterator<Iterator<MultiCut>> graphIter = graphIterList.iterator();
             while (graphIter.hasNext()) {
-                Iterator<Cut> cutIterator = graphIter.next();
+                Iterator<MultiCut> cutIterator = graphIter.next();
                 while (cutIterator.hasNext()) {
-                    Cut cut = cutIterator.next();
+                    MultiCut cut = cutIterator.next();
                     //check upper bound
-                    if ((cut.minCutValue + currentscore) < upperBound) {
+                    if ((cut.minCutValue() + currentscore) < upperBound) {
                             //check if better than the k we have
                         if (cutsDesc.size() >= k) {
-                            if (cut.minCutValue < cutsDesc.peek().minCutValue) {
+                            if (cut.minCutValue() < cutsDesc.peek().minCutValue()) {
                                 cutsDesc.add(cut);
                                 //remove last cut
                                 cutsDesc.poll();
@@ -120,12 +120,12 @@ public class Partition implements Comparable<Partition> {
             }
         }
         //convert to ascending list
-        List<Cut> cuts = new LinkedList<Cut>(cutsDesc);
+        List<MultiCut> cuts = new LinkedList<>(cutsDesc);
         Collections.sort(cuts);
 
         // build the k best partitions
         List<Partition> partitions = new LinkedList<>();
-        for (Cut cut : cuts) {
+        for (MultiCut cut : cuts) {
             //add new edge for cutted graph to supertree edgeset
             List<FlipCutGraphMultiSimpleWeight> splittedGraphs = cut.getSplittedGraphs();
 
@@ -154,7 +154,7 @@ public class Partition implements Comparable<Partition> {
                 }
             }
 
-            Partition p = new Partition(currentscore + cut.minCutValue, newPartitionGraphs, root, edges, newFinished);
+            Partition p = new Partition(currentscore + cut.minCutValue(), newPartitionGraphs, root, edges, newFinished);
             partitions.add(p);
         }
         return partitions;

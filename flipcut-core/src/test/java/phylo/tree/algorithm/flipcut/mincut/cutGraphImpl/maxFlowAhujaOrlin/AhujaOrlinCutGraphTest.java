@@ -2,7 +2,7 @@ package phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.maxFlowAhujaOrlin;
 
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.AhujaOrlinCutGraph;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.MaxFlowCutGraph;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -122,7 +122,7 @@ public class AhujaOrlinCutGraphTest {
         hp.addEdge(7, 5, 5);
         hp.addEdge(7, 8, 1);
 
-        BasicCut cut = hp.calculateMinSTCut(1, 8);
+        STCut cut = hp.calculateMinSTCut(1, 8);
         System.out.println(cut.minCutValue);
         System.out.println(cut.getCutSet());
 

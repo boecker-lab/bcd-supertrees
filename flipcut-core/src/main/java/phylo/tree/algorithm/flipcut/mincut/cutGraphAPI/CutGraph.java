@@ -1,6 +1,6 @@
 package phylo.tree.algorithm.flipcut.mincut.cutGraphAPI;
 
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.Cut;
 
 import java.util.concurrent.ExecutionException;
 
@@ -15,7 +15,7 @@ public interface CutGraph<V> {
      *
      * @return mincut all connected components of the input graph
      */
-    BasicCut<V> calculateMinCut() throws ExecutionException, InterruptedException;
+    Cut<V> calculateMinCut() throws ExecutionException, InterruptedException;
 
     /**
      * Adds the given node to the graph. Does nothing if the graph already contains the node.

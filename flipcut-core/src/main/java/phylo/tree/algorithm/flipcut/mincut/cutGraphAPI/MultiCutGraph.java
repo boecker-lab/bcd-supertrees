@@ -1,6 +1,6 @@
 package phylo.tree.algorithm.flipcut.mincut.cutGraphAPI;
 
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.Cut;
 
 import java.util.List;
 
@@ -13,6 +13,6 @@ public interface MultiCutGraph<V> extends CutGraph<V>{
      *
      * @return mincuts: all cut calculate by this algorithm
      */
-    List<BasicCut<V>> calculateMinCuts();
-    List<BasicCut<V>> calculateMinCuts(int numberOfCuts);
+    List<? extends Cut<V>> calculateMinCuts();
+    List<? extends Cut<V>> calculateMinCuts(int numberOfCuts);
 }

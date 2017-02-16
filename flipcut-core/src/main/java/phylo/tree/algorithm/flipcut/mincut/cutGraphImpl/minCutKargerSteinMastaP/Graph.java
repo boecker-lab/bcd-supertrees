@@ -9,6 +9,7 @@ import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import phylo.tree.algorithm.flipcut.mincut.Colorable;
 import phylo.tree.algorithm.flipcut.mincut.EdgeColor;
 
 import java.util.ArrayList;
@@ -19,9 +20,9 @@ import java.util.List;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public class Graph implements Cloneable{
+public class Graph implements Comparable<Graph>, Cloneable{
 
-    final EdgeWeighter weigter;
+    final EdgeWeighter weighter;
     final TIntObjectMap<Vertex> vertices = new TIntObjectHashMap<>();
 
     final List<Edge> edges = new ArrayList<Edge>();
@@ -32,10 +33,10 @@ public class Graph implements Cloneable{
 
 
     public Graph() {
-        weigter = new EdgeWeighter() {};
+        weighter = new EdgeWeighter() {};
     }
-    public Graph(EdgeWeighter weigter) {
-        this.weigter = weigter;
+    public Graph(EdgeWeighter weighter) {
+        this.weighter = weighter;
     }
 
     public double getSumOfWeights() {
@@ -61,19 +62,16 @@ public class Graph implements Cloneable{
     }
 
     public boolean addEdge(Vertex v1, Vertex v2, double weight) {
-        return addEdge(v1, v2, weight, null);
+        return addEdge(v1, v2, new EdgeColor(weight));
+    }
+
+
+    public boolean addEdge(Vertex v1, Vertex v2) {
+        return addEdge(v1, v2, new EdgeColor(1d));
     }
 
     public boolean addEdge(Vertex v1, Vertex v2, EdgeColor c) {
-        return addEdge(v1, v2, 1d, c);
-    }
-
-    public boolean addEdge(Vertex v1, Vertex v2) {
-        return addEdge(v1, v2, 1d, null);
-    }
-
-    public boolean addEdge(Vertex v1, Vertex v2, double weight, EdgeColor c) {
-        Edge e = new Edge(v1, v2, weight, c);
+        Edge e = new Edge(v1, v2, c);
 
         if (!vertices.containsKey(v1.lbl))
             addVertex(v1);
@@ -91,16 +89,25 @@ public class Graph implements Cloneable{
 
     @Override
     protected Graph clone() {
-        Graph g = new Graph();
+        Graph g = new Graph(weighter);
         vertices.forEachEntry((k, v) -> {
             g.vertices.put(k, new Vertex(v.lbl));
             return true;
         });
-        edges.stream().forEach(e -> {
-            Iterator<Vertex> it = e.iterator();
-            g.addEdge(g.vertices.get(it.next().lbl), g.vertices.get(it.next().lbl), e.weight);
-        });
-        g.edgeColors.addAll(edgeColors);
+
+        for (EdgeColor sourceColor : edgeColors) {
+            EdgeColor target = sourceColor.clone();
+            for (Colorable c : sourceColor.getEdges()) {
+                Edge e = ((Edge) c);
+
+                Iterator<Vertex> it = e.iterator();
+                Vertex v1 = g.vertices.get(it.next().lbl);
+                Vertex v2 = g.vertices.get(it.next().lbl);
+
+                g.addEdge(v1,v2, target);
+            }
+        }
+
         g.weights.addAll(weights);
         g.sumOfWeights = sumOfWeights;
 
@@ -111,8 +118,31 @@ public class Graph implements Cloneable{
         weights.clear();
         sumOfWeights = 0;
         for (Edge edge : edges) {
-            weigter.weightEdge(this,edge);
-            weights.add((sumOfWeights += edge.weight));
+            weights.add((sumOfWeights += edge.getWeight(weighter)));
         }
+    }
+
+    public TIntObjectMap<Vertex> getVertices() {
+        return vertices;
+    }
+
+    private boolean cutted = false;
+    public boolean isCutted() {
+        return cutted;
+    }
+
+    public void setCutted(boolean cuted) {
+        this.cutted = cuted;
+    }
+
+    public double mincutValue(){
+        if (!cutted)
+            return  Double.NaN;
+        return sumOfWeights;
+    }
+
+    @Override
+    public int compareTo(Graph o) {
+        return Double.compare(mincutValue(),o.mincutValue());
     }
 }

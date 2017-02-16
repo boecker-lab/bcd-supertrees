@@ -62,12 +62,8 @@ public class GraphUtils {
                     v2 = new Vertex(edgeTo);
                     gr.addVertex(v2);
                 }
-                Edge e;
                 if ((v2.getEdgeTo(v)) == null) {
-                    e = new Edge(v, v2);
-                    gr.edges.add(e);
-                    v.addEdge(e);
-                    v2.addEdge(e);
+                    gr.addEdge(v,v2);
                 }
             }
         }

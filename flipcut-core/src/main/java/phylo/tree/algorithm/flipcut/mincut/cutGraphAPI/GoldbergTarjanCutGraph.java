@@ -21,7 +21,7 @@
 package phylo.tree.algorithm.flipcut.mincut.cutGraphAPI;
 
 import core.utils.parallel.IterationCallableFactory;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan.CutGraphImpl;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.maxFlowGoldbergTarjan.Node;
 
@@ -162,7 +162,7 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
      * @param sink   the sink
      */
     @Override
-    public BasicCut<V> calculateMinSTCut(V source, V sink) {
+    public STCut<V> calculateMinSTCut(V source, V sink) {
         if (hipri == null) {
             algoNodes = new HashMap<>(nodes.size());
             hipri = createHipri(algoNodes);
@@ -170,12 +170,12 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
         return calculateMinSTCut(source, sink, hipri, algoNodes);
     }
 
-    BasicCut<V> calculateMinSTCut(final V source, final V sink, final CutGraphImpl hipri, Map<N, Node> algoNodeMap) {
+    STCut<V> calculateMinSTCut(final V source, final V sink, final CutGraphImpl hipri, Map<N, Node> algoNodeMap) {
         hipri.setSource(algoNodeMap.get(nodes.get(source)));
         hipri.setSink(algoNodeMap.get(nodes.get(sink)));
 
         LinkedHashSet<V> sinkList = (LinkedHashSet<V>) hipri.calculateMaxSTFlow(false);
-        return new BasicCut(sinkList, source, sink, hipri.getValue());
+        return new STCut(sinkList, source, sink, hipri.getValue());
     }
 
     private class HipriCallable extends MaxFlowCallable {
@@ -195,7 +195,7 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
         }
 
         @Override
-        public BasicCut<V> doJob(SS ss) {
+        public STCut<V> doJob(SS ss) {
             return calculateMinSTCut(ss.source, ss.sink, hipri, algoNodeMap);
         }
     }

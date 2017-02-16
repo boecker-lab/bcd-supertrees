@@ -16,8 +16,9 @@ public interface EdgeColorableUndirectedGraph<V> extends CutGraph<V> {
      *
      * @param vertex1  the source
      * @param vertex2  the sink
-     * @param capacity the capacity
-     * @param color color of the edge
+     * @param weight  weight of the hyperedge
+     * @param character  the hyper edge where source an sink are part of
+     *
      */
-    void addEdge(V vertex1, V vertex2, long capacity, EdgeColor color);
+    void addEdge(V vertex1, V vertex2, long weight, V character);
 }

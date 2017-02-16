@@ -2,7 +2,8 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
-import phylo.tree.algorithm.flipcut.model.Cut;
+import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
+import phylo.tree.algorithm.flipcut.model.MultiCut;
 import phylo.tree.model.TreeNode;
 
 import java.util.*;
@@ -14,61 +15,92 @@ import java.util.*;
  */
 
 public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
-    public static final boolean VAZIRANI = false;
+    public enum  MultiCutterType {VAZIRANI, GREEDY, MC};
+    private MultiCutterType multiCutterType = MultiCutterType.MC;
 
     private int maxCutNumber;
     private int nextCutIndexToCalculate;
-    private final Cut[] cuts;
+    private final MultiCut[] cuts;
     private final MultiCutter cutter;
 
     //todo k needed?
     public FlipCutGraphMultiSimpleWeight(CostComputer costs, int k, CutGraphCutter.CutGraphTypes cutterType) {
         super(costs,0); //todo dummy bootstrapthreshold --> implement it
-        if (VAZIRANI) {
-            this.cutter = new MultiCutGraphCutter(cutterType,this);
-        } else {
-            //System.out.println("NO_Vazi");
-            this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
+
+        //todo factory for this stuff
+        switch (multiCutterType) {
+            case VAZIRANI:
+                this.cutter = new MultiCutGraphCutter(cutterType,this);
+                break;
+            case GREEDY:
+                this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
+                break;
+            case MC:
+                this.cutter = new MultiCutGraphCutterUndirectedTranfomation(cutterType,this);
+                break;
+            default:
+                this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
+                break;
         }
+
+
         maxCutNumber = k;
-        cuts = new Cut[maxCutNumber];
+        cuts = new MultiCut[maxCutNumber];
         nextCutIndexToCalculate = 0;
     }
 
     protected FlipCutGraphMultiSimpleWeight(LinkedHashSet<FlipCutNodeSimpleWeight> characters, LinkedHashSet<FlipCutNodeSimpleWeight> taxa, TreeNode parentNode, int k, CutGraphCutter.CutGraphTypes cutterType) {
         super(characters, taxa, parentNode);
-        if (VAZIRANI) {
-            this.cutter = new MultiCutGraphCutter(cutterType,this);
-        } else {
-            //System.out.println("NO_Vazi");
-            this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
+
+        switch (multiCutterType) {
+            case VAZIRANI:
+                this.cutter = new MultiCutGraphCutter(cutterType,this);
+                break;
+            case GREEDY:
+                this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
+                break;
+            case MC:
+                this.cutter = new MultiCutGraphCutterUndirectedTranfomation(cutterType,this);
+                break;
+            default:
+                this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
+                break;
         }
+
         maxCutNumber = k;
-        cuts = new Cut[maxCutNumber];
+        cuts = new MultiCut[maxCutNumber];
         nextCutIndexToCalculate = 0;
     }
 
     public FlipCutGraphMultiSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, int k, CutGraphCutter.CutGraphTypes cutterType) {
         super(nodes, parentNode, (cutterType == CutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG));
-        if (VAZIRANI) {
-            this.cutter = new MultiCutGraphCutter(cutterType,this);
-        } else {
-            //System.out.println("NO_Vazi");
-            this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
+        switch (multiCutterType) {
+            case VAZIRANI:
+                this.cutter = new MultiCutGraphCutter(cutterType,this);
+                break;
+            case GREEDY:
+                this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
+                break;
+            case MC:
+                this.cutter = new MultiCutGraphCutterUndirectedTranfomation(cutterType,this);
+                break;
+            default:
+                this.cutter = new MultiCutGraphCutterGreedy(cutterType,this);
+                break;
         }
         maxCutNumber = k;
-        cuts = new Cut[maxCutNumber];
+        cuts = new MultiCut[maxCutNumber];
         nextCutIndexToCalculate = 0;
     }
 
 
-    public Iterator<Cut> getCutIterator(){
+    public Iterator<MultiCut> getCutIterator(){
         return new CutIterator();
     }
 
 
     private boolean calculateNextCut() {
-        Cut c = cutter.getNextCut();
+        MultiCut c = cutter.getNextCut();
         if (c != null) {
             cuts[nextCutIndexToCalculate] = c;
             nextCutIndexToCalculate++;
@@ -223,11 +255,11 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         return nextCutIndexToCalculate > 0;
     }
 
-    private Cut getCompCut(List<List<FlipCutNodeSimpleWeight>> comp){
-        return new Cut(comp,this);
+    private DefaultMultiCut getCompCut(List<List<FlipCutNodeSimpleWeight>> comp){
+        return new DefaultMultiCut(comp,this);
     }
 
-    class CutIterator implements Iterator<Cut>{
+    class CutIterator implements Iterator<MultiCut>{
         CutIterator() {
             //check if graph is already disconnected
             if (nextCutIndexToCalculate == 0 && maxCutNumber == cuts.length){
@@ -252,7 +284,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
             return true;
         }
 
-        public Cut next() {
+        public MultiCut next() {
             if (cuts[index] == null)
                 calculateNextCut();
             return cuts[index++];

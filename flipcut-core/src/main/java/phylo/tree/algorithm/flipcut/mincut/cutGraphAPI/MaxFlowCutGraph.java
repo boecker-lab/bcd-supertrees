@@ -3,7 +3,7 @@ package phylo.tree.algorithm.flipcut.mincut.cutGraphAPI;
 import core.utils.parallel.DefaultIterationCallable;
 import core.utils.parallel.IterationCallableFactory;
 import core.utils.parallel.ParallelUtils;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,8 +36,8 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
     }
 
     @Override
-    public List<BasicCut<V>> calculateMinSTCuts() {//todo palatalize if really used
-        List<BasicCut<V>> stCuts = new LinkedList<>();
+    public List<STCut<V>> calculateMinSTCuts() {//todo palatalize if really used
+        List<STCut<V>> stCuts = new LinkedList<>();
         final int max = stToCalculate.size();
         for (int i = 0; i < max; i++) {
             SS st = stToCalculate.get(i);
@@ -48,7 +48,7 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
     }
 
     @Override
-    public BasicCut<V> calculateMinCut() throws ExecutionException, InterruptedException {
+    public STCut<V> calculateMinCut() throws ExecutionException, InterruptedException {
         if (threads == 1 || executorService == null) {
             return calculatMinCutSingle();
         } else {
@@ -56,27 +56,27 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
         }
     }
 
-    private BasicCut<V> calculatMinCutSingle() {
-        BasicCut<V> cut = BasicCut.MAX_CUT_DUMMY;
+    private STCut<V> calculatMinCutSingle() {
+        STCut<V> cut = STCut.MAX_CUT_DUMMY;
         final int max = stToCalculate.size();
         for (int i = 0; i < max; i++) {
             SS st = stToCalculate.get(i);
-            BasicCut<V> next = calculateMinSTCut(
+            STCut<V> next = calculateMinSTCut(
                     st.source,
                     st.sink);
-            if (next.minCutValue < cut.minCutValue)
+            if (next.minCutValue < cut.minCutValue())
                 cut = next;
         }
         return cut;
     }
 
-    private BasicCut<V> calculatMinCutParallel() throws ExecutionException, InterruptedException {
+    private STCut<V> calculatMinCutParallel() throws ExecutionException, InterruptedException {
 
-        final List<Future<List<BasicCut<V>>>> busyMaxFlow = ParallelUtils.parallelBucketForEach(executorService, getMaxFlowCallableFactory(), stToCalculate, threads);
+        final List<Future<List<STCut<V>>>> busyMaxFlow = ParallelUtils.parallelBucketForEach(executorService, getMaxFlowCallableFactory(), stToCalculate, threads);
 
-        BasicCut<V> cut = BasicCut.MAX_CUT_DUMMY;
-        for (Future<List<BasicCut<V>>> future : busyMaxFlow) {
-            BasicCut<V> next = future.get().get(0);
+        STCut<V> cut = STCut.MAX_CUT_DUMMY;
+        for (Future<List<STCut<V>>> future : busyMaxFlow) {
+            STCut<V> next = future.get().get(0);
             if (next.minCutValue < cut.minCutValue)
                 cut = next;
         }
@@ -91,7 +91,7 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
 
     abstract <T extends MaxFlowCallable> IterationCallableFactory<T, SS> getMaxFlowCallableFactory();
 
-    abstract class MaxFlowCallable extends DefaultIterationCallable<SS, BasicCut<V>> {
+    abstract class MaxFlowCallable extends DefaultIterationCallable<SS, STCut<V>> {
         MaxFlowCallable(List<SS> jobs) {
             super(jobs);
         }
@@ -100,12 +100,12 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
 
 
         @Override
-        public List<BasicCut<V>> call() throws Exception {
+        public List<STCut<V>> call() throws Exception {
             initGraph();
-            BasicCut<V> best = BasicCut.MAX_CUT_DUMMY;
+            STCut<V> best = STCut.MAX_CUT_DUMMY;
 
             for (SS job : jobs) {
-                BasicCut<V> next = doJob(job);
+                STCut<V> next = doJob(job);
                 if (next.minCutValue < best.minCutValue)
                     best = next;
             }

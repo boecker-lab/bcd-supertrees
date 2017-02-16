@@ -5,11 +5,12 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
  * 14.02.17.
  */
 
-import phylo.tree.algorithm.flipcut.mincut.EdgeColor;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.KargerSteinCutGraph;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.BasicCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.HyperCut;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.NormalizePerColorWeighter;
-import phylo.tree.algorithm.flipcut.model.Cut;
+import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
+import phylo.tree.algorithm.flipcut.model.HyperMultiCut;
 
 import java.util.List;
 import java.util.Queue;
@@ -19,14 +20,17 @@ import java.util.concurrent.ExecutorService;
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
 public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> implements MultiCutter {
-    Queue<BasicCut<FlipCutNodeSimpleWeight>> mincuts = null;
+    Queue<HyperCut<FlipCutNodeSimpleWeight>> mincuts = null;
 
-    public MultiCutGraphCutterUndirectedTranfomation(CutGraphTypes type) {
+
+    public MultiCutGraphCutterUndirectedTranfomation(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut) {
         super(type);
+        source = graphToCut;
     }
 
-    public MultiCutGraphCutterUndirectedTranfomation(CutGraphTypes type, ExecutorService executorService, int threads) {
+    public MultiCutGraphCutterUndirectedTranfomation(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut, ExecutorService executorService, int threads) {
         super(type, executorService, threads);
+        source = graphToCut;
     }
 
     @Override
@@ -38,12 +42,10 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
     protected void calculateMinCut() {
         KargerSteinCutGraph<FlipCutNodeSimpleWeight> cutGraph = new KargerSteinCutGraph<>(new NormalizePerColorWeighter());
         for (FlipCutNodeSimpleWeight character : source.characters) {
-            EdgeColor color = new EdgeColor();
-            color.setWeight(character.edgeWeight);
             for (FlipCutNodeSimpleWeight e1 : character.edges) {
                 for (FlipCutNodeSimpleWeight e2 : character.edges) {
                     if (e1 != e2) {
-                        cutGraph.addEdge(e1, e2, 1, color);
+                        cutGraph.addEdge(e1, e2, character.edgeWeight, character);
                     }
                 }
             }
@@ -53,15 +55,13 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
 
 
     @Override
-    public Cut getNextCut() {
+    public HyperMultiCut getNextCut() {
         if (mincuts == null)
             calculateMinCut();
         if (mincuts.isEmpty()) {
             return null;
         }
-        BasicCut<FlipCutNodeSimpleWeight> c = mincuts.poll();
-        mincut = c.getCutSet();
-        mincutValue = c.minCutValue; //todo map cut score back, just if we have a weighting that does not mactch with the original one
-        return new Cut(mincut, mincutValue, source);
+        HyperCut<FlipCutNodeSimpleWeight> c = mincuts.poll();
+        return new HyperMultiCut(source,c);
     }
 }

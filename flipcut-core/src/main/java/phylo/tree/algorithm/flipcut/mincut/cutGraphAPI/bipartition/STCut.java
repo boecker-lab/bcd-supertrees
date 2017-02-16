@@ -5,8 +5,8 @@ import java.util.LinkedHashSet;
 /**
  * Created by fleisch on 15.04.15.
  */
-public class BasicCut<V> implements Comparable<BasicCut<V>> {
-    public final static BasicCut MAX_CUT_DUMMY = new BasicCut(null, Long.MAX_VALUE);
+public class STCut<V> implements Cut<V> {
+    public final static STCut MAX_CUT_DUMMY = new STCut(null, Long.MAX_VALUE);
 
     public final V source;
     public final V sink;
@@ -15,14 +15,14 @@ public class BasicCut<V> implements Comparable<BasicCut<V>> {
     final LinkedHashSet<V> cutSet;
 
 
-    public BasicCut(LinkedHashSet<V> cutSet, V source, V sink, long minCutValue) {
+    public STCut(LinkedHashSet<V> cutSet, V source, V sink, long minCutValue) {
         this.cutSet = cutSet;
         this.source = source;
         this.sink = sink;
         this.minCutValue = minCutValue;
     }
 
-    public BasicCut(LinkedHashSet<V> part, long minCutValue) {
+    public STCut(LinkedHashSet<V> part, long minCutValue) {
         this(part, null, null, minCutValue);
     }
 
@@ -31,7 +31,7 @@ public class BasicCut<V> implements Comparable<BasicCut<V>> {
     }
 
     @Override
-    public int compareTo(BasicCut<V> o) {
-        return Long.compare(minCutValue, o.minCutValue);
+    public long minCutValue() {
+        return minCutValue;
     }
 }

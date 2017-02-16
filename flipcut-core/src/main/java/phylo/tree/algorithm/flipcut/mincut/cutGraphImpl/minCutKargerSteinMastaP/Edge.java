@@ -18,26 +18,25 @@ import java.util.Set;
 public class Edge implements Colorable {
 
     private final Set<Vertex> ends = new HashSet<>(2);
-    double weight;
     EdgeColor color;
 
     public Edge(Vertex fst, Vertex snd) {
-        this(fst, snd, 1d, null);
+        this(fst, snd, 1d);
     }
 
     public Edge(Vertex fst, Vertex snd, double weight) {
-        this(fst, snd, weight, null);
+        this(fst, snd, new EdgeColor(weight));
     }
 
-    public Edge(Vertex fst, Vertex snd, double weight, EdgeColor color) {
+    public Edge(Vertex fst, Vertex snd, EdgeColor color) {
         if (fst == null || snd == null) {
             throw new IllegalArgumentException("Both vertices are required");
         }
         ends.add(fst);
         ends.add(snd);
-        this.weight = weight;
-        if (color != null)
+        if (color != null) {
             color.add(this);
+        }
     }
 
     public boolean contains(Vertex v1, Vertex v2) {
@@ -70,6 +69,10 @@ public class Edge implements Colorable {
         }
         ends.remove(oldV);
         ends.add(newV);
+    }
+
+    public double getWeight(EdgeWeighter weighter){
+        return weighter.weightEdge(this);
     }
 
     @Override
