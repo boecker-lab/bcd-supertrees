@@ -173,7 +173,9 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, Fl
             for (Partition partition : partitions) {
                 //build the supertree from this partition..
                 partition.getKBestNew(numberOfCuts, -1l); //needed to remove the single graphs
-                supertrees.add(partition.createSupertree(treeNumber));
+                final Tree s = partition.createSupertree(treeNumber);
+                System.out.println("SupertreeScore = " + s.getName());
+                supertrees.add(s);
                 treeNumber++;
             }
             System.out.println("...DONE in " + ((double) (System.currentTimeMillis() - supertreetime) / 1000d) + "s");

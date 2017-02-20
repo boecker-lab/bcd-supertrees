@@ -222,26 +222,34 @@ public class BeamSearchTest {
         fs.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
         Tree exp = calculateSupertrees(fs, null).get(0);
 
-        System.out.println("Vazi");
+
+        System.out.println("MultiSingle");
         FlipCutMultiCut fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.VAZIRANI,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
-        fcm.setNumberOfCuts(1000);
+        fcm.setNumberOfCuts(1);
         fcm.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
         calculateSupertrees(fcm, null);
 
+        System.out.println("Vazi");
+        FlipCutMultiCut fcmVaz = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.VAZIRANI,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
+        fcmVaz.setNumberOfCuts(100);
+        fcmVaz.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
+        fcmVaz.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
+        calculateSupertrees(fcmVaz, null);
+
         System.out.println("Greedy");
         FlipCutMultiCut fcmG = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.GREEDY,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
-        fcmG.setNumberOfCuts(1000);
+        fcmG.setNumberOfCuts(100);
         fcmG.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fcmG.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
         calculateSupertrees(fcmG, null);
 
-        /*System.out.println("MC");
+        System.out.println("MC");
         fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.MC));
-        fcm.setNumberOfCuts(1);
+        fcm.setNumberOfCuts(100);
         fcm.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
-        calculateSupertrees(fcm, exp);*/
+        calculateSupertrees(fcm, exp);
 
 
     }

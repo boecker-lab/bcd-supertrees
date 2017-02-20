@@ -150,20 +150,24 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
             return null;
         }
 
-        if (DEBUG) {
-            List<FlipCutNodeSimpleWeight> toBlacklist = source.checkRemoveCharacter(mincut);
-            for (FlipCutNodeSimpleWeight flipCutNodeSimpleWeight : toBlacklist) {
-                if (flipCutNodeSimpleWeight.isCharacter() && blacklist.contains(flipCutNodeSimpleWeight)) {
-                    System.out.println("BLACKLIST cut!!!!!!!!!!");
-                    stopCutting = true;
-                    return null;
+        //todo optimize
+        mincutValue = 0;
+        for (FlipCutNodeSimpleWeight node : mincut) {
+            if (!node.isTaxon()) {
+                // it is character or a character clone
+                // check if the other one is also in the set
+                if (!mincut.contains(node.clone)) {
+                    FlipCutNodeSimpleWeight c = node.isClone() ? node.clone : node;
+                    if (DEBUG) {
+                        if (blacklist.contains(c)) {
+                            System.out.println("BLACKLIST cut!!!!!!!!!!");
+                        }
+                    }
+                    blacklist.add(c);
+                    mincutValue += c.edgeWeight;
                 }
             }
-            blacklist.addAll(toBlacklist);
-        } else {
-            blacklist.addAll(source.checkRemoveCharacter(mincut));
         }
-
 
         return new DefaultMultiCut(mincut, mincutValue, source);
     }
