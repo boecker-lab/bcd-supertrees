@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutionException;
  * Created by fleisch on 15.04.15.
  */
 public class KargerSteinCutGraph<V> implements MultiCutGraph<V>, EdgeColorableUndirectedGraph<V> {
+    private static final boolean RESCURSIVE_KARGER = true;
     private TIntObjectMap<V> vertexMap = new TIntObjectHashMap<>();
     private Map<V, Vertex> vertexMapBack = new HashMap<>();
     private BiMap<V, EdgeColor> charactermap = HashBiMap.create();
@@ -23,9 +24,9 @@ public class KargerSteinCutGraph<V> implements MultiCutGraph<V>, EdgeColorableUn
     private int vertexIndex = 0;
     private EdgeWeighter weighter;
 
-    private List<Graph> calculate() {
+    private LinkedHashSet<Graph> calculate() {
         KargerStein cutter = new KargerStein();
-        return cutter.getMinCuts(g);
+        return cutter.getMinCuts(g,RESCURSIVE_KARGER);
     }
 
     public KargerSteinCutGraph(EdgeWeighter weighter) {
@@ -41,7 +42,7 @@ public class KargerSteinCutGraph<V> implements MultiCutGraph<V>, EdgeColorableUn
 
     @Override
     public LinkedList<HyperCut<V>> calculateMinCuts() {
-        List<Graph> cuts = calculate();
+        LinkedHashSet<Graph> cuts = calculate();
         LinkedList<HyperCut<V>> basicCuts = new LinkedList<>();
 
         for (Graph c : cuts) {

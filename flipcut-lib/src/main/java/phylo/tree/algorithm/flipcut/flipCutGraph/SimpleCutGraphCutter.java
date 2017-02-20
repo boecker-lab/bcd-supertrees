@@ -33,11 +33,6 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
     protected final CutGraphTypes type;
 
-    /*public CutGraphTypes getType() {
-        return type;
-    }*/
-
-
     public SimpleCutGraphCutter(CutGraphTypes type) {
         super();
         this.type = type;
@@ -345,7 +340,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
             else
                 cutGraph = new GoldbergTarjanCutGraph<>();
 
-            if (source.SCAFF_TAXA_MERGE && !source.activePartitions.isEmpty()) {
+            if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE && !source.activePartitions.isEmpty()) {
                 //create mapping
                 //todo optimize all these mapping stuff if it works well
                 Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> taxonToDummy = new HashMap<>();
@@ -365,10 +360,6 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                     if (!taxonToDummy.containsKey(taxon)) {
                         taxonToDummy.put(taxon, taxon);
                     }
-                }
-
-                if (taxonToDummy.containsKey(null) || taxonToDummy.containsValue(null)) {
-                    System.out.println("null already here");
                 }
 
                 //create cutgraph
@@ -405,7 +396,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                         mincut.addAll(realNodes);
                     }
                 }
-            } else if (source.GLOBAL_CHARACTER_MERGE) {
+            } else if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE) {
                 dummyToMerged = source.dummyToCharacters;
                 nodeToDummy = source.characterToDummy;
                 int merged = nodeToDummy.size() - dummyToMerged.size();

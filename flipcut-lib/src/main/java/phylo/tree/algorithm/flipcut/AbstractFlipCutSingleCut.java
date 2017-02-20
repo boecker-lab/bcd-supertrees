@@ -206,10 +206,10 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
 
                     //Cut graph components
                     for (T componentGraph : componentGraphs) {
-                        if (initialGraph.SCAFF_TAXA_MERGE) {
+                        if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
                             componentGraph.insertScaffPartData(initialGraph, null);
                         }
-                        if (initialGraph.GLOBAL_CHARACTER_MERGE)
+                        if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
                             componentGraph.insertCharacterMapping(initialGraph, null);
                         graphs.offer(componentGraph);
                     }
@@ -227,10 +227,10 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                     for (List<N> component : components) {
                         T g = createGraph(component, initialGraph.treeNode);
                         //actualize scaffold partition data
-                        if (initialGraph.SCAFF_TAXA_MERGE) {
+                        if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
                             g.insertScaffPartData(initialGraph, null);
                         }
-                        if (initialGraph.GLOBAL_CHARACTER_MERGE)
+                        if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
                             g.insertCharacterMapping(initialGraph, null);
                         graphs.offer(g);
                     }
@@ -285,10 +285,10 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
 
                     //Cut graph components
                     for (T componentGraph : componentGraphs) {
-                        if (currentGraph.SCAFF_TAXA_MERGE) {
+                        if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
                             componentGraph.insertScaffPartData(currentGraph, null);
                         }
-                        if (currentGraph.GLOBAL_CHARACTER_MERGE)
+                        if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
                             componentGraph.insertCharacterMapping(currentGraph, null);
                         nodes.add(componentGraph.treeNode);
                         results.offer(executorService.submit(new GraphSplitterIterative(componentGraph)));
@@ -300,10 +300,10 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                     for (List<N> component : components) {
                         T g = createGraph(component, currentGraph.treeNode);
                         //actualize scaffold partition data
-                        if (currentGraph.SCAFF_TAXA_MERGE) {
+                        if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
                             g.insertScaffPartData(currentGraph, null);
                         }
-                        if (currentGraph.GLOBAL_CHARACTER_MERGE)
+                        if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
                             g.insertCharacterMapping(currentGraph, null);
                         nodes.add(g.treeNode);
                         results.offer(executorService.submit(new GraphSplitterIterative(g)));

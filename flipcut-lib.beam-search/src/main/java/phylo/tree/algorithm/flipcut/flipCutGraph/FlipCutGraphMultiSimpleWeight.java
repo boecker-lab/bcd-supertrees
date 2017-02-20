@@ -35,7 +35,6 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         super(characters, taxa, parentNode);
         this.cutter = cutterFactory.newInstance(this);
         this.cutterFactory = cutterFactory;
-
         maxCutNumber = k;
         cuts = new MultiCut[maxCutNumber];
         nextCutIndexToCalculate = 0;
@@ -72,22 +71,26 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
     public List<? extends FlipCutGraphMultiSimpleWeight> split(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes) {
         Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew = copyNodes();
         List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> graphData = splitToGraphData(new LinkedHashSet<>(sinkNodes), oldToNew);
-        List<FlipCutGraphMultiSimpleWeight> graphs = new LinkedList<FlipCutGraphMultiSimpleWeight>();
-        graphs.add(new FlipCutGraphMultiSimpleWeight(graphData.get(0).get(0), graphData.get(0).get(1), treeNode, cuts.length, cutterFactory));
-        graphs.add(new FlipCutGraphMultiSimpleWeight(graphData.get(1).get(0), graphData.get(1).get(1), treeNode, cuts.length, cutterFactory));
-        if (SCAFF_TAXA_MERGE) {
-            for (FlipCutGraphMultiSimpleWeight graph : graphs) {
+
+        List<FlipCutGraphMultiSimpleWeight> graphs = new LinkedList<>();
+        for (List<LinkedHashSet<FlipCutNodeSimpleWeight>> data : graphData) {
+            FlipCutGraphMultiSimpleWeight graph = new FlipCutGraphMultiSimpleWeight(data.get(0), data.get(1), treeNode, cuts.length, cutterFactory);
+
+            if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE)
                 graph.insertScaffPartData(this, oldToNew);
-            }
+
+            if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
+                graph.insertCharacterMapping(this, oldToNew);
+
+            graphs.add(graph);
+
         }
+
         return graphs;
     }
 
     //overwritten --> creates cloned nodes for multiple splits
-//    @Override
     protected List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> splitToGraphData(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes, final Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew) {
-
-
         LinkedHashSet<FlipCutNodeSimpleWeight> g1Characters = new LinkedHashSet<>();
         LinkedHashSet<FlipCutNodeSimpleWeight> g1Taxa = new LinkedHashSet<>();
         LinkedHashSet<FlipCutNodeSimpleWeight> g2Characters = new LinkedHashSet<>();
@@ -97,7 +100,8 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         List<FlipCutNodeSimpleWeight> preCharactersToRemove = checkRemoveCharacter(sinkNodes);
         List<FlipCutNodeSimpleWeight> charactersToRemove = new ArrayList<FlipCutNodeSimpleWeight>(preCharactersToRemove.size());
         for (FlipCutNodeSimpleWeight toRemove : preCharactersToRemove) {
-            charactersToRemove.add(oldToNew.get(toRemove));
+            FlipCutNodeSimpleWeight toRemoveNew = oldToNew.get(toRemove);
+            charactersToRemove.add(toRemoveNew);
         }
 
         //remove all clone nodes
@@ -108,6 +112,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
                 iterator.remove();
             }
         }
+
 
         //fill g1 lists
         for (FlipCutNodeSimpleWeight node : sinkNodes) {
@@ -170,14 +175,15 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         List<FlipCutGraphMultiSimpleWeight> splittedGraphs = new ArrayList<FlipCutGraphMultiSimpleWeight>(comp.size());
         for (List<FlipCutNodeSimpleWeight> component : comp) {
             //clone all nodes
-            Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew = new HashMap<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight>(characters.size() + taxa.size());
-
+            Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew = new HashMap<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight>(component.size());
             for (FlipCutNodeSimpleWeight node : component) {
                 oldToNew.put(node, node.copy());
             }
 
+            Set<FlipCutNodeSimpleWeight> characters = new HashSet<>();
             for (FlipCutNodeSimpleWeight node : component) {
                 if (!node.isTaxon()) {
+                    characters.add(node);
                     FlipCutNodeSimpleWeight nClone = oldToNew.get(node);
                     for (FlipCutNodeSimpleWeight taxon : node.edges) {
                         FlipCutNodeSimpleWeight tClone = oldToNew.get(taxon);
@@ -188,25 +194,64 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
                         FlipCutNodeSimpleWeight tClone = oldToNew.get(taxon);
                         if (tClone != null) {
                             nClone.addImaginaryEdgeTo(tClone);
-                        } else {
-                            //todo check!!!
-                            //nClone.characterWeight -= nClone.edgeWeight;
                         }
                     }
                 }
             }
+
+            Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> characterToDummy = new HashMap<>();
+            Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToCharacters = new HashMap<>();
+
             FlipCutGraphMultiSimpleWeight g;
             if (cutterFactory instanceof MaxFlowCutterFactory) {
-                g = new FlipCutGraphMultiSimpleWeight(new ArrayList<>(oldToNew.values()), treeNode, cuts.length, cutterFactory,!((MaxFlowCutterFactory)cutterFactory).isHyperGraphCutter());
-            }else{
-                g = new FlipCutGraphMultiSimpleWeight(new ArrayList<>(oldToNew.values()), treeNode, cuts.length, cutterFactory,false);
+                g = new FlipCutGraphMultiSimpleWeight(new ArrayList<>(oldToNew.values()), treeNode, cuts.length, cutterFactory, !((MaxFlowCutterFactory) cutterFactory).isHyperGraphCutter());
+            } else {
+                g = new FlipCutGraphMultiSimpleWeight(new ArrayList<>(oldToNew.values()), treeNode, cuts.length, cutterFactory, false);
             }
-            if (SCAFF_TAXA_MERGE)
+
+            if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE)
                 g.insertScaffPartData(this, oldToNew);
+
+            if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
+                g.insertCharacterMapping(this, oldToNew);
+
+
             splittedGraphs.add(g);
 
         }
         return splittedGraphs;
+    }
+
+    //gets mapping and characters of the new compount to duplicate merging maps;
+    private void cloneCharacterMaps(final AbstractFlipCutGraph<FlipCutNodeSimpleWeight> sourceGraph, final Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew) {
+        for (FlipCutNodeSimpleWeight sourceChar : sourceGraph.characters) {
+            FlipCutNodeSimpleWeight sourceDummy = sourceGraph.characterToDummy.get(sourceChar);
+            if (sourceDummy != null) {
+                FlipCutNodeSimpleWeight targetChar = oldToNew.get(sourceChar);
+                if (targetChar != null && characters.contains(targetChar) && !characterToDummy.containsKey(targetChar)) {
+                    Set<FlipCutNodeSimpleWeight> sourceSet = sourceGraph.dummyToCharacters.get(sourceDummy);
+                    FlipCutNodeSimpleWeight targetDummy = new FlipCutNodeSimpleWeight(new HashSet<>(oldToNew.get(sourceChar).edges));
+
+                    Set<FlipCutNodeSimpleWeight> targetSet = new HashSet<>();
+                    Set<FlipCutNodeSimpleWeight> targetCloneSet = new HashSet<>();
+
+                    dummyToCharacters.put(targetDummy, targetSet);
+                    dummyToCharacters.put(targetDummy.clone, targetCloneSet);
+                    for (FlipCutNodeSimpleWeight source : sourceSet) {
+                        FlipCutNodeSimpleWeight target = oldToNew.get(source);
+                        if (target != null && characters.contains(target)) {
+                            characterToDummy.put(target, targetDummy);
+                            characterToDummy.put(target.clone, targetDummy.clone);
+
+                            targetDummy.edgeWeight += target.edgeWeight;
+
+                            targetSet.add(target);
+                            targetCloneSet.add(target.clone);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public boolean containsCuts() {
@@ -215,6 +260,13 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
 
     private DefaultMultiCut getCompCut(List<List<FlipCutNodeSimpleWeight>> comp) {
         return new DefaultMultiCut(comp, this);
+    }
+
+    @Override
+    public void insertCharacterMapping(AbstractFlipCutGraph<FlipCutNodeSimpleWeight> source, Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew) {
+        dummyToCharacters = new HashMap<>(characters.size());
+        characterToDummy = new HashMap<>(characters.size());
+        cloneCharacterMaps(source, oldToNew);
     }
 
     class CutIterator implements Iterator<MultiCut> {

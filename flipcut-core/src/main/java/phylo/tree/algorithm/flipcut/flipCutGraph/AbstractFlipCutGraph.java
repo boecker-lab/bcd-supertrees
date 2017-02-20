@@ -22,7 +22,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      * Turn on/off guide tree based taxa merging
      */
     public static final boolean SCAFF_TAXA_MERGE = true;
-    public static final boolean CHECK_EDGES = false;
     /**
      * Mapping for guide tree based taxa merging
      */
@@ -34,7 +33,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     /**
      * Turn on/off global character merging for characters with identical edgeset {@literal ->} works for hypergraph version only
      */
-    public static final boolean GLOBAL_CHARACTER_MERGE = false;
+    public static final boolean GLOBAL_CHARACTER_MERGE = true;
     /**
      * Mapping for edge  based character merging (Global character Map)
      */
@@ -156,6 +155,8 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
 
     protected void removeAdjacentEdges(T characterToRemove) {
         // remove edges to taxa
+        if (characterToRemove == null || characterToRemove.edges == null)
+            System.out.println("fail");
         for (T taxon : characterToRemove.edges) {
             taxon.edges.remove(characterToRemove);
         }
@@ -177,9 +178,9 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         }
     }
 
-    protected void removeCharacters(Collection<T> toRemove) {
+    /*protected void removeCharacters(Collection<T> toRemove) {
         removeCharacters(toRemove, characters);
-    }
+    }*/
 
     /**
      * Remove semi universal characters

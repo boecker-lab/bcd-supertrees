@@ -167,7 +167,7 @@ public class BeamSearchTest {
         //trivial example
 //        params.add(new Object[]{Newick.getTreeFromString("((A,B),C);"), Newick.getTreeFromString("((A,B),C);"), trivialSource});
 //        params.add(new Object[]{Newick.getTreeFromString("(((a,b),c),e),d);"), Newick.getTreeFromString("(((a,b),c),e),d);"), caterpillar});
-        params.add(new Object[]{null,null, cut});
+//        params.add(new Object[]{null,null, cut});
         params.add(new Object[]{null,null,realExample});
 
         //bryant example
@@ -222,26 +222,26 @@ public class BeamSearchTest {
         fs.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
         Tree exp = calculateSupertrees(fs, null).get(0);
 
-        /*System.out.println("Vazi");
+        System.out.println("Vazi");
         FlipCutMultiCut fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.VAZIRANI,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
+        fcm.setNumberOfCuts(1000);
+        fcm.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
+        fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
+        calculateSupertrees(fcm, null);
+
+        System.out.println("Greedy");
+        FlipCutMultiCut fcmG = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.GREEDY,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
+        fcmG.setNumberOfCuts(1000);
+        fcmG.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
+        fcmG.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
+        calculateSupertrees(fcmG, null);
+
+        /*System.out.println("MC");
+        fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.MC));
         fcm.setNumberOfCuts(1);
         fcm.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
         calculateSupertrees(fcm, exp);*/
-
-        /*System.out.println("Greedy");
-        FlipCutMultiCut fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.GREEDY,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
-        fcm.setNumberOfCuts(10);
-        fcm.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
-        fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
-        calculateSupertrees(fcm, exp);*/
-
-        System.out.println("MC");
-        FlipCutMultiCut fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.MC));
-        fcm.setNumberOfCuts(1);
-        fcm.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
-        fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
-        calculateSupertrees(fcm, exp);
 
 
     }

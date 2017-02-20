@@ -9,6 +9,7 @@ import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
 import phylo.tree.algorithm.flipcut.mincut.Colorable;
 import phylo.tree.algorithm.flipcut.mincut.EdgeColor;
 
@@ -20,7 +21,8 @@ import java.util.List;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public class Graph implements Comparable<Graph>, Cloneable{
+public class Graph implements Comparable<Graph>, Cloneable {
+    private int hashCache = 0;
 
     final EdgeWeighter weighter;
     final TIntObjectMap<Vertex> vertices = new TIntObjectHashMap<>();
@@ -31,10 +33,14 @@ public class Graph implements Comparable<Graph>, Cloneable{
     final TDoubleList weights = new TDoubleArrayList();
     private double sumOfWeights = 0;
 
+    public final HashSet<TIntSet> cutSets = new HashSet<>(2);
+
 
     public Graph() {
-        weighter = new EdgeWeighter() {};
+        weighter = new EdgeWeighter() {
+        };
     }
+
     public Graph(EdgeWeighter weighter) {
         this.weighter = weighter;
     }
@@ -91,7 +97,7 @@ public class Graph implements Comparable<Graph>, Cloneable{
     protected Graph clone() {
         Graph g = new Graph(weighter);
         vertices.forEachEntry((k, v) -> {
-            g.vertices.put(k, new Vertex(v.lbl));
+            g.vertices.put(k, new Vertex(v.lbl, v.mergedLbls));
             return true;
         });
 
@@ -104,7 +110,7 @@ public class Graph implements Comparable<Graph>, Cloneable{
                 Vertex v1 = g.vertices.get(it.next().lbl);
                 Vertex v2 = g.vertices.get(it.next().lbl);
 
-                g.addEdge(v1,v2, target);
+                g.addEdge(v1, v2, target);
             }
         }
 
@@ -127,22 +133,61 @@ public class Graph implements Comparable<Graph>, Cloneable{
     }
 
     private boolean cutted = false;
+
     public boolean isCutted() {
         return cutted;
     }
 
     public void setCutted(boolean cuted) {
-        this.cutted = cuted;
+        if (cuted != cutted) {
+            this.cutted = cuted;
+            cutSets.clear();
+            if (this.cutted) {
+                Iterator<Vertex> it = vertices.valueCollection().iterator();
+                cutSets.add(it.next().getMergedLbls());
+                cutSets.add(it.next().getMergedLbls());
+            }
+        }
+
     }
 
-    public double mincutValue(){
+    public double mincutValue() {
         if (!cutted)
-            return  Double.NaN;
+            return Double.NaN;
         return sumOfWeights;
     }
 
     @Override
     public int compareTo(Graph o) {
-        return Double.compare(mincutValue(),o.mincutValue());
+        return Double.compare(mincutValue(), o.mincutValue());
+    }
+//
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Graph)) return false;
+
+        Graph graph = (Graph) o;
+
+        if (Double.compare(graph.sumOfWeights, sumOfWeights) != 0) return false;
+        if (cutted != graph.cutted) return false;
+        return cutSets.equals(graph.cutSets);
+
+    }
+
+    @Override
+    public int hashCode() {
+        if (!cutted || hashCache == 0) {
+            int result;
+            long temp;
+            temp = Double.doubleToLongBits(sumOfWeights);
+            result = (int) (temp ^ (temp >>> 32));
+            result = 31 * result + cutSets.hashCode();
+            result = 31 * result + (cutted ? 1 : 0);
+            hashCache = result;
+        }
+        return hashCache;
     }
 }

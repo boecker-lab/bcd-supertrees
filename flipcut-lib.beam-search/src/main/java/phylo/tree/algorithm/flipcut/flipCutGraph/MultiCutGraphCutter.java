@@ -9,6 +9,8 @@ import phylo.tree.algorithm.flipcut.model.VaziraniNode;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 
+import static org.biojava.bio.program.homologene.Taxon.taxa;
+
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 17.01.13
@@ -20,21 +22,21 @@ import java.util.concurrent.ExecutorService;
  */
 //TODO THE VAZIRANI should be an own Cutgraph not a cut graph cutter --> it should extend directed cut graph an use some max flow implemetation
 
-public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight> {
+public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
 
     private static final boolean PRINT_GRAPHS = false;
     private PriorityQueue<VaziraniNode> queueAscHEAP = null;
     private VaziraniNode<FlipCutNodeSimpleWeight> currentNode = null;
     private VaziraniNode<FlipCutNodeSimpleWeight>[] initCuts;
-    private ArrayList<FlipCutNodeSimpleWeight> taxa;
-    private ArrayList<FlipCutNodeSimpleWeight> characters;
+    private final ArrayList<FlipCutNodeSimpleWeight> taxa;
+    private final LinkedHashSet<FlipCutNodeSimpleWeight> characters;
 
 
     public MultiCutGraphCutter(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut) {
         super(type);
         source = graphToCut;
-        taxa =  new ArrayList<>(source.taxa);
-        characters =  new ArrayList<>(source.characters);
+        taxa = new ArrayList<>(source.taxa);
+        characters = source.characters;
     }
 
     private List<VaziraniNode> findCutsFromPartialCuts(VaziraniNode sourceCut, VaziraniNode[] initCuts) {
@@ -153,7 +155,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                         }
                     }
                     //copy to new object
-                    initCut = new VaziraniNode(initCut.cut, initCut.cutWeight, k+1);
+                    initCut = new VaziraniNode(initCut.cut, initCut.cutWeight, k + 1);
                     cuts.add(initCut);
                 }
             }
@@ -162,26 +164,20 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
     }
 
 
-
     public DefaultMultiCut getNextCut() {
         if (queueAscHEAP != null && queueAscHEAP.isEmpty()) {
             // all mincut calculated
             return null;
-        }else{
-            if (queueAscHEAP == null){
+        } else {
+            if (queueAscHEAP == null) {
                 initialCut();
             }
             nextCut();
             mincut = new LinkedHashSet<>(currentNode.cut); //todo not really needed remove later!
             mincutValue = currentNode.cutWeight; //todo not really needed remove later!
-            return new DefaultMultiCut(mincut,mincutValue,source);
+            return new DefaultMultiCut(mincut, mincutValue, source);
         }
     }
-
-    public CutGraphTypes getType() {
-        return type;
-    }
-
 
     private void nextCut() {
         //Starting find subobtimal mincut mincut with vaziranis algo
@@ -193,7 +189,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
         }
     }
 
-    private void initialCut(){
+    private void initialCut() {
         GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph = null;
 
         // get the mincut, fix s iterate over t
@@ -206,7 +202,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
 //        long minCutValue;
 
         VaziraniNode lightestCut;
-        initCuts = new VaziraniNode[taxa.size()-1];
+        initCuts = new VaziraniNode[taxa.size() - 1];
         queueAscHEAP = new PriorityQueue<VaziraniNode>();
 
         //j=0
@@ -311,17 +307,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
 
     }
 
-    /*@Override
-    public CutterFactory<MultiCutGraphCutter, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> getFactory(CutGraphTypes type) {
-        return new Factory(type);
-    }
-
-    @Override
-    public CutterFactory<MultiCutGraphCutter, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> getFactory() {
-        return new Factory(CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
-    }*/
-
-    static class Factory implements MultiCutterFactory<MultiCutGraphCutter,FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutter,FlipCutNodeSimpleWeight,FlipCutGraphMultiSimpleWeight>{
+    static class Factory implements MultiCutterFactory<MultiCutGraphCutter, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutter, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
         private final CutGraphTypes type;
 
         Factory(CutGraphTypes type) {
@@ -330,7 +316,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
 
         @Override
         public MultiCutGraphCutter newInstance(FlipCutGraphMultiSimpleWeight graph) {
-            return new MultiCutGraphCutter(type,graph);
+            return new MultiCutGraphCutter(type, graph);
         }
 
         @Override

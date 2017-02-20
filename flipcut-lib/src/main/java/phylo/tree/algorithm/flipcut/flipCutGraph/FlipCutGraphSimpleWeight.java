@@ -259,9 +259,10 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                 //update zero edge counter
                 if (aCharacter.imaginaryEdges.remove(bTaxon)) { // < 0
                     //remove edge to other side
+//                    System.out.println("!!!!!!!!!!!!! IMAGINARY-EDGE remove !!!!!!!!!!!!!");
                 } else if (aCharacter.edges.remove(bTaxon)) { // > 0
                     // remove reverse edge
-                    System.out.println("!!!!!!!!!!!!! should not the case for bcd !!!!!!!!!!!!!");
+                    System.out.println("!!!!!!!!!!!!!  EDGE remove -> should not the case for bcd !!!!!!!!!!!!!");
                     bTaxon.edges.remove(aCharacter);
                 }
             }

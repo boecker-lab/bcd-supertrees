@@ -25,6 +25,11 @@ public class Vertex {
         mergedLbls = new TIntHashSet();
         mergedLbls.add(lbl);
     }
+    Vertex(int lbl, TIntSet mergedLbls) {
+        this(lbl);
+        this.mergedLbls.addAll(mergedLbls);
+    }
+
 
     public void addEdge(Edge edge) {
         edges.add(edge);
@@ -45,4 +50,20 @@ public class Vertex {
     public Set<Edge> getEdges() {
         return edges;
     }
+
+   /* @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Vertex)) return false;
+
+        Vertex vertex = (Vertex) o;
+
+        return mergedLbls.equals(vertex.mergedLbls);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return mergedLbls.hashCode();
+    }*/
 }

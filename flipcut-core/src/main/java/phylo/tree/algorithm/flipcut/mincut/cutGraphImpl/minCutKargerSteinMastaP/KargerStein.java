@@ -9,21 +9,39 @@ package phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP
 
 import gnu.trove.list.TDoubleList;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class KargerStein {
+    private Graph best;
+    private LinkedHashSet<Graph> cuts;
 
-    public void contract(Graph gr) {
-        while (gr.vertices.size() > 2) {
+    public Graph contract(Graph gr, int numOfVerticesLeft) {
+        while (gr.vertices.size() > numOfVerticesLeft) {
             Edge edge = drawEdge(gr);
             Iterator<Vertex> it = edge.iterator();
             reorganizeEdges(gr, it.next(), it.next());
         }
-        gr.setCutted(true);
+        return gr;
+    }
+
+    private Graph recursiveContract(Graph gr) {
+        final int n = gr.vertices.size();
+        if (n <= 6) {
+            Graph g1 = contract(gr, 2);
+            g1.setCutted(true);
+            cuts.add(g1);
+            return g1;
+        } else {
+            final int contractTo = (int) Math.ceil((n / Math.sqrt(2d) + 1d));
+            Graph g1 = recursiveContract(contract(gr.clone(), contractTo));
+            Graph g2 = recursiveContract(contract(gr.clone(), contractTo));
+
+            if (g1.getSumOfWeights() <= g2.getSumOfWeights())
+                return g1;
+            else
+                return g2;
+        }
     }
 
     private Edge drawEdge(Graph g) {
@@ -57,34 +75,38 @@ public class KargerStein {
         return g.edges.get(mid);
     }
 
-    public List<Graph> getMinCuts(final Graph gr) {
-        int iter = gr.vertices.size() * gr.vertices.size();
-        List<Graph> cuts = new ArrayList<>(iter);
-
+    public LinkedHashSet<Graph> getMinCuts(final Graph gr, final boolean recursive) {
         gr.refreshWeights();
-        for (int i = 0; i < iter; i++) {
-            Graph grc = gr.clone();
-            contract(grc);
-            cuts.add(grc);
+        if (recursive) {
+            cuts = new LinkedHashSet<>();
+            best = recursiveContract(gr);
+        }else{
+            best = null;
+            int iter = gr.vertices.size() * gr.vertices.size();
+            cuts = new LinkedHashSet<>(iter);
+
+            for (int i = 0; i < iter; i++) {
+                Graph grc = gr.clone();
+                contract(grc, 2);
+                grc.setCutted(true);
+                cuts.add(grc);
+            }
         }
         return cuts;
     }
 
-    public List<Graph> getMinCuts(final int[][] arr) {
+    public LinkedHashSet<Graph> getMinCuts(final int[][] arr, final boolean recursive) {
         Graph gr = GraphUtils.createGraph(arr);
-        return getMinCuts(gr);
+        return getMinCuts(gr,recursive);
     }
 
     public Graph getMinCut(final Graph gr) {
-        List<Graph> cuts = getMinCuts(gr);
-        Collections.sort(cuts);
-        return cuts.get(0);
+        return best;
     }
 
     public Graph getMinCut(final int[][] arr) {
-        List<Graph> cuts = getMinCuts(arr);
-        Collections.sort(cuts);
-        return cuts.get(0);
+        getMinCuts(arr,true);
+        return best;
     }
 
     private void reorganizeEdges(Graph gr, Vertex v1, Vertex v2) {

@@ -50,6 +50,7 @@ public class HyperMultiCut extends MultiCut<FlipCutNodeSimpleWeight, FlipCutGrap
             splittedGraphs = (List<FlipCutGraphMultiSimpleWeight>) sourceGraph.split(sinkNodes);
             sourceCut = null;
         }
+
         return splittedGraphs;
     }
 }

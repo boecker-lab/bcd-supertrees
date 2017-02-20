@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  *         Time: 14:10
  */
 public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends GraphCutter<N, T>, F extends CutterFactory<C, N, T>> extends SupertreeAlgorithm {
-    protected static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     public static final int CORES_AVAILABLE = Runtime.getRuntime().availableProcessors();
     /**
      * number of thread that should be used 0 {@literal ->} automatic {@literal <} 0 massive parralel

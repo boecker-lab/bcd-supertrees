@@ -149,6 +149,8 @@ public class Partition implements Comparable<Partition> {
                 if (splitGraph.taxa.size() == 1) {
                     splitGraph.treeNode.setLabel(splitGraph.taxa.iterator().next().name); //todo if or not
                     newFinished++;
+                }else if(splitGraph.taxa.size()== 0){
+                    System.out.println("WTF?");
                 }else{
                     newPartitionGraphs.add(splitGraph);
                 }
