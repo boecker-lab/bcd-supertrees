@@ -158,7 +158,8 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         if (characterToRemove == null || characterToRemove.edges == null)
             System.out.println("fail");
         for (T taxon : characterToRemove.edges) {
-            taxon.edges.remove(characterToRemove);
+            if(!taxon.edges.remove(characterToRemove))
+                System.out.println("WTF");
         }
         //check that no active scaffold character gets removded
         //JUST for DEBUGGING

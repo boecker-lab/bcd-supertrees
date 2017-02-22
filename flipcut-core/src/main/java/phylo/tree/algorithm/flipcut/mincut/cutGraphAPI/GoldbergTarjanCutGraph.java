@@ -88,7 +88,7 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
     /**
      * The internal nodes to simplify graph construction: not private because of inner class access
      */
-    final Map<V, N> nodes = new HashMap<>();
+    public Map<V, N> nodes = new HashMap<>(); //todo debug --> bck to private check
 
 
     CutGraphImpl createHipri(final Map<N, Node> algoNodeMapToFill) {

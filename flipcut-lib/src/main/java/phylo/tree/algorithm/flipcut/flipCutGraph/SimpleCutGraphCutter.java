@@ -1,6 +1,7 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 
+import com.google.common.collect.Sets;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.AhujaOrlinCutGraph;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.CutGraph;
@@ -93,6 +94,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         int size = source.characters.size();
         dummyToMerged = new HashMap<>(size);
 
+       
         //add taxa
         cutGraphTaxa = new ArrayList<>(taxonToMerged.size());
         for (FlipCutNodeSimpleWeight mergedTaxon : taxonToMerged.values()) {
@@ -101,7 +103,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         }
 
         // add characters, character clones and edges between them
-        long infinity = CostComputer.ACCURACY * INFINITY;
+        final long infinity = CostComputer.ACCURACY * INFINITY;
 
         Set<FlipCutNodeSimpleWeight> alreadyIn = new HashSet<>(size);
         Map<Set<FlipCutNodeSimpleWeight>, FlipCutNodeSimpleWeight> charsToAdd = new HashMap<>(size);
@@ -143,10 +145,22 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
                     set.add(characterDummy);
                     cloneSet.add(characterDummy.clone);
+
+
+                    //todo debug
+                    long old = n.edgeWeight;
                     n.edgeWeight += calculateCharacterCap(characterDummy);
+                    boolean overflow =  n.edgeWeight < old;
+                    if(overflow)
+                        System.out.println("### CHARACTER OVERFLOW W####");
 
                 } else {
                     FlipCutNodeSimpleWeight tax = edgesTo.iterator().next();
+                    //todo debug
+                    if (tax ==null){
+                        System.out.println("wtf");
+                    }
+
                     if (!taxonGroupTotrivialcharacters.containsKey(tax)) {
                         taxonGroupTotrivialcharacters.put(tax, new HashSet<FlipCutNodeSimpleWeight>());
                     }
@@ -172,6 +186,40 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                 cutGraph.addEdge(taxon, dummyNode.clone, infinity);
             }
         }
+        
+        //#########################################################33DEBUG
+        Set<Set<FlipCutNodeSimpleWeight>> charset = new HashSet<>(); //todo remove, debug
+        for (FlipCutNodeSimpleWeight dumm : dummyToMerged.keySet()) {
+            if (!dumm.isClone()) charset.add(new HashSet<>(dumm.edges));
+        }
+
+        boolean changes = true;
+        while (changes) {
+            changes = false;
+            Iterator<Set<FlipCutNodeSimpleWeight>> it = charset.iterator();
+            Set<FlipCutNodeSimpleWeight> merged = it.next();
+
+            while (it.hasNext()) {
+                Set<FlipCutNodeSimpleWeight> next = it.next();
+                if (Sets.intersection(next, merged).size() > 0) {
+                    merged.addAll(next);
+                    it.remove();
+                    changes = true;
+                }
+            }
+        }
+
+        /*System.out.println();
+        if (charset.size() != 1)
+            System.out.println("graph is not connected -> number of Compounts" + charset.size());
+
+        for (Set<FlipCutNodeSimpleWeight> flipCutNodeSimpleWeights : charset) {
+            System.out.println("Graph to cut taxa" + charset);
+        }
+        System.out.println();*/
+
+
+
     }
 
 

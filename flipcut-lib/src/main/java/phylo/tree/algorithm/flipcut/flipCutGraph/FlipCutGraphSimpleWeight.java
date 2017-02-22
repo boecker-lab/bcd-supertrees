@@ -7,6 +7,9 @@ import phylo.tree.model.TreeNode;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static phylo.tree.algorithm.flipcut.costComputer.CostComputer.ACCURACY;
+import static phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter.INFINITY;
+
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 09.01.13
@@ -252,6 +255,17 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         return Arrays.asList(g1, g2);
     }
 
+//todo debug stuff
+    int realMincutValue;
+    public boolean addToMincutValue(long val){
+        long old = realMincutValue;
+        realMincutValue += val;
+        boolean overflow = realMincutValue < old;
+        if(overflow)
+            System.out.println("### OVERFLOW W####");
+        return overflow;
+    }
+
     //helper method for split
     protected void removeEdgesToOtherGraph(Collection<FlipCutNodeSimpleWeight> aCharacters, Collection<FlipCutNodeSimpleWeight> bTaxa) {
         for (FlipCutNodeSimpleWeight aCharacter : aCharacters) {
@@ -260,13 +274,33 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                 if (aCharacter.imaginaryEdges.remove(bTaxon)) { // < 0
                     //remove edge to other side
 //                    System.out.println("!!!!!!!!!!!!! IMAGINARY-EDGE remove !!!!!!!!!!!!!");
-                } else if (aCharacter.edges.remove(bTaxon)) { // > 0
+                } else if (aCharacter.edges.contains(bTaxon)) { // > 0
+                    System.out.println("!!!!!!!!!!!!!  EDGE remove -> should not the case for bcd: taxon "+ bTaxon.name +" !!!!!!!!!!!!!");
+                    System.out.println("--> char: " + aCharacter.toString() + " with taxa: " + getSortedEdges(aCharacter.edges));
+
+                    aCharacter.edges.remove(bTaxon);
                     // remove reverse edge
-                    System.out.println("!!!!!!!!!!!!!  EDGE remove -> should not the case for bcd !!!!!!!!!!!!!");
+                    addToMincutValue((ACCURACY * INFINITY));
+
+//                    System.out.println("number of taxa" + taxa.size());
+
+//                    System.out.println("source taxa: " + taxa);
+//                    System.out.println("character taxa: " + characters);
                     bTaxon.edges.remove(aCharacter);
                 }
             }
         }
+    }
+
+    // todo debug
+    public static List<String> getSortedEdges(Collection<FlipCutNodeSimpleWeight> in){
+        List<String> out = new ArrayList<>(in.size());
+        for (FlipCutNodeSimpleWeight flipCutNodeSimpleWeight : in) {
+            out.add(flipCutNodeSimpleWeight.name);
+        }
+
+        Collections.sort(out);
+        return out;
     }
 
     @Override

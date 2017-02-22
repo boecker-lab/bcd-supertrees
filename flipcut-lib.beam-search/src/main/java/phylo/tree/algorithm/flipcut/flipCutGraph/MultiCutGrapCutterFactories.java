@@ -9,7 +9,7 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
 public class MultiCutGrapCutterFactories {
-    public enum MultiCutterType {VAZIRANI, GREEDY, MC}
+    public enum MultiCutterType {VAZIRANI, GREEDY,GREEDY_RAND, MC}
 
 
     private MultiCutGrapCutterFactories() {
@@ -34,6 +34,8 @@ public class MultiCutGrapCutterFactories {
                 return new MultiCutGraphCutter.Factory(simpleCutterType);
             case GREEDY:
                 return new MultiCutGraphCutterGreedy.Factory(simpleCutterType);
+            case GREEDY_RAND:
+                return new MultiCutGraphCutterGreedyRandomized.Factory(simpleCutterType);
             case MC:
                 return MultiCutGraphCutterUndirectedTranfomation.getFactory();
             default:

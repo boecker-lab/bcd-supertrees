@@ -1,6 +1,7 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 
+import com.google.common.collect.Sets;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 import phylo.tree.algorithm.flipcut.model.MultiCut;
@@ -15,11 +16,13 @@ import java.util.*;
  */
 
 public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
-    private int maxCutNumber;
+    int maxCutNumber;
     private int nextCutIndexToCalculate;
     private final MultiCut[] cuts;
     private final MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutter;
     private final MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory;
+
+
 
     //todo k needed?
     public FlipCutGraphMultiSimpleWeight(CostComputer costs, int k, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory) {
@@ -82,11 +85,41 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
             if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
                 graph.insertCharacterMapping(this, oldToNew);
 
+            checkGraph(graph);
+
+
             graphs.add(graph);
 
         }
 
         return graphs;
+    }
+
+    private void checkGraph(FlipCutGraphMultiSimpleWeight graph) {
+        //todo debug
+        for (FlipCutNodeSimpleWeight n : graph.characterToDummy.keySet()) {
+            FlipCutNodeSimpleWeight node =  n.isClone()?n.clone:n;
+            if (graph.characterToDummy.keySet().size() != 2 *graph.characters.size())
+                System.out.println("not all chars in map");
+            if (!graph.characters.contains(node)){
+                System.out.println("Character not in graph: " + node);
+            }
+            if (!graph.taxa.containsAll(node.edges)){
+                System.out.println("at least one edge not in graph " + getSortedEdges(node.edges));
+            }
+
+            if (!getSortedEdges(node.edges).equals(getSortedEdges(graph.characterToDummy.get(node).edges)))
+                System.out.println("dummy edges do not match character edges");
+        }
+
+        for (Map.Entry<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> entry : graph.dummyToCharacters.entrySet()) {
+            if (!entry.getKey().isClone()) {
+                Set<FlipCutNodeSimpleWeight> sets = entry.getValue();
+                if (!graph.characters.containsAll(sets)){
+                    System.out.println("at least on char not in graph " + sets);
+                }
+            }
+        }
     }
 
     //overwritten --> creates cloned nodes for multiple splits
@@ -96,9 +129,62 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         LinkedHashSet<FlipCutNodeSimpleWeight> g2Characters = new LinkedHashSet<>();
         LinkedHashSet<FlipCutNodeSimpleWeight> g2Taxa = new LinkedHashSet<>();
 
+        //todo debug
+        System.out.println("###################################");
+        System.out.println("#########CUT THE GRAPH ############");
+        System.out.println("###################################");
+
+        //double check:
+        LinkedHashSet<FlipCutNodeSimpleWeight> sourceNodes =  new LinkedHashSet<>();
+        for (FlipCutNodeSimpleWeight character : characters) {
+            sourceNodes.add(character);
+            sourceNodes.add(character.clone);
+        }
+        for (FlipCutNodeSimpleWeight tax : taxa) {
+            sourceNodes.add(tax);
+        }
+        sourceNodes.removeAll(sinkNodes);
+
+        if (Sets.intersection(sinkNodes,sourceNodes).size() > 0)
+            System.out.println("Alarm source und sink");
+
+
+
+        for (FlipCutNodeSimpleWeight sinkNode : sinkNodes) {
+            if (sinkNode.isTaxon()){
+                if(!taxa.contains(sinkNode))
+                    System.out.println("Taxon not in graph " + sinkNode);
+            }else{
+                FlipCutNodeSimpleWeight c = sinkNode.isClone() ? sinkNode.clone : sinkNode;
+                if (!characters.contains(c)){
+                    System.out.println("character not in graph " + sinkNode);
+                }
+            }
+        }
+
+        for (Map.Entry<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> entry : oldToNew.entrySet()) {
+            if (entry.getValue().isCharacter()) {
+                if (!getSortedEdges(entry.getKey().edges).equals(getSortedEdges(entry.getValue().edges))){
+                    System.out.println("ALARRRRM");
+                }
+            }else{
+                if (!entry.getKey().name.equals(entry.getValue().name)){
+                    System.out.println("ALARRRRM");
+                }
+            }
+        }
+
+
+        ///////////////////////////////////debug end
+
         // check if we have to remove vertices
         List<FlipCutNodeSimpleWeight> preCharactersToRemove = checkRemoveCharacter(sinkNodes);
-        List<FlipCutNodeSimpleWeight> charactersToRemove = new ArrayList<FlipCutNodeSimpleWeight>(preCharactersToRemove.size());
+        List<FlipCutNodeSimpleWeight> preCharactersToRemove2 = checkRemoveCharacter(sourceNodes);
+        if (!new HashSet<>(preCharactersToRemove).equals(new HashSet<>(preCharactersToRemove2)))
+            System.out.println("starnge");
+
+
+        List<FlipCutNodeSimpleWeight> charactersToRemove = new ArrayList<>(preCharactersToRemove.size());
         for (FlipCutNodeSimpleWeight toRemove : preCharactersToRemove) {
             FlipCutNodeSimpleWeight toRemoveNew = oldToNew.get(toRemove);
             charactersToRemove.add(toRemoveNew);
@@ -137,6 +223,20 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
 
 
         //todo maybe use iterator and delete removed from toRemove list
+        //todo debug ################3
+        realMincutValue = 0;
+        for (FlipCutNodeSimpleWeight toRemove : charactersToRemove) {
+            addToMincutValue(toRemove.edgeWeight);
+        }
+        if (Sets.intersection(g1Taxa,g2Taxa).size() > 0)
+            System.out.println("WTF");
+        if (Sets.union(g1Taxa,g2Taxa).size() !=  taxa.size())
+            System.out.println("WTF2");
+        if (Sets.union(g1Characters,g2Characters).size() !=  characters.size())
+            System.out.println("WTF3");
+
+        //##################### END
+
         // remove characters from g1 if we have to remove any
         removeCharacters(charactersToRemove, g1Characters);
 
@@ -157,21 +257,41 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
     }
 
     public List<FlipCutNodeSimpleWeight> checkRemoveCharacter(Set<FlipCutNodeSimpleWeight> sinkNodes) {
+        System.out.println("===================");
         List<FlipCutNodeSimpleWeight> charactersToRemove = new LinkedList<FlipCutNodeSimpleWeight>();
         for (FlipCutNodeSimpleWeight node : sinkNodes) {
+            if (node ==null)
+                System.out.println("What??");
             if (!node.isTaxon()) {
                 // it is character or a character clone
                 // check if the other one is also in the set
                 if (!sinkNodes.contains(node.clone)) {
                     FlipCutNodeSimpleWeight c = node.isClone() ? node.clone : node;
+                    System.out.println("--> remove char: " + c.toString() + " with taxa: " + getSortedEdges(c.edges));
                     charactersToRemove.add(c);
+                }else{//todo debug thing
+                    FlipCutNodeSimpleWeight c = node.isClone() ? node.clone : node;
+                    System.out.println("--> keep char: " + c.toString() + " with taxa: " + getSortedEdges(c.edges));
+                    int count = 0;
+                    for (FlipCutNodeSimpleWeight tax : c.edges) {
+                        if(!sinkNodes.contains(tax)) {
+                            System.out.println("===================this is strange");
+                            count++;
+                        }
+                    }
+                    if (count > 0)
+                        System.out.println(count+" / " +c.edges.size());
                 }
             }
         }
+        System.out.println("===================");
         return charactersToRemove;
     }
 
     public List<FlipCutGraphMultiSimpleWeight> buildComponentGraphs(List<List<FlipCutNodeSimpleWeight>> comp) {
+        System.out.println("###################################");
+        System.out.println("##### disconnected COMPONENTS #####");
+        System.out.println("###################################");
         List<FlipCutGraphMultiSimpleWeight> splittedGraphs = new ArrayList<FlipCutGraphMultiSimpleWeight>(comp.size());
         for (List<FlipCutNodeSimpleWeight> component : comp) {
             //clone all nodes
@@ -180,10 +300,8 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
                 oldToNew.put(node, node.copy());
             }
 
-            Set<FlipCutNodeSimpleWeight> characters = new HashSet<>();
             for (FlipCutNodeSimpleWeight node : component) {
                 if (!node.isTaxon()) {
-                    characters.add(node);
                     FlipCutNodeSimpleWeight nClone = oldToNew.get(node);
                     for (FlipCutNodeSimpleWeight taxon : node.edges) {
                         FlipCutNodeSimpleWeight tClone = oldToNew.get(taxon);
@@ -199,9 +317,6 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
                 }
             }
 
-            Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> characterToDummy = new HashMap<>();
-            Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToCharacters = new HashMap<>();
-
             FlipCutGraphMultiSimpleWeight g;
             if (cutterFactory instanceof MaxFlowCutterFactory) {
                 g = new FlipCutGraphMultiSimpleWeight(new ArrayList<>(oldToNew.values()), treeNode, cuts.length, cutterFactory, !((MaxFlowCutterFactory) cutterFactory).isHyperGraphCutter());
@@ -215,7 +330,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
             if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
                 g.insertCharacterMapping(this, oldToNew);
 
-
+            checkGraph(g);
             splittedGraphs.add(g);
 
         }
