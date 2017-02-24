@@ -1,6 +1,8 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 
+import gnu.trove.list.TDoubleList;
+import gnu.trove.list.array.TDoubleArrayList;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 
 import java.util.*;
@@ -15,8 +17,11 @@ import static phylo.tree.algorithm.flipcut.costComputer.CostComputer.ACCURACY;
  *         Time: 12:02
  */
 public class MultiCutGraphCutterGreedyRandomized extends MultiCutGraphCutterGreedy implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+    public enum SamplingDitribution {UNIFORM,GAUSSIAN}
+    private final SamplingDitribution dist = SamplingDitribution.GAUSSIAN;
+    private final double maximumBlackListProportion = 1/3;
     protected Set<FlipCutNodeSimpleWeight> fullBlacklist = new HashSet<>();
-    ArrayDeque<DefaultMultiCut> mincuts = null;
+    TreeSet<DefaultMultiCut> mincuts = null; //todo, we say there are no cooptimal cuts in reality
 
     public MultiCutGraphCutterGreedyRandomized(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut) {
         super(type, graphToCut);
@@ -26,7 +31,7 @@ public class MultiCutGraphCutterGreedyRandomized extends MultiCutGraphCutterGree
     public DefaultMultiCut getNextCut() {
 //        if (DEBUG) System.out.println("Taxa to cut: " + (source.taxa));
         if (mincuts == null) {
-            mincuts = new ArrayDeque<>(source.maxCutNumber);
+            mincuts = new TreeSet<>();
            //todo reenable
              while (mincuts.size() < source.maxCutNumber && !stopCutting) {
                 DefaultMultiCut r = super.getNextCut();
@@ -60,19 +65,41 @@ public class MultiCutGraphCutterGreedyRandomized extends MultiCutGraphCutterGree
         }
     }
 
-    private List<FlipCutNodeSimpleWeight> drawBlackCharacters(Set<FlipCutNodeSimpleWeight> fullBlacklist) {
-        //todo debug
-        if (!source.characters.containsAll(fullBlacklist)){
-            System.out.println("proof");
+    private Set<FlipCutNodeSimpleWeight> drawBlackCharacters(Set<FlipCutNodeSimpleWeight> fullBlacklist) {
+        List<FlipCutNodeSimpleWeight> bl = new ArrayList<>(fullBlacklist.size());
+        long[] weights = new long[fullBlacklist.size()];
+        long weight = 0;
+        int index =0;
+        for (FlipCutNodeSimpleWeight node : fullBlacklist) {
+            bl.add(node);
+            weight += node.edgeWeight;
+            weights[index++] = weight;
         }
-        List<FlipCutNodeSimpleWeight> bl = new ArrayList<>(fullBlacklist);
+
+
         if (bl.size() > 0) {
             Collections.shuffle(bl);
-            int upper = Math.min(bl.size() + 1, 2 + source.characters.size()/3);
-            int randUpper = ThreadLocalRandom.current().nextInt(1, upper);
-            bl = bl.subList(0,randUpper);
+            int upper = Math.min(bl.size() + 1, 2 + (int)Math.round(source.characters.size() * maximumBlackListProportion));
+
+
+            int number;
+            if (dist.equals(SamplingDitribution.UNIFORM)) {
+                number = ThreadLocalRandom.current().nextInt(0, upper);
+            }else{
+                double tmp = ThreadLocalRandom.current().nextGaussian() * .194 + .5; //calculate gaussian between 0 and 1
+                tmp = Math.max(0,Math.min(1,tmp));
+                number = (int) Math.round(tmp * upper); //round to int value
+            }
+
+            Set<FlipCutNodeSimpleWeight> r = new HashSet<>(number);
+            for (int i = 0; i<number;i++){
+                long search = ThreadLocalRandom.current().nextLong(weight+1);
+                int elementIndex = Arrays.binarySearch(weights,search);
+                r.add(bl.get(elementIndex<0?(elementIndex*-1)-1:elementIndex));
+            }
+            return r;
         }
-        return bl;
+        return new HashSet<>(bl);
     }
 
     static class Factory implements MultiCutterFactory<MultiCutGraphCutterGreedyRandomized, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutterGreedyRandomized, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {

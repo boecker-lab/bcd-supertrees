@@ -11,10 +11,12 @@ package phylo.tree.algorithm.flipcut.mincut;
 public interface Colorable {
     void setColor(EdgeColor color);
     EdgeColor getColor();
-    default boolean deleteColor(){
+    default EdgeColor deleteColor(){
         EdgeColor color = getColor();
         if (color == null)
-            return false;
-        return color.remove(this);
+            return null;
+
+        color.remove(this);
+        return color;
     }
 }

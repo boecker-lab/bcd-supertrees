@@ -255,12 +255,12 @@ public class BeamSearchTest {
         fcmGR.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
         calculateSupertrees(fcmGR, null);
 
-       /* System.out.println("MC");
+        System.out.println("MC");
         FlipCutMultiCut fcmMC = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.MC));
-        fcmMC.setNumberOfCuts(10);
+        fcmMC.setNumberOfCuts(100);
         fcmMC.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fcmMC.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
-        calculateSupertrees(fcmMC, exp);*/
+        calculateSupertrees(fcmMC, null);
 
     }
 

@@ -5,8 +5,16 @@ package phylo.tree.algorithm.flipcut.mincut;
  * 10.02.17.
  */
 
-import java.util.HashSet;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import org.apache.commons.collections4.list.TreeList;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.RandomSet;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
@@ -14,7 +22,7 @@ import java.util.Set;
 public class EdgeColor implements Cloneable {
     private final Object idetifier;
     private final double weight;
-    private final Set<Colorable> edges = new HashSet<>();
+    private final RandomSet<Colorable> edges = new RandomSet<>();
 
 
     private EdgeColor(Object idetifier, double weight) {
@@ -30,9 +38,9 @@ public class EdgeColor implements Cloneable {
         return weight;
     }
 
-//    public void setWeight(double weight) {
-//        this.weight = weight;
-//    }
+    public Colorable getRandomElement(){
+        return edges.peekRandom(ThreadLocalRandom.current());
+    }
 
     public Set<Colorable> getEdges() {
         return edges;

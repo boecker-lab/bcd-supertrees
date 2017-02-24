@@ -114,7 +114,7 @@ public class KargerSteinCutGraph<V> implements MultiCutGraph<V>, EdgeColorableUn
     @Override
     public void clear() {
         vertexMap.clear();
-        g = new Graph(weighter);
+        g = new Graph(/*weighter*/);
         vertexIndex = 0;
         charactermap.clear();
     }

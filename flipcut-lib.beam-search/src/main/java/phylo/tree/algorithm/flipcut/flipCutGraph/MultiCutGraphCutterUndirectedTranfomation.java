@@ -12,6 +12,7 @@ import phylo.tree.algorithm.flipcut.model.HyperMultiCut;
 
 import java.util.List;
 import java.util.Queue;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -19,7 +20,7 @@ import java.util.concurrent.ExecutorService;
  */
 public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
     private static final Factory FACTORY = new Factory();
-    Queue<HyperCut<FlipCutNodeSimpleWeight>> mincuts = null;
+    TreeSet<HyperCut<FlipCutNodeSimpleWeight>> mincuts = null;
 
 
     public MultiCutGraphCutterUndirectedTranfomation(FlipCutGraphMultiSimpleWeight graphToCut) {
@@ -49,7 +50,7 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
                 }
             }
         }
-        mincuts = cutGraph.calculateMinCuts();
+        mincuts = new TreeSet<>(cutGraph.calculateMinCuts()); //todo is that efficient?
     }
 
 
@@ -60,7 +61,7 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
         if (mincuts.isEmpty()) {
             return null;
         }
-        HyperCut<FlipCutNodeSimpleWeight> c = mincuts.poll();
+        HyperCut<FlipCutNodeSimpleWeight> c = mincuts.pollFirst();
         return new HyperMultiCut(source,c);
     }
 

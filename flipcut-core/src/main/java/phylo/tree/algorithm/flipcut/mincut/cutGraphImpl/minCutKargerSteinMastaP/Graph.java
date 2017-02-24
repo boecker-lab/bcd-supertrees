@@ -13,10 +13,7 @@ import gnu.trove.set.TIntSet;
 import phylo.tree.algorithm.flipcut.mincut.Colorable;
 import phylo.tree.algorithm.flipcut.mincut.EdgeColor;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
@@ -24,32 +21,33 @@ import java.util.List;
 public class Graph implements Comparable<Graph>, Cloneable {
     private int hashCache = 0;
 
-    final EdgeWeighter weighter;
+    //    final EdgeWeighter weighter;
     final TIntObjectMap<Vertex> vertices = new TIntObjectHashMap<>();
 
-    final List<Edge> edges = new ArrayList<Edge>();
-    final HashSet<EdgeColor> edgeColors = new HashSet<>();
+    final List<Edge> edges = new ArrayList<>();
+    final Set<EdgeColor> edgeColors = new HashSet<>();
 
-    final TDoubleList weights = new TDoubleArrayList();
+    List<EdgeColor> edgeColorList;
+    TDoubleList weights;
     private double sumOfWeights = 0;
 
     public final HashSet<TIntSet> cutSets = new HashSet<>(2);
 
 
     public Graph() {
-        weighter = new EdgeWeighter() {
-        };
+//        weighter = new EdgeWeighter() {
+//        };
     }
 
-    public Graph(EdgeWeighter weighter) {
-        this.weighter = weighter;
-    }
+//    public Graph(EdgeWeighter weighter) {
+//        this.weighter = weighter;
+//    }
 
     public double getSumOfWeights() {
         return sumOfWeights;
     }
 
-    public int getNumOfEdges() {
+    public int getNumOfColors() {
         return weights.size();
     }
 
@@ -95,14 +93,24 @@ public class Graph implements Comparable<Graph>, Cloneable {
 
     @Override
     protected Graph clone() {
-        Graph g = new Graph(weighter);
+        Graph g = new Graph(/*weighter*/);
         vertices.forEachEntry((k, v) -> {
             g.vertices.put(k, new Vertex(v.lbl, v.mergedLbls));
             return true;
         });
 
-        for (EdgeColor sourceColor : edgeColors) {
+        Iterable<EdgeColor> es;
+        final boolean weightsSet = edgeColorList != null;
+        if (weightsSet) {
+            es = edgeColorList;
+            g.edgeColorList = new ArrayList<>(edgeColorList.size());
+        } else {
+            es = edgeColors;
+        }
+
+        for (EdgeColor sourceColor : es) {
             EdgeColor target = sourceColor.clone();
+            if (weightsSet) g.edgeColorList.add(target);
             for (Colorable c : sourceColor.getEdges()) {
                 Edge e = ((Edge) c);
 
@@ -114,17 +122,21 @@ public class Graph implements Comparable<Graph>, Cloneable {
             }
         }
 
-        g.weights.addAll(weights);
-        g.sumOfWeights = sumOfWeights;
+        if (weightsSet) {
+            g.weights = new TDoubleArrayList(weights);
+            g.sumOfWeights = sumOfWeights;
+        }
 
         return g;
     }
 
     public void refreshWeights() {
-        weights.clear();
+        weights = new TDoubleArrayList(edgeColors.size());
+        edgeColorList = new ArrayList<>(edgeColors.size());
         sumOfWeights = 0;
-        for (Edge edge : edges) {
-            weights.add((sumOfWeights += edge.getWeight(weighter)));
+        for (EdgeColor edge : edgeColors) {
+            edgeColorList.add(edge);
+            weights.add((sumOfWeights += edge.getWeight()));
         }
     }
 
@@ -161,8 +173,6 @@ public class Graph implements Comparable<Graph>, Cloneable {
     public int compareTo(Graph o) {
         return Double.compare(mincutValue(), o.mincutValue());
     }
-//
-
 
     @Override
     public boolean equals(Object o) {
@@ -189,5 +199,15 @@ public class Graph implements Comparable<Graph>, Cloneable {
             hashCache = result;
         }
         return hashCache;
+    }
+
+    public boolean removeClolor(EdgeColor color) {
+        if (edgeColors.remove(color)) {
+            weights = null;
+            edgeColorList = null;
+            sumOfWeights = 0;
+            return true;
+        }
+        return false;
     }
 }
