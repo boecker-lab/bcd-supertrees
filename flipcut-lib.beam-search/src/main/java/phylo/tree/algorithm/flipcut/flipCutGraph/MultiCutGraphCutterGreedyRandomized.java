@@ -19,7 +19,7 @@ import static phylo.tree.algorithm.flipcut.costComputer.CostComputer.ACCURACY;
 public class MultiCutGraphCutterGreedyRandomized extends MultiCutGraphCutterGreedy implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
     public enum SamplingDitribution {UNIFORM,GAUSSIAN}
     private final SamplingDitribution dist = SamplingDitribution.GAUSSIAN;
-    private final double maximumBlackListProportion = 1/3;
+    private final double maximumBlackListProportion = .5;
     protected Set<FlipCutNodeSimpleWeight> fullBlacklist = new HashSet<>();
     TreeSet<DefaultMultiCut> mincuts = null; //todo, we say there are no cooptimal cuts in reality
 
@@ -48,20 +48,19 @@ public class MultiCutGraphCutterGreedyRandomized extends MultiCutGraphCutterGree
     private void getRandCuts() {
         fullBlacklist = new HashSet<>(blacklist);
         int it = 0;
+//        System.out.println();
+//        System.out.println();
         while (mincuts.size() < source.maxCutNumber && it < (2*source.maxCutNumber)) {
+//            long time = System.currentTimeMillis();
             it++;
             blacklist = new HashSet<>(drawBlackCharacters(fullBlacklist));
             calculateMinCut();
             if (mincut != null) {
                 mincutValue = getMinCutValueAndFillBlacklist(fullBlacklist, mincut);
                 mincuts.add(new DefaultMultiCut(mincut, mincutValue, source));
-                System.out.println("###### MinCutValue RAND ########");
-                System.out.println(mincutValue);
-                System.out.println(mincutValue2);
-                System.out.println(CutGraphCutter.INFINITY * ACCURACY);
-                System.out.println(Long.MAX_VALUE);
-                System.out.println("###########################");
             }
+//            System.out.println("On Random Cut needed " + (System.currentTimeMillis() - time) / 1000d + "s");
+//            System.out.println();
         }
     }
 

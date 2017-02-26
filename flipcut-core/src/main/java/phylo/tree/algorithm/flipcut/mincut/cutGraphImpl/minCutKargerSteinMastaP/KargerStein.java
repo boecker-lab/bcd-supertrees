@@ -20,9 +20,13 @@ public class KargerStein {
 
     public Graph contract(Graph gr, int numOfVerticesLeft) {
         while (gr.vertices.size() > numOfVerticesLeft) {
+//            long t =  System.currentTimeMillis();
             Edge edge = drawEdge(gr);
+//            System.out.println("drew edge in: " + (System.currentTimeMillis() - t)/1000d + "s");
             Iterator<Vertex> it = edge.iterator();
+//            t =  System.currentTimeMillis();
             reorganizeEdges(gr, it.next(), it.next());
+//            System.out.println("reorganize edges in edge in: " + (System.currentTimeMillis() - t)/1000d + "s");
         }
         return gr;
     }
@@ -107,12 +111,23 @@ public class KargerStein {
     }
 
     public Graph getMinCut(final Graph gr) {
+        getMinCuts(gr, true);
         return best;
     }
 
     public Graph getMinCut(final int[][] arr) {
         getMinCuts(arr, true);
         return best;
+    }
+
+
+    public Graph sampleCut(Graph gr) {
+        if (!gr.hasFreshEdges())
+            gr.refreshWeights();
+        Graph grc = gr.clone();
+        contract(grc, 2);
+        grc.setCutted(true);
+        return grc;
     }
 
     private void reorganizeEdges(Graph gr, Vertex v1, Vertex v2) {
@@ -124,25 +139,37 @@ public class KargerStein {
         v1.mergedLbls.addAll(v2.mergedLbls);
 
         //redirect edges
-        for (Iterator<Edge> it = gr.edges.iterator(); it.hasNext(); ) {
-            Edge edge = it.next();
+        for (Iterator<Edge> edgeIt = gr.edges.values().iterator(); edgeIt.hasNext(); ) {
+            Edge edge = edgeIt.next();
             if (edge.contains(v1, v2)) {
                 //remove loops
                 v1.edges.remove(edge);
                 v2.edges.remove(edge);//not needed
-                EdgeColor color = edge.deleteColor();
-                if (color != null && color.numOfEdges() == 0) {//remove color from graph
-                    if (gr.removeClolor(color))
-                        colorRemoved = true;
+                for (Iterator<EdgeColor> colorit = edge.colorIterator(); colorit.hasNext();) {
+                    EdgeColor color = colorit.next();
+                    colorit.remove();
+
+                    if (color.numOfEdges() == 0) { //remove colors from graph
+                        if (gr.removeClolor(color))
+                            colorRemoved = true;
+                    }
                 }
-
-                it.remove();
-
+                edgeIt.remove();
             } else if (v2.edges.contains(edge)) {
                 //redirect edges from v2 to v1
                 v2.edges.remove(edge);//not needed
-                edge.replaceVertex(v2, v1);
-                v1.edges.add(edge);
+                Vertex v = edge.getOppositeVertex(v2);
+                Edge toAdd =  gr.getEdge(v,v1);
+                if (toAdd != null){
+                    for (Iterator<EdgeColor> colorit = edge.colorIterator(); colorit.hasNext();) {
+                        toAdd.add(colorit.next());
+                    }
+                    edge.clearColors();
+                    edgeIt.remove();
+                }else{
+                    edge.replaceVertex(v2,v1);
+                    v1.edges.add(edge);
+                }
             }
         }
         if (colorRemoved)

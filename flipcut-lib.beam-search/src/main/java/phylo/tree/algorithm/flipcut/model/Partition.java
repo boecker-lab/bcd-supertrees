@@ -18,7 +18,7 @@ public class Partition implements Comparable<Partition> {
     public final long currentscore;
     public final int cachedHash;
 
-    public final Set<FlipCutGraphMultiSimpleWeight> graphs; //todo back to private
+    private final Set<FlipCutGraphMultiSimpleWeight> graphs;
     private TreeNode root;
     private Set<Edge> supertreeEdges = new HashSet<>();
     private int finishedGraphs;

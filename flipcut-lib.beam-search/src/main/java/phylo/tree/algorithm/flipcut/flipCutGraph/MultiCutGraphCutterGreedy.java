@@ -23,7 +23,6 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
     protected Set<FlipCutNodeSimpleWeight> blacklist = new HashSet<>();
     protected boolean stopCutting;
     protected int cuts = 0;
-    protected long mincutValue2; //todo debug
 
     public MultiCutGraphCutterGreedy(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut) {
         super(type);
@@ -33,8 +32,6 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
 
     @Override
     protected void calculateMinCut() {
-        System.out.println("--------------------------------------------------------");
-
         if (type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG || type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN) {
             if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
 
@@ -70,19 +67,6 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                     activePartitions = finalActivePartitions;
                 }
 
-
-                //todo debug check
-                for (Set<FlipCutNodeSimpleWeight> ap1 : activePartitions) {
-                    for (Set<FlipCutNodeSimpleWeight> ap2 : activePartitions) {
-                        if (ap1 != ap2) {
-                            Sets.SetView<FlipCutNodeSimpleWeight> inter = Sets.intersection(ap1, ap2);
-                            if (!inter.isEmpty())
-                                System.out.println("not independent!");
-                        }
-                    }
-                }
-
-
                 //create mapping
                 //todo optimize all these mapping stuff if it works well
                 Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> taxonToDummy = new HashMap<>();
@@ -99,10 +83,6 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                     mergedTaxonIndex++;
                 }
 
-                if (!taxonToDummy.values().containsAll(dummyToTaxa.keySet())) {
-                    System.out.println("demaged before");
-                }
-
                 int singleTaxonIndex = 0;
                 for (FlipCutNodeSimpleWeight taxon : source.taxa) {
                     if (!taxonToDummy.containsKey(taxon)) {
@@ -110,11 +90,6 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                         singleTaxonIndex++;
                     }
                 }
-
-                if (!taxonToDummy.values().containsAll(dummyToTaxa.keySet())) {
-                    System.out.println("demaged after");
-                }
-
 
                 if (mergedTaxonIndex + singleTaxonIndex > 1) {
                     MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph;
@@ -126,41 +101,9 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                     //create cutgraph
                     createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, taxonToDummy, trivialcharacters);
 
-                    if (!taxonToDummy.values().containsAll(dummyToTaxa.keySet())) {
-                        System.out.println("demaged after after");
-                    }
-
-                    //todo debug
-                    Map<FlipCutNodeSimpleWeight, Object> tarjannodes = ((GoldbergTarjanCutGraph) cutGraph).nodes;
-                    int nodesToHave = mergedTaxonIndex + singleTaxonIndex + dummyToMerged.size() /*- trivialcharacters.size()*/;
-
-                    if (tarjannodes.size() != nodesToHave) {
-                        System.out.println("not all nodes in graph " + tarjannodes.size() + " / " + nodesToHave);
-                        List<FlipCutNodeSimpleWeight> missings = new LinkedList<>();
-                        Set<FlipCutNodeSimpleWeight> nodes = tarjannodes.keySet();
-                        for (FlipCutNodeSimpleWeight dum : dummyToMerged.keySet()) {
-                            if (!nodes.contains(dum)) {
-                                System.out.println("Character missing: " + dum);
-                                missings.add(dum);
-                            }
-                        }
-                        for (FlipCutNodeSimpleWeight dum : dummyToTaxa.keySet()) {
-                            if (!nodes.contains(dum)) {
-                                System.out.println("TaxonSet missing: " + dum);
-                                missings.add(dum);
-                            }
-                        }
-                        System.out.println();
-
-                    } else {
-                        System.out.println("ALL fine");
-                    }
-
-                    //degub done
-
                     //calculate mincut
                     STCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph);
-                    mincutValue2 = newMinCut.minCutValue();
+//                    mincutValue = newMinCut.minCutValue();
 
                     //undo mapping
                     mincut = new LinkedHashSet<>(source.characters.size() + source.taxa.size());
@@ -169,7 +112,6 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                         if (node.isTaxon()) {
                             Set<FlipCutNodeSimpleWeight> trivials = trivialcharacters.get(node);
                             if (trivials != null) {
-                                System.out.println("Add trivials");
                                 for (FlipCutNodeSimpleWeight trivial : trivials) {
                                     mincut.addAll(source.dummyToCharacters.get(trivial));
                                 }
@@ -191,7 +133,6 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                     }
                 } else {
                     mincut = null;
-                    mincutValue2 = -1;
                 }
             } else {
                 throw new IllegalArgumentException("SCAFFOLD MERGE has to be enabled");
@@ -199,7 +140,6 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
         } else {
             throw new IllegalArgumentException("Hypergraph max flow has to be enabled");
         }
-        System.out.println("--------------------------------------------------------");
     }
 
 
@@ -220,17 +160,10 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
 
         //todo optimize
         mincutValue = getMinCutValueAndFillBlacklist(blacklist, mincut);
-        System.out.println("###### MinCutValue ########");
-        System.out.println(mincutValue);
-        System.out.println(mincutValue2);
-        System.out.println(CutGraphCutter.INFINITY * ACCURACY);
-        System.out.println(Long.MAX_VALUE);
-        System.out.println("###########################");
         return new DefaultMultiCut(mincut, mincutValue, source);
     }
 
     protected long getMinCutValueAndFillBlacklist(final Set<FlipCutNodeSimpleWeight> blacklistToAddTo, final LinkedHashSet<FlipCutNodeSimpleWeight> mincut) {
-        long mincutValue = 0;
         for (FlipCutNodeSimpleWeight node : mincut) {
             if (!node.isTaxon()) {
                 // it is character or a character clone
@@ -246,9 +179,6 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                     mincutValue += c.edgeWeight;
                 }
             }
-        }
-        if (mincutValue != mincutValue2) {
-            System.out.println("Check!!!!!!!");
         }
         return mincutValue;
     }

@@ -146,20 +146,10 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                     set.add(characterDummy);
                     cloneSet.add(characterDummy.clone);
 
-
-                    //todo debug
-                    long old = n.edgeWeight;
                     n.edgeWeight += calculateCharacterCap(characterDummy);
-                    boolean overflow =  n.edgeWeight < old;
-                    if(overflow)
-                        System.out.println("### CHARACTER OVERFLOW W####");
 
                 } else {
                     FlipCutNodeSimpleWeight tax = edgesTo.iterator().next();
-                    //todo debug
-                    if (tax ==null){
-                        System.out.println("wtf");
-                    }
 
                     if (!taxonGroupTotrivialcharacters.containsKey(tax)) {
                         taxonGroupTotrivialcharacters.put(tax, new HashSet<FlipCutNodeSimpleWeight>());
@@ -186,40 +176,6 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                 cutGraph.addEdge(taxon, dummyNode.clone, infinity);
             }
         }
-        
-        //#########################################################33DEBUG
-        Set<Set<FlipCutNodeSimpleWeight>> charset = new HashSet<>(); //todo remove, debug
-        for (FlipCutNodeSimpleWeight dumm : dummyToMerged.keySet()) {
-            if (!dumm.isClone()) charset.add(new HashSet<>(dumm.edges));
-        }
-
-        boolean changes = true;
-        while (changes) {
-            changes = false;
-            Iterator<Set<FlipCutNodeSimpleWeight>> it = charset.iterator();
-            Set<FlipCutNodeSimpleWeight> merged = it.next();
-
-            while (it.hasNext()) {
-                Set<FlipCutNodeSimpleWeight> next = it.next();
-                if (Sets.intersection(next, merged).size() > 0) {
-                    merged.addAll(next);
-                    it.remove();
-                    changes = true;
-                }
-            }
-        }
-
-        /*System.out.println();
-        if (charset.size() != 1)
-            System.out.println("graph is not connected -> number of Compounts" + charset.size());
-
-        for (Set<FlipCutNodeSimpleWeight> flipCutNodeSimpleWeights : charset) {
-            System.out.println("Graph to cut taxa" + charset);
-        }
-        System.out.println();*/
-
-
-
     }
 
 
@@ -368,6 +324,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                 STCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph);
 
                 mincut = new LinkedHashSet<>(source.characters.size() + source.taxa.size());
+                mincutValue = newMinCut.minCutValue();
                 for (FlipCutNodeSimpleWeight node : newMinCut.getCutSet()) {
                     Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
                     if (realNodes == null) {
@@ -379,7 +336,9 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
             } else {
                 createGoldbergTarjanCharacterWeights(cutGraph);
                 createGoldbergTarjan(cutGraph);
-                mincut = calculateTarjanMinCut(cutGraph).getCutSet();
+                STCut<FlipCutNodeSimpleWeight> st = calculateTarjanMinCut(cutGraph);
+                mincut = st.getCutSet();
+                mincutValue = st.minCutValue();
             }
 
         } else if (type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG || type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN) {
@@ -419,6 +378,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
                 //undo mapping
                 mincut = new LinkedHashSet<>(source.characters.size() + source.taxa.size());
+                mincutValue = newMinCut.minCutValue();
                 for (FlipCutNodeSimpleWeight node : newMinCut.getCutSet()) {
                     //undo taxa mapping
                     if (node.isTaxon()) {
@@ -455,6 +415,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                 STCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph);
 
                 mincut = new LinkedHashSet<>(source.characters.size() + source.taxa.size());
+                mincutValue = newMinCut.minCutValue();
                 for (FlipCutNodeSimpleWeight node : newMinCut.getCutSet()) {
                     Set<FlipCutNodeSimpleWeight> realNodes = dummyToMerged.get(node);
 
@@ -468,7 +429,9 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                 cutGraph = new GoldbergTarjanCutGraph<>();
                 createGoldbergTarjanCharacterWeights(cutGraph);
                 createTarjanGoldbergHyperGraph(cutGraph);
-                mincut = calculateTarjanMinCut(cutGraph).getCutSet();
+                STCut<FlipCutNodeSimpleWeight> st = calculateTarjanMinCut(cutGraph);
+                mincut = st.getCutSet();
+                mincutValue = st.minCutValue();
             }
         }
 

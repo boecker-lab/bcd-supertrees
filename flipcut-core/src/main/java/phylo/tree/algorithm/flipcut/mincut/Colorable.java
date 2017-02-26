@@ -5,18 +5,20 @@ package phylo.tree.algorithm.flipcut.mincut;
  * 10.02.17.
  */
 
+import java.util.Iterator;
+
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
 public interface Colorable {
-    void setColor(EdgeColor color);
-    EdgeColor getColor();
-    default EdgeColor deleteColor(){
-        EdgeColor color = getColor();
-        if (color == null)
-            return null;
-
-        color.remove(this);
-        return color;
+    default void clearColors() {
+        Iterator<EdgeColor> it = colorIterator();
+        while (it.hasNext()) {
+            it.next();
+            it.remove();
+        }
     }
+
+    Iterator<EdgeColor> colorIterator();
+    boolean add(EdgeColor color);
 }

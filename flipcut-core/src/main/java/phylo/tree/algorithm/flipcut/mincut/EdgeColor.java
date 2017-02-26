@@ -5,14 +5,8 @@ package phylo.tree.algorithm.flipcut.mincut;
  * 10.02.17.
  */
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import org.apache.commons.collections4.list.TreeList;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.RandomSet;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -50,18 +44,18 @@ public class EdgeColor implements Cloneable {
         return edges.size();
     }
 
-    public boolean add(Colorable edge) {
-        edge.setColor(this);
+    /*public boolean add(Colorable edge) {
+        edge.add(this);
         return edges.add(edge);
-    }
+    }*/
 
-    public boolean remove(Colorable edge) {
+    /*public boolean remove(Colorable edge) {
         if (edges.remove(edge)) {
-            edge.setColor(null);
+            edge.removeColor(this);
             return true;
         }
         return false;
-    }
+    }*/
 
     public EdgeColor clone() {
         return new EdgeColor(idetifier, weight);

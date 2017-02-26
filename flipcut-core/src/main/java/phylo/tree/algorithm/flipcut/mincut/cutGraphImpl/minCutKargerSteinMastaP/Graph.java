@@ -24,7 +24,7 @@ public class Graph implements Comparable<Graph>, Cloneable {
     //    final EdgeWeighter weighter;
     final TIntObjectMap<Vertex> vertices = new TIntObjectHashMap<>();
 
-    final List<Edge> edges = new ArrayList<>();
+    final Map<VertexPair, Edge> edges = new HashMap<>();
     final Set<EdgeColor> edgeColors = new HashSet<>();
 
     List<EdgeColor> edgeColorList;
@@ -74,21 +74,29 @@ public class Graph implements Comparable<Graph>, Cloneable {
         return addEdge(v1, v2, new EdgeColor(1d));
     }
 
-    public boolean addEdge(Vertex v1, Vertex v2, EdgeColor c) {
-        Edge e = new Edge(v1, v2, c);
+    public Edge getEdge(Vertex v1, Vertex v2){
+        return edges.get(new VertexPair(v1,v2));
+    }
 
+    public boolean addEdge(Vertex v1, Vertex v2, EdgeColor c) {
         if (!vertices.containsKey(v1.lbl))
             addVertex(v1);
         if (!vertices.containsKey(v2.lbl))
             addVertex(v2);
 
-        v1.addEdge(e);
-        v2.addEdge(e);
-        edges.add(e);
-        if (c != null)
-            edgeColors.add(c);
+        Edge e = getEdge(v1, v2);
+        if (e == null) {
+            e = new Edge(v1, v2, c);
 
-        return true;
+            v1.addEdge(e);
+            v2.addEdge(e);
+
+            edges.put(new VertexPair(v1,v2),e);
+
+        }else{
+            e.add(c);
+        }
+        return edgeColors.add(c);
     }
 
     @Override
@@ -101,11 +109,18 @@ public class Graph implements Comparable<Graph>, Cloneable {
 
         Iterable<EdgeColor> es;
         final boolean weightsSet = edgeColorList != null;
+
         if (weightsSet) {
             es = edgeColorList;
             g.edgeColorList = new ArrayList<>(edgeColorList.size());
         } else {
             es = edgeColors;
+        }
+
+        for (int l : vertices.keys()) {
+            //todo debug
+            if (g.getVertex(l) == null)
+                System.out.println("What");
         }
 
         for (EdgeColor sourceColor : es) {
@@ -209,5 +224,13 @@ public class Graph implements Comparable<Graph>, Cloneable {
             return true;
         }
         return false;
+    }
+
+    public boolean hasFreshEdges(){
+        return weights != null && edgeColorList != null;
+    }
+
+    public Set<EdgeColor> getEdgeColors() {
+        return edgeColors;
     }
 }

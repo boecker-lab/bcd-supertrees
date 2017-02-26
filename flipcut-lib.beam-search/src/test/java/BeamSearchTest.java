@@ -170,9 +170,9 @@ public class BeamSearchTest {
 //        params.add(new Object[]{Newick.getTreeFromString("((A,B),C);"), Newick.getTreeFromString("((A,B),C);"), trivialSource});
 //        params.add(new Object[]{Newick.getTreeFromString("(((a,b),c),e),d);"), Newick.getTreeFromString("(((a,b),c),e),d);"), caterpillar});
 //        params.add(new Object[]{null,null, cut});
-//        params.add(new Object[]{null,null,realExample0});
+        params.add(new Object[]{null,null,realExample0});
 //        params.add(new Object[]{null,null,realExample1});
-        params.add(new Object[]{null,null,realExample2});
+//        params.add(new Object[]{null,null,realExample2});
 
         //bryant example
 //        params.add(new Object[]{Newick.getTreeFromString("((e,f,g),(x,y,z));"), Newick.getTreeFromString("((e,f,g),(x,y,z));"), checkRoot1Source});
@@ -211,9 +211,9 @@ public class BeamSearchTest {
             System.out.println(Newick.getStringFromTree(expected,true,false) + " Expected");
             Assert.assertEquals(TreeUtils.getLeafCount(source), supertree.getLeaves().length);
             int rfdist = RFDistance.getDifference(supertree, expected, false);
-            assertEquals(0, rfdist);
+            System.out.println("Distance to expected: " + rfdist);
+//            assertEquals(0, rfdist);
         }
-
         return fs.getResults();
     }
 
@@ -227,40 +227,49 @@ public class BeamSearchTest {
         Tree exp = calculateSupertrees(fs, null).get(0);
 
 
-        System.out.println("MultiSingle");
+        System.out.println("MultiSingleVazi");
         FlipCutMultiCut fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.VAZIRANI,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
         fcm.setNumberOfCuts(1);
         fcm.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
-        calculateSupertrees(fcm, null);
+        calculateSupertrees(fcm, exp);
 
-        System.out.println("Vazi");
+        System.out.println("MultiSingleGreedy");
+        FlipCutMultiCut fcmMG = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.GREEDY,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
+        fcmMG.setNumberOfCuts(1);
+        fcmMG.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
+        fcmMG.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
+        calculateSupertrees(fcmMG, exp);
+
+        final int k = 100;
+
+        /*System.out.println("Vazi");
         FlipCutMultiCut fcmVaz = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.VAZIRANI,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
-        fcmVaz.setNumberOfCuts(100);
+        fcmVaz.setNumberOfCuts(k);
         fcmVaz.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fcmVaz.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
-        calculateSupertrees(fcmVaz, null);
+        calculateSupertrees(fcmVaz, exp);*/
 
         System.out.println("Greedy");
         FlipCutMultiCut fcmG = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.GREEDY,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
-        fcmG.setNumberOfCuts(100);
+        fcmG.setNumberOfCuts(k);
         fcmG.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fcmG.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
-        calculateSupertrees(fcmG, null);
+        calculateSupertrees(fcmG, exp);
 
         System.out.println("Greedy_Rand");
         FlipCutMultiCut fcmGR = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.GREEDY_RAND,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
-        fcmGR.setNumberOfCuts(100);
+        fcmGR.setNumberOfCuts(k);
         fcmGR.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fcmGR.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
-        calculateSupertrees(fcmGR, null);
+        calculateSupertrees(fcmGR, exp);
 
         System.out.println("MC");
         FlipCutMultiCut fcmMC = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.MC));
-        fcmMC.setNumberOfCuts(100);
+        fcmMC.setNumberOfCuts(k);
         fcmMC.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fcmMC.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
-        calculateSupertrees(fcmMC, null);
+        calculateSupertrees(fcmMC, exp);
 
     }
 

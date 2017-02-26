@@ -18,7 +18,7 @@ import java.util.Set;
 public class Edge implements Colorable {
 
     private final Set<Vertex> ends = new HashSet<>(2);
-    EdgeColor color;
+    Set<EdgeColor> colors = new HashSet<>();
 
     public Edge(Vertex fst, Vertex snd) {
         this(fst, snd, 1d);
@@ -35,7 +35,7 @@ public class Edge implements Colorable {
         ends.add(fst);
         ends.add(snd);
         if (color != null) {
-            color.add(this);
+            add(color);
         }
     }
 
@@ -71,17 +71,38 @@ public class Edge implements Colorable {
         ends.add(newV);
     }
 
-    public double getWeight(EdgeWeighter weighter){
-        return weighter.weightEdge(this);
+    @Override
+    public Iterator<EdgeColor> colorIterator() {
+        return new ColorIterator();
     }
 
     @Override
-    public void setColor(EdgeColor color) {
-        this.color = color;
+    public boolean add(EdgeColor color) {
+        color.getEdges().add(this);
+        return colors.add(color);
     }
 
-    @Override
-    public EdgeColor getColor() {
-        return color;
+    private Edge self(){return this;}
+
+    private class ColorIterator implements Iterator<EdgeColor>{
+        private Iterator<EdgeColor> source = colors.iterator();
+        private EdgeColor current = null;
+
+        @Override
+        public boolean hasNext() {
+            return source.hasNext();
+        }
+
+        @Override
+        public EdgeColor next() {
+            current = source.next();
+            return current;
+        }
+
+        @Override
+        public void remove() {
+            source.remove();
+            current.getEdges().remove(self());
+        }
     }
 }

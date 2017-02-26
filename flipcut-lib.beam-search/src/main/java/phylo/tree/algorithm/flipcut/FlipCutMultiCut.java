@@ -144,22 +144,6 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, Fl
                 List<Partition> allNewPartitions = new LinkedList<>(allNewPartitionsSet);
                 minimalPartSize = buildPartitionList(allNewPartitions);
 
-                if (DEBUG) {
-                    System.out.println("Progress: " + minimalPartSize + "/" + numTaxa);
-                    System.out.println("NUM Partitions after sorting: " + partitions.size() + "");
-
-                    //some more DEBUG shit
-                    allGraphsDebug.clear();
-                    numAllGraphPointer = 0;
-                    for (Partition partition : partitions) {
-                        allGraphsDebug.addAll(partition.graphs);
-                        numAllGraphPointer += partition.graphs.size();
-                    }
-                    System.out.println("Number of Graphs = " + allGraphsDebug.size());
-                    System.out.println("Number of GraphPointer = " + numAllGraphPointer);
-                }
-
-
             }
             System.out.println("...DONE in " + ((double) (System.currentTimeMillis() - calctime) / 1000d) + "s");
             System.out.println();
