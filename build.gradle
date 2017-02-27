@@ -80,7 +80,7 @@ project(':flipcut-lib') {
 
     dependencies {
         compile project(':flipcut-core')
-        testCompile 'de.unijena.bioinf.phylo:gscm-lib:1.0.1'
+        testCompile 'de.unijena.bioinf.phylo:gscm-lib:1.0.2'
     }
 }
 
@@ -91,17 +91,17 @@ project(':flipcut-lib.beam-search') {
 
     dependencies {
         compile project(':flipcut-lib')
-        testCompile 'de.unijena.bioinf.phylo:gscm-lib:1.0.1'
+        testCompile 'de.unijena.bioinf.phylo:gscm-lib:1.0.2'
     }
 }
 
 //beam CLI Project specific stuff
-project(':flipcut-cli.beam-search') {
+/*project(':flipcut-cli.beam-search') {
     version = '0.8-SNAPSHOT'
     dependencies {
         compile project(':flipcut-lib.beam-search'), project(':flipcut-cli')
     }
-}
+}*/
 
 
 version = '0.9-SNAPSHOT'

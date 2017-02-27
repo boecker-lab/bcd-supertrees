@@ -14,7 +14,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -23,10 +25,14 @@ import java.util.logging.Level;
  * Created by fleisch on 25.11.14.
  */
 public class BCDSupertrees {
-    private static BCDCLI CLI;
+    protected static BCDCLI CLI;
 
     public static void main(String[] args) {
         CLI = new BCDCLI(BCDCLI.DEFAULT_PROPERTIES_FILE);
+        run(args);
+    }
+
+    public static void run(final String[] args){
         double startTime = System.currentTimeMillis();
         CLI.LOGGER.info("Start calculation with following parameters: " + Arrays.toString(args));
         final CmdLineParser parser = new InterfaceCmdLineParser(CLI);
@@ -40,6 +46,7 @@ public class BCDSupertrees {
                 CLI.printHelp(parser);
                 System.exit(0);
             }
+
 
             //parse guide trees
             Tree guideTree = CLI.parseSCM();
@@ -81,29 +88,33 @@ public class BCDSupertrees {
             }
 
             // configure algorithm
-            FlipCutSingleCutSimpleWeight algorithm = new FlipCutSingleCutSimpleWeight();
-            CLI.setParameters(algorithm);
+            AbstractFlipCut algorithm =  CLI.createAlgorithmInstance();
+//            CLI.setParameters(algorithm);
             //set input trees
             algorithm.setInput(inputTrees, guideTreeToCut);
             inputTrees = null;
             //run bcd supertrees
             algorithm.run();
             //collect results
-            Tree superTree = algorithm.getResult();
+            List<Tree> superTrees =  algorithm.getResults();
 
             //postprocess results if needed
             if (CLI.removeUndisputedSiblings)
-                reducer.unmodify(Arrays.asList(superTree));
+                reducer.unmodify(superTrees);
 
             if (CLI.unsupportedCladeReduction) {
                 List<Tree> inputTreesUntouched = CLI.parseInput();
-                removeUnsupportedClades(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()]), superTree);
+                for (Tree superTree : superTrees) {
+                    removeUnsupportedClades(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()]), superTree);
+                }
             }
             //write output file
             if (CLI.isFullOutput() && guideTree != null) {
-                CLI.writeOutput(Arrays.asList(superTree, guideTree));
+                List<Tree> withSCM = new LinkedList(superTrees);
+                withSCM.add(guideTree);
+                CLI.writeOutput(withSCM);
             } else {
-                CLI.writeOutput(Arrays.asList(superTree));
+                CLI.writeOutput(superTrees);
             }
 
             //calculate runtime
@@ -158,8 +169,6 @@ public class BCDSupertrees {
 
         System.exit(888);
     }
-
-
     private static ReductionModifier removeUndisputedSiblings(List<Tree> inputTrees) {
         ReductionModifier reducer = new ReductionModifier(null, false);
         reducer.modify(inputTrees);

@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutorService;
  * Time: 11:12
  */
 public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> extends CutGraphCutter<FlipCutNodeSimpleWeight, T> {
-    public enum CutGraphTypes {MAXFLOW_TARJAN_GOLDBERG, MAXFLOW_AHOJI_ORLIN, HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG, type, HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN}
+    public enum CutGraphTypes {MAXFLOW_TARJAN_GOLDBERG, MAXFLOW_AHOJI_ORLIN, HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG, HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN}
 
     protected static final boolean DEBUG = false;
 

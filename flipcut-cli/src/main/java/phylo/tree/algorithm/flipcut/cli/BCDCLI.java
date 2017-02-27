@@ -1,9 +1,13 @@
 package phylo.tree.algorithm.flipcut.cli;
 
+import phylo.tree.algorithm.flipcut.AbstractFlipCut;
 import phylo.tree.algorithm.flipcut.FlipCutSingleCutSimpleWeight;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
 import phylo.tree.algorithm.consensus.Consensus;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
+import phylo.tree.algorithm.flipcut.flipCutGraph.SimpleCutGraphCutter;
+import phylo.tree.algorithm.flipcut.flipCutGraph.SimpleCutterFactories;
 import phylo.tree.io.TreeFileUtils;
 import phylo.tree.model.Tree;
 
@@ -18,7 +22,7 @@ import java.util.EnumMap;
 /**
  * Created by fleisch on 03.02.16.
  */
-public class BCDCLI extends BasicBCDCLI<FlipCutSingleCutSimpleWeight> {
+public class BCDCLI<A extends AbstractFlipCut> extends BasicBCDCLI<A> {
 
     public BCDCLI(String appHomeParent, String appHomeFolderName, String logDir, int maxLogFileSize, int logRotation) {
         super(appHomeParent, appHomeFolderName, logDir, maxLogFileSize, logRotation);
@@ -51,14 +55,14 @@ public class BCDCLI extends BasicBCDCLI<FlipCutSingleCutSimpleWeight> {
     }
 
     //cut graph type
-    CutGraphCutter.CutGraphTypes graphType = CutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG;
+    SimpleCutGraphCutter.CutGraphTypes graphType = SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG;
 
     @Override
-    public void setGraphType(CutGraphCutter.CutGraphTypes graphType) {
+    public void setGraphType(SimpleCutGraphCutter.CutGraphTypes graphType) {
         this.graphType = graphType;
     } //deafault has to be null
 
-    public CutGraphCutter.CutGraphTypes getGraphType() {
+    public SimpleCutGraphCutter.CutGraphTypes getGraphType() {
         return graphType;
     } //deafault has to be null
 
@@ -73,10 +77,10 @@ public class BCDCLI extends BasicBCDCLI<FlipCutSingleCutSimpleWeight> {
     protected void printUsage(PrintStream stream) {
         stream.println("Usage:");
         stream.println(" " + name() + " [options...] INPUT_TREE_FILE");
-        stream.println("    The only required argument is the input tree file in newick format");
+        stream.println("    The only required argument is the input tree file");
         stream.println();
         stream.println(" " + name() + " [options...] INPUT_TREE_FILE GUIDE_TREE_FILE");
-        stream.println("    Additionally, a guide tree can be specified. Otherwise SCM tree gets calculated as default guide tree");
+        stream.println("    Additionally, a guide tree can be specified. Otherwise the GSCM tree will be calculated as default guide tree");
         stream.println();
 //        stream.println(" " + NAME + " NEXUS_FILE");
 //        stream.println("    Use nexus file for options and input data");
@@ -89,13 +93,22 @@ public class BCDCLI extends BasicBCDCLI<FlipCutSingleCutSimpleWeight> {
     }
 
     @Override
-    public void setParameters(FlipCutSingleCutSimpleWeight algo) {
+    public void setParameters(A algo) {
         algo.setNumberOfThreads(getNumberOfThreads());
         algo.setPrintProgress(isProgressBar());
         algo.setBootstrapThreshold(getBootstrapThreshold());
-        algo.setCutter(getGraphType());
         algo.setWeights(getWeights());
     }
+
+    @Override
+    public A createAlgorithmInstance() {
+        A algo = (A) new FlipCutSingleCutSimpleWeight();
+        algo.setCutter(SimpleCutterFactories.newInstance(getGraphType()));
+        setParameters(algo);
+        return algo;
+    }
+
+
 
     public Tree parseSCM() throws IOException {
         if (getSCMInputFile() == null)

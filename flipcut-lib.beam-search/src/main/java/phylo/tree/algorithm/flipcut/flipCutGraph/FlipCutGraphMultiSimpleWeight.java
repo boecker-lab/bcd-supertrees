@@ -16,15 +16,13 @@ import java.util.*;
  */
 
 public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
-    int maxCutNumber;
+    private int maxCutNumber;
     private int nextCutIndexToCalculate;
     private final MultiCut[] cuts;
     private final MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutter;
     private final MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory;
 
 
-
-    //todo k needed?
     public FlipCutGraphMultiSimpleWeight(CostComputer costs, int k, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory) {
         super(costs, 0); //todo dummy bootstrapthreshold --> implement it
         this.cutter = cutterFactory.newInstance(this);
@@ -357,6 +355,8 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
             }
         }
     }
+
+    public int getK(){return cuts.length;}
 
 
 }

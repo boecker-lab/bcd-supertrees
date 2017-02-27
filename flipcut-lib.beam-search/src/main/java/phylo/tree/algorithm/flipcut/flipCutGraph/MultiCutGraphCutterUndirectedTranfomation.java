@@ -66,7 +66,7 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
         }
 
         //sample k-1 random cuts
-        for (int i = 0; i < source.maxCutNumber - 1; i++) {
+        for (int i = 0; i < source.getK() - 1; i++) {
 //            time = System.currentTimeMillis();
 //            System.out.println();
             mincuts.add(cutGraph.calculateMinCut());

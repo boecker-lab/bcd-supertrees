@@ -33,7 +33,7 @@ public class MultiCutGraphCutterGreedyRandomized extends MultiCutGraphCutterGree
         if (mincuts == null) {
             mincuts = new TreeSet<>();
            //todo reenable
-             while (mincuts.size() < source.maxCutNumber && !stopCutting) {
+             while (mincuts.size() < source.getK() && !stopCutting) {
                 DefaultMultiCut r = super.getNextCut();
                 if (r != null)
                     mincuts.add(r);
@@ -50,7 +50,7 @@ public class MultiCutGraphCutterGreedyRandomized extends MultiCutGraphCutterGree
         int it = 0;
 //        System.out.println();
 //        System.out.println();
-        while (mincuts.size() < source.maxCutNumber && it < (2*source.maxCutNumber)) {
+        while (mincuts.size() < source.getK() && it < (2*source.getK())) {
 //            long time = System.currentTimeMillis();
             it++;
             blacklist = new HashSet<>(drawBlackCharacters(fullBlacklist));

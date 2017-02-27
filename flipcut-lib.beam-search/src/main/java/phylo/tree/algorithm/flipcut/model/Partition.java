@@ -182,7 +182,7 @@ public class Partition implements Comparable<Partition> {
         for (Edge edge : supertreeEdges) {
             tree.addEdge(nodeMap.get(edge.source),nodeMap.get(edge.target));
         }
-        tree.setName("Tree" + treeNumber + "_" + currentscore);
+        tree.setName(String.valueOf(currentscore));
         return tree;
     }
 
