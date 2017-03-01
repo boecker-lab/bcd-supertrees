@@ -23,7 +23,8 @@ public class HyperMultiCut extends MultiCut<FlipCutNodeSimpleWeight, FlipCutGrap
     public HyperMultiCut(FlipCutGraphMultiSimpleWeight sourceGraph, HyperCut<FlipCutNodeSimpleWeight> sourceCut) {
         super(sourceGraph);
         this.sourceCut = sourceCut;
-        minCutValue = sourceCut.minCutValue;
+        minCutValue = sourceCut.minCutValue();
+        calculateHash();
     }
 
     @Override
@@ -32,25 +33,25 @@ public class HyperMultiCut extends MultiCut<FlipCutNodeSimpleWeight, FlipCutGrap
     }
 
     @Override
+    public LinkedHashSet<FlipCutNodeSimpleWeight> getCutSet() {
+        return sourceCut.getCutSet();
+    }
+
+    @Override
     public List<FlipCutGraphMultiSimpleWeight> getSplittedGraphs() {
-
         if (splittedGraphs == null) {
-            LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes = new LinkedHashSet<>();
-            LinkedHashSet<FlipCutNodeSimpleWeight> deletedChars = sourceCut.cutEdges;
 
-            for (FlipCutNodeSimpleWeight taxon : sourceCut.cutTaxaSource) {
-                sinkNodes.add(taxon);
-                for (FlipCutNodeSimpleWeight character : taxon.edges) {
-                    sinkNodes.add(character);
-                    sinkNodes.add(character.getClone());
-                }
-            }
-            sinkNodes.removeAll(deletedChars);
-
-            splittedGraphs = (List<FlipCutGraphMultiSimpleWeight>) sourceGraph.split(sinkNodes);
+            splittedGraphs = (List<FlipCutGraphMultiSimpleWeight>) sourceGraph.split(getCutSet());
             sourceCut = null;
         }
 
         return splittedGraphs;
     }
+
+    @Override
+    protected List<List<FlipCutNodeSimpleWeight>> comp() {
+        return null;
+    }
+
+
 }

@@ -5,7 +5,10 @@ import com.google.common.collect.HashBiMap;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import phylo.tree.algorithm.flipcut.mincut.EdgeColor;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.AbstractBipartition;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.Cut;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.HyperCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.CutFactory;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.*;
 
 import java.util.*;
@@ -13,7 +16,7 @@ import java.util.*;
 /**
  * Created by fleisch on 15.04.15.
  */
-public class KargerSteinCutGraph<V> implements MultiCutGraph<V>, EdgeColorableUndirectedGraph<V> {
+public class KargerSteinCutGraph<V, C extends CutFactory<V,? extends AbstractBipartition<V>>> implements MultiCutGraph<V>, EdgeColorableUndirectedGraph<V> {
     private static final boolean RESCURSIVE_KARGER = true;
     private final boolean allowDuplicates = false;
     private TIntObjectMap<V> vertexMap = new TIntObjectHashMap<>();
@@ -24,68 +27,104 @@ public class KargerSteinCutGraph<V> implements MultiCutGraph<V>, EdgeColorableUn
     private int vertexIndex = 0;
     private EdgeWeighter weighter;
 
-    public KargerSteinCutGraph(EdgeWeighter weighter) {
+    private final C cutFactory;
+
+    public KargerSteinCutGraph(EdgeWeighter weighter, C cutFactory) {
         this.weighter = weighter;
+        this.cutFactory =cutFactory;
         clear();
     }
 
-    public KargerSteinCutGraph() {
-        this(new EdgeWeighter() {
-        });
+    public KargerSteinCutGraph(C cutFactory) {
+        this(new EdgeWeighter() {},cutFactory);
     }
 
 
     @Override
-    public LinkedList<HyperCut<V>> calculateMinCuts() {
+    public List<AbstractBipartition<V>> calculateMinCuts() {
         KargerStein cutter = new KargerStein();
         LinkedHashSet<Graph> cuts = cutter.getMinCuts(g,RESCURSIVE_KARGER);
 
-        LinkedList<HyperCut<V>> basicCuts = buildCuts(cuts);
+        ArrayList<AbstractBipartition<V>> basicCuts = new ArrayList<>(cuts.size());
+        for (Graph cut : cuts) {
+            basicCuts.add(buildCut(cut));
+        }
         Collections.sort(basicCuts);
         return basicCuts;
     }
 
-    private LinkedList<HyperCut<V>> buildCuts(Collection<Graph> sourceCuts){
-        LinkedList<HyperCut<V>> basicCuts = new LinkedList<>();
-        for (Graph c : sourceCuts) {
-            LinkedHashSet<V> cutset = new LinkedHashSet<>();
+    private AbstractBipartition<V> buildCut(Graph c) {
+        Iterator<Vertex> vIt = c.getVertices().valueCollection().iterator();
 
-            Vertex source = c.getVertices().valueCollection().iterator().next();
-            source.getMergedLbls().forEach(v -> {
-                cutset.add(vertexMap.get(v));
-                return true;
-            });
+        //get source taxa set
+        Vertex source = vIt.next();
+        LinkedHashSet<V> sSet = new LinkedHashSet<>();
+        source.getMergedLbls().forEach(v -> {
+            sSet.add(vertexMap.get(v));
+            return true;
+        });
 
-            LinkedHashSet<V> cutEdges = new LinkedHashSet<>(source.getEdges().size());
-            for (EdgeColor color : c.getEdgeColors()) {
-                cutEdges.add(charactermap.inverse().get(color));
-            }
+        //get targe taxa set
+        Vertex target = vIt.next();
+        LinkedHashSet<V> tSet = new LinkedHashSet<>();
+        target.getMergedLbls().forEach(v -> {
+            tSet.add(vertexMap.get(v));
+            return true;
+        });
 
-
-            long mincutValue = (long) c.mincutValue();
-            if (!charactermap.isEmpty()) {
-                mincutValue = (long) cutEdges.stream().mapToDouble(cc -> charactermap.get(cc).getWeight()).sum();
-            }
-            basicCuts.add(new HyperCut<V>(cutset, cutEdges, mincutValue));
+        //get edges
+        LinkedHashSet<V> cutEdges = new LinkedHashSet<>(source.getEdges().size());
+        for (EdgeColor color : c.getEdgeColors()) {
+            cutEdges.add(charactermap.inverse().get(color));
         }
-        return basicCuts;
+        //get cutsocre from edges
+        long mincutValue = (long) c.mincutValue();
+        if (!charactermap.isEmpty()) {
+            mincutValue = (long) cutEdges.stream().mapToDouble(cc -> charactermap.get(cc).getWeight()).sum();
+        }
+        return cutFactory.newCutInstance(sSet,tSet,cutEdges, mincutValue);
     }
 
+
+
+
     @Override
-    public List<HyperCut<V>> calculateMinCuts(int numberOfCuts) {
+    public List<AbstractBipartition<V>> calculateMinCuts(int numberOfCuts) {
         if (numberOfCuts == 0) return null;
 
         if (numberOfCuts > 1) {
-            return calculateMinCuts().subList(0, numberOfCuts);
+            List<AbstractBipartition<V>> cuts = calculateMinCuts();
+            return cuts.subList(0, Math.min(numberOfCuts,cuts.size()));
         } else {
-            return buildCuts(Arrays.asList(new KargerStein().sampleCut(g)));
+            return Arrays.asList(calculateMinCut());
         }
     }
 
     @Override
-    public HyperCut<V> calculateMinCut() {
-        Graph cut = new KargerStein().sampleCut(g);
-        return buildCuts(Arrays.asList(cut)).get(0);
+    public AbstractBipartition<V> calculateMinCut() {
+        return buildCut(new KargerStein().getMinCut(g));
+    }
+
+    public AbstractBipartition<V> sampleCut() {
+        return buildCut(new KargerStein().sampleCut(g));
+    }
+
+    public List<AbstractBipartition<V>> sampleCuts(int numberOfCuts) {
+        KargerStein algo = new KargerStein();
+        Set<Graph> graphs =  new HashSet<>(numberOfCuts);
+
+        for (int i=0;i<numberOfCuts;i++){
+            graphs.add(algo.sampleCut(g));
+        }
+
+        Iterator<Graph> it = graphs.iterator();
+
+        List<AbstractBipartition<V>> cuts =  new ArrayList<>(graphs.size());
+        while (it.hasNext()){
+            cuts.add(buildCut(it.next()));
+            it.remove();//dont know if i should do that
+        }
+        return cuts;
     }
 
     @Override

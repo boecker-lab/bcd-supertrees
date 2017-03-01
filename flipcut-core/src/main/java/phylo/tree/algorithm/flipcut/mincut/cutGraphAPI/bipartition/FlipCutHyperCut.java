@@ -2,18 +2,19 @@ package phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition;
 /**
  * Created by Markus Fleischauer (markus.fleischauer@gmail.com)
  * as part of the flipcut
- * 15.02.17.
+ * 28.02.17.
  */
+
+import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
 
 import java.util.LinkedHashSet;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public abstract class HyperCut<V> extends AbstractBipartition<V> {
+public class FlipCutHyperCut<V extends AbstractFlipCutNode<V>> extends HyperCut<V> {
 
-
-    public HyperCut(long minCutValue, LinkedHashSet<V> sSet, LinkedHashSet<V> tSet) {
+    public FlipCutHyperCut(long minCutValue, LinkedHashSet<V> sSet, LinkedHashSet<V> tSet) {
         super(minCutValue, sSet, tSet);
     }
 

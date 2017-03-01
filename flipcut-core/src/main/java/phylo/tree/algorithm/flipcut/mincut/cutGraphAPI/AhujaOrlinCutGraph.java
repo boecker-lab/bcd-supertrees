@@ -1,13 +1,14 @@
 package phylo.tree.algorithm.flipcut.mincut.cutGraphAPI;
 
 import core.utils.parallel.IterationCallableFactory;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.maxFlowAhujaOrlin.FlowGraph;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.maxFlowAhujaOrlin.FlowGraph;
 
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -72,20 +73,29 @@ public class AhujaOrlinCutGraph<V> extends MaxFlowCutGraph<V> {
         ahujaGraph.setSource(vertexToNode.get(source));
         ahujaGraph.setSink(vertexToNode.get(sink));
 
-        LinkedHashSet<V> sourceList = creatCut(ahujaGraph);
-        STCut<V> cut = new STCut(sourceList, source, sink, (long) ahujaGraph.getMaximumFlow());
+        List<LinkedHashSet<V>> sourceList = creatCut(ahujaGraph);
+        STCut<V> cut = new STCut(sourceList.get(0), sourceList.get(1), source, sink, (long) ahujaGraph.getMaximumFlow());
         return cut;
     }
 
-    private LinkedHashSet<V> creatCut(FlowGraph flowGraph) {
-        TIntHashSet soourceSet = flowGraph.calculateSTCut();
-        TIntIterator ti = soourceSet.iterator();
-        LinkedHashSet<V> set = new LinkedHashSet<>(soourceSet.size());
-
-        while (ti.hasNext()) {
-            set.add(nodeToVertex.get(ti.next()));
+    private List<LinkedHashSet<V>> creatCut(FlowGraph flowGraph) {
+        //create source set
+        TIntHashSet sourceSet = flowGraph.calculateSTCut();
+        TIntIterator sIt = sourceSet.iterator();
+        LinkedHashSet<V> sset = new LinkedHashSet<>(sourceSet.size());
+        while (sIt.hasNext()) {
+            sset.add(nodeToVertex.get(sIt.next()));
         }
-        return set;
+
+        //create target set
+        TIntHashSet targetSet = flowGraph.getTSet(sourceSet);
+        TIntIterator tIt = targetSet.iterator();
+        LinkedHashSet<V> tset = new LinkedHashSet<>(targetSet.size());
+        while (tIt.hasNext()) {
+            tset.add(nodeToVertex.get(tIt.next()));
+        }
+
+        return Arrays.asList(sset, tset);
     }
 
     private class AhujaOrlinCallable extends MaxFlowCallable {

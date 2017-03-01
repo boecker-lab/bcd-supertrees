@@ -737,7 +737,7 @@ public class CutGraphImpl {
      * @param activateChecks check the results
      * @return cut all elements of the component that contains the sink
      */
-    public LinkedHashSet<Object> calculateMaxSTFlow(final boolean activateChecks) {
+    public List<LinkedHashSet<Object>> calculateMaxSTFlowFull(final boolean activateChecks) {
         long sum;
         globUpdtFreq = GLOB_UPDT_FREQ;
 
@@ -789,15 +789,24 @@ public class CutGraphImpl {
             }
         }
 
-        LinkedHashSet<Object> cut = new LinkedHashSet<>();
+        LinkedHashSet<Object> sSet = new LinkedHashSet<>();
+        LinkedHashSet<Object> tSet = new LinkedHashSet<>();
         /// original :
         for (Node j : nodes) {
             if (j.d < n) {
-                cut.add(j.name);
+                sSet.add(j.name);
+            }else{
+                tSet.add(j.name);
             }
         }
-        return cut;
+        return Arrays.asList(sSet,tSet);
     }
+
+    public LinkedHashSet<Object> calculateMaxSTFlow(final boolean activateChecks) {
+        return calculateMaxSTFlowFull(activateChecks).get(0);
+    }
+
+
 
 
     /**

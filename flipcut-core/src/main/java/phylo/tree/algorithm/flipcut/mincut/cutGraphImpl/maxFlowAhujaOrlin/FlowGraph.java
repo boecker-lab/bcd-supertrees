@@ -42,7 +42,7 @@ public class FlowGraph {
     }
 
     public void addEdge(int source, int dest, double cap) {
-        addEdge(new Edge(source,dest,cap));
+        addEdge(new Edge(source, dest, cap));
     }
 
     private void addEdge(Edge e) {
@@ -310,6 +310,12 @@ public class FlowGraph {
         sourceSet.add(source);
         dfs(sourceSet, adjacencies.get(source));
         return sourceSet;
+    }
+
+    public TIntHashSet getTSet(TIntHashSet sourceSet) {
+        final TIntHashSet targetSet = new TIntHashSet(adjacencies.keySet());
+        targetSet.removeAll(sourceSet);
+        return targetSet;
     }
 
     private void dfs(final TIntHashSet sourceSet, LinkedList<Edge> edges) {

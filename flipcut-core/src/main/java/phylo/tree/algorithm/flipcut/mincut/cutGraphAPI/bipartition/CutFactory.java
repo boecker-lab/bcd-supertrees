@@ -2,7 +2,7 @@ package phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition;
 /**
  * Created by Markus Fleischauer (markus.fleischauer@gmail.com)
  * as part of the flipcut
- * 15.02.17.
+ * 28.02.17.
  */
 
 import java.util.LinkedHashSet;
@@ -10,15 +10,6 @@ import java.util.LinkedHashSet;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public abstract class HyperCut<V> extends AbstractBipartition<V> {
-
-
-    public HyperCut(long minCutValue, LinkedHashSet<V> sSet, LinkedHashSet<V> tSet) {
-        super(minCutValue, sSet, tSet);
-    }
-
-
-
-
-
+public interface CutFactory<V,C extends Cut<V>> {
+    C newCutInstance(LinkedHashSet<V> cutTaxaSource, LinkedHashSet<V> cutTaxaSink, LinkedHashSet<V> cutEdges, long mincutValue);
 }

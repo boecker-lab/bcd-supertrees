@@ -7,6 +7,7 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.KargerSteinCutGraph;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.Cut;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.FlipCutCutFactory;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.HyperCut;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 import phylo.tree.algorithm.flipcut.model.HyperMultiCut;
@@ -21,6 +22,7 @@ import java.util.concurrent.ExecutorService;
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
 public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+    private static final boolean MINIMAL_SAMPLING = true;
     private static final Factory FACTORY = new Factory();
     private TreeSet<Cut<FlipCutNodeSimpleWeight>> mincuts = null;
 
@@ -49,12 +51,10 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
         LinkedHashSet<FlipCutNodeSimpleWeight> optCutSet = optCutter.getMinCut(source);
         long mincutValue = optCutter.getMinCutValue(source);
         DefaultMultiCut optCut = new DefaultMultiCut(optCutSet, mincutValue, source);
-//        System.out.println("Optimal Cut needed " + (System.currentTimeMillis() - time) / 1000d + "s");
 
         mincuts.add(optCut);
 
-
-        KargerSteinCutGraph<FlipCutNodeSimpleWeight> cutGraph = new KargerSteinCutGraph<>(/*new NormalizePerColorWeighter()*/);
+        KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory<FlipCutNodeSimpleWeight>> cutGraph = new KargerSteinCutGraph<>(new FlipCutCutFactory<FlipCutNodeSimpleWeight>());
         for (FlipCutNodeSimpleWeight character : source.characters) {
             for (FlipCutNodeSimpleWeight e1 : character.edges) {
                 for (FlipCutNodeSimpleWeight e2 : character.edges) {
@@ -66,13 +66,14 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
         }
 
         //sample k-1 random cuts
-        for (int i = 0; i < source.getK() - 1; i++) {
-//            time = System.currentTimeMillis();
-//            System.out.println();
-            mincuts.add(cutGraph.calculateMinCut());
-//            System.out.println("On Random Cut needed " + (System.currentTimeMillis() - time) / 1000d + "s");
+        final int toGo = source.getK() - 1;
+        if (toGo > 0) {
+            if (MINIMAL_SAMPLING) {
+                mincuts.addAll(cutGraph.sampleCuts(toGo));
+            } else {
+                mincuts.addAll(cutGraph.calculateMinCuts(toGo));
+            }
         }
-//        mincuts.addAll(cutGraph.calculateMinCuts(source.maxCutNumber-1));
     }
 
 

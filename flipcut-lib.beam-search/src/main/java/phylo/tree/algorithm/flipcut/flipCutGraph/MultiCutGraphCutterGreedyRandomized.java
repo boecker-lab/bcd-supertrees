@@ -21,7 +21,7 @@ public class MultiCutGraphCutterGreedyRandomized extends MultiCutGraphCutterGree
     private final SamplingDitribution dist = SamplingDitribution.GAUSSIAN;
     private final double maximumBlackListProportion = .5;
     protected Set<FlipCutNodeSimpleWeight> fullBlacklist = new HashSet<>();
-    TreeSet<DefaultMultiCut> mincuts = null; //todo, we say there are no cooptimal cuts in reality
+    LinkedList<DefaultMultiCut> mincuts = null;
 
     public MultiCutGraphCutterGreedyRandomized(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut) {
         super(type, graphToCut);
@@ -31,21 +31,23 @@ public class MultiCutGraphCutterGreedyRandomized extends MultiCutGraphCutterGree
     public DefaultMultiCut getNextCut() {
 //        if (DEBUG) System.out.println("Taxa to cut: " + (source.taxa));
         if (mincuts == null) {
-            mincuts = new TreeSet<>();
-           //todo reenable
+            HashSet<DefaultMultiCut> mincuts =  new HashSet<>(source.getK());
              while (mincuts.size() < source.getK() && !stopCutting) {
                 DefaultMultiCut r = super.getNextCut();
                 if (r != null)
                     mincuts.add(r);
             }
-            getRandCuts();
+            getRandCuts(mincuts);
+
+            this.mincuts = new LinkedList(mincuts);
+            Collections.sort(this.mincuts);
         }
 
 
-        return mincuts.pollFirst();
+        return mincuts.poll();
     }
 
-    private void getRandCuts() {
+    private void getRandCuts(HashSet<DefaultMultiCut> mincuts) {
         fullBlacklist = new HashSet<>(blacklist);
         int it = 0;
 //        System.out.println();

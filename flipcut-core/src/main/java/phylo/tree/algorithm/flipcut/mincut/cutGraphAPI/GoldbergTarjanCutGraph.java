@@ -174,8 +174,8 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
         hipri.setSource(algoNodeMap.get(nodes.get(source)));
         hipri.setSink(algoNodeMap.get(nodes.get(sink)));
 
-        LinkedHashSet<V> sinkList = (LinkedHashSet<V>) hipri.calculateMaxSTFlow(false);
-        return new STCut(sinkList, source, sink, hipri.getValue());
+        List<LinkedHashSet<Object>> cutList = hipri.calculateMaxSTFlowFull(false);
+        return new STCut(cutList.get(0), cutList.get(1), source, sink, hipri.getValue());
     }
 
     private class HipriCallable extends MaxFlowCallable {

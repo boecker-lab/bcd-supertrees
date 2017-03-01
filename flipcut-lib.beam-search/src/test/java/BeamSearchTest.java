@@ -28,6 +28,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
@@ -170,8 +171,8 @@ public class BeamSearchTest {
 //        params.add(new Object[]{Newick.getTreeFromString("((A,B),C);"), Newick.getTreeFromString("((A,B),C);"), trivialSource});
 //        params.add(new Object[]{Newick.getTreeFromString("(((a,b),c),e),d);"), Newick.getTreeFromString("(((a,b),c),e),d);"), caterpillar});
 //        params.add(new Object[]{null,null, cut});
-        params.add(new Object[]{null,null,realExample0});
-//        params.add(new Object[]{null,null,realExample1});
+//        params.add(new Object[]{null,null,realExample0});
+        params.add(new Object[]{null,null,realExample1});
 //        params.add(new Object[]{null,null,realExample2});
 
         //bryant example
@@ -192,28 +193,40 @@ public class BeamSearchTest {
 
     public List<Tree> calculateSupertrees(SupertreeAlgorithm fs, Tree expected, Tree guide) {
         fs.run();
-        Tree supertree = fs.getResult();
-        assertNotNull(supertree);
+        List<Tree> supertrees = fs.getResults();
+        assertNotNull(supertrees);
+        assertTrue(!supertrees.isEmpty());
 
-        supertree = TreeUtils.deleteInnerLabels(supertree);
-        ArrayList<String> s = new ArrayList<>(TreeUtils.getLeafLabels(supertree));
+        Tree best = TreeUtils.deleteInnerLabels(supertrees.get(0));
+        ArrayList<String> s = new ArrayList<>(TreeUtils.getLeafLabels(best));
 
         if (guide != null) {
             guide = TreeUtils.deleteInnerLabels(guide);
             TreeUtils.sortTree(guide,s);
             System.out.println(Newick.getStringFromTree(guide,true,false) + " Guide");
         }
-        TreeUtils.sortTree(supertree,s);
-        System.out.println(Newick.getStringFromTree(supertree,true,false) + " Estimated");
 
         if (expected != null) {
-            TreeUtils.sortTree(expected,s);
-            System.out.println(Newick.getStringFromTree(expected,true,false) + " Expected");
-            Assert.assertEquals(TreeUtils.getLeafCount(source), supertree.getLeaves().length);
-            int rfdist = RFDistance.getDifference(supertree, expected, false);
-            System.out.println("Distance to expected: " + rfdist);
-//            assertEquals(0, rfdist);
+            TreeUtils.sortTree(expected, s);
+            System.out.println(Newick.getStringFromTree(expected, true, false) + " Expected");
+            Assert.assertEquals(TreeUtils.getLeafCount(source), best.getLeaves().length);
         }
+        System.out.println();
+
+        for (Tree supertree : supertrees) {
+            TreeUtils.sortTree(supertree,s);
+            System.out.println(Newick.getStringFromTree(supertree,true,false) + " Estimated");
+            if (expected != null) {
+                int rfdist = RFDistance.getDifference(supertree, expected, false);
+                System.out.println("Distance to expected: " + rfdist);
+                System.out.println();
+//            assertEquals(0, rfdist);
+            }
+        }
+
+
+
+
         return fs.getResults();
     }
 
@@ -241,14 +254,21 @@ public class BeamSearchTest {
         fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
         calculateSupertrees(fcm, exp);
 
+        System.out.println("MultiSingleMC");
+        fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.MC));
+        fcm.setNumberOfCuts(1);
+        fcm.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
+        fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
+        calculateSupertrees(fcm, exp);
+
         final int k = 100;
 
-        System.out.println("Vazi");
+        /*System.out.println("Vazi");
         fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.VAZIRANI,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
         fcm.setNumberOfCuts(k);
         fcm.setWeights(FlipCutWeights.Weights.EDGE_WEIGHTS);
         fcm.setInput(TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)));
-        calculateSupertrees(fcm, exp);
+        calculateSupertrees(fcm, exp);*/
 
         System.out.println("Greedy");
         fcm = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(MultiCutGrapCutterFactories.MultiCutterType.GREEDY,SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
