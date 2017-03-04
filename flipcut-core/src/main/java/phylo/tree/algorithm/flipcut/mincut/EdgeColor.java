@@ -14,18 +14,28 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
 public class EdgeColor implements Cloneable {
+    public final boolean preMerged; //todo this is ugly. make nice
     private final Object idetifier;
     private final double weight;
     private final RandomSet<Colorable> edges = new RandomSet<>();
 
 
     private EdgeColor(Object idetifier, double weight) {
+        this(idetifier,weight,false);
+
+    }
+    private EdgeColor(Object idetifier, double weight, boolean preMerged) {
         this.idetifier = idetifier;
         this.weight = weight;
+        this.preMerged = preMerged;
     }
 
     public EdgeColor(double weight) {
         this(new Object(), weight);
+    }
+
+    public EdgeColor(double weight, boolean preMerged) {
+        this(new Object(), weight, preMerged);
     }
 
     public double getWeight() {
@@ -58,7 +68,7 @@ public class EdgeColor implements Cloneable {
     }*/
 
     public EdgeColor clone() {
-        return new EdgeColor(idetifier, weight);
+        return new EdgeColor(idetifier, weight,preMerged);
     }
 
     @Override

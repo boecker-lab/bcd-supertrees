@@ -26,6 +26,7 @@ public class Graph implements Comparable<Graph>, Cloneable {
 
     final Map<VertexPair, Edge> edges = new HashMap<>();
     final Set<EdgeColor> edgeColors = new HashSet<>();
+    final Set<EdgeColor> preMergedColors = new HashSet<>();
 
     List<EdgeColor> edgeColorList;
     TDoubleList weights;
@@ -95,6 +96,9 @@ public class Graph implements Comparable<Graph>, Cloneable {
 
         }else{
             e.add(c);
+        }
+        if (c.preMerged) {
+            preMergedColors.add(c);
         }
         return edgeColors.add(c);
     }
@@ -218,6 +222,7 @@ public class Graph implements Comparable<Graph>, Cloneable {
 
     public boolean removeClolor(EdgeColor color) {
         if (edgeColors.remove(color)) {
+            preMergedColors.remove(color);
             weights = null;
             edgeColorList = null;
             sumOfWeights = 0;

@@ -51,34 +51,41 @@ public class KargerStein {
     }
 
     private Edge drawEdge(Graph g) {
-        int upper = g.getNumOfColors();
-        int downer = 0;
+        EdgeColor picked;
+        if (g.preMergedColors.isEmpty()) {
+            int upper = g.getNumOfColors();
+            int downer = 0;
 
-        double r = ThreadLocalRandom.current().nextDouble(0, g.getSumOfWeights());
+            double r = ThreadLocalRandom.current().nextDouble(0, g.getSumOfWeights());
 
-        TDoubleList values = g.weights;
+            TDoubleList values = g.weights;
 
-        int mid;
-        while (upper - downer > 1) {
-            mid = downer + (upper - downer) / 2;
-            double v = values.get(mid);
-            if (r > v) {
-                downer = mid;
-            } else if (r < v) {
-                upper = mid;
-            } else {
-                downer = mid;
-                break;
+            int mid;
+            while (upper - downer > 1) {
+                mid = downer + (upper - downer) / 2;
+                double v = values.get(mid);
+                if (r > v) {
+                    downer = mid;
+                } else if (r < v) {
+                    upper = mid;
+                } else {
+                    downer = mid;
+                    break;
+                }
             }
+
+            if (r <= values.get(downer)) {
+                mid = downer;
+            } else {
+                mid = upper;
+            }
+
+            picked = g.edgeColorList.get(mid);
+
+        }else{
+            picked = g.preMergedColors.iterator().next();
         }
 
-        if (r <= values.get(downer)) {
-            mid = downer;
-        } else {
-            mid = upper;
-        }
-
-        EdgeColor picked = g.edgeColorList.get(mid);
         Edge e = (Edge) picked.getRandomElement();
         if (e == null)
             System.out.println("fali");

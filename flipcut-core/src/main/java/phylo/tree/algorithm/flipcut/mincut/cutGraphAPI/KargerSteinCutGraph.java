@@ -6,17 +6,18 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import phylo.tree.algorithm.flipcut.mincut.EdgeColor;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.AbstractBipartition;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.Cut;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.HyperCut;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.CutFactory;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.*;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.EdgeWeighter;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.Graph;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.KargerStein;
+import phylo.tree.algorithm.flipcut.mincut.cutGraphImpl.minCutKargerSteinMastaP.Vertex;
 
 import java.util.*;
 
 /**
  * Created by fleisch on 15.04.15.
  */
-public class KargerSteinCutGraph<V, C extends CutFactory<V,? extends AbstractBipartition<V>>> implements MultiCutGraph<V>, EdgeColorableUndirectedGraph<V> {
+public class KargerSteinCutGraph<V, C extends CutFactory<V, ? extends AbstractBipartition<V>>> implements MultiCutGraph<V>, EdgeColorableUndirectedGraph<V> {
     private static final boolean RESCURSIVE_KARGER = true;
     private final boolean allowDuplicates = false;
     private TIntObjectMap<V> vertexMap = new TIntObjectHashMap<>();
@@ -31,19 +32,20 @@ public class KargerSteinCutGraph<V, C extends CutFactory<V,? extends AbstractBip
 
     public KargerSteinCutGraph(EdgeWeighter weighter, C cutFactory) {
         this.weighter = weighter;
-        this.cutFactory =cutFactory;
+        this.cutFactory = cutFactory;
         clear();
     }
 
     public KargerSteinCutGraph(C cutFactory) {
-        this(new EdgeWeighter() {},cutFactory);
+        this(new EdgeWeighter() {
+        }, cutFactory);
     }
 
 
     @Override
     public List<AbstractBipartition<V>> calculateMinCuts() {
         KargerStein cutter = new KargerStein();
-        LinkedHashSet<Graph> cuts = cutter.getMinCuts(g,RESCURSIVE_KARGER);
+        LinkedHashSet<Graph> cuts = cutter.getMinCuts(g, RESCURSIVE_KARGER);
 
         ArrayList<AbstractBipartition<V>> basicCuts = new ArrayList<>(cuts.size());
         for (Graph cut : cuts) {
@@ -82,10 +84,8 @@ public class KargerSteinCutGraph<V, C extends CutFactory<V,? extends AbstractBip
         if (!charactermap.isEmpty()) {
             mincutValue = (long) cutEdges.stream().mapToDouble(cc -> charactermap.get(cc).getWeight()).sum();
         }
-        return cutFactory.newCutInstance(sSet,tSet,cutEdges, mincutValue);
+        return cutFactory.newCutInstance(sSet, tSet, cutEdges, mincutValue);
     }
-
-
 
 
     @Override
@@ -94,7 +94,7 @@ public class KargerSteinCutGraph<V, C extends CutFactory<V,? extends AbstractBip
 
         if (numberOfCuts > 1) {
             List<AbstractBipartition<V>> cuts = calculateMinCuts();
-            return cuts.subList(0, Math.min(numberOfCuts,cuts.size()));
+            return cuts.subList(0, Math.min(numberOfCuts, cuts.size()));
         } else {
             return Arrays.asList(calculateMinCut());
         }
@@ -111,16 +111,16 @@ public class KargerSteinCutGraph<V, C extends CutFactory<V,? extends AbstractBip
 
     public List<AbstractBipartition<V>> sampleCuts(int numberOfCuts) {
         KargerStein algo = new KargerStein();
-        Set<Graph> graphs =  new HashSet<>(numberOfCuts);
+        Set<Graph> graphs = new HashSet<>(numberOfCuts);
 
-        for (int i=0;i<numberOfCuts;i++){
+        for (int i = 0; i < numberOfCuts; i++) {
             graphs.add(algo.sampleCut(g));
         }
 
         Iterator<Graph> it = graphs.iterator();
 
-        List<AbstractBipartition<V>> cuts =  new ArrayList<>(graphs.size());
-        while (it.hasNext()){
+        List<AbstractBipartition<V>> cuts = new ArrayList<>(graphs.size());
+        while (it.hasNext()) {
             cuts.add(buildCut(it.next()));
             it.remove();//dont know if i should do that
         }
@@ -144,13 +144,17 @@ public class KargerSteinCutGraph<V, C extends CutFactory<V,? extends AbstractBip
 
     @Override
     public void addEdge(V vertex1, V vertex2, long capacity, V hyperedge) {
+        addEdge(vertex1,vertex2,capacity,hyperedge,false);
+    }
+
+    public void addEdge(V vertex1, V vertex2, long capacity, V hyperedge,  boolean uncutable) {
         if (!vertexMapBack.containsKey(vertex1))
             addNode(vertex1);
         if (!vertexMapBack.containsKey(vertex2))
             addNode(vertex2);
         EdgeColor color = charactermap.get(hyperedge);
         if (color == null) {
-            color = new EdgeColor(capacity);
+            color = new EdgeColor(capacity,uncutable);
             if (hyperedge != null) //todo proof
                 charactermap.put(hyperedge, color);
         }

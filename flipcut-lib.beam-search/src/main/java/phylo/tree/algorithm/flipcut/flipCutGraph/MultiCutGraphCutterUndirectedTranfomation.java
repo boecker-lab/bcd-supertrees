@@ -5,6 +5,7 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
  * 14.02.17.
  */
 
+import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.KargerSteinCutGraph;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.Cut;
 import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.FlipCutCutFactory;
@@ -17,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
+
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
@@ -59,7 +61,8 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
             for (FlipCutNodeSimpleWeight e1 : character.edges) {
                 for (FlipCutNodeSimpleWeight e2 : character.edges) {
                     if (e1 != e2) {
-                        cutGraph.addEdge(e1, e2, character.edgeWeight, character);
+                        boolean guide = character.edgeWeight == CostComputer.ACCURACY * INFINITY;
+                        cutGraph.addEdge(e1, e2, character.edgeWeight, character, (guide));
                     }
                 }
             }
