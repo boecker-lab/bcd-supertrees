@@ -1,15 +1,13 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
+import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
+import mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 import phylo.tree.algorithm.flipcut.model.VaziraniNode;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-
-import static org.biojava.bio.program.homologene.Taxon.taxa;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)

@@ -11,6 +11,7 @@ allprojects {
     apply plugin: "com.jfrog.artifactory"
 
     sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
     group = 'de.unijena.bioinf.phylo'
 
@@ -71,6 +72,7 @@ project(':flipcut-core') {
     version = '0.9-SNAPSHOT'
 
     dependencies {
+        compile project(':mincut')
     }
 }
 

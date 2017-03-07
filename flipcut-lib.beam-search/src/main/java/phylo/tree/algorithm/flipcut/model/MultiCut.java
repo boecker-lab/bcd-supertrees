@@ -8,11 +8,9 @@ import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.Cut;
+import mincut.cutGraphAPI.bipartition.Cut;
 
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)

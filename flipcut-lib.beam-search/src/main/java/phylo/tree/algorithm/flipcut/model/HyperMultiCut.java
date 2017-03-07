@@ -7,7 +7,7 @@ package phylo.tree.algorithm.flipcut.model;
 
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.HyperCut;
+import mincut.cutGraphAPI.bipartition.HyperCut;
 
 import java.util.LinkedHashSet;
 import java.util.List;
