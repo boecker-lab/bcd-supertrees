@@ -16,12 +16,10 @@ import java.util.List;
 
 /**
  * Semplice implementazione di un grafo orientato e pesato per problemi di flusso con liste di adiacenza e incidenza
- *
- * @author Stefano Scerra
  */
 
 /**
- * This is an implementation of Ahuja Orlins max flow algorithm. based on the freely available code of Stefano Scerra.
+ * This is an implementation of Ahuja Orlins max flow algorithm, based on the freely available code from Stefano Scerra (http://www.stefanoscerra.it/java-max-flow-graph-algorithm/).
  */
 
 public class FlowGraph {
