@@ -41,15 +41,16 @@ public class BCDCLI<A extends AbstractFlipCut> extends BasicBCDCLI<A> {
     //##### flip cut parameter #####
     //this is a simple mapping from experimental weighting names to public naming
     @Override
-    protected final EnumMap<BasicBCDCLI.SuppportedWeights, FlipCutWeights.Weights> initWheightMapping() {
-        final EnumMap<BasicBCDCLI.SuppportedWeights, FlipCutWeights.Weights> weightMapping = new EnumMap<>(BasicBCDCLI.SuppportedWeights.class);
-        weightMapping.put(BasicBCDCLI.SuppportedWeights.UNIT_WEIGHT, FlipCutWeights.Weights.UNIT_COST);
-        weightMapping.put(BasicBCDCLI.SuppportedWeights.TREE_WEIGHT, FlipCutWeights.Weights.TREE_WEIGHT);
-        weightMapping.put(BasicBCDCLI.SuppportedWeights.BRANCH_LENGTH, FlipCutWeights.Weights.EDGE_WEIGHTS);
-        weightMapping.put(BasicBCDCLI.SuppportedWeights.BOOTSTRAP_WEIGHT, FlipCutWeights.Weights.BOOTSTRAP_VALUES);
-        weightMapping.put(BasicBCDCLI.SuppportedWeights.LEVEL, FlipCutWeights.Weights.NODE_LEVEL);
-        weightMapping.put(BasicBCDCLI.SuppportedWeights.BRANCH_AND_LEVEL, FlipCutWeights.Weights.EDGE_AND_LEVEL);
-        weightMapping.put(BasicBCDCLI.SuppportedWeights.BOOTSTRAP_AND_LEVEL, FlipCutWeights.Weights.BOOTSTRAP_AND_LEVEL);
+    protected final EnumMap<SuppportedWeights, FlipCutWeights.Weights> initWheightMapping() {
+        final EnumMap<SuppportedWeights, FlipCutWeights.Weights> weightMapping = new EnumMap<>(BasicBCDCLI.SuppportedWeights.class);
+        weightMapping.put(SuppportedWeights.UNIT_WEIGHT, FlipCutWeights.Weights.UNIT_COST);
+        weightMapping.put(SuppportedWeights.TREE_WEIGHT, FlipCutWeights.Weights.TREE_WEIGHT);
+        weightMapping.put(SuppportedWeights.BRANCH_LENGTH, FlipCutWeights.Weights.EDGE_WEIGHTS);
+        weightMapping.put(SuppportedWeights.BOOTSTRAP_WEIGHT, FlipCutWeights.Weights.BOOTSTRAP_VALUES);
+        weightMapping.put(SuppportedWeights.BOOTSTRAP_LOG, FlipCutWeights.Weights.BOOTSTRAP_LOG_PROPS);
+        weightMapping.put(SuppportedWeights.LEVEL, FlipCutWeights.Weights.NODE_LEVEL);
+        weightMapping.put(SuppportedWeights.BRANCH_AND_LEVEL, FlipCutWeights.Weights.EDGE_AND_LEVEL);
+        weightMapping.put(SuppportedWeights.BOOTSTRAP_AND_LEVEL, FlipCutWeights.Weights.BOOTSTRAP_AND_LEVEL);
 
         return weightMapping;
     }
