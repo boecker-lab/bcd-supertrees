@@ -47,7 +47,6 @@ public class BCDCLI<A extends AbstractFlipCut> extends BasicBCDCLI<A> {
         weightMapping.put(SuppportedWeights.TREE_WEIGHT, FlipCutWeights.Weights.TREE_WEIGHT);
         weightMapping.put(SuppportedWeights.BRANCH_LENGTH, FlipCutWeights.Weights.EDGE_WEIGHTS);
         weightMapping.put(SuppportedWeights.BOOTSTRAP_WEIGHT, FlipCutWeights.Weights.BOOTSTRAP_VALUES);
-        weightMapping.put(SuppportedWeights.BOOTSTRAP_LOG, FlipCutWeights.Weights.BOOTSTRAP_LOG_PROPS);
         weightMapping.put(SuppportedWeights.LEVEL, FlipCutWeights.Weights.NODE_LEVEL);
         weightMapping.put(SuppportedWeights.BRANCH_AND_LEVEL, FlipCutWeights.Weights.EDGE_AND_LEVEL);
         weightMapping.put(SuppportedWeights.BOOTSTRAP_AND_LEVEL, FlipCutWeights.Weights.BOOTSTRAP_AND_LEVEL);
@@ -94,7 +93,7 @@ public class BCDCLI<A extends AbstractFlipCut> extends BasicBCDCLI<A> {
     }
 
     @Override
-    public void setParameters(A algo) {
+    public void setParameters(AbstractFlipCut algo) {
         algo.setNumberOfThreads(getNumberOfThreads());
         algo.setPrintProgress(isProgressBar());
         algo.setBootstrapThreshold(getBootstrapThreshold());
@@ -102,8 +101,8 @@ public class BCDCLI<A extends AbstractFlipCut> extends BasicBCDCLI<A> {
     }
 
     @Override
-    public A createAlgorithmInstance() {
-        A algo = (A) new FlipCutSingleCutSimpleWeight();
+    public AbstractFlipCut createAlgorithmInstance() {
+        AbstractFlipCut algo = new FlipCutSingleCutSimpleWeight();
         algo.setCutter(SimpleCutterFactories.newInstance(getGraphType()));
         setParameters(algo);
         return algo;

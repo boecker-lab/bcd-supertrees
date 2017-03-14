@@ -181,6 +181,6 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
         return algo;
     }
 
-    public abstract A createAlgorithmInstance();
+    public abstract AbstractFlipCut createAlgorithmInstance();
 
 }

@@ -3,6 +3,7 @@ package phylo.tree.algorithm.flipcut.clo;
 
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.IntOptionHandler;
+import phylo.tree.algorithm.flipcut.AbstractFlipCut;
 import phylo.tree.algorithm.flipcut.FlipCutMultiCut;
 import phylo.tree.algorithm.flipcut.cli.BCDCLI;
 import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutGrapCutterFactories;
@@ -40,17 +41,19 @@ public class BCDBeamCLI extends BCDCLI<FlipCutMultiCut> {
     @Option(name = "-k", aliases = "--cutNumber", handler = IntOptionHandler.class, usage = "Number of suboptimal solutions")
     public void setCutNumber(int cutNumber) {
         this.cutNumber = Math.max(1, cutNumber);
-    }
-
-    ;
+    };
 
 
     @Override
-    public FlipCutMultiCut createAlgorithmInstance() {
-        FlipCutMultiCut algo = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(multiType, getGraphType()));
-        algo.setNumberOfCuts(cutNumber);
-        setParameters(algo);
-        return algo;
+    public AbstractFlipCut createAlgorithmInstance() {
+        if (multiType != null) {
+            FlipCutMultiCut algo = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(multiType, getGraphType()));
+            algo.setNumberOfCuts(cutNumber);
+            setParameters(algo);
+            return algo;
+        } else {
+            return super.createAlgorithmInstance();
+        }
     }
 
     @Override

@@ -61,6 +61,18 @@ public class WeightCostComputer extends SimpleCosts {
                 //ATTENTION: labels unchecked
                 //get bootstrap value from label
                 edgeWeight = calcBSValueFromLabelNorm(node);
+            } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_LN) {
+                //ATTENTION: labels unchecked
+                //get bootstrap value from label
+                edgeWeight = calcLNBoots(node);
+            } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_LOG2) {
+                //ATTENTION: labels unchecked
+                //get bootstrap value from label
+                edgeWeight = calcLOG2Boots(node);
+            } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_LOG) {
+                //ATTENTION: labels unchecked
+                //get bootstrap value from label
+                edgeWeight = calcLOGBoots(node);
             } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_LOG_PROPS) {
                 //ATTENTION: labels unchecked
                 //get bootstrap value from label
@@ -182,7 +194,18 @@ public class WeightCostComputer extends SimpleCosts {
 
     private double calcBSValueFromLabel(TreeNode node){
         return parseBSValueFromLabel(node) / 100d;
+    }
 
+    private double calcLNBoots(TreeNode node){
+            return Math.log1p(parseBSValueFromLabel(node));
+    }
+
+    private double calcLOG2Boots(TreeNode node){
+        return calcLNBoots(node) / Math.log(2);
+    }
+
+    private double calcLOGBoots(TreeNode node){
+        return calcLNBoots(node) / Math.log(10);
     }
 
     private double logBoots(final double bs, final double min, final double max){

@@ -82,6 +82,12 @@ public interface FlipCutWeights {
         /**
          * Uses only bootstrap Values of the corresponding chararacter as multiplier
          */
+        BOOTSTRAP_LN,
+        BOOTSTRAP_LOG,
+        BOOTSTRAP_LOG2,
+        /**
+         * Uses only bootstrap Values of the corresponding chararacter as multiplier
+         */
         BOOTSTRAP_VALUES,
 
         /**
