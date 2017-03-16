@@ -10,8 +10,6 @@ buildscript {
 }
 
 //command line interface stuff
-version = '0.8-SNAPSHOT'
-
 dependencies {
     compile project(':flipcut-lib.beam-search')
     compile project(':flipcut-cli')
