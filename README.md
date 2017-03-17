@@ -98,38 +98,41 @@ General options:
 ----------------
 ```
  General options:
-  PATH                                          : Path of the file containing the input data
-  PATH                                          : Path of the file containing the guide tree
-  
-  -H (--HELP)                                   : Full usage message including
-                                                  nonofficial Options (default: false)
-  -O (--fullOutput) PATH                        : Output file containing full output
-  -V (--VERBOSE)                                : many console output
-  -b (--bootstrapThreshold) N                   : Minimal bootstrap value of a
-                                                  tree-node to be considered during the
-                                                  supertree calculation (default: 0)
-  -d (--outFileType) [NEXUS | NEWICK | AUTO]    : Output file type (default: AUTO)
-  
-  -f (--fileType) [NEXUS | NEWICK | AUTO]       : Type of input files and if not
-                                                  specified otherwise also of the
-                                                  output file (default: AUTO)
-  -h (--help)                                   : usage message (default: false)
-  -o (--outputPath) PATH                        : Output file
-  -p (--workingDir) PATH                        : Path of the working directory. All
-                                                  relative paths will be rooted here.
-                                                  Absolute paths are not effected
-  -s (--scm) VALUE                              : Use SCM-tree as guide tree (default:true)
-  -v (--verbose)                                : some more console output
-  -w (--weighting) [UNIT_WEIGHT |               : Weighting strategy
+  PATH                                   : Path of the file containing the input
+                                           data
+  PATH                                   : Path of the file containing the guide
+                                           tree
+  -H (--HELP)                            : Full usage message including
+                                           nonofficial Options (default: false)
+  -O (--fullOutput) PATH                 : Output file containing full output
+  -V (--VERBOSE)                         : many console output
+  -b (--bootstrapThreshold) N            : Minimal bootstrap value of a
+                                           tree-node to be considered during the
+                                           supertree calculation (default: 0)
+  -d (--outFileType) [NEXUS | NEWICK |   : Output file type (default: AUTO)
+  AUTO]
+  -f (--fileType) [NEXUS | NEWICK |      : Type of input files and if not
+  AUTO]                                    specified otherwise also of the
+                                           output file (default: AUTO)
+  -h (--help)                            : usage message (default: false)
+  -o (--outputPath) PATH                 : Output file
+  -p (--workingDir) PATH                 : Path of the working directory. All
+                                           relative paths will be rooted here.
+                                           Absolute paths are not effected
+  -s (--scm) VALUE                       : Use SCM-tree as guide tree (default:
+                                           true)
+  -v (--verbose)                         : some more console output
+  -w (--weighting) [UNIT_WEIGHT |        : Weighting strategy
   TREE_WEIGHT | BRANCH_LENGTH |
   BOOTSTRAP_VALUES | LEVEL |
-  BRANCH_AND_LEVEL |
-  BOOTSTRAP_AND_LEVEL]
-  
-  -t (--threads) N                              : Set a positive number of Threads that
-                                                  should be used
-  -T (--singleThreaded)                         : starts in single threaded mode, equal to "-t 1"
-  -B (--disableProgressbar)                     : Disables progress bar (cluster/background mode)
+  BRANCH_AND_LEVEL | BOOTSTRAP_AND_LEVEL
+  ]
+  -t (--threads) N                       : Set a positive number of Threads that
+                                           should be used
+  -T (--singleThreaded)                  : starts in single threaded mode, equal
+                                           to "-t 1"
+  -B (--disableProgressbar)              : Disables progress bar (cluster/backgro
+                                           und mode)
 
 
  Example:
