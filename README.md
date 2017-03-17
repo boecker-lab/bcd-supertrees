@@ -29,7 +29,6 @@ Installation
 
 Windows
 -------
-
 The bcdSupertrees.exe should hopefully work out of
 the box. To execute BCD from every location you have to add the
 location of the *bcdSupertrees.exe* to your **PATH** environment variable.
@@ -39,35 +38,34 @@ Linux and MacOSX
 ----------------
 To start BCD Supertrees you just have to start the *bcd* start script from the command line:
 
-    `/path/to/bcd/bcdVM LIST_OF_BCD_ARGS`
+    /path/to/bcd/bcd LIST_OF_BCD_ARGS
+
+The BCD Supertrees directory contains another start script named bcdVM. This script allows you to run 
+BCD Supertrees with specific JVM (Java Virtual Machine) arguments.
+The command to run the bcdVM start script type:
+
+    /path/to/bcd/bcdVM "LIST_OF_JVM_ARGS" "LIST_OF_BCD_ARGS"
 
 To execute BCD Supertrees from every location you have to add the location of
 the BCD start script to your **PATH** variable. Open the file `~/.profile`
 in an editor and add the following line (replacing the placeholder
 path):
 
-   `export PATH-$PATH:/path/to/bcd`
+    export PATH-$PATH:/path/to/bcd
    
-The BCD Supertrees directory contains another start script named bcdVM. This script allows you to run 
-BCD Supertrees with specific JVM (Java Virtual Machine) arguments.
-The command to run the bcdVM start script type:
-    `/path/to/bcd/bcdVM "LIST_OF_JVM_ARGS" "LIST_OF_BCD_ARGS"`
-
-
+   
 Jar (any OS)
 ----------------
-
 Alternatively, you can run the jar file using java with the
 command:
 
-   `java -jar /path/to/bcdSupertrees/bcdSupertrees.jar`
-
-You can always use the "--help" option to get a documentation about
-the available commands and options.
+    java -jar /path/to/bcdSupertrees/bcdSupertrees.jar
 
 
 Using the BCD Supertrees command line tool
 ============================
+You can always use the "--help" option to get a documentation about
+the available commands and options.
 
 Generally you only need to specify the input trees as input.
 If your input data contains bootstrap values we recommend the *BOOTSTRAP_VALUES*
