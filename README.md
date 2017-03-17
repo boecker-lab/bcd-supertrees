@@ -201,14 +201,13 @@ There are currently 1 implementation of *phylo.tree.algorithm.flipcut.AbstractFl
 
 ```phylo.tree.algorithm.flipcut.FlipCutSingleCutSimpleWeight```
 
-   This class provides the basic Bad Character Deletion algorithm.
+This class provides the basic Bad Character Deletion algorithm.
+Parameters:
+* **input** -- List of rooted input trees.
+* **weight** -- character weighting to use
 
-   Parameters:
-   * **input** -- List of rooted input trees.
-   * **weight** -- character weighting to use
-
-   Returns:
-          The bcd supertree
+Returns:
+   The bcd supertree
 
 
 ### Character Weightings:
@@ -228,6 +227,7 @@ They all implement the *FlipCutWeights* interface.
 ```
 
 The in Fleischauer et al. presented scorings are:
+
 ```
   UNIT_WEIGHT
   BRANCH_LENGTH
