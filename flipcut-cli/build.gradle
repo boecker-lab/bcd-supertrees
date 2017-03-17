@@ -87,6 +87,8 @@ distributions {
                 exclude('bcdVM')
             }
             from("${project.readmePath}")
+            from("${project.copyingPath}")
+            from("${project.licensePath}")
             from { fatJarFile }
         }
     }
@@ -96,6 +98,8 @@ distributions {
         contents {
             from("${project.distPath}")
             from("${project.readmePath}")
+            from("${project.copyingPath}")
+            from("${project.licensePath}")
             from { fatJarFile }
         }
     }
@@ -108,6 +112,8 @@ distributions {
                 exclude('bcdVM')
             }
             from("${project.readmePath}")
+            from("${project.copyingPath}")
+            from("${project.licensePath}")
             from('build/launch4j') {
                 include("*.exe")
             }

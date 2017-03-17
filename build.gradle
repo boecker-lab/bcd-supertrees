@@ -6,6 +6,8 @@ plugins {
 
 project.ext.set("distPath", file('dist').absolutePath)
 project.ext.set("readmePath", file('README.md').absolutePath)
+project.ext.set("copyingPath", file('COPYING.txt').absolutePath)
+project.ext.set("licensePath", file('LICENSE.txt').absolutePath)
 project.ext.set("jarName", 'BCDSupertrees.jar')
 project.ext.set("baseName", 'bcdSupertrees')
 
