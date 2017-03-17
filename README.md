@@ -213,9 +213,8 @@ Returns:
 
 ### Character Weightings:
 
-The interface *phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights* provides
-different weightings. The package *phylo.tree.algorithm.flipcut.costComputer* contains implementations of these weightings.
-They all implement the *FlipCutWeights* interface.
+The interface `phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights` provides
+different weightings. The package `phylo.tree.algorithm.flipcut.costComputer` contains implementations of these weightings.
 
 ```
 UNIT_WEIGHT
