@@ -170,6 +170,7 @@ Now you can integrate BCD in your project by adding the following
 dependency:
 
 Library containing all algorithms
+
 ```xml
    <dependency>
      <groupId>de.unijena.bioinf.phylo</groupId>
@@ -178,6 +179,7 @@ Library containing all algorithms
    </dependency>
 ```
 Whole project containing the algorithm (bcd-lib) and the command line interface (bcd-cli)
+
 ```xml
    <dependency>
      <groupId>de.unijena.bioinf.phylo</groupId>
