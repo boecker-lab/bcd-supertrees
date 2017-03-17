@@ -191,15 +191,16 @@ Whole project containing the algorithm (bcd-lib) and the command line interface 
 Main API (WIP)
 --------
 
-The main class in the BCD library is *phylo.tree.algorithm.flipcut.AbstractFlipCut*.
+The main class in the BCD library is `phylo.tree.algorithm.flipcut.AbstractFlipCut`.
 It specifies the main API of all provided algorithm implementation. To run the algorithm you
 just have to specify the input trees.
 
-There are currently 1 implementation of *phylo.tree.algorithm.flipcut.AbstractFlipCut*:
+There is currently 1 implementation of `phylo.tree.algorithm.flipcut.AbstractFlipCut`:
+
 
 ### Algorithm Implemetation(s):
 
-```phylo.tree.algorithm.flipcut.FlipCutSingleCutSimpleWeight```
+`phylo.tree.algorithm.flipcut.FlipCutSingleCutSimpleWeight`
 
 This class provides the basic Bad Character Deletion algorithm.
 Parameters:
@@ -217,25 +218,25 @@ different weightings. The package *phylo.tree.algorithm.flipcut.costComputer* co
 They all implement the *FlipCutWeights* interface.
 
 ```
-  UNIT_WEIGHT
-  TREE_WEIGHT
-  BRANCH_LENGTH
-  BOOTSTRAP_VALUES
-  LEVEL
-  BRANCH_AND_LEVEL
-  BOOTSTRAP_AND_LEVEL
+UNIT_WEIGHT
+TREE_WEIGHT
+BRANCH_LENGTH
+BOOTSTRAP_VALUES
+LEVEL
+BRANCH_AND_LEVEL
+BOOTSTRAP_AND_LEVEL
 ```
 
 The in Fleischauer et al. presented scorings are:
 
 ```
-  UNIT_WEIGHT
-  BRANCH_LENGTH
-  BOOTSTRAP_VALUES
+UNIT_WEIGHT
+BRANCH_LENGTH
+BOOTSTRAP_VALUES
 ```
 
 Changelog
 =========
 
 1.0
-   * release version
+* release version
