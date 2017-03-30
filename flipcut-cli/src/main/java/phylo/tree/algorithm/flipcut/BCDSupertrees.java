@@ -4,7 +4,9 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.InterfaceCmdLineParser;
 import phylo.tree.algorithm.flipcut.cli.BCDCLI;
+import phylo.tree.algorithm.flipcut.utils.Utils;
 import phylo.tree.algorithm.gscm.SCMAlgorithm;
+import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeUtils;
 import phylo.tree.treetools.ReductionModifier;
@@ -14,7 +16,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,7 +33,7 @@ public class BCDSupertrees {
         run(args);
     }
 
-    public static void run(final String[] args){
+    public static void run(final String[] args) {
         double startTime = System.currentTimeMillis();
         CLI.LOGGER.info("Start calculation with following parameters: " + Arrays.toString(args));
         final CmdLineParser parser = new InterfaceCmdLineParser(CLI);
@@ -88,15 +89,15 @@ public class BCDSupertrees {
             }
 
             // configure algorithm
-            AbstractFlipCut algorithm =  CLI.createAlgorithmInstance();
+            AbstractFlipCut algorithm = CLI.createAlgorithmInstance();
 //            CLI.setParameters(algorithm);
             //set input trees
             algorithm.setInput(inputTrees, guideTreeToCut);
-            inputTrees = null;
+
             //run bcd supertrees
             algorithm.run();
             //collect results
-            List<Tree> superTrees =  algorithm.getResults();
+            List<Tree> superTrees = algorithm.getResults();
 
             //postprocess results if needed
             if (CLI.removeUndisputedSiblings)
@@ -108,6 +109,15 @@ public class BCDSupertrees {
                     removeUnsupportedClades(inputTreesUntouched.toArray(new Tree[inputTreesUntouched.size()]), superTree);
                 }
             }
+            // calc support values
+            if (CLI.supportValues) {
+                Utils.addCladewiseSplitFit(inputTrees, CLI.getWeights(), superTrees);
+                for (Tree tree : superTrees) {
+                    System.out.println(Newick.getStringFromTree(tree));
+                }
+            }
+            inputTrees = null;
+
             //write output file
             if (CLI.isFullOutput() && guideTree != null) {
                 List<Tree> withSCM = new LinkedList(superTrees);
@@ -134,7 +144,7 @@ public class BCDSupertrees {
                     Files.write(timeFile, ("gscm=" + Double.toString(scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.CREATE_NEW);
                     Files.write(timeFile, ("bcd=" + Double.toString(calcTime - scmRuntime) + System.lineSeparator()).getBytes(), StandardOpenOption.APPEND);
                     Files.write(timeFile, ("complete=" + Double.toString(calcTime)).getBytes(), StandardOpenOption.APPEND);
-                }else{
+                } else {
                     Files.write(timeFile, ("bcd=" + Double.toString(calcTime)).getBytes(), StandardOpenOption.CREATE_NEW);
                 }
 
@@ -169,6 +179,7 @@ public class BCDSupertrees {
 
         System.exit(888);
     }
+
     private static ReductionModifier removeUndisputedSiblings(List<Tree> inputTrees) {
         ReductionModifier reducer = new ReductionModifier(null, false);
         reducer.modify(inputTrees);
