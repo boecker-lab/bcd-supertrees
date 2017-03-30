@@ -112,9 +112,6 @@ public class BCDSupertrees {
             // calc support values
             if (CLI.supportValues) {
                 Utils.addCladewiseSplitFit(inputTrees, CLI.getWeights(), superTrees);
-                for (Tree tree : superTrees) {
-                    System.out.println(Newick.getStringFromTree(tree));
-                }
             }
             inputTrees = null;
 
