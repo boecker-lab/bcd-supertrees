@@ -161,6 +161,8 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
     @Option(name = "-i", aliases = "--insufficient", usage = "Skip if input trees have insufficient taxa overlap", hidden = true)
     public boolean skipInsufficientOverlapInstances = false; //todo warn if taxa have insufficient taxa overlap taxa overlap check
 
+    @Option(name = "-j", aliases = "--supportValues", usage = "Calculate Split Fit for every clade of the supertree(s) ")
+    public boolean supportValues = false;
 
     public SCMAlgorithm getSCMInstance() {
         SCMAlgorithm algo = null;
