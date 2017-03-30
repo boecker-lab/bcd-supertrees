@@ -5,11 +5,11 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
  * 14.02.17.
  */
 
+import mincut.cutGraphAPI.bipartition.FlipCutCutFactory;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.KargerSteinCutGraph;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.Cut;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.FlipCutCutFactory;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.HyperCut;
+import mincut.cutGraphAPI.KargerSteinCutGraph;
+import mincut.cutGraphAPI.bipartition.Cut;
+import mincut.cutGraphAPI.bipartition.HyperCut;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 import phylo.tree.algorithm.flipcut.model.HyperMultiCut;
 import phylo.tree.algorithm.flipcut.model.MultiCut;

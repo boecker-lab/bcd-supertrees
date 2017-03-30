@@ -2,16 +2,14 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 
 import com.google.common.collect.Sets;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.AhujaOrlinCutGraph;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.GoldbergTarjanCutGraph;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.MaxFlowCutGraph;
-import phylo.tree.algorithm.flipcut.mincut.cutGraphAPI.bipartition.STCut;
+import mincut.cutGraphAPI.AhujaOrlinCutGraph;
+import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
+import mincut.cutGraphAPI.MaxFlowCutGraph;
+import mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-
-import static phylo.tree.algorithm.flipcut.costComputer.CostComputer.ACCURACY;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)

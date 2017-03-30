@@ -4,5 +4,6 @@ include 'flipcut-core',
         'flipcut-lib',
         'flipcut-lib.beam-search',
         'flipcut-cli',
-        'flipcut-cli.beam-search';
+        'flipcut-cli.beam-search',
+        'mincut'
 

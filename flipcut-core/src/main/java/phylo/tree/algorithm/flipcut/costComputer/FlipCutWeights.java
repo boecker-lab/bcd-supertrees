@@ -5,7 +5,7 @@ package phylo.tree.algorithm.flipcut.costComputer;
  * 10.07.12 11:20
  */
 public interface FlipCutWeights {
-    static enum Weights{
+    enum Weights{
         /**
          * Use the incoming edge weights
          */
@@ -74,6 +74,17 @@ public interface FlipCutWeights {
          * Uses Distances from one Vertex to any other of the clade, relative to the number of taxa, weighted by the EDGE_AND_CLADE score
          */
         FLIPS_PLUS_EDGE_AND_CLADE_PLUS_DISTANCES,
+
+        /**
+         * Uses only bootstrap Values of the corresponding chararacter as multiplier
+         */
+        BOOTSTRAP_LOG_PROPS,
+        /**
+         * Uses only bootstrap Values of the corresponding chararacter as multiplier
+         */
+        BOOTSTRAP_LN,
+        BOOTSTRAP_LOG,
+        BOOTSTRAP_LOG2,
         /**
          * Uses only bootstrap Values of the corresponding chararacter as multiplier
          */

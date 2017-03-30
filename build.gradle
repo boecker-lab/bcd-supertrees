@@ -4,6 +4,11 @@ plugins {
     id "com.jfrog.artifactory" version "4.3.0"
 }
 
+project.ext.set("distPath", file('dist').absolutePath)
+project.ext.set("readmePath", file('README.md').absolutePath)
+project.ext.set("jarName", 'BCDSupertrees.jar')
+project.ext.set("baseName", 'bcdSupertrees')
+
 allprojects {
 
     apply plugin: 'java'
@@ -11,8 +16,11 @@ allprojects {
     apply plugin: "com.jfrog.artifactory"
 
     sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
     group = 'de.unijena.bioinf.phylo'
+
+    version = '1.0'
 
     repositories {
         mavenCentral()
@@ -68,16 +76,13 @@ subprojects {
 
 //Core Project specific stuff
 project(':flipcut-core') {
-    version = '0.9-SNAPSHOT'
-
     dependencies {
+        compile project(':mincut')
     }
 }
 
 //single algo Project specific stuff
 project(':flipcut-lib') {
-    version = '0.9-SNAPSHOT'
-
     dependencies {
         compile project(':flipcut-core')
         testCompile 'de.unijena.bioinf.phylo:gscm-lib:1.0.2'
@@ -87,24 +92,11 @@ project(':flipcut-lib') {
 
 //beam algo Project specific stuff
 project(':flipcut-lib.beam-search') {
-    version = '0.8-SNAPSHOT'
-
     dependencies {
         compile project(':flipcut-lib')
         testCompile 'de.unijena.bioinf.phylo:gscm-lib:1.0.2'
     }
 }
-
-//beam CLI Project specific stuff
-/*project(':flipcut-cli.beam-search') {
-    version = '0.8-SNAPSHOT'
-    dependencies {
-        compile project(':flipcut-lib.beam-search'), project(':flipcut-cli')
-    }
-}*/
-
-
-version = '0.9-SNAPSHOT'
 
 dependencies {
     compile project(':flipcut-core')
