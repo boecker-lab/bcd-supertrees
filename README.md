@@ -165,7 +165,7 @@ Add the following repository to your pom file:
      <repository>
          <id>bioinf-jena</id>
          <name>bioinf-jena-releases</name>
-         <url>http://bio.informatik.uni-jena.de/repository/libs-releases-local</url>
+         <url>https://bio.informatik.uni-jena.de/repository/libs-releases-local</url>
      </repository>
    </distributionManagement>
 ```
@@ -240,5 +240,8 @@ BOOTSTRAP_VALUES
 Changelog
 =========
 
-1.0
+#### 1.0
 * release version
+
+## Acknowledgments
+* We thank Stefano Scerra for providing us [his implementation](http://www.stefanoscerra.it/java-max-flow-graph-algorithm/) of the Ahuja-Orlin max flow algorithm

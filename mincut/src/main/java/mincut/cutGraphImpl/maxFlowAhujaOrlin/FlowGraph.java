@@ -19,7 +19,7 @@ import java.util.List;
  */
 
 /**
- * This is an implementation of Ahuja Orlins max flow algorithm, based on the freely available code from Stefano Scerra (http://www.stefanoscerra.it/java-max-flow-graph-algorithm/).
+ * This is an implementation of Ahuja Orlins max flow algorithm, is based on the freely available code from Stefano Scerra (http://www.stefanoscerra.it/java-max-flow-graph-algorithm/).
  */
 
 public class FlowGraph {
