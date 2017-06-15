@@ -24,6 +24,8 @@ BCD Supertrees commandline tool v1.0
 * for [Linux/Unix/Mac](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.0-Nix.zip)
 * as [jar file](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.0-Jar.zip)
 
+#### Source Code
+can be found on [GitHub](https://github.com/boecker-lab/bcd-supertrees)
 
 Installation
 ============
