@@ -6,7 +6,6 @@ import org.kohsuke.args4j.InterfaceCmdLineParser;
 import phylo.tree.algorithm.flipcut.cli.BCDCLI;
 import phylo.tree.algorithm.flipcut.utils.Utils;
 import phylo.tree.algorithm.gscm.SCMAlgorithm;
-import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeUtils;
 import phylo.tree.treetools.ReductionModifier;
