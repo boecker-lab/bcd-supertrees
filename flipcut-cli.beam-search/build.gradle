@@ -13,10 +13,9 @@ buildscript {
 dependencies {
     compile project(':flipcut-lib.beam-search')
     compile project(':flipcut-cli')
-    compile 'de.unijena.bioinf.phylo:gscm-lib:1.0.2'
-    compile 'de.unijena.bioinf.phylo:gscm-cli:1.0.2'
+    compile 'de.unijena.bioinf.phylo:gscm-lib:1.0.1'
+    compile 'de.unijena.bioinf.phylo:gscm-cli:1.0.1'
     compile 'de.unijena.bioinf.phylo:phyloTree-lib.utils:0.9.9'
-    compile 'de.unijena.bioinf:core-lib.cli:0.9'
     compile 'de.unijena.bioinf.phylo:phyloTree-lib.cli:0.9.9'
 
     testCompile 'com.github.stefanbirkner:system-rules:1.5.0'
