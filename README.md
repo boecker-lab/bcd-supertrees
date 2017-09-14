@@ -19,10 +19,10 @@ _PeerJ (2016) 4:e2172_ https://doi.org/10.7717/peerj.2172.
 
 Download Links
 ============
-BCD Supertrees commandline tool v1.0
-* for [Windows](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.0-Win.zip)
-* for [Linux/Unix/Mac](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.0-Nix.zip)
-* as [jar file](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.0-Jar.zip)
+BCD Supertrees commandline tool v1.0.1
+* for [Windows](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.0.1-Win.zip)
+* for [Linux/Unix/Mac](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.0.1-Nix.zip)
+* as [jar file](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.0.1-Jar.zip)
 
 The **Source Code** can be found on [GitHub](https://github.com/boecker-lab/bcd-supertrees)
 
@@ -240,7 +240,10 @@ BOOTSTRAP_VALUES
 
 Changelog
 =========
-
+**1.0.1**
+* Low Overlap: BCD now returns a warning for input tree sets with low overlap instead of not calculating them.
+* bcd now supports both bootstrap notations of the newick file format.
+* some minor fixes
 **1.0**
 * release version
 

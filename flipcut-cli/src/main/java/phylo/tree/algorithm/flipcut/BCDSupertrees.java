@@ -128,8 +128,8 @@ public class BCDSupertrees {
 
 
             if (!Double.isNaN(scmRuntime)) {
-                CLI.LOGGER.info("...SCM runs in " + (scmRuntime) + "s");
-                CLI.LOGGER.info("...FlipCut runs in " + (calcTime - scmRuntime) + "s");
+                CLI.LOGGER.info("...GSCM runs in " + (scmRuntime) + "s");
+                CLI.LOGGER.info("...BCD runs in " + (calcTime - scmRuntime) + "s");
             }
 
             //todo move this to write output???
