@@ -244,6 +244,7 @@ Changelog
 * Low Overlap: BCD now returns a warning for input tree sets with low overlap instead of not calculating them.
 * bcd now supports both bootstrap notations of the newick file format.
 * some minor fixes
+
 **1.0**
 * release version
 
