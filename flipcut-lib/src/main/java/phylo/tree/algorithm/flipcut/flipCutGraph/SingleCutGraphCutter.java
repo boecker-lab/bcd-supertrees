@@ -22,7 +22,7 @@ public class SingleCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphSimpl
 
     @Override
     public List<FlipCutGraphSimpleWeight> cut(FlipCutGraphSimpleWeight source){
-        LinkedHashSet<FlipCutNodeSimpleWeight> minCut = getMinCut(source);
+        LinkedHashSet<FlipCutNodeSimpleWeight> minCut = getMinCutSet(source);
         if (split == null) {
             split = (List<FlipCutGraphSimpleWeight>) source.split(minCut);
         }

@@ -43,9 +43,9 @@ public class WeightCostComputer extends SimpleCosts {
         double edgeWeight;
         double nodeLevel = 1;
         Tree tree = (Tree) node.getGraph();
-    if (scaffoldTree != null &&  tree.equals(scaffoldTree)){
-        return CutGraphCutter.INFINITY * ACCURACY;
-    }else {
+        if (scaffoldTree != null && tree.equals(scaffoldTree)) {
+            return CutGraphCutter.INFINITY * ACCURACY;
+        } else {
             //###############################
             //##### most common weights #####
             //###############################
@@ -76,25 +76,25 @@ public class WeightCostComputer extends SimpleCosts {
             } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_LOG_PROPS) {
                 //ATTENTION: labels unchecked
                 //get bootstrap value from label
-                edgeWeight = logBoots(calcBSValueFromLabel(node),0.02,0.98);
+                edgeWeight = logBoots(calcBSValueFromLabel(node), 0.02, 0.98);
             } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_VALUES_LOG_75_01) {
                 //ATTENTION: labels unchecked
                 //get bootstrap value from label
-                edgeWeight = logisticFunction(.1,75d,parseBSValueFromLabel(node));
+                edgeWeight = logisticFunction(.1, 75d, parseBSValueFromLabel(node));
             } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_VALUES_LOG_66_01) {
                 //ATTENTION: labels unchecked
                 //get bootstrap value from label
-                edgeWeight = logisticFunction(.1,(2d/3d*100d),parseBSValueFromLabel(node));
+                edgeWeight = logisticFunction(.1, (2d / 3d * 100d), parseBSValueFromLabel(node));
             } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_VALUES_LOG_50_01) {
                 //ATTENTION: labels unchecked
                 //get bootstrap value from label
-                edgeWeight = logisticFunction(.1,50d,parseBSValueFromLabel(node));
-            }else if (weights == FlipCutWeights.Weights.BOOTSTRAP_AND_LEVEL) {
+                edgeWeight = logisticFunction(.1, 50d, parseBSValueFromLabel(node));
+            } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_AND_LEVEL) {
                 //ATTENTION: labels unchecked
                 //get bootstrap value from label
                 edgeWeight = calcBSValueFromLabelNorm(node);
                 nodeLevel = calcNodeLevel(node);
-            }else if (weights == FlipCutWeights.Weights.BOOTSTRAP_AND_LOGLEVEL) {
+            } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_AND_LOGLEVEL) {
                 //ATTENTION: labels unchecked
                 //get bootstrap value from label
                 edgeWeight = calcBSValueFromLabelNorm(node);
@@ -105,25 +105,26 @@ public class WeightCostComputer extends SimpleCosts {
                 edgeWeight = Math.log(calcNodeLevel(node));
 
 
-            //shitty working stuff
-            }else if (weights == FlipCutWeights.Weights.BOOTSTRAP_AND_EDGEWEIGHTS) {
+                //shitty working stuff
+            } else if (weights == FlipCutWeights.Weights.BOOTSTRAP_AND_EDGEWEIGHTS) {
                 //ATTENTION: labels unchecked
                 //get bootstrap value from label
                 edgeWeight = (100d * calcBSValueFromLabelNorm(node)) + calcEdgeWeight(node);
 
-            //UNIT_COST with treeweighting
-            }else if (weights == FlipCutWeights.Weights.TREE_WEIGHT) {
+                //UNIT_COST with treeweighting
+            } else if (weights == FlipCutWeights.Weights.TREE_WEIGHT) {
                 //weighting with tree weight is done below
                 edgeWeight = 1;
-            //###########################################
-            //##### some other experimental weights #####
-            //###########################################
+                //###########################################
+                //##### some other experimental weights #####
+                //###########################################
             } else {
                 edgeWeight = node.getEdgeToParent().getWeight();
                 TreeNode root = tree.getRoot();
                 /*if (weights == FlipCutWeights.Weights.EDGE_AND_LEVEL) {
                     edgeWeight = edgeWeight * node.getLevel();
-                } else*/ if (weights == FlipCutWeights.Weights.EDGE_AND_ClADESIZE) {
+                } else*/
+                if (weights == FlipCutWeights.Weights.EDGE_AND_ClADESIZE) {
                     edgeWeight = edgeWeight * (root.getLeaves().length - node.getLeaves().length);
                 } else if (weights == FlipCutWeights.Weights.EDGE_AND_ClADERATE) {
                     edgeWeight = edgeWeight * (1 - (node.getLeaves().length / root.getLeaves().length));
@@ -166,16 +167,14 @@ public class WeightCostComputer extends SimpleCosts {
             double treeWeight = parseTreeWeightFromLabel(tree);
 
             long w;
-            if (weights == FlipCutWeights.Weights.TREE_WEIGHT){
-                w = Math.round(Math.max(ZERO,treeWeight) * ACCURACY);
-            }else{
-                w = Math.round(ACCURACY * Math.max(ZERO,edgeWeight) * Math.max(ZERO,nodeLevel) * Math.max(ZERO,treeWeight));
+            if (weights == FlipCutWeights.Weights.TREE_WEIGHT) {
+                w = Math.round(Math.max(ZERO, treeWeight) * ACCURACY);
+            } else {
+                w = Math.round(ACCURACY * Math.max(ZERO, edgeWeight) * Math.max(ZERO, nodeLevel) * Math.max(ZERO, treeWeight));
             }
-
             return w;
         }
     }
-
 
 
     @Override
@@ -188,40 +187,40 @@ public class WeightCostComputer extends SimpleCosts {
         return getEdgeWeight(node);
     }
 
-    private double calcBSValueFromLabelNorm(TreeNode node){
+    private double calcBSValueFromLabelNorm(TreeNode node) {
         return parseBSValueFromLabel(node) / maxBSValue;
     }
 
-    private double calcBSValueFromLabel(TreeNode node){
+    private double calcBSValueFromLabel(TreeNode node) {
         return parseBSValueFromLabel(node) / 100d;
     }
 
-    private double calcLNBoots(TreeNode node){
-            return Math.log1p(parseBSValueFromLabel(node));
+    private double calcLNBoots(TreeNode node) {
+        return Math.log1p(parseBSValueFromLabel(node));
     }
 
-    private double calcLOG2Boots(TreeNode node){
+    private double calcLOG2Boots(TreeNode node) {
         return calcLNBoots(node) / Math.log(2);
     }
 
-    private double calcLOGBoots(TreeNode node){
+    private double calcLOGBoots(TreeNode node) {
         return calcLNBoots(node) / Math.log(10);
     }
 
-    private double logBoots(final double bs, final double min, final double max){
-        double p = Math.max(min,Math.min(max,bs));
-        return -Math.log(1-p);
+    private double logBoots(final double bs, final double min, final double max) {
+        double p = Math.max(min, Math.min(max, bs));
+        return -Math.log(1 - p);
     }
 
-    private double logisticFunction(double k,double x0, double x){
-        return 1/(1+(Math.exp( (-k*(x-x0)))));
+    private double logisticFunction(double k, double x0, double x) {
+        return 1 / (1 + (Math.exp((-k * (x - x0)))));
     }
 
-    private double calcNodeLevel(TreeNode node){
-        return (double)node.getLevel()/(double)maxLevel;
+    private double calcNodeLevel(TreeNode node) {
+        return (double) node.getLevel() / (double) maxLevel;
     }
 
-    private double calcEdgeWeight(TreeNode node){
+    private double calcEdgeWeight(TreeNode node) {
         return (node.getDistanceToParent() / longestBranch);
     }
 }

@@ -50,10 +50,7 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
 //        long time = System.currentTimeMillis();
         //search the optimal cat
         SingleCutGraphCutter optCutter = new SingleCutGraphCutter(SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
-        LinkedHashSet<FlipCutNodeSimpleWeight> optCutSet = optCutter.getMinCut(source);
-        long mincutValue = optCutter.getMinCutValue(source);
-        DefaultMultiCut optCut = new DefaultMultiCut(optCutSet, mincutValue, source);
-
+        DefaultMultiCut optCut = new DefaultMultiCut(optCutter.getMinCut(source),  source);
         mincuts.add(optCut);
 
         KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory<FlipCutNodeSimpleWeight>> cutGraph = new KargerSteinCutGraph<>(new FlipCutCutFactory<FlipCutNodeSimpleWeight>());

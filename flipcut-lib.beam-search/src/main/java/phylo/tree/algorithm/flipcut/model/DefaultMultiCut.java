@@ -1,6 +1,8 @@
 package phylo.tree.algorithm.flipcut.model;
 
 
+import mincut.cutGraphAPI.bipartition.BasicCut;
+import mincut.cutGraphAPI.bipartition.Cut;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 
@@ -9,32 +11,28 @@ import java.util.List;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
- *         Date: 18.01.13
- *         Time: 18:10
+ * Date: 18.01.13
+ * Time: 18:10
  */
 public class DefaultMultiCut extends MultiCut<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
-
-
-    private LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes;
+    protected LinkedHashSet<FlipCutNodeSimpleWeight> cutSet;
+    protected final long minCutValue;
     private List<List<FlipCutNodeSimpleWeight>> comp;
 
-    private final long minCutValue;
-
-
-    public DefaultMultiCut(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes, long minCutValue, FlipCutGraphMultiSimpleWeight sourceGraph) {
+    private DefaultMultiCut(LinkedHashSet<FlipCutNodeSimpleWeight> cutSet, long minCutValue, List<List<FlipCutNodeSimpleWeight>> comp, FlipCutGraphMultiSimpleWeight sourceGraph) {
         super(sourceGraph);
+        this.cutSet = cutSet;
         this.minCutValue = minCutValue;
-        this.sinkNodes = sinkNodes;
-        comp = null;
-       calculateHash();
+        this.comp = comp;
+        calculateHash();
+    }
+
+    public DefaultMultiCut(Cut<FlipCutNodeSimpleWeight> cut, FlipCutGraphMultiSimpleWeight sourceGraph) {
+        this(cut.getCutSet(), cut.minCutValue(), null, sourceGraph);
     }
 
     public DefaultMultiCut(List<List<FlipCutNodeSimpleWeight>> comp, FlipCutGraphMultiSimpleWeight graph) {
-        super(graph);
-        this.minCutValue = 0;
-        sinkNodes = null;
-        this.comp = comp;
-        calculateHash();
+        this(null, 0, comp, graph);
     }
 
     @Override
@@ -44,7 +42,7 @@ public class DefaultMultiCut extends MultiCut<FlipCutNodeSimpleWeight, FlipCutGr
 
     @Override
     public LinkedHashSet<FlipCutNodeSimpleWeight> getCutSet() {
-        return sinkNodes;
+        return cutSet;
     }
 
     public List<FlipCutGraphMultiSimpleWeight> getSplittedGraphs() {
@@ -52,10 +50,9 @@ public class DefaultMultiCut extends MultiCut<FlipCutNodeSimpleWeight, FlipCutGr
             if (comp != null) {
                 splittedGraphs = sourceGraph.buildComponentGraphs(comp);
                 comp = null;
-
             } else {
-                splittedGraphs = (List<FlipCutGraphMultiSimpleWeight>) sourceGraph.split(sinkNodes);
-                sinkNodes = null;
+                splittedGraphs = (List<FlipCutGraphMultiSimpleWeight>) sourceGraph.split(getCutSet());
+                cutSet = null;
             }
         }
         return splittedGraphs;

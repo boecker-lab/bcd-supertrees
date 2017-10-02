@@ -1,3 +1,4 @@
+import java.nio.file.StandardCopyOption
 
 buildscript {
     repositories {
@@ -33,84 +34,116 @@ jar {
 apply plugin: "eu.appsatori.fatjar"
 
 fatJar {
+    baseName = "${project.baseName}"
     classifier 'fat'
+    with jar
     manifest {
         attributes 'Main-Class': project.mainClassName
     }
-    exclude 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.SF'
 }
+fatJarPrepareFiles.dependsOn jar
+
+fatJar.doLast {
+    File file = project.tasks.fatJar.outputs.files.singleFile;
+    java.nio.file.Path nu = file.toPath().getParent().toAbsolutePath().resolve("${project.jarName}");
+    java.nio.file.Files.copy(file.toPath(), nu, StandardCopyOption.REPLACE_EXISTING);
+}
+
+def linSuffix = '-Nix'
+def winSuffix = '-Win'
+def jarSuffix = '-Jar'
 
 
 apply plugin: 'edu.sc.seis.launch4j'
 
-copyL4jLib.dependsOn fatJar
-fatJarPrepareFiles.dependsOn jar
-
+//createExe.dependsOn fatJar
 launch4j {
-    outfile = 'bcd.exe'
+    outfile = 'bcdSupertrees.exe'
     mainClassName = project.mainClassName
     copyConfigurable = project.tasks.fatJar.outputs.files
     jar = "lib/${project.tasks.fatJar.archiveName}"
-//    icon = project.projectDir.toPath().resolve('src/main/resources/dist/icon.ico')
+    headerType = "console"
 }
+
 
 apply plugin: 'distribution'
 
-def fatJarFile = project.tasks.fatJar.outputs.files.singleFile
-println(fatJarFile.toString())
-def linSuffix = '-Linux'
-def winSuffix = '-Win'
+task distribute { group = 'distribution' }
 
 
 distributions {
+    File fatJarFile = project.tasks.fatJar.outputs.files.singleFile.toPath().getParent().toAbsolutePath().resolve("${project.jarName}").toFile();
+    jar {
+        baseName = "${project.baseName}$jarSuffix"
+        contents {
+            from("${project.distPath}") {
+                exclude('bcd')
+                exclude('bcdVM')
+            }
+            from("${project.readmePath}")
+            from("${project.copyingPath}")
+            from("${project.licensePath}")
+            from { fatJarFile }
+        }
+    }
 
     linux {
-        baseName = project.getName() + linSuffix
+        baseName = "${project.baseName}$linSuffix"
         contents {
-            from {'src/main/resources/dist/'}
-            from {fatJarFile}
-            from { 'src/main/resources/dist-linux/' }
+            from("${project.distPath}")
+            from("${project.readmePath}")
+            from("${project.copyingPath}")
+            from("${project.licensePath}")
+            from { fatJarFile }
         }
     }
 
     win {
-        baseName = project.getName() + winSuffix
+        baseName = "${project.baseName}$winSuffix"
         contents {
-            from {'src/main/dist/'}
-            from {'build/launch4j/'}
+            from("${project.distPath}") {
+                exclude('bcd')
+                exclude('bcdVM')
+            }
+            from("${project.readmePath}")
+            from("${project.copyingPath}")
+            from("${project.licensePath}")
+            from('build/launch4j') {
+                include("*.exe")
+            }
         }
     }
-
-    jar {
-        baseName = project.getName()
-        contents {
-            from {'src/main/resources/dist/'}
-            from {fatJarFile}
-        }
-    }
-
-
 }
 
-task distribute {}
-distribute.dependsOn 'linuxDistZip', /*'winDistZip',*/ 'jarDistZip'
+//getTasksByName("${n}DistTar", false).each { it.setEnabled(false) }
+project.getTasksByName("distTar", false).each { it.setEnabled(false) }
+project.getTasksByName("distZip", false).each { it.setEnabled(false) }
+
+
+distribute.dependsOn 'linuxDistZip', 'winDistZip', 'jarDistZip'
+
+linuxDistZip.doLast {
+    File file = project.tasks.jarDistZip.outputs.files.singleFile
+    println(file)
+    file.renameTo(file.toString().replace((jarSuffix + "-" + version + "."), "-" + version + jarSuffix + "."))
+}
 
 
 linuxDistZip.doLast {
-        File file = project.tasks.linuxDistZip.outputs.files.singleFile
-        println(file)
-        file.renameTo(file.toString().replace((linSuffix + "-" + version + ".") ,"-" + version + linSuffix + "."))
+    File file = project.tasks.linuxDistZip.outputs.files.singleFile
+    println(file)
+    file.renameTo(file.toString().replace((linSuffix + "-" + version + "."), "-" + version + linSuffix + "."))
 }
 
 winDistZip.doLast {
     File file = project.tasks.winDistZip.outputs.files.singleFile
     println(file)
-    file.renameTo(file.toString().replace((winSuffix + "-" + version + ".") ,"-" + version + winSuffix + "."))
+    file.renameTo(file.toString().replace((winSuffix + "-" + version + "."), "-" + version + winSuffix + "."))
 }
 
-distZip.dependsOn 'fatJar'
-distTar.dependsOn 'fatJar'
-installDist.dependsOn 'fatJar'
+jarDistZip.dependsOn 'fatJar'
+jarDistTar.dependsOn 'fatJar'
+installJarDist.dependsOn 'fatJar'
 
 linuxDistZip.dependsOn 'fatJar'
 linuxDistTar.dependsOn 'fatJar'

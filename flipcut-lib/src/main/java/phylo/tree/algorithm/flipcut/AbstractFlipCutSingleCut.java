@@ -2,7 +2,10 @@ package phylo.tree.algorithm.flipcut;
 
 import core.algorithm.Algorithm;
 import core.utils.progressBar.CLIProgressBar;
-import phylo.tree.algorithm.flipcut.flipCutGraph.*;
+import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
+import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
+import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
+import phylo.tree.algorithm.flipcut.flipCutGraph.MaxFlowCutterFactory;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
@@ -18,7 +21,7 @@ import java.util.logging.Logger;
  * Date: 29.11.12
  * Time: 14:42
  */
-public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends CutGraphCutter<N, T>> extends AbstractFlipCut<N, T, C,MaxFlowCutterFactory<C, N, T>> {
+public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends CutGraphCutter<N, T>> extends AbstractFlipCut<N, T, C, MaxFlowCutterFactory<C, N, T>> {
     private static final boolean CALCULATE_SCORE = true;
     private long globalWeight;
 
@@ -89,13 +92,13 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                 if (numberOfThreads < 0) {
                     if (executorService == null)
                         executorService = Executors.newWorkStealingPool();
-                        supertree = computeSTIterativeMultiThreaded();
-                //only max flow calculation is parralel, more efficient
+                    supertree = computeSTIterativeMultiThreaded();
+                    //only max flow calculation is parralel, more efficient
                 } else {
                     if (executorService == null) {
                         if (numberOfThreads == 0) {
                             executorService = Executors.newFixedThreadPool(CORES_AVAILABLE);
-                        }else if(numberOfThreads > 1){
+                        } else if (numberOfThreads > 1) {
                             executorService = Executors.newFixedThreadPool(numberOfThreads);
                         }
                     }
@@ -106,7 +109,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (CALCULATE_SCORE) supertree.setName("Tree_" + globalWeight);
+            if (CALCULATE_SCORE) supertree.setName("" + globalWeight);
             if (DEBUG) {
                 debugInfo.weight = globalWeight;
                 debugInfo.overallCalculationTime = (System.currentTimeMillis() - debugInfo.overallCalculationTime) / 1000;
@@ -117,6 +120,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
             }
             System.out.println("...Supertree construction FINISHED!");
             this.supertree = supertree;
+            System.out.println("SupertreeScore: " + supertree.getName());
             System.out.println("calculations time: " + (double) (System.currentTimeMillis() - time) / 1000d + "s");
 
 
@@ -156,7 +160,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
     }
 
     private Tree computeSTIterativeSingleThreaded() {
-        final C cutter = ((MaxFlowCutterFactory<C,N,T>)type).newInstance(initialGraph);
+        final C cutter = ((MaxFlowCutterFactory<C, N, T>) type).newInstance(initialGraph);
         final Tree supertree = new Tree();
 
         Queue<T> graphs = new LinkedList<T>();
@@ -199,7 +203,10 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                     cutter.clear();
                     List<T> componentGraphs = cutter.cut(initialGraph);
                     //mincut value in graph needed?
-                    if (CALCULATE_SCORE) globalWeight += cutter.getMinCutValue(initialGraph);
+                    if (CALCULATE_SCORE) {
+                        long v = cutter.getMinCutValue(initialGraph);
+                        globalWeight += v;
+                    }
                     if (DEBUG)
                         if (componentGraphs.size() > 2)
                             debugInfo.polytomies.add(componentGraphs.size());

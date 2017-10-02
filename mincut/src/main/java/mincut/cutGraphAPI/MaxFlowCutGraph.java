@@ -89,7 +89,8 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
         stToCalculate.clear();
     }
 
-    abstract <T extends MaxFlowCallable> IterationCallableFactory<T, SS> getMaxFlowCallableFactory();
+//    abstract <T extends MaxFlowCallable> IterationCallableFactory<T, SS> getMaxFlowCallableFactory();
+    abstract IterationCallableFactory<? extends DefaultIterationCallable<SS, STCut<V>>, SS> getMaxFlowCallableFactory();
 
     abstract class MaxFlowCallable extends DefaultIterationCallable<SS, STCut<V>> {
         MaxFlowCallable(List<SS> jobs) {

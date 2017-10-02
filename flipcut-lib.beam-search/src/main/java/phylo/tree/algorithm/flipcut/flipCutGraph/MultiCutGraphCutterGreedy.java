@@ -1,11 +1,13 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 
-import com.google.common.collect.Sets;
 import mincut.cutGraphAPI.AhujaOrlinCutGraph;
 import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.MaxFlowCutGraph;
+import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.STCut;
+import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.BlackList;
+import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.GreedyBlackList;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 
 import java.util.*;
@@ -13,83 +15,41 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
- *         Date: 19.04.13
- *         Time: 12:02
+ * Date: 19.04.13
+ * Time: 12:02
  */
 public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
 
-    protected Set<FlipCutNodeSimpleWeight> blacklist = new HashSet<>();
-    protected boolean stopCutting;
+    protected final Queue<BlackList> blacklists;
+    protected BlackList blacklist = null;
     protected int cuts = 0;
 
     public MultiCutGraphCutterGreedy(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut) {
+        this(type, graphToCut, new GreedyBlackList());
+    }
+
+    public MultiCutGraphCutterGreedy(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut, BlackList initialBlackList) {
         super(type);
         source = graphToCut;
-        stopCutting = false;
+        initialBlackList.setNumberOfCharacters(source.characters.size());
+        blacklists = initBlackLists(initialBlackList);
+    }
+
+    Queue<BlackList> initBlackLists(final BlackList initial) {
+        LinkedList<BlackList> bls = new LinkedList<>();
+        bls.add(initial);
+        return bls;
     }
 
     @Override
     protected void calculateMinCut() {
         if (type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG || type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN) {
             if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
-
-                Set<Set<FlipCutNodeSimpleWeight>> activePartitions = new HashSet<>();
-                for (FlipCutNodeSimpleWeight character : source.activePartitions) {
-                    activePartitions.add(new HashSet<>(character.edges));
-                }
-                for (FlipCutNodeSimpleWeight character : blacklist) {
-                    activePartitions.add(new HashSet<>(character.edges));
-                }
-
-                //todo is there a less ugly way to do this?
-                if (!activePartitions.isEmpty()) {
-                    Set<Set<FlipCutNodeSimpleWeight>> finalActivePartitions = new HashSet<>();
-                    while (!activePartitions.isEmpty()) {
-                        Set<FlipCutNodeSimpleWeight> merged = activePartitions.iterator().next();
-                        activePartitions.remove(merged);
-                        boolean changes = true;
-                        while (changes) {
-                            Iterator<Set<FlipCutNodeSimpleWeight>> it = activePartitions.iterator();
-                            changes = false;
-                            while (it.hasNext()) {
-                                Set<FlipCutNodeSimpleWeight> next = it.next();
-                                if (Sets.intersection(next, merged).size() > 0) {
-                                    merged.addAll(next);
-                                    it.remove();
-                                    changes = true;
-                                }
-                            }
-                        }
-                        finalActivePartitions.add(merged);
-                    }
-                    activePartitions = finalActivePartitions;
-                }
-
                 //create mapping
-                //todo optimize all these mapping stuff if it works well
-                Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> taxonToDummy = new HashMap<>();
-                Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToTaxa = new HashMap<>();
-                Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> trivialcharacters = new HashMap<>();
+                BlackListVertexMapping mapping = new BlackListVertexMapping();
+                mapping.createMapping(source, blacklist);
 
-                int mergedTaxonIndex = 0;
-                for (Set<FlipCutNodeSimpleWeight> scaffChar : activePartitions) {
-                    FlipCutNodeSimpleWeight mergeTaxon = new FlipCutNodeSimpleWeight("TaxonGroup_" + mergedTaxonIndex);
-                    for (FlipCutNodeSimpleWeight taxon : scaffChar) {
-                        taxonToDummy.put(taxon, mergeTaxon);
-                    }
-                    dummyToTaxa.put(mergeTaxon, scaffChar);
-                    mergedTaxonIndex++;
-                }
-
-                int singleTaxonIndex = 0;
-                for (FlipCutNodeSimpleWeight taxon : source.taxa) {
-                    if (!taxonToDummy.containsKey(taxon)) {
-                        taxonToDummy.put(taxon, taxon);
-                        singleTaxonIndex++;
-                    }
-                }
-
-                if (mergedTaxonIndex + singleTaxonIndex > 1) {
+                if (mapping.mergedTaxonIndex + mapping.singleTaxonIndex > 1) {
                     MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph;
                     if (type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN)
                         cutGraph = new AhujaOrlinCutGraph<>();
@@ -97,38 +57,13 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                         cutGraph = new GoldbergTarjanCutGraph<>();
 
                     //create cutgraph
-                    createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, taxonToDummy, trivialcharacters);
+                    createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, mapping);
 
                     //calculate mincut
                     STCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph);
-//                    mincutValue = newMinCut.minCutValue();
 
                     //undo mapping
-                    mincut = new LinkedHashSet<>(source.characters.size() + source.taxa.size());
-                    for (FlipCutNodeSimpleWeight node : newMinCut.getCutSet()) {
-                        //undo taxa mapping
-                        if (node.isTaxon()) {
-                            Set<FlipCutNodeSimpleWeight> trivials = trivialcharacters.get(node);
-                            if (trivials != null) {
-                                for (FlipCutNodeSimpleWeight trivial : trivials) {
-                                    mincut.addAll(source.dummyToCharacters.get(trivial));
-                                }
-                            }
-                            Set<FlipCutNodeSimpleWeight> realT = dummyToTaxa.get(node);
-                            if (realT != null)
-                                mincut.addAll(realT);
-                            else
-                                mincut.add(node);
-
-                            //undo character mapping
-                        } else {
-                            Set<FlipCutNodeSimpleWeight> realNodes = new HashSet<>(source.characters.size());
-                            for (FlipCutNodeSimpleWeight realNode : dummyToMerged.get(node)) {
-                                realNodes.addAll(source.dummyToCharacters.get(realNode));
-                            }
-                            mincut.addAll(realNodes);
-                        }
-                    }
+                    mincut = mapping.undoMapping((Cut<FlipCutNodeSimpleWeight>) newMinCut, dummyToMerged);
                 } else {
                     mincut = null;
                 }
@@ -142,26 +77,25 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
 
 
     public DefaultMultiCut getNextCut() {
-//        if (DEBUG) System.out.println("cut number: " + (++cuts));
-        if (stopCutting) {
-            if (DEBUG) System.out.println("cutting stopped");
-            return null;
+        if (cuts >= source.getK()) return null;
+        mincut = null;
+        while (mincut == null) {
+            blacklist = blacklists.poll();
+            if (blacklist != null) {
+                calculateMinCut();
+            } else {
+                if (DEBUG) System.out.println("Stop  Cutting");
+                return null;
+            }
         }
 
-        calculateMinCut();
-
-        if (mincut == null) {
-            if (DEBUG) System.out.println("Stop  Cutting");
-            stopCutting = true;
-            return null;
-        }
-
-        //todo optimize
-        mincutValue = getMinCutValueAndFillBlacklist(blacklist, mincut);
-        return new DefaultMultiCut(mincut, mincutValue, source);
+        cuts++;
+        getFillBlacklist(mincut.getCutSet());
+        return new DefaultMultiCut(mincut, source);
     }
 
-    protected long getMinCutValueAndFillBlacklist(final Set<FlipCutNodeSimpleWeight> blacklistToAddTo, final LinkedHashSet<FlipCutNodeSimpleWeight> mincut) {
+    protected void getFillBlacklist(final LinkedHashSet<FlipCutNodeSimpleWeight> mincut) {
+        Set<FlipCutNodeSimpleWeight> removed = new HashSet<>();
         for (FlipCutNodeSimpleWeight node : mincut) {
             if (!node.isTaxon()) {
                 // it is character or a character clone
@@ -169,16 +103,15 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                 if (!mincut.contains(node.clone)) {
                     FlipCutNodeSimpleWeight c = node.isClone() ? node.clone : node;
                     if (DEBUG) {
-                        if (blacklistToAddTo.contains(c)) {
+                        if (blacklist.contains(c)) {
                             System.out.println("BLACKLIST cut!!!!!!!!!!");
                         }
                     }
-                    blacklistToAddTo.add(c);
-                    mincutValue += c.edgeWeight;
+                    removed.add(c);
                 }
             }
         }
-        return mincutValue;
+        blacklists.addAll(blacklist.createBlackLists(removed));
     }
 
     @Override
@@ -186,16 +119,19 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
         return getNextCut().getSplittedGraphs();
     }
 
+
     static class Factory implements MultiCutterFactory<MultiCutGraphCutterGreedy, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutterGreedy, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
         private final CutGraphTypes type;
+        private final BlackList blPrototype;
 
-        Factory(CutGraphTypes type) {
+        Factory(CutGraphTypes type, BlackList blPrototype) {
             this.type = type;
+            this.blPrototype = blPrototype;
         }
 
         @Override
         public MultiCutGraphCutterGreedy newInstance(FlipCutGraphMultiSimpleWeight graph) {
-            return new MultiCutGraphCutterGreedy(type, graph);
+            return new MultiCutGraphCutterGreedy(type, graph, blPrototype.newInitialInstance());
         }
 
         @Override

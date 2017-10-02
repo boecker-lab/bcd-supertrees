@@ -18,11 +18,11 @@ import java.util.Set;
 /**
  * node weight styles
  */
-public abstract class CostComputer{
+public abstract class CostComputer {
     /**
      * The accuracy used to go from double to long
      */
-    public final static long ACCURACY = 100000000;
+    public final static long ACCURACY = 1000000000L; //100000000;
     public final static double ZERO = Double.MIN_VALUE;
 
     public final static Set<FlipCutWeights.Weights> SUPPORTED_COST_TYPES = Collections.emptySet();
@@ -38,11 +38,11 @@ public abstract class CostComputer{
     protected double maxBSValue = -1d;
 
     public CostComputer(List<Tree> trees, FlipCutWeights.Weights weights) {
-        this(trees,weights,null);
+        this(trees, weights, null);
     }
 
 
-    public CostComputer(List<Tree> inputTrees,  FlipCutWeights.Weights weights, Tree scaffoldTree) {
+    public CostComputer(List<Tree> inputTrees, FlipCutWeights.Weights weights, Tree scaffoldTree) {
         System.out.println("Init CostComputer");
         this.scaffoldTree = scaffoldTree;
         trees = new ArrayList<>(inputTrees);
@@ -52,21 +52,21 @@ public abstract class CostComputer{
         for (Tree tree : trees) {
             //finde longest branch and max BSValue
             for (TreeNode node : tree.vertices()) {
-                if (node.getParent() != null){
+                if (node.getParent() != null && node.isInnerNode()) {
                     //branch stuff
                     double branchLength = node.getDistanceToParent();
                     if (branchLength > longestBranch)
                         longestBranch = branchLength;
 
-                    if (node.isLeaf()){
+                    if (node.isLeaf()) {
                         //level stuff
                         int level = node.getLevel();
                         if (level > maxLevel)
                             maxLevel = level;
-                    }else {
+                    } else {
                         //BS stuff
                         double currentBS = parseBSValueFromLabel(node);
-                        if (currentBS > maxBSValue){
+                        if (currentBS > maxBSValue) {
                             maxBSValue = currentBS;
                         }
                     }
@@ -75,19 +75,19 @@ public abstract class CostComputer{
             }
         }
 
-        if (scaffoldTree != null && !trees.contains(scaffoldTree)){
+        if (scaffoldTree != null && !trees.contains(scaffoldTree)) {
 //            System.out.println("adding scaffold tree to treelist");
             trees.add(scaffoldTree);
             //scaffoldTree.getRoot().setLabel(Double.toString(getScaffoldWeight()));
         }
-        if (maxBSValue < 0d){
+        if (maxBSValue < 0d) {
             maxBSValue = 100d;
         }
         this.weights = weights;
         System.out.println("...Done!");
     }
 
-    protected double parseBSValueFromLabel(TreeNode node){
+    protected double parseBSValueFromLabel(TreeNode node) {
         if (node.getLabel() != null) {
             try {
                 return Double.valueOf(node.getLabel());
@@ -100,9 +100,9 @@ public abstract class CostComputer{
     }
 
     //returns 1 if no weight is set
-    protected double parseTreeWeightFromLabel(Tree tree){
+    protected double parseTreeWeightFromLabel(Tree tree) {
         String rootLabel = tree.getRoot().getLabel();
-        if (rootLabel != null){
+        if (rootLabel != null) {
             try {
                 return Double.valueOf(rootLabel);
             } catch (NumberFormatException e) {
@@ -113,6 +113,7 @@ public abstract class CostComputer{
     }
 
     public abstract long getEdgeWeight(TreeNode node, List<? extends AbstractFlipCutNode> leafes, AbstractFlipCutNode leaf);
+
     public abstract long getEdgeWeight(TreeNode node, List<TreeNode> leafes, TreeNode leaf);
 
     public List<Tree> getTrees() {

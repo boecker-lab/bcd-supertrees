@@ -65,9 +65,6 @@ launch4j {
     copyConfigurable = project.tasks.fatJar.outputs.files
     jar = "lib/${project.tasks.fatJar.archiveName}"
     headerType = "console"
-
-//    icon = "${project.distPath}/icon.ico"
-//    productName = 'BCD Supertrees'
 }
 
 

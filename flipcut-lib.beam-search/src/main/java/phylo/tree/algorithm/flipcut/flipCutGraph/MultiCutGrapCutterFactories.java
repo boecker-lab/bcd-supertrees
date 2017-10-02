@@ -5,11 +5,15 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
  * 16.02.17.
  */
 
+import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.GreedyBlackList;
+import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.RandomizedBlackList;
+import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.RecursiveBlackList;
+
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
 public class MultiCutGrapCutterFactories {
-    public enum MultiCutterType {VAZIRANI, GREEDY,GREEDY_RAND, MC}
+    public enum MultiCutterType {VAZIRANI, GREEDY,GREEDY_RAND, GREEDY_RECURSIVE, MC}
 
 
     private MultiCutGrapCutterFactories() {
@@ -33,13 +37,15 @@ public class MultiCutGrapCutterFactories {
             case VAZIRANI:
                 return new MultiCutGraphCutter.Factory(simpleCutterType);
             case GREEDY:
-                return new MultiCutGraphCutterGreedy.Factory(simpleCutterType);
+                return new MultiCutGraphCutterGreedy.Factory(simpleCutterType,new GreedyBlackList());
             case GREEDY_RAND:
-                return new MultiCutGraphCutterGreedyRandomized.Factory(simpleCutterType);
+                return new MultiCutGraphCutterGreedy.Factory(simpleCutterType, new RandomizedBlackList());
+            case GREEDY_RECURSIVE:
+                return new MultiCutGraphCutterGreedy.Factory(simpleCutterType, new RecursiveBlackList());
             case MC:
                 return MultiCutGraphCutterUndirectedTranfomation.getFactory();
             default:
-                return new MultiCutGraphCutterGreedy.Factory(simpleCutterType);
+                return new MultiCutGraphCutterGreedy.Factory(simpleCutterType, new GreedyBlackList());
         }
     }
 
