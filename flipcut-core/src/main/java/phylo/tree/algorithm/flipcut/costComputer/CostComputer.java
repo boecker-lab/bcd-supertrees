@@ -2,6 +2,7 @@ package phylo.tree.algorithm.flipcut.costComputer;
 
 
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
+import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
@@ -30,7 +31,6 @@ public abstract class CostComputer {
     protected final List<Tree> trees;
     protected final Tree scaffoldTree;
     protected FlipCutWeights.Weights weights;
-    private double scaffoldWeight = 0d;
 
     //just for normalization for easy combination of different weighting types
     protected double longestBranch;

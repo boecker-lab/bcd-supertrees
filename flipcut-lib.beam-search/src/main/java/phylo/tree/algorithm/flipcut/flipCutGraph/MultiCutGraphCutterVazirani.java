@@ -3,7 +3,6 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.bipartition.BasicCut;
 import mincut.cutGraphAPI.bipartition.STCut;
-import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 import phylo.tree.algorithm.flipcut.model.VaziraniCut;
 
@@ -25,7 +24,9 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
     private PriorityQueue<VaziraniCut> queueAscHEAP = null;
     private VaziraniCut<FlipCutNodeSimpleWeight> currentNode = null;
     private VaziraniCut<FlipCutNodeSimpleWeight>[] initCuts;
-    private final ArrayList<FlipCutNodeSimpleWeight> taxa;
+
+
+    private ArrayList<FlipCutNodeSimpleWeight> taxa;
     private VertexMapping<FlipCutGraphMultiSimpleWeight> mapping = new VertexMapping<>();
     private LinkedHashSet<FlipCutNodeSimpleWeight> characters = null;
 
@@ -33,9 +34,6 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
     public MultiCutGraphCutterVazirani(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut) {
         super(type);
         source = graphToCut;
-
-        mapping.createMapping(source);
-        taxa = new ArrayList<>(mapping.taxonToDummy.values());
     }
 
     private List<VaziraniCut> findCutsFromPartialCuts(VaziraniCut sourceCut, VaziraniCut[] initCuts) {
@@ -49,8 +47,10 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
         Set<FlipCutNodeSimpleWeight> sSet;
         Set<FlipCutNodeSimpleWeight> tSet;
 
+
         // finding all partial mincut
         for (int k = sourceCut.k; k < taxa.size(); k++) {
+//            System.out.println("Taxa number: " + taxa.size() + " - k=" + k);
             sSet = new HashSet<FlipCutNodeSimpleWeight>();
             tSet = new HashSet<FlipCutNodeSimpleWeight>();
 
@@ -79,10 +79,12 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
             for (int i = k + 1; i < taxa.size(); i++) {
                 cutGraph.addNode(taxa.get(i));
             }
+
             FlipCutNodeSimpleWeight randomS = sSet.iterator().next();
             cutGraph.addNode(randomS);
 
             if (!tSet.isEmpty()) {
+
                 FlipCutNodeSimpleWeight randomT = tSet.iterator().next();
                 cutGraph.addNode(randomT);
 
@@ -91,12 +93,12 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
                     long sWeight = 0;
                     long tWeight = 0;
                     for (FlipCutNodeSimpleWeight taxon : character.edges) {
-                        long weight = CostComputer.ACCURACY * INFINITY;
+                        long weight = CutGraphCutter.getInfinity();
 
                         if (sSet.contains(taxon)) {
-                            sWeight = CostComputer.ACCURACY * INFINITY;
+                            sWeight = CutGraphCutter.getInfinity();
                         } else if (tSet.contains(taxon)) {
-                            tWeight = CostComputer.ACCURACY * INFINITY;
+                            tWeight = CutGraphCutter.getInfinity();
                         } else {
                             cutGraph.addEdge(character, taxon, weight);
                             cutGraph.addEdge(taxon, character.clone, weight);
@@ -169,8 +171,10 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
         FlipCutNodeSimpleWeight t;
         VaziraniCut currentNode;
         STCut minCut;
-
         VaziraniCut lightestCut;
+
+        // inti data structures
+        taxa = mapping.createMapping(source);
         initCuts = new VaziraniCut[taxa.size() - 1];
         queueAscHEAP = new PriorityQueue<VaziraniCut>();
 
@@ -188,7 +192,14 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
             FlipCutNodeSimpleWeight node = (FlipCutNodeSimpleWeight) o;
             if (!node.isClone() && (node.isCharacter() || node.isDummyCharacter())) {
                 characters.add(node);
+                if (node.edgeWeight == CutGraphCutter.getInfinity())
+                    System.out.println("SCM node in graph???????");
             }
+        }
+
+        for (Set<FlipCutNodeSimpleWeight> simpleWeights : mapping.trivialcharacters.values()) {
+            if (characters.removeAll(simpleWeights))
+                System.out.println("trivials removed");
         }
 
         //ATTENTION this is  the undirected graph version as tweak for flipCut Graph
@@ -217,13 +228,13 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
             for (FlipCutNodeSimpleWeight character : characters) {
                 long sWeight = 0;
                 for (FlipCutNodeSimpleWeight taxon : character.edges) {
-                    long weight = CostComputer.ACCURACY * INFINITY;
+                    long weight = CutGraphCutter.getInfinity();
 
                     if (!sSet.contains(taxon)) {
                         cutGraph.addEdge(character, taxon, weight);
                         cutGraph.addEdge(taxon, character.clone, weight);
                     } else {
-                        sWeight = CostComputer.ACCURACY * INFINITY;
+                        sWeight = CutGraphCutter.getInfinity();
                     }
                 }
                 if (sWeight > 0) {

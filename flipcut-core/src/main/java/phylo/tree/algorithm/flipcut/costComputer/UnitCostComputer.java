@@ -22,7 +22,7 @@ public class UnitCostComputer extends SimpleCosts {
     public long getEdgeWeight(TreeNode node) {
         Tree t = (Tree)node.getGraph();
         if (scaffoldTree != null && trees.equals(scaffoldTree)) {
-            return ACCURACY * CutGraphCutter.INFINITY;
+            return CutGraphCutter.getInfinity();
         } else {
             return 1;
         }

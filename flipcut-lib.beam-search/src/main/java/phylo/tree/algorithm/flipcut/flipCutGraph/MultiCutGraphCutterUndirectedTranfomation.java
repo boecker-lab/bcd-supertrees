@@ -58,7 +58,7 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
             for (FlipCutNodeSimpleWeight e1 : character.edges) {
                 for (FlipCutNodeSimpleWeight e2 : character.edges) {
                     if (e1 != e2) {
-                        boolean guide = character.edgeWeight == CostComputer.ACCURACY * INFINITY;
+                        boolean guide = character.edgeWeight == CutGraphCutter.getInfinity();
                         cutGraph.addEdge(e1, e2, character.edgeWeight, character, (guide));
                     }
                 }

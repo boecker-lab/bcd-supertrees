@@ -1,6 +1,7 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 import mincut.cutGraphAPI.bipartition.Cut;
+import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -14,7 +15,15 @@ import java.util.concurrent.ExecutorService;
  * Time: 14:15
  */
 public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>> implements GraphCutter<N, T> {
-    public static final long INFINITY = 1000000;
+    private static final long INFINITY = 1000000;
+
+    public static long getInfinity(){
+        return CostComputer.ACCURACY * INFINITY;
+    }
+
+//    public static long getSCMInfinity(){
+//        return CostComputer.ACCURACY * INFINITY;
+//    }
 
     protected final ExecutorService executorService;
     protected final int threads;

@@ -44,7 +44,7 @@ public class WeightCostComputer extends SimpleCosts {
         double nodeLevel = 1;
         Tree tree = (Tree) node.getGraph();
         if (scaffoldTree != null && tree.equals(scaffoldTree)) {
-            return CutGraphCutter.INFINITY * ACCURACY;
+            return CutGraphCutter.getInfinity();
         } else {
             //###############################
             //##### most common weights #####

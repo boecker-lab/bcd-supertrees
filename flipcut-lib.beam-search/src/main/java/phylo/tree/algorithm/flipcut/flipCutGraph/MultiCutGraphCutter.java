@@ -106,7 +106,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                                 break;
                             }
                             case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
-                                weight = CostComputer.ACCURACY * INFINITY;
+                                weight = CutGraphCutter.getInfinity();
                                 break;
                             }
                         }
@@ -262,7 +262,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
                             break;
                         }
                         case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
-                            weight = CostComputer.ACCURACY * INFINITY;
+                            weight = CutGraphCutter.getInfinity();
                             break;
                         }
                     }

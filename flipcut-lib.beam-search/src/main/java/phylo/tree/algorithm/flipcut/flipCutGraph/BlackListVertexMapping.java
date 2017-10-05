@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.BlackList;
 import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.GreedyBlackList;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -19,11 +20,11 @@ public class BlackListVertexMapping extends VertexMapping<FlipCutGraphMultiSimpl
     }
 
     @Override
-    protected void createMapping(final FlipCutGraphMultiSimpleWeight s) {
-        createMapping(s, new GreedyBlackList());
+    protected ArrayList<FlipCutNodeSimpleWeight> createMapping(final FlipCutGraphMultiSimpleWeight s) {
+        return createMapping(s, new GreedyBlackList());
     }
 
-    protected void createMapping(final FlipCutGraphMultiSimpleWeight s, final BlackList blacklist) {
+    protected ArrayList<FlipCutNodeSimpleWeight> createMapping(final FlipCutGraphMultiSimpleWeight s, final BlackList blacklist) {
         clear(s);
 
         Set<Set<FlipCutNodeSimpleWeight>> activePartitions = new HashSet<>();
@@ -58,8 +59,10 @@ public class BlackListVertexMapping extends VertexMapping<FlipCutGraphMultiSimpl
             activePartitions = finalActivePartitions;
         }
 
+        ArrayList<FlipCutNodeSimpleWeight> taxa = new ArrayList<>();
         for (Set<FlipCutNodeSimpleWeight> scaffChar : activePartitions) {
             FlipCutNodeSimpleWeight mergeTaxon = new FlipCutNodeSimpleWeight("TaxonGroup_" + mergedTaxonIndex);
+            taxa.add(mergeTaxon);
             for (FlipCutNodeSimpleWeight taxon : scaffChar) {
                 taxonToDummy.put(taxon, mergeTaxon);
             }
@@ -70,8 +73,10 @@ public class BlackListVertexMapping extends VertexMapping<FlipCutGraphMultiSimpl
         for (FlipCutNodeSimpleWeight taxon : sourceGraph.taxa) {
             if (!taxonToDummy.containsKey(taxon)) {
                 taxonToDummy.put(taxon, taxon);
+                taxa.add(taxon);
                 singleTaxonIndex++;
             }
         }
+        return taxa;
     }
 }

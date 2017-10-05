@@ -7,9 +7,6 @@ import phylo.tree.model.TreeNode;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static phylo.tree.algorithm.flipcut.costComputer.CostComputer.ACCURACY;
-import static phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter.INFINITY;
-
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
  * Date: 09.01.13

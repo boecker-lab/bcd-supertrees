@@ -52,7 +52,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         for (FlipCutNodeSimpleWeight character : source.characters) {
             for (FlipCutNodeSimpleWeight taxon : character.edges) {
                 //todo what is a useful way for a constant
-                long weight = CostComputer.ACCURACY * INFINITY;
+                long weight = CutGraphCutter.getInfinity();
                 cutGraph.addEdge(character, taxon, weight);
                 cutGraph.addEdge(taxon, character.clone, weight);
             }
@@ -77,7 +77,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
                     for (FlipCutNodeSimpleWeight taxon : dummy.edges) {
                         //todo what is a useful way for a constant
-                        long weight = CostComputer.ACCURACY * INFINITY;
+                        long weight = CutGraphCutter.getInfinity();
                         cutGraph.addEdge(dummy, taxon, weight);
                         cutGraph.addEdge(taxon, dummy.clone, weight);
                     }
@@ -105,7 +105,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         }
 
         // add characters, character clones and edges between them
-        final long infinity = CostComputer.ACCURACY * INFINITY;
+        final long infinity = CutGraphCutter.getInfinity();
 
         Set<FlipCutNodeSimpleWeight> alreadyIn = new HashSet<>(size);
         Map<Set<FlipCutNodeSimpleWeight>, FlipCutNodeSimpleWeight> charsToAdd = new HashMap<>(size);

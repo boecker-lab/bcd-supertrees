@@ -26,12 +26,14 @@ public class VertexMapping<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeigh
         clear(null);
     }
 
-    protected void createMapping(final T s) {
+    protected ArrayList<FlipCutNodeSimpleWeight> createMapping(final T s) {
         clear(s);
         //create mapping
         //todo optimize all these mapping stuff if it works well
+        ArrayList<FlipCutNodeSimpleWeight> taxonGroups = new ArrayList<>();
         for (FlipCutNodeSimpleWeight scaffChar : sourceGraph.activePartitions) {
             FlipCutNodeSimpleWeight mergeTaxon = new FlipCutNodeSimpleWeight("TaxonGroup_" + mergedTaxonIndex);
+            taxonGroups.add(mergeTaxon);
             for (FlipCutNodeSimpleWeight taxon : scaffChar.edges) {
                 taxonToDummy.put(taxon, mergeTaxon);
             }
@@ -42,8 +44,10 @@ public class VertexMapping<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeigh
         for (FlipCutNodeSimpleWeight taxon : sourceGraph.taxa) {
             if (!taxonToDummy.containsKey(taxon)) {
                 taxonToDummy.put(taxon, taxon);
+                taxonGroups.add(taxon);
             }
         }
+        return taxonGroups;
     }
 
     protected STCut<FlipCutNodeSimpleWeight> undoMapping(final STCut<FlipCutNodeSimpleWeight> newMinCut, final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged) {
