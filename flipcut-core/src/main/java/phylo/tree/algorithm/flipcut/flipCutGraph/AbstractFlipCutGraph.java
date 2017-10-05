@@ -28,7 +28,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     protected Map<T, TreeNode> charToTreeNode = null;
     protected Map<TreeNode, T> treeNodeToChar = null;
     // active partitions for guide tree based taxa merging
-    protected Set<T> activePartitions = null;
+    protected Set<T> activePartitions = new HashSet<>();
 
     /**
      * Turn on/off global character merging for characters with identical edgeset {@literal ->} works for hypergraph version only

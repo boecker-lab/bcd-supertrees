@@ -35,7 +35,8 @@ public class MultiCutGrapCutterFactories {
     public static MultiCutterFactory newInstance(MultiCutterType multiCutterType, SimpleCutGraphCutter.CutGraphTypes simpleCutterType) {
         switch (multiCutterType) {
             case VAZIRANI:
-                return new MultiCutGraphCutter.Factory(simpleCutterType);
+                return new MultiCutGraphCutterVazirani.Factory(simpleCutterType);
+//                return new MultiCutGraphCutter.Factory(simpleCutterType);
             case GREEDY:
                 return new MultiCutGraphCutterGreedy.Factory(simpleCutterType,new GreedyBlackList());
             case GREEDY_RAND:

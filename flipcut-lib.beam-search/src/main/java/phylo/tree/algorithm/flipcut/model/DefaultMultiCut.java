@@ -1,7 +1,6 @@
 package phylo.tree.algorithm.flipcut.model;
 
 
-import mincut.cutGraphAPI.bipartition.BasicCut;
 import mincut.cutGraphAPI.bipartition.Cut;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
@@ -62,6 +61,4 @@ public class DefaultMultiCut extends MultiCut<FlipCutNodeSimpleWeight, FlipCutGr
     protected List<List<FlipCutNodeSimpleWeight>> comp() {
         return comp;
     }
-
-
 }

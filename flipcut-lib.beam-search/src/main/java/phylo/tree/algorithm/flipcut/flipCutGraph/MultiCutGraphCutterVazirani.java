@@ -1,6 +1,7 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
+import mincut.cutGraphAPI.bipartition.BasicCut;
 import mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
@@ -18,27 +19,29 @@ import java.util.concurrent.ExecutorService;
 /**
  * VAZIRANI ALGORITHM
  */
-//TODO THE VAZIRANI should be an own Cutgraph not a cut graph cutter --> it should extend directed cut graph an use some max flow implemetation
 
-/*public class MergeableVziraniCutter extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
 
     private PriorityQueue<VaziraniCut> queueAscHEAP = null;
-    private VaziraniCut<FlipCutNodeSimpleWeight> currentVaziraniCut = null;
+    private VaziraniCut<FlipCutNodeSimpleWeight> currentNode = null;
     private VaziraniCut<FlipCutNodeSimpleWeight>[] initCuts;
     private final ArrayList<FlipCutNodeSimpleWeight> taxa;
-    private final LinkedHashSet<FlipCutNodeSimpleWeight> characters;
-    private VertexMapping mapping = new VertexMapping();
+    private VertexMapping<FlipCutGraphMultiSimpleWeight> mapping = new VertexMapping<>();
+    private LinkedHashSet<FlipCutNodeSimpleWeight> characters = null;
 
-    public MergeableVziraniCutter(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut) {
+
+    public MultiCutGraphCutterVazirani(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut) {
         super(type);
         source = graphToCut;
+
         mapping.createMapping(source);
         taxa = new ArrayList<>(mapping.taxonToDummy.values());
-        characters = source.characters;
     }
 
     private List<VaziraniCut> findCutsFromPartialCuts(VaziraniCut sourceCut, VaziraniCut[] initCuts) {
-        Set<FlipCutNodeSimpleWeight> cutTset = new HashSet<>(sourceCut.cut.gettSet());
+        Set<FlipCutNodeSimpleWeight> cut = sourceCut.getCutSet();
+
+
         List<VaziraniCut> cuts = new ArrayList<VaziraniCut>(taxa.size() - sourceCut.k);
 
         VaziraniCut currentCut;
@@ -52,7 +55,7 @@ import java.util.concurrent.ExecutorService;
             tSet = new HashSet<FlipCutNodeSimpleWeight>();
 
             for (int i = 0; i < k; i++) {
-                if (cutTset.contains(taxa.get(i))) {
+                if (cut.contains(taxa.get(i))) {
                     tSet.add(taxa.get(i));
                 } else {
                     sSet.add(taxa.get(i));
@@ -60,7 +63,7 @@ import java.util.concurrent.ExecutorService;
             }
 
             //change position of taxon number k
-            if (!cutTset.contains(taxa.get(k))) {
+            if (!cut.contains(taxa.get(k))) {
                 tSet.add(taxa.get(k));
             } else {
                 sSet.add(taxa.get(k));
@@ -70,17 +73,8 @@ import java.util.concurrent.ExecutorService;
             cutGraph = new GoldbergTarjanCutGraph<>();
 
             // add characters, character clones and edges between them
-            //todo character merging stuff
-            switch (type) {
-                case MAXFLOW_TARJAN_GOLDBERG: {
-                    createGoldbergTarjanCharacterWeights(cutGraph);
-                    break;
-                }
-                case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
-                    createGoldbergTarjanCharacterWeights(cutGraph);
-                    break;
-                }
-            }
+            createGoldbergTarjanCharacterWeights(cutGraph, characters);
+
             //add taxa > k
             for (int i = k + 1; i < taxa.size(); i++) {
                 cutGraph.addNode(taxa.get(i));
@@ -97,22 +91,12 @@ import java.util.concurrent.ExecutorService;
                     long sWeight = 0;
                     long tWeight = 0;
                     for (FlipCutNodeSimpleWeight taxon : character.edges) {
-                        long weight = 0;
-                        switch (type) {
-                            case MAXFLOW_TARJAN_GOLDBERG: {
-                                weight = character.edgeWeight;
-                                break;
-                            }
-                            case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
-                                weight = CostComputer.ACCURACY * INFINITY;
-                                break;
-                            }
-                        }
+                        long weight = CostComputer.ACCURACY * INFINITY;
 
                         if (sSet.contains(taxon)) {
-                            sWeight = sWeight + weight;
+                            sWeight = CostComputer.ACCURACY * INFINITY;
                         } else if (tSet.contains(taxon)) {
-                            tWeight = tWeight + weight;
+                            tWeight = CostComputer.ACCURACY * INFINITY;
                         } else {
                             cutGraph.addEdge(character, taxon, weight);
                             cutGraph.addEdge(taxon, character.clone, weight);
@@ -131,7 +115,7 @@ import java.util.concurrent.ExecutorService;
 
                 // compute mincut an put it to results
                 STCut<FlipCutNodeSimpleWeight> tmpCut = cutGraph.calculateMinSTCut(randomS, randomT);
-                currentCut = new VaziraniCut(tmpCut, k + 1);
+                currentCut = new VaziraniCut(tmpCut, tSet, k + 1);
                 cuts.add(currentCut);
 
             } else {
@@ -146,7 +130,7 @@ import java.util.concurrent.ExecutorService;
                         }
                     }
                     //copy to new object
-                    initCut = new VaziraniCut(initCut.cut, k + 1);
+                    initCut = new VaziraniCut(initCut.getCutSet(), initCut.minCutValue(), k + 1);
                     cuts.add(initCut);
                 }
             }
@@ -164,62 +148,50 @@ import java.util.concurrent.ExecutorService;
                 initialCut();
             }
             nextCut();
-            mincut = mapping.undoMapping(currentVaziraniCut.cut, dummyToMerged);
-            mincutValue = currentVaziraniCut.minCutValue();
-
-            return new DefaultMultiCut(mincut, mincutValue, source);
+            BasicCut<FlipCutNodeSimpleWeight> unMapped = mapping.undoMapping(currentNode, dummyToMerged);
+            return new DefaultMultiCut(unMapped, source);
         }
     }
 
     private void nextCut() {
         //Starting find subobtimal mincut mincut with vaziranis algo
-        currentVaziraniCut = queueAscHEAP.poll();
+        currentNode = queueAscHEAP.poll();
         //compute next cut candidates with vaziranis algo
-        List<VaziraniCut> toHeap = findCutsFromPartialCuts(currentVaziraniCut, initCuts);
+        List<VaziraniCut> toHeap = findCutsFromPartialCuts(currentNode, initCuts);
         for (VaziraniCut node : toHeap) {
             queueAscHEAP.add(node);
         }
     }
 
     private void initialCut() {
-        GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph = null;
-
         // get the mincut, fix s iterate over t
         FlipCutNodeSimpleWeight s;
         FlipCutNodeSimpleWeight t;
         VaziraniCut currentNode;
         STCut minCut;
+
         VaziraniCut lightestCut;
         initCuts = new VaziraniCut[taxa.size() - 1];
         queueAscHEAP = new PriorityQueue<VaziraniCut>();
 
         //j=0
-       *//* //todo integrate character merging stuff!
-        switch (type) {
-            case MAXFLOW_TARJAN_GOLDBERG: {
-                cutGraph = new GoldbergTarjanCutGraph<>();
-                createGoldbergTarjanCharacterWeights(cutGraph);
-                createGoldbergTarjan(cutGraph);
-                break;
-            }
-            case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
-                cutGraph = new GoldbergTarjanCutGraph<>();
-                createGoldbergTarjanCharacterWeights(cutGraph);
-                createTarjanGoldbergHyperGraph(cutGraph);
-                break;
-            }
-        }*//*
-
-        //create cutgraph
-        cutGraph = new GoldbergTarjanCutGraph<>();
+        GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph = new GoldbergTarjanCutGraph<>();
         createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, mapping);
 
-
         minCut = cutGraph.calculateMinSTCut(taxa.get(0), taxa.get(1));
-        lightestCut = new VaziraniCut(minCut, 1);
+        lightestCut = new VaziraniCut(minCut.getCutSet(), minCut.minCutValue, 1);
         initCuts[0] = lightestCut;
 
-        //ATTENTION this is  the undirected graph version as tweak for the symmetric flipCut Graph
+
+        characters = new LinkedHashSet<>();
+        for (Object o : cutGraph.getNodes().keySet()) {
+            FlipCutNodeSimpleWeight node = (FlipCutNodeSimpleWeight) o;
+            if (!node.isClone() && (node.isCharacter() || node.isDummyCharacter())) {
+                characters.add(node);
+            }
+        }
+
+        //ATTENTION this is  the undirected graph version as tweak for flipCut Graph
         for (int j = 1; j < taxa.size() - 1; j++) {
             s = taxa.get(j);
             t = taxa.get(j + 1);
@@ -232,19 +204,8 @@ import java.util.concurrent.ExecutorService;
                 sSet.add(taxa.get(i));
             }
 
-
             // add characters, character clones and edges between them
-            //todo character merging stuff
-            switch (type) {
-                case MAXFLOW_TARJAN_GOLDBERG: {
-                    createGoldbergTarjanCharacterWeights(cutGraph);
-                    break;
-                }
-                case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
-                    createGoldbergTarjanCharacterWeights(cutGraph);
-                    break;
-                }
-            }
+            createGoldbergTarjanCharacterWeights(cutGraph, characters);
 
             //add taxa
             for (int i = j + 1; i < taxa.size(); i++) {
@@ -256,23 +217,13 @@ import java.util.concurrent.ExecutorService;
             for (FlipCutNodeSimpleWeight character : characters) {
                 long sWeight = 0;
                 for (FlipCutNodeSimpleWeight taxon : character.edges) {
-                    long weight = 0;
-                    switch (type) {
-                        case MAXFLOW_TARJAN_GOLDBERG: {
-                            weight = character.edgeWeight;
-                            break;
-                        }
-                        case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
-                            weight = CostComputer.ACCURACY * INFINITY;
-                            break;
-                        }
-                    }
+                    long weight = CostComputer.ACCURACY * INFINITY;
 
-                    if (sSet.contains(taxon)) {
-                        sWeight = sWeight + weight;
-                    } else {
+                    if (!sSet.contains(taxon)) {
                         cutGraph.addEdge(character, taxon, weight);
                         cutGraph.addEdge(taxon, character.clone, weight);
+                    } else {
+                        sWeight = CostComputer.ACCURACY * INFINITY;
                     }
                 }
                 if (sWeight > 0) {
@@ -282,13 +233,13 @@ import java.util.concurrent.ExecutorService;
             }
 
             minCut = cutGraph.calculateMinSTCut(s, t);
-            currentNode = new VaziraniCut(minCut, 1);
+            currentNode = new VaziraniCut(minCut.getCutSet(), minCut.minCutValue, 1);
             initCuts[j] = currentNode;
             //save lightest cut for HEAP init
             if (currentNode.minCutValue() < lightestCut.minCutValue()) lightestCut = currentNode;
         }
         //initialize heap
-        VaziraniCut initialToHeap = new VaziraniCut(lightestCut); //todo why new node?
+        VaziraniCut initialToHeap = new VaziraniCut(lightestCut.getCutSet(), lightestCut.minCutValue(), lightestCut.k); //todo why new node?
         queueAscHEAP.add(initialToHeap);
         //this.currentNode =  initialToHeap;
     }
@@ -299,7 +250,7 @@ import java.util.concurrent.ExecutorService;
 
     }
 
-    static class Factory implements MultiCutterFactory<MergeableVziraniCutter, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MergeableVziraniCutter, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+    static class Factory implements MultiCutterFactory<MultiCutGraphCutterVazirani, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutterVazirani, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
         private final CutGraphTypes type;
 
         Factory(CutGraphTypes type) {
@@ -307,12 +258,12 @@ import java.util.concurrent.ExecutorService;
         }
 
         @Override
-        public MergeableVziraniCutter newInstance(FlipCutGraphMultiSimpleWeight graph) {
-            return new MergeableVziraniCutter(type, graph);
+        public MultiCutGraphCutterVazirani newInstance(FlipCutGraphMultiSimpleWeight graph) {
+            return new MultiCutGraphCutterVazirani(type, graph);
         }
 
         @Override
-        public MergeableVziraniCutter newInstance(FlipCutGraphMultiSimpleWeight graph, ExecutorService executorService, int threads) {
+        public MultiCutGraphCutterVazirani newInstance(FlipCutGraphMultiSimpleWeight graph, ExecutorService executorService, int threads) {
             return newInstance(graph);
         }
 
@@ -321,4 +272,4 @@ import java.util.concurrent.ExecutorService;
             return type;
         }
     }
-}*/
+}

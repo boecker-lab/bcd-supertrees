@@ -74,11 +74,11 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
             //todo character merging stuff
             switch (type) {
                 case MAXFLOW_TARJAN_GOLDBERG: {
-                    createGoldbergTarjanCharacterWeights(cutGraph);
+                    createGoldbergTarjanCharacterWeights(cutGraph,source.characters);
                     break;
                 }
                 case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
-                    createGoldbergTarjanCharacterWeights(cutGraph);
+                    createGoldbergTarjanCharacterWeights(cutGraph,source.characters);
                     break;
                 }
             }
@@ -201,13 +201,13 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
         switch (type) {
             case MAXFLOW_TARJAN_GOLDBERG: {
                 cutGraph = new GoldbergTarjanCutGraph<>();
-                createGoldbergTarjanCharacterWeights(cutGraph);
+                createGoldbergTarjanCharacterWeights(cutGraph,source.characters);
                 createGoldbergTarjan(cutGraph);
                 break;
             }
             case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
                 cutGraph = new GoldbergTarjanCutGraph<>();
-                createGoldbergTarjanCharacterWeights(cutGraph);
+                createGoldbergTarjanCharacterWeights(cutGraph,source.characters);
                 createTarjanGoldbergHyperGraph(cutGraph);
                 break;
             }
@@ -236,11 +236,11 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
             //todo character merging stuff
             switch (type) {
                 case MAXFLOW_TARJAN_GOLDBERG: {
-                    createGoldbergTarjanCharacterWeights(cutGraph);
+                    createGoldbergTarjanCharacterWeights(cutGraph,source.characters);
                     break;
                 }
                 case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
-                    createGoldbergTarjanCharacterWeights(cutGraph);
+                    createGoldbergTarjanCharacterWeights(cutGraph,source.characters);
                     break;
                 }
             }

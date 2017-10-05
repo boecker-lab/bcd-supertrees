@@ -67,7 +67,6 @@ public class VertexMapping<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeigh
                     for (FlipCutNodeSimpleWeight trivial : trivials) {
                         mincut.addAll(sourceGraph.dummyToCharacters.get(trivial));
                     }
-
                 }
                 Set<FlipCutNodeSimpleWeight> realT = dummyToTaxa.get(node);
                 if (realT != null)
