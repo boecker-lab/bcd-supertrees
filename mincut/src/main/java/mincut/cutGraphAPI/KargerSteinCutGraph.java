@@ -70,7 +70,7 @@ public class KargerSteinCutGraph<V, C extends CutFactory<V, ? extends AbstractBi
             cutEdges.add(charactermap.inverse().get(color));
         }
         //get cutsocre from edges
-        long mincutValue = (long) c.mincutValue();
+        long mincutValue = 0;
         if (!charactermap.isEmpty()) {
             mincutValue = (long) cutEdges.stream().mapToDouble(cc -> charactermap.get(cc).getWeight()).sum();
         }
@@ -80,19 +80,19 @@ public class KargerSteinCutGraph<V, C extends CutFactory<V, ? extends AbstractBi
 
     @Override
     public List<AbstractBipartition<V>> calculateMinCuts(int numberOfCuts) {
-        if (numberOfCuts == 0) return null;
+        if (numberOfCuts <= 0) return null;
 
-        if (numberOfCuts > 1) {
+        if (numberOfCuts == 1) {
+            return Arrays.asList(calculateMinCut());
+        } else {
             List<AbstractBipartition<V>> cuts = calculateMinCuts();
             return cuts.subList(0, Math.min(numberOfCuts, cuts.size()));
-        } else {
-            return Arrays.asList(calculateMinCut());
         }
     }
 
     @Override
     public AbstractBipartition<V> calculateMinCut() {
-        return buildCut(new KargerStein().getMinCut(g));
+        return buildCut(new KargerStein().getMinCut(g, true));
     }
 
     public AbstractBipartition<V> sampleCut() {
@@ -134,18 +134,18 @@ public class KargerSteinCutGraph<V, C extends CutFactory<V, ? extends AbstractBi
 
     @Override
     public void addEdge(V vertex1, V vertex2, long capacity, V hyperedge) {
-        addEdge(vertex1,vertex2,capacity,hyperedge,false);
+        addEdge(vertex1, vertex2, capacity, hyperedge, false);
     }
 
-    public void addEdge(V vertex1, V vertex2, long capacity, V hyperedge,  boolean uncutable) {
+    public void addEdge(V vertex1, V vertex2, double capacity, V hyperedge, boolean uncutable) {
         if (!vertexMapBack.containsKey(vertex1))
             addNode(vertex1);
         if (!vertexMapBack.containsKey(vertex2))
             addNode(vertex2);
         EdgeColor color = charactermap.get(hyperedge);
         if (color == null) {
-            color = new EdgeColor(capacity,uncutable);
-            if (hyperedge != null) //todo proof
+            color = new EdgeColor(capacity, uncutable);
+            if (hyperedge != null)
                 charactermap.put(hyperedge, color);
         }
         g.addEdge(vertexMapBack.get(vertex1), vertexMapBack.get(vertex2), color);

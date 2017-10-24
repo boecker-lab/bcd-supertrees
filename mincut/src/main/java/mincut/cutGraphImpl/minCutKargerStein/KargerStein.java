@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class KargerStein {
+    public static final double SQRT2 = Math.sqrt(2d);
     private Graph best;
     private LinkedHashSet<Graph> cuts;
 
@@ -39,14 +40,12 @@ public class KargerStein {
             cuts.add(g1);
             return g1;
         } else {
-            final int contractTo = (int) Math.ceil((n / Math.sqrt(2d) + 1d));
+            final int contractTo = (int) Math.ceil((((double) n) / SQRT2) + 1d);
+
             Graph g1 = recursiveContract(contract(gr.clone(), contractTo));
             Graph g2 = recursiveContract(contract(gr.clone(), contractTo));
 
-            if (g1.getSumOfWeights() <= g2.getSumOfWeights())
-                return g1;
-            else
-                return g2;
+            return (g1.getSumOfWeights() < g2.getSumOfWeights()) ? g1 : g2;
         }
     }
 
@@ -82,7 +81,7 @@ public class KargerStein {
 
             picked = g.edgeColorList.get(mid);
 
-        }else{
+        } else {
             picked = g.preMergedColors.iterator().next();
         }
 
@@ -99,7 +98,8 @@ public class KargerStein {
             best = recursiveContract(gr);
         } else {
             best = null;
-            int iter = gr.vertices.size() * gr.vertices.size();
+            final int n = gr.vertices.size();
+            int iter = (int) Math.ceil(n * n * (Math.log(n) / Math.log(2)));
             cuts = new LinkedHashSet<>(iter);
 
             for (int i = 0; i < iter; i++) {
@@ -107,6 +107,8 @@ public class KargerStein {
                 contract(grc, 2);
                 grc.setCutted(true);
                 cuts.add(grc);
+                if (best == null || grc.mincutValue() < best.mincutValue())
+                    best = grc;
             }
         }
         return cuts;
@@ -117,13 +119,13 @@ public class KargerStein {
         return getMinCuts(gr, recursive);
     }
 
-    public Graph getMinCut(final Graph gr) {
-        getMinCuts(gr, true);
+    public Graph getMinCut(final Graph gr, final boolean recursive) {
+        getMinCuts(gr, recursive);
         return best;
     }
 
-    public Graph getMinCut(final int[][] arr) {
-        getMinCuts(arr, true);
+    public Graph getMinCut(final int[][] arr, final boolean recursive) {
+        getMinCuts(arr, recursive);
         return best;
     }
 
@@ -152,7 +154,7 @@ public class KargerStein {
                 //remove loops
                 v1.edges.remove(edge);
                 v2.edges.remove(edge);//not needed
-                for (Iterator<EdgeColor> colorit = edge.colorIterator(); colorit.hasNext();) {
+                for (Iterator<EdgeColor> colorit = edge.colorIterator(); colorit.hasNext(); ) {
                     EdgeColor color = colorit.next();
                     colorit.remove();
 
@@ -166,15 +168,15 @@ public class KargerStein {
                 //redirect edges from v2 to v1
                 v2.edges.remove(edge);//not needed
                 Vertex v = edge.getOppositeVertex(v2);
-                Edge toAdd =  gr.getEdge(v,v1);
-                if (toAdd != null){
-                    for (Iterator<EdgeColor> colorit = edge.colorIterator(); colorit.hasNext();) {
+                Edge toAdd = gr.getEdge(v, v1);
+                if (toAdd != null) {
+                    for (Iterator<EdgeColor> colorit = edge.colorIterator(); colorit.hasNext(); ) {
                         toAdd.add(colorit.next());
                     }
                     edge.clearColors();
                     edgeIt.remove();
-                }else{
-                    edge.replaceVertex(v2,v1);
+                } else {
+                    edge.replaceVertex(v2, v1);
                     v1.edges.add(edge);
                 }
             }
