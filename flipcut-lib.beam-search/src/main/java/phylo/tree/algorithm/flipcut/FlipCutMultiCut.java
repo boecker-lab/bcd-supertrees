@@ -68,7 +68,7 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, Fl
             while (minimalPartLevel < numTaxa) {
                 System.out.println(new Date().toString());
                 System.out.println(minimalPartLevel + " of " + numTaxa + " done!");
-                System.out.println("number of partitions: " + partitions.size());
+                System.out.println("Number of solutions alive: " + partitions.size());
                 System.out.println();
                 final Set<Partition> allNewPartitionsSet = new HashSet<>();
                 //start with best partitions...

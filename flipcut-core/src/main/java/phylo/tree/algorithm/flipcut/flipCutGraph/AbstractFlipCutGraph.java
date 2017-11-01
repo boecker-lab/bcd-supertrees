@@ -21,7 +21,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      * Turn on/off debug mode
      */
     protected static final boolean DEBUG = false;
-
     /**
      * Turn on/off guide tree based taxa merging
      */
@@ -30,14 +29,11 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      * Mapping for guide tree based taxa merging
      */
     protected BiMap<T, TreeNode> scaffoldCharacterMapping = null;
-
-    // active partitions for guide tree based taxa merging
+    /**
+     * Active partitions for guide tree based taxa merging
+     */
     protected Set<T> activePartitions = new HashSet<>();
 
-    /**
-     * Turn on/off global character merging for characters with identical edgeset {@literal ->} works for hypergraph version only
-     */
-//    public static final boolean GLOBAL_CHARACTER_MERGE = true;
     /**
      * Mapping for edge  based character merging (Global character Map)
      */
@@ -127,26 +123,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         treeNode = new TreeNode();
     }
 
-    protected void createCharacterMapping() {
-        characterToDummy = new ConcurrentHashMap<>(characters.size());
-        dummyToCharacters = new ConcurrentHashMap<>(characters.size());
-        Map<Set<T>, T> edgeSetToDummy = new HashMap<>();
-
-        for (T character : characters) {
-            //global character merge for chars with same edgeset
-            T dummy = edgeSetToDummy.get(character.edges);
-            if (dummy == null) {
-                dummy = character.createDummy();
-                edgeSetToDummy.put(dummy.edges, dummy);
-                dummyToCharacters.put(dummy, Collections.newSetFromMap(new ConcurrentHashMap()));
-                dummyToCharacters.put(dummy.clone, Collections.newSetFromMap(new ConcurrentHashMap()));
-            }
-            addCharacterToDummyMapping(character, dummy);
-        }
-
-        System.out.println(characterToDummy.size() / 2 + " can be merged to " + dummyToCharacters.size() / 2 + " during mincut phases");
-    }
-
     protected abstract List<LinkedHashSet<T>> createGraphData(CostComputer costs, int bootstrapThreshold);
 
     protected void removeAdjacentEdges(T characterToRemove) {
@@ -174,10 +150,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
             }
         }
     }
-
-    /*protected void removeCharacters(Collection<T> toRemove) {
-        removeCharacters(toRemove, characters);
-    }*/
 
     /**
      * Remove semi universal characters
@@ -352,6 +324,27 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     //########## methods for guide tree mapping END ##########
 
     //########## methods for edge identical character mapping ##########
+    protected void createCharacterMapping() {
+//        System.out.println("Creating character mapping for Graph: " + this.toString());
+        characterToDummy = new ConcurrentHashMap<>(characters.size());
+        dummyToCharacters = new ConcurrentHashMap<>(characters.size());
+        Map<Set<T>, T> edgeSetToDummy = new HashMap<>();
+
+        for (T character : characters) {
+            //global character merge for chars with same edgeset
+            T dummy = edgeSetToDummy.get(character.edges);
+            if (dummy == null) {
+                dummy = character.createDummy();
+                edgeSetToDummy.put(dummy.edges, dummy);
+                dummyToCharacters.put(dummy, Collections.newSetFromMap(new ConcurrentHashMap()));
+                dummyToCharacters.put(dummy.clone, Collections.newSetFromMap(new ConcurrentHashMap()));
+            }
+            addCharacterToDummyMapping(character, dummy);
+        }
+
+//        System.out.println(characterToDummy.size() / 2 + " can be merged to " + dummyToCharacters.size() / 2 + " during mincut phases");
+    }
+
     public void insertCharacterMapping(AbstractFlipCutGraph<T> source) {
         characterToDummy = source.characterToDummy;
         dummyToCharacters = source.dummyToCharacters;

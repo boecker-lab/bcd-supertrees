@@ -70,16 +70,22 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
             if (c != null) {
                 cuts[nextCutIndexToCalculate++] = c;
                 if (nextCutIndexToCalculate >= maxCutNumber) {
-                    cutter.clear();
-                    cutter = null;
+                    disableCutting();
                 }
                 return true;
             }
             maxCutNumber = nextCutIndexToCalculate;
         }
-        cutter.clear();
-        cutter = null;
+        disableCutting();
         return false;
+    }
+
+    private void disableCutting() {
+//        System.out.println("Disable cutting for this Graph: " + this.toString());
+        if (cutter != null) cutter.clear();
+        cutter = null;
+        characterToDummy = null;
+        dummyToCharacters = null;
     }
 
     @Override
@@ -275,15 +281,12 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
 
     public void close() {
         if (splittedCuts != null && splittedCuts.size() == maxCutNumber) {
-            cutter = null;
+            disableCutting();
             cutterFactory = null;
             characters = null;
-            characterToDummy = null;
-            dummyToCharacters = null;
             scaffoldCharacterMapping = null;
             numTaxaAfterClose = taxa.size();
             taxa = null;
-
 //            cuts = null;
             splittedCuts = null;
         }

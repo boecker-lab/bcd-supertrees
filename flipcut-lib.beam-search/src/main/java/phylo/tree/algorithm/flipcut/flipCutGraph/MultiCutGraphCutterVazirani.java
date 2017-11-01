@@ -192,8 +192,10 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
             FlipCutNodeSimpleWeight node = (FlipCutNodeSimpleWeight) o;
             if (!node.isClone() && (node.isCharacter() || node.isDummyCharacter())) {
                 characters.add(node);
-                if (node.edgeWeight == CutGraphCutter.getInfinity())
-                    System.out.println("SCM node in graph???????");
+                if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
+                    if (node.edgeWeight == CutGraphCutter.getInfinity())
+                        System.out.println("SCM node in graph, but should be merged!");
+                }
             }
         }
 
