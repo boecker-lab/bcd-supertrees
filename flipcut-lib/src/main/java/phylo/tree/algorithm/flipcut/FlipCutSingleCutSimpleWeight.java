@@ -5,7 +5,9 @@ import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.costComputer.UnitCostComputer;
 import phylo.tree.algorithm.flipcut.costComputer.WeightCostComputer;
-import phylo.tree.algorithm.flipcut.flipCutGraph.*;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
+import phylo.tree.algorithm.flipcut.flipCutGraph.SingleCutGraphCutter;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
@@ -18,10 +20,9 @@ import java.util.logging.Logger;
  * Date: 15.01.13
  * Time: 18:13
  */
-public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipCutNodeSimpleWeight,FlipCutGraphSimpleWeight,SingleCutGraphCutter> {
+public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipCutNodeSimpleWeight, FlipCutGraphSimpleWeight, SingleCutGraphCutter> {
 
-    public FlipCutSingleCutSimpleWeight() {
-    }
+    public FlipCutSingleCutSimpleWeight() {}
 
     public FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.Factory type) {
         super(type);
@@ -42,7 +43,7 @@ public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipC
 
     @Override
     protected FlipCutGraphSimpleWeight createGraph(List<FlipCutNodeSimpleWeight> component, TreeNode treeNode) {
-        return new FlipCutGraphSimpleWeight(component,treeNode,!((SingleCutGraphCutter.Factory)type).isHyperGraphCutter());
+        return new FlipCutGraphSimpleWeight(component, treeNode, type.getType().isFlipCut());
     }
 
     @Override
@@ -56,15 +57,15 @@ public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipC
 
         if (UnitCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
             LOGGER.info("Using Unit Costs");
-            return new UnitCostComputer(inputTrees,scaffoldTree);
+            return new UnitCostComputer(inputTrees, scaffoldTree);
         } else if (WeightCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
             LOGGER.info("Using " + weights);
             return new WeightCostComputer(inputTrees, weights, scaffoldTree);
         }
 
-        LOGGER.warning("No supported weight option found. Setting to standard: "+ FlipCutWeights.Weights.UNIT_COST);
+        LOGGER.warning("No supported weight option found. Setting to standard: " + FlipCutWeights.Weights.UNIT_COST);
         setWeights(FlipCutWeights.Weights.UNIT_COST);
-        return new UnitCostComputer(inputTrees,scaffoldTree);
+        return new UnitCostComputer(inputTrees, scaffoldTree);
 
     }
 }

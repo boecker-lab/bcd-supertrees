@@ -19,7 +19,6 @@ import java.util.concurrent.ExecutorService;
  * Time: 11:12
  */
 public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> extends CutGraphCutter<FlipCutNodeSimpleWeight, T> {
-    public enum CutGraphTypes {MAXFLOW_TARJAN_GOLDBERG, MAXFLOW_AHOJI_ORLIN, HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG, HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN}
 
     protected static final boolean DEBUG = false;
 
@@ -315,7 +314,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
             createGoldbergTarjanCharacterWeights(cutGraph, source.characters);
             createGoldbergTarjan(cutGraph);
             mincut = calculateTarjanMinCut(cutGraph);
-
+            //todo this was flipcut code from times where character merging was not compatible. but i think it is if we use the multicut strategy
         } else if (type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG || type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN) {
             if (type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN)
                 cutGraph = new AhujaOrlinCutGraph<>();
@@ -335,7 +334,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
                 //undo mapping
                 mincut = mapping.undoMapping(newMinCut, dummyToMerged);
-            } else if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE) {
+            } else {
                 dummyToMerged = source.dummyToCharacters;
                 nodeToDummy = source.characterToDummy;
                 int merged = nodeToDummy.size() - dummyToMerged.size();
@@ -356,11 +355,6 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                     }
                 }
                 mincut = new BasicCut<>(nuCutSet, newMinCut.minCutValue);
-            } else {
-                cutGraph = new GoldbergTarjanCutGraph<>();
-                createGoldbergTarjanCharacterWeights(cutGraph, source.characters);
-                createTarjanGoldbergHyperGraph(cutGraph);
-                mincut = calculateTarjanMinCut(cutGraph);
             }
         } else {
             System.err.println("ERROR: Unsupported cut-graph type!");

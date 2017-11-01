@@ -1,12 +1,10 @@
 package phylo.tree.algorithm.flipcut.cli;
 
+import phylo.tree.algorithm.consensus.Consensus;
 import phylo.tree.algorithm.flipcut.AbstractFlipCut;
 import phylo.tree.algorithm.flipcut.FlipCutSingleCutSimpleWeight;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
-import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
-import phylo.tree.algorithm.consensus.Consensus;
-import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
-import phylo.tree.algorithm.flipcut.flipCutGraph.SimpleCutGraphCutter;
+import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 import phylo.tree.algorithm.flipcut.flipCutGraph.SimpleCutterFactories;
 import phylo.tree.io.TreeFileUtils;
 import phylo.tree.model.Tree;
@@ -15,7 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.EnumMap;
 
@@ -55,14 +52,14 @@ public class BCDCLI<A extends AbstractFlipCut> extends BasicBCDCLI<A> {
     }
 
     //cut graph type
-    SimpleCutGraphCutter.CutGraphTypes graphType = SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG;
+    CutGraphTypes graphType = CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG;
 
     @Override
-    public void setGraphType(SimpleCutGraphCutter.CutGraphTypes graphType) {
+    public void setGraphType(CutGraphTypes graphType) {
         this.graphType = graphType;
     } //deafault has to be null
 
-    public SimpleCutGraphCutter.CutGraphTypes getGraphType() {
+    public CutGraphTypes getGraphType() {
         return graphType;
     } //deafault has to be null
 
@@ -107,7 +104,6 @@ public class BCDCLI<A extends AbstractFlipCut> extends BasicBCDCLI<A> {
         setParameters(algo);
         return algo;
     }
-
 
 
     public Tree parseSCM() throws IOException {

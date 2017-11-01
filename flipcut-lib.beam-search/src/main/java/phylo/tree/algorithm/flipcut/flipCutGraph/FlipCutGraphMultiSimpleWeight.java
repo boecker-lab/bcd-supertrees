@@ -65,6 +65,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
             if (cutter == null)
                 cutter = cutterFactory.newInstance(this);
 
+
             MultiCut c = cutter.getNextCut();
             if (c != null) {
                 cuts[nextCutIndexToCalculate++] = c;
@@ -93,15 +94,10 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
             if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE)
                 graph.insertScaffPartData(this, oldToNew);
 
-            if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
-                graph.insertCharacterMapping(this, oldToNew);
-
             if (DEBUG)
                 checkGraph(graph);
 
-
             graphs.add(graph);
-
         }
 
         return graphs;
@@ -261,16 +257,13 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
 
             FlipCutGraphMultiSimpleWeight g;
             if (cutterFactory instanceof MaxFlowCutterFactory) {
-                g = new FlipCutGraphMultiSimpleWeight(new ArrayList<>(oldToNew.values()), treeNode, cuts.length, cutterFactory, !((MaxFlowCutterFactory) cutterFactory).isHyperGraphCutter());
+                g = new FlipCutGraphMultiSimpleWeight(new ArrayList<>(oldToNew.values()), treeNode, cuts.length, cutterFactory, ((MaxFlowCutterFactory) cutterFactory).getType().isFlipCut());
             } else {
                 g = new FlipCutGraphMultiSimpleWeight(new ArrayList<>(oldToNew.values()), treeNode, cuts.length, cutterFactory, false);
             }
 
             if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE)
                 g.insertScaffPartData(this, oldToNew);
-
-            if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
-                g.insertCharacterMapping(this, oldToNew);
 
             if (DEBUG)
                 checkGraph(g);
@@ -309,52 +302,6 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
     public int getK() {
         return cuts.length;
     }
-
-    //gets mapping and characters of the new compount to duplicate merging maps;
-    private void cloneCharacterMaps(final AbstractFlipCutGraph<FlipCutNodeSimpleWeight> sourceGraph, final Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew) {
-        for (FlipCutNodeSimpleWeight sourceChar : sourceGraph.characters) {
-            FlipCutNodeSimpleWeight sourceDummy = sourceGraph.characterToDummy.get(sourceChar);
-            if (sourceDummy != null) {
-                FlipCutNodeSimpleWeight targetChar = oldToNew.get(sourceChar);
-                if (targetChar != null && characters.contains(targetChar) && !characterToDummy.containsKey(targetChar)) {
-                    Set<FlipCutNodeSimpleWeight> sourceSet = sourceGraph.dummyToCharacters.get(sourceDummy);
-                    FlipCutNodeSimpleWeight targetDummy = oldToNew.get(sourceChar).createDummy();
-
-                    Set<FlipCutNodeSimpleWeight> targetSet = new HashSet<>();
-                    Set<FlipCutNodeSimpleWeight> targetCloneSet = new HashSet<>();
-
-                    dummyToCharacters.put(targetDummy, targetSet);
-                    dummyToCharacters.put(targetDummy.clone, targetCloneSet);
-                    for (FlipCutNodeSimpleWeight source : sourceSet) {
-                        FlipCutNodeSimpleWeight target = oldToNew.get(source);
-                        if (target != null && characters.contains(target)) {
-                            characterToDummy.put(target, targetDummy);
-                            characterToDummy.put(target.clone, targetDummy.clone);
-
-                            targetDummy.edgeWeight += target.edgeWeight;
-
-                            targetSet.add(target);
-                            targetCloneSet.add(target.clone);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    private void initMapping(){
-        dummyToCharacters = new HashMap<>(characters.size());
-        characterToDummy = new HashMap<>(characters.size());
-
-    }
-
-    @Override
-    public void insertCharacterMapping(AbstractFlipCutGraph<FlipCutNodeSimpleWeight> source, Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew) {
-        dummyToCharacters = new HashMap<>(characters.size());
-        characterToDummy = new HashMap<>(characters.size());
-        cloneCharacterMaps(source, oldToNew);
-    }
-
-
 
     class CutIterator implements Iterator<MultiCut> {
         CutIterator() {

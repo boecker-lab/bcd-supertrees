@@ -1,10 +1,9 @@
 package phylo.tree.algorithm.flipcut;
 
-import phylo.tree.algorithm.flipcut.cli.BCDCLI;
-import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
 import org.junit.Test;
 import org.kohsuke.args4j.CmdLineParser;
-import phylo.tree.algorithm.flipcut.flipCutGraph.SimpleCutGraphCutter;
+import phylo.tree.algorithm.flipcut.cli.BCDCLI;
+import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 import phylo.tree.io.TreeFileUtils;
 
 import java.nio.file.Path;
@@ -32,12 +31,12 @@ public class BCDCLITest extends BCDCLI { //extending from class to test to get p
         String[] test_string = new String[]{"-a", Algorithm.BCD.name(), requiredInputPath};
         parser.parseArgument(test_string);
         //assert
-        assertEquals(SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG, getGraphType());
+        assertEquals(CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG, getGraphType());
 
         test_string = new String[]{"-a", Algorithm.FC.name(), requiredInputPath};
         parser.parseArgument(test_string);
         //assert
-        assertEquals(SimpleCutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG, getGraphType());
+        assertEquals(CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG, getGraphType());
     }
 
     @Test

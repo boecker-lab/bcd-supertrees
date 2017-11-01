@@ -37,7 +37,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     /**
      * Turn on/off global character merging for characters with identical edgeset {@literal ->} works for hypergraph version only
      */
-    public static final boolean GLOBAL_CHARACTER_MERGE = true;
+//    public static final boolean GLOBAL_CHARACTER_MERGE = true;
     /**
      * Mapping for edge  based character merging (Global character Map)
      */
@@ -82,10 +82,49 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         parentNode = null;
         treeNode = new TreeNode();
 
-        if (GLOBAL_CHARACTER_MERGE)
-            createCharacterMapping();
-
         System.out.println("...Done!");
+    }
+
+
+    /**
+     * Create a new graph with a list of characters and taxa and a tree node. The parent node
+     * is optional and can be null if this is the root graph. No checks for edges that
+     * connect the given vertex set to nodes no in this set are done!
+     *
+     * @param characters the character
+     * @param taxa       the taxa
+     */
+    protected AbstractFlipCutGraph(LinkedHashSet<T> characters, LinkedHashSet<T> taxa, TreeNode parentNode) {
+        this.characters = characters;
+        this.taxa = taxa;
+        this.parentNode = parentNode;
+        treeNode = new TreeNode();
+    }
+
+
+    /**
+     * Takes a list  of nodes and splits them into characters and taxa. Then we check for
+     * edges that connect the vertices to nodes not contained in this graphs vertex set and remove those edges.
+     *
+     * @param nodes the nodes
+     */
+    public AbstractFlipCutGraph(List<T> nodes, TreeNode parentNode, final boolean edgeDeletion) {
+        characters = new LinkedHashSet<>(nodes.size());
+        taxa = new LinkedHashSet<>(nodes.size());
+        for (T node : nodes) {
+            if (node.isTaxon()) {
+                taxa.add(node);
+            } else {
+                characters.add(node);
+            }
+        }
+
+        // checks an removes edges to taxa that are not in this component!
+        if (checkEdges(edgeDeletion))
+            System.out.println("INFO: Edges between graphs deleted! - Not possible for BCD");
+
+        this.parentNode = parentNode;
+        treeNode = new TreeNode();
     }
 
     protected void createCharacterMapping() {
@@ -107,73 +146,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
 
         System.out.println(characterToDummy.size() / 2 + " can be merged to " + dummyToCharacters.size() / 2 + " during mincut phases");
     }
-
-
-    /**
-     * Create a new graph with a list of characters and taxa and a tree node. The parent node
-     * is optional and can be null if this is the root graph. No checks for edges that
-     * connect the given vertex set to nodes no in this set are done!
-     *
-     * @param characters the character
-     * @param taxa       the taxa
-     */
-    protected AbstractFlipCutGraph(LinkedHashSet<T> characters, LinkedHashSet<T> taxa, TreeNode parentNode) {
-        this.characters = characters;
-        this.taxa = taxa;
-        this.parentNode = parentNode;
-        treeNode = new TreeNode();
-
-       /*
-       * Sort the leaves alphabetically to ensure we find the same mincut
-       * for multiple runs
-       */
-
-//        sortTaxa();
-    }
-
-
-    /**
-     * Takes a list  of nodes and splits them into characters and taxa. Then we check for
-     * edges that connect the vertices to nodes not contained in this graphs vertex set and remove those edges.
-     *
-     * @param nodes the nodes
-     */
-    public AbstractFlipCutGraph(List<T> nodes, TreeNode parentNode, final boolean edgeDeletion) {
-        characters = new LinkedHashSet<>(nodes.size());
-        taxa = new LinkedHashSet<>(nodes.size());
-        for (T node : nodes) {
-            if (node.isTaxon()) {
-                taxa.add(node);
-            } else {
-                characters.add(node);
-            }
-        }
-
-        // checks an removes edges to taxa that are not in this component!!!
-        if (checkEdges(edgeDeletion))
-            System.out.println("INFO: Edges between graphs deleted! - Not possible for BCD");
-
-        this.parentNode = parentNode;
-        treeNode = new TreeNode();
-
-        /*
-       Sort the leaves alphabetically to ensure we find the same mincut
-       for multiple runs
-        */
-//        sortTaxa();
-    }
-
-    /*
-       Sorts the leaves alphabetically to ensure we find the same mincut
-       for multiple runs
-     */
-    /*protected void sortTaxa() {
-        Collections.sort(taxa, new Comparator<T>() {
-            public int compare(T o1, T o2) {
-                return o1.name.compareTo(o2.name);
-            }
-        });
-    }*/
 
     protected abstract List<LinkedHashSet<T>> createGraphData(CostComputer costs, int bootstrapThreshold);
 
@@ -211,15 +183,15 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      * Remove semi universal characters
      */
     public void deleteSemiUniversals() {
+        if (characterToDummy == null)
+            createCharacterMapping();
         Iterator<T> it = characters.iterator();
         while (it.hasNext()) {
             T character = it.next();
             if (character.isSemiUniversal()) {
                 //remove deleted partitions an insert child partitions
 
-                if (GLOBAL_CHARACTER_MERGE) {
-                    removeCharacterFromDummyMapping(character);
-                }
+                removeCharacterFromDummyMapping(character);
 
                 if (SCAFF_TAXA_MERGE && !activePartitions.isEmpty()) {
                     TreeNode node = scaffoldCharacterMapping.get(character);
@@ -325,18 +297,10 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         return false;
     }
 
-    //########## methods for edge identical character mappin ##########
-    public abstract void addCharacterToDummyMapping(T character, T dummy);
-
-    public abstract void removeCharacterFromDummyMapping(T character);
-
-    public abstract void insertCharacterMapping(AbstractFlipCutGraph<T> source, final Map<T, T> oldToNew);
-    //########## methods for edge identical character mappin END ##########
-
 
     //########## methods for guide tree mapping ##########
     protected void addTreeNodeCharGuideTreeMapping(TreeNode character, T c) {
-        scaffoldCharacterMapping.put(c,character);
+        scaffoldCharacterMapping.put(c, character);
     }
 
     protected void removeTreeNodeCharGuideTreeMapping(TreeNode character) {
@@ -350,7 +314,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     public void insertScaffPartData(AbstractFlipCutGraph<T> source, final Map<T, T> oldToNew) {
         activePartitions = new HashSet<>();
         if (!source.activePartitions.isEmpty()) {
-
             // multicutted version
             if (oldToNew != null) {
                 scaffoldCharacterMapping = Maps.synchronizedBiMap(HashBiMap.create());
@@ -387,4 +350,15 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         }
     }
     //########## methods for guide tree mapping END ##########
+
+    //########## methods for edge identical character mapping ##########
+    public void insertCharacterMapping(AbstractFlipCutGraph<T> source) {
+        characterToDummy = source.characterToDummy;
+        dummyToCharacters = source.dummyToCharacters;
+    }
+
+    public abstract void addCharacterToDummyMapping(T character, T dummy);
+
+    public abstract void removeCharacterFromDummyMapping(T character);
+    //########## methods for edge identical character mappin END ##########
 }

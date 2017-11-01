@@ -13,10 +13,10 @@ public class SimpleCutterFactories {
     }
 
     public static MaxFlowCutterFactory newInstance() {
-        return newInstance(SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+        return newInstance(CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
     }
 
-    public static MaxFlowCutterFactory newInstance(SimpleCutGraphCutter.CutGraphTypes simpleCutterType) {
+    public static MaxFlowCutterFactory newInstance(CutGraphTypes simpleCutterType) {
         switch (simpleCutterType) {
             default:
                 return new SingleCutGraphCutter.Factory(simpleCutterType);

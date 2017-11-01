@@ -146,7 +146,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                 //insert scaffold characters to mapping if activated
                 if (scaff != null && tree.equals(scaff)) {
                     addTreeNodeCharGuideTreeMapping(character, characerInList);
-                    //create set of active partitions
+                    //create set of active partitions -> characters from scaffold tree that are currently the top level
                     if (character.getParent().equals(scaff.getRoot()))
                         activePartitions.add(characerInList);
                 }
@@ -308,15 +308,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
 
     }
 
-
     //########## methods for edge identical character mapping ##########
-
-    @Override
-    public void insertCharacterMapping(AbstractFlipCutGraph<FlipCutNodeSimpleWeight> source, Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew) {
-        characterToDummy = source.characterToDummy;
-        dummyToCharacters = source.dummyToCharacters;
-    }
-
     @Override
     public void addCharacterToDummyMapping(FlipCutNodeSimpleWeight character, FlipCutNodeSimpleWeight dummy) {
         characterToDummy.put(character, dummy);

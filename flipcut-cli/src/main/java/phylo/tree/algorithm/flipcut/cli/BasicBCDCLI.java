@@ -8,6 +8,7 @@ import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler;
+import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 import phylo.tree.algorithm.flipcut.flipCutGraph.SimpleCutGraphCutter;
 import phylo.tree.algorithm.gscm.GreedySCMAlgorithm;
 import phylo.tree.algorithm.gscm.MultiGreedySCMAlgorithm;
@@ -68,15 +69,15 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
 
     //cut graph type
     @Option(name = "-c", aliases = "--cutGraphImplementation", usage = "Choose the graph structure used for the mincut calculation", hidden = true)
-    public abstract void setGraphType(SimpleCutGraphCutter.CutGraphTypes graphType);
+    public abstract void setGraphType(CutGraphTypes graphType);
 
     //FlipCut or BCD
     @Option(name = "-a", aliases = "--algorithm", usage = "The algorithm that is used to estimate the Supertree.\n BCD = BadCharacterDeletion supertrees\n FC = FlipCut supertrees.", hidden = true)
     public void setAlgorithm(Algorithm algo) {
         if (algo == Algorithm.FC)
-            setGraphType(SimpleCutGraphCutter.CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
+            setGraphType(CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG);
         else
-            setGraphType(SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+            setGraphType(CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
     }
 
     //Weighting

@@ -65,7 +65,7 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
 
 //        long time = System.currentTimeMillis();
         //search the optimal cat
-        SingleCutGraphCutter optCutter = new SingleCutGraphCutter(SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+        SingleCutGraphCutter optCutter = new SingleCutGraphCutter(CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
         DefaultMultiCut optCut = new DefaultMultiCut(optCutter.getMinCut(source), source);
         mincuts.add(optCut);
 

@@ -23,18 +23,18 @@ public class MultiCutGrapCutterFactories {
     }
 
     public static MultiCutterFactory newInstance() {
-        return newInstance(MultiCutterType.GREEDY, SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+        return newInstance(MultiCutterType.GREEDY, CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
     }
 
     public static MultiCutterFactory newInstance(MultiCutterType multiCutterType) {
-        return newInstance(multiCutterType, SimpleCutGraphCutter.CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+        return newInstance(multiCutterType, CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
     }
 
-    public static MultiCutterFactory newInstance(SimpleCutGraphCutter.CutGraphTypes simpleCutterType) {
+    public static MultiCutterFactory newInstance(CutGraphTypes simpleCutterType) {
         return newInstance(MultiCutterType.GREEDY, simpleCutterType);
     }
 
-    public static MultiCutterFactory newInstance(MultiCutterType multiCutterType, SimpleCutGraphCutter.CutGraphTypes simpleCutterType) {
+    public static MultiCutterFactory newInstance(MultiCutterType multiCutterType, CutGraphTypes simpleCutterType) {
         switch (multiCutterType) {
             case VAZIRANI:
                 return new MultiCutGraphCutterVazirani.Factory(simpleCutterType);

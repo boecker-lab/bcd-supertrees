@@ -216,8 +216,8 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                         if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
                             componentGraph.insertScaffPartData(initialGraph, null);
                         }
-                        if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
-                            componentGraph.insertCharacterMapping(initialGraph, null);
+                        if (getCutterType().getType().isBCD())
+                            componentGraph.insertCharacterMapping(initialGraph);
                         graphs.offer(componentGraph);
                     }
 
@@ -237,8 +237,8 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                         if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
                             g.insertScaffPartData(initialGraph, null);
                         }
-                        if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
-                            g.insertCharacterMapping(initialGraph, null);
+                        if (getCutterType().getType().isBCD())
+                            g.insertCharacterMapping(initialGraph);
                         graphs.offer(g);
                     }
                     if (DEBUG)
@@ -295,8 +295,8 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                         if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
                             componentGraph.insertScaffPartData(currentGraph, null);
                         }
-                        if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
-                            componentGraph.insertCharacterMapping(currentGraph, null);
+                        if (getCutterType().getType().isBCD())
+                            componentGraph.insertCharacterMapping(currentGraph);
                         nodes.add(componentGraph.treeNode);
                         results.offer(executorService.submit(new GraphSplitterIterative(componentGraph)));
                     }
@@ -310,8 +310,8 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                         if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
                             g.insertScaffPartData(currentGraph, null);
                         }
-                        if (AbstractFlipCutGraph.GLOBAL_CHARACTER_MERGE)
-                            g.insertCharacterMapping(currentGraph, null);
+                        if (getCutterType().getType().isBCD())
+                            g.insertCharacterMapping(currentGraph);
                         nodes.add(g.treeNode);
                         results.offer(executorService.submit(new GraphSplitterIterative(g)));
                     }
