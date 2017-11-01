@@ -7,8 +7,8 @@ import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 
 public interface KargerGraphCreator {
-    default KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory<FlipCutNodeSimpleWeight>> createGraph(final ChracterScoreModifier modder, final FlipCutGraphSimpleWeight source) {
-        KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory<FlipCutNodeSimpleWeight>> cutGraph = new KargerSteinCutGraph<>(new FlipCutCutFactory<FlipCutNodeSimpleWeight>());
+    default KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory> createGraph(final ChracterScoreModifier modder, final FlipCutGraphSimpleWeight source) {
+        KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory> cutGraph = new KargerSteinCutGraph<>(new FlipCutCutFactory());
         for (FlipCutNodeSimpleWeight character : source.characters) {
             double weight = modder.modifyCharacterScore(character);
             for (FlipCutNodeSimpleWeight e1 : character.edges) {
@@ -23,7 +23,7 @@ public interface KargerGraphCreator {
         return cutGraph;
     }
 
-    default KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory<FlipCutNodeSimpleWeight>> createGraph(final FlipCutGraphSimpleWeight source) {
+    default KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory> createGraph(final FlipCutGraphSimpleWeight source) {
         return createGraph(new ChracterScoreModifier(){},source);
     }
 }

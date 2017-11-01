@@ -8,8 +8,8 @@ import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 
 public class StaticKargerGraphCreator implements KargerGraphCreator{
     @Override
-    public KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory<FlipCutNodeSimpleWeight>> createGraph(ChracterScoreModifier modder, FlipCutGraphSimpleWeight source) {
-        KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory<FlipCutNodeSimpleWeight>> cutGraph = new KargerSteinCutGraph<>(new FlipCutCutFactory<FlipCutNodeSimpleWeight>());
+    public KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory> createGraph(ChracterScoreModifier modder, FlipCutGraphSimpleWeight source) {
+        KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory> cutGraph = new KargerSteinCutGraph<>(new FlipCutCutFactory());
         for (FlipCutNodeSimpleWeight character : source.characters) {
             final double weight = modder.modifyCharacterScore(character);
             for (FlipCutNodeSimpleWeight e1 : character.edges) {

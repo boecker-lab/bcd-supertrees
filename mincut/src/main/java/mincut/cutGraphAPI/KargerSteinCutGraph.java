@@ -66,15 +66,12 @@ public class KargerSteinCutGraph<V, C extends CutFactory<V, ? extends AbstractBi
 
         //get edges
         LinkedHashSet<V> cutEdges = new LinkedHashSet<>(source.getEdges().size());
+        //get cutsocre from edges
         for (EdgeColor color : c.getEdgeColors()) {
             cutEdges.add(charactermap.inverse().get(color));
         }
-        //get cutsocre from edges
-        long mincutValue = 0;
-        if (!charactermap.isEmpty()) {
-            mincutValue = (long) cutEdges.stream().mapToDouble(cc -> charactermap.get(cc).getWeight()).sum();
-        }
-        return cutFactory.newCutInstance(sSet, tSet, cutEdges, mincutValue);
+
+        return cutFactory.newCutInstance(sSet, tSet, cutEdges, (long) c.mincutValue());
     }
 
 
@@ -86,7 +83,12 @@ public class KargerSteinCutGraph<V, C extends CutFactory<V, ? extends AbstractBi
             return Arrays.asList(calculateMinCut());
         } else {
             List<AbstractBipartition<V>> cuts = calculateMinCuts();
-            return cuts.subList(0, Math.min(numberOfCuts, cuts.size()));
+            if (cuts.size() > numberOfCuts) {
+                System.out.println("leght before: " +cuts.size());
+                cuts.subList(numberOfCuts+1, cuts.size()).clear();
+                System.out.println("leght after: " +cuts.size());
+            }
+            return cuts;
         }
     }
 
@@ -142,6 +144,7 @@ public class KargerSteinCutGraph<V, C extends CutFactory<V, ? extends AbstractBi
             addNode(vertex1);
         if (!vertexMapBack.containsKey(vertex2))
             addNode(vertex2);
+
         EdgeColor color = charactermap.get(hyperedge);
         if (color == null) {
             color = new EdgeColor(capacity, uncutable);

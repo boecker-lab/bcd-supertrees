@@ -9,6 +9,7 @@ import phylo.tree.algorithm.gscm.SCMAlgorithm;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeUtils;
 import phylo.tree.treetools.ReductionModifier;
+import phylo.tree.treetools.TreetoolUtils;
 import phylo.tree.treetools.UnsupportedCladeReduction;
 
 import java.io.IOException;
@@ -59,12 +60,14 @@ public class BCDSupertrees {
                     CLI.LOGGER.info("Calculating SCM Guide Tree...");
                     scmRuntime = System.currentTimeMillis();
                     SCMAlgorithm algo = CLI.getSCMInstance();
-                    algo.setInput(CLI.parseInput());
+                    algo.setInput(TreetoolUtils.removeDuplicates(CLI.parseInput()));
                     algo.call();
                     algo.shutdown();
                     guideTree = algo.getResult();
                     scmRuntime = ((double) System.currentTimeMillis() - scmRuntime) / 1000d;
                     CLI.LOGGER.info("...SCM Guide Tree calculation DONE in " + scmRuntime + "s");
+                }else{
+
                 }
                 guideTreeToCut = guideTree;
                 guideTree = TreeUtils.deleteInnerLabels(guideTreeToCut);

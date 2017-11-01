@@ -44,11 +44,11 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     /**
      * The character vertex set
      */
-    public final LinkedHashSet<T> characters;
+    public LinkedHashSet<T> characters;
     /**
      * The taxa vertex set
      */
-    public final LinkedHashSet<T> taxa;
+    public LinkedHashSet<T> taxa;
     /**
      * Marker for DFS
      */

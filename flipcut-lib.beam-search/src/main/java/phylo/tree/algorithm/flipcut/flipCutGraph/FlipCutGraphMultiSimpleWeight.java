@@ -16,11 +16,13 @@ import java.util.*;
  */
 
 public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
+    private int numTaxaAfterClose = -1;
     private int maxCutNumber;
     private int nextCutIndexToCalculate;
+    protected final Set<MultiCut> splittedCuts;
     private final MultiCut[] cuts;
-    private final MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutter;
-    private final MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory;
+    private MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutter;
+    private MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory;
 
 
     public FlipCutGraphMultiSimpleWeight(CostComputer costs, int k, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory) {
@@ -29,6 +31,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         this.cutterFactory = cutterFactory;
         maxCutNumber = k;
         cuts = new MultiCut[maxCutNumber];
+        splittedCuts =  new HashSet<>(maxCutNumber);
         nextCutIndexToCalculate = 0;
     }
 
@@ -38,6 +41,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         this.cutterFactory = cutterFactory;
         maxCutNumber = k;
         cuts = new MultiCut[maxCutNumber];
+        splittedCuts =  new HashSet<>(maxCutNumber);
         nextCutIndexToCalculate = 0;
     }
 
@@ -47,6 +51,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         this.cutterFactory = cutterFactory;
         maxCutNumber = k;
         cuts = new MultiCut[maxCutNumber];
+        splittedCuts =  new HashSet<>(maxCutNumber);
         nextCutIndexToCalculate = 0;
     }
 
@@ -55,15 +60,23 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         return new CutIterator();
     }
 
+    public void setCutSplitted(MultiCut c){
+        splittedCuts.add(c);
+    }
 
     private boolean calculateNextCut() {
-        MultiCut c = cutter.getNextCut();
+        MultiCut c = null;
+        if(cutter != null)
+            c = cutter.getNextCut();
+
         if (c != null) {
             cuts[nextCutIndexToCalculate] = c;
             nextCutIndexToCalculate++;
             return true;
         } else {
             maxCutNumber = nextCutIndexToCalculate;
+            cutter.clear();
+            cutter = null;
             return false;
         }
     }
@@ -264,6 +277,29 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
 
         }
         return splittedGraphs;
+    }
+
+    public void close() {
+        if (splittedCuts.size() == maxCutNumber) {
+            cutter = null;
+            cutterFactory=null;
+            characters = null;
+            characterToDummy = null;
+            dummyToCharacters = null;
+            charToTreeNode = null;
+            treeNodeToChar = null;
+            splittedCuts.clear();
+
+            numTaxaAfterClose = taxa.size();
+            taxa = null;
+
+        }
+    }
+
+    public int getNumTaxa(){
+        if (numTaxaAfterClose >= 0)
+            return numTaxaAfterClose;
+        return taxa.size();
     }
 
     //gets mapping and characters of the new compount to duplicate merging maps;

@@ -53,6 +53,8 @@ public class DefaultMultiCut extends MultiCut<FlipCutNodeSimpleWeight, FlipCutGr
                 splittedGraphs = (List<FlipCutGraphMultiSimpleWeight>) sourceGraph.split(getCutSet());
                 cutSet = null;
             }
+            sourceGraph.setCutSplitted(this);
+            sourceGraph.close();
         }
         return splittedGraphs;
     }

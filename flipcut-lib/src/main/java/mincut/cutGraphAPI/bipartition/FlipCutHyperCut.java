@@ -6,6 +6,7 @@ package mincut.cutGraphAPI.bipartition;
  */
 
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 
 import java.util.LinkedHashSet;
 
@@ -17,9 +18,4 @@ public class FlipCutHyperCut<V extends AbstractFlipCutNode<V>> extends HyperCut<
     public FlipCutHyperCut(long minCutValue, LinkedHashSet<V> sSet, LinkedHashSet<V> tSet) {
         super(minCutValue, sSet, tSet);
     }
-
-
-
-
-
 }

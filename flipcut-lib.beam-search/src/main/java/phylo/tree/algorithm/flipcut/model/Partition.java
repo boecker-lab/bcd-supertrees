@@ -50,7 +50,7 @@ public class Partition implements Comparable<Partition> {
     * Attention this may calculate time critical minimum Cuts
     */
     //todo parallelize this step
-    public List<Partition> getKBestNew(int k, long upperBound) {
+    public LinkedList<Partition> getKBestNew(int k, long upperBound) {
         PriorityQueue<MultiCut> cutsDesc = new PriorityQueue<>(k,new Comparator<MultiCut>() {
             public int compare(MultiCut o1, MultiCut o2) {
                 return - o1.compareTo(o2);
@@ -61,7 +61,8 @@ public class Partition implements Comparable<Partition> {
         List<FlipCutGraphMultiSimpleWeight> toRemove = new LinkedList<FlipCutGraphMultiSimpleWeight>();
         for (FlipCutGraphMultiSimpleWeight graph : graphs) {
             //only 1 taxon left --> labeling node corresponding to the graph with the label of the last taxon
-            if (graph.taxa.size() == 1) {
+            final int taxaNum =graph.getNumTaxa();
+            if (taxaNum == 1) {
                 graph.treeNode.setLabel(graph.taxa.iterator().next().name);
                 toRemove.add(graph);
                 finishedGraphs++;
@@ -124,7 +125,7 @@ public class Partition implements Comparable<Partition> {
         Collections.sort(cuts);
 
         // build the k best partitions
-        List<Partition> partitions = new LinkedList<>();
+        LinkedList<Partition> partitions = new LinkedList<>();
         for (MultiCut cut : cuts) {
             //add new edge for cutted graph to supertree edgeset
             List<FlipCutGraphMultiSimpleWeight> splittedGraphs = cut.getSplittedGraphs();
@@ -136,20 +137,20 @@ public class Partition implements Comparable<Partition> {
                 edges.add(new Edge(g.parentNode, g.treeNode));
             }
 
-
             //build new partition
             Set<FlipCutGraphMultiSimpleWeight> newPartitionGraphs = new HashSet<>(graphs);
-            newPartitionGraphs.remove(cut.sourceGraph);
+            newPartitionGraphs.remove(cut.sourceGraph); //todo is there a better way
 
             //check if one of the splitted graphes is finished
             int newFinished = finishedGraphs;
             Iterator<FlipCutGraphMultiSimpleWeight> it = splittedGraphs.iterator();
             while (it.hasNext()) {
                 FlipCutGraphMultiSimpleWeight splitGraph = it.next();
-                if (splitGraph.taxa.size() == 1) {
+                final int taxaNum = splitGraph.getNumTaxa();
+                if (taxaNum == 1) {
                     splitGraph.treeNode.setLabel(splitGraph.taxa.iterator().next().name); //todo if or not
                     newFinished++;
-                }else if(splitGraph.taxa.size()== 0){
+                }else if(taxaNum == 0){
                     System.out.println("WTF?");
                 }else{
                     newPartitionGraphs.add(splitGraph);
@@ -164,6 +165,10 @@ public class Partition implements Comparable<Partition> {
 
     public int getSize() {
         return graphs.size() + finishedGraphs;
+    }
+
+    public int getNumOfGraphs() {
+        return graphs.size();
     }
 
     public int compareTo(Partition o) {

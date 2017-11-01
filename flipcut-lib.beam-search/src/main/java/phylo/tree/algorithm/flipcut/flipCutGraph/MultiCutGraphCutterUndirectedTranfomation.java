@@ -69,7 +69,7 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
         DefaultMultiCut optCut = new DefaultMultiCut(optCutter.getMinCut(source), source);
         mincuts.add(optCut);
 
-        KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory<FlipCutNodeSimpleWeight>> cutGraph = graphCreator.createGraph(modder, source);
+        KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory> cutGraph = graphCreator.createGraph(modder, source);
 
         //sample k-1 random cuts
         final int toGo = source.getK() - 1;
