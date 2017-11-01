@@ -46,27 +46,6 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, Fl
         super(log, executorService1, type);
     }
 
-    //todo sort with some quality criteria
-    @Override
-    public Tree getResult() {
-        if (result == null || result.isEmpty())
-            return null;
-        return getResults().get(0);
-    }
-
-    @Override
-    public List<Tree> getResults() {
-        if (result == null || result.isEmpty())
-            return null;
-        return result;
-    }
-
-    @Override
-    public Algorithm<List<Tree>, Tree> call() {
-        calculateSTs();
-        return this;
-    }
-
     private void calculateSTs() {
         //init fields
         result = null;
@@ -82,13 +61,13 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, Fl
 
             //initial step to generate
             final LinkedList<Partition> partitions = new Partition(0, initialGraph).getKBestNew(numberOfCuts, Long.MAX_VALUE);
-            int minimalPartSize = buildPartitionList(partitions, subsBench);
+            int minimalPartLevel = buildNextPartitionLevel(partitions, subsBench);
             initialGraph = null; //get rid of these large graph
 
             //iterates as long as all taxa are separated
-            while (minimalPartSize < numTaxa) {
+            while (minimalPartLevel < numTaxa) {
                 System.out.println(new Date().toString());
-                System.out.println(minimalPartSize + " of " + numTaxa + " done!");
+                System.out.println(minimalPartLevel + " of " + numTaxa + " done!");
                 System.out.println("number of partitions: " + partitions.size());
                 System.out.println();
                 final Set<Partition> allNewPartitionsSet = new HashSet<>();
@@ -108,67 +87,19 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, Fl
                 partitions.addAll(allNewPartitionsSet);
                 Collections.sort(partitions);
                 if (partitions.size() > (numberOfCuts))
-                    partitions.subList(numberOfCuts+1, partitions.size()).clear();
-                minimalPartSize= buildPartitionList(partitions, subsBench);
+                    partitions.subList(numberOfCuts + 1, partitions.size()).clear();
+                minimalPartLevel = buildNextPartitionLevel(partitions, subsBench);
             }
 
             System.out.println("...DONE in " + ((double) (System.currentTimeMillis() - calctime) / 1000d) + "s");
             System.out.println();
 
-            //this ist just to build the supertree edgelist finally! //todo do in supertree building method!
-            long supertreetime = System.currentTimeMillis();
-            System.out.println("Builing Supertrees...");
-            int treeNumber = 1;
-//            if (partitions.size() > numberOfCuts)
-//                partitions = partitions.subList(0, numberOfCuts); //todo output all trees?
-            List<Tree> supertrees = new ArrayList<>(numberOfCuts);
-            for (Partition partition : partitions) {
-                //build the supertree from this partition..
-                partition.getKBestNew(numberOfCuts, -1l); //needed to remove the single graphs
-                final Tree s = partition.createSupertree(treeNumber);
-                System.out.println("SupertreeScore = " + s.getName());
-                supertrees.add(s);
-                treeNumber++;
-            }
-            System.out.println("...DONE in " + ((double) (System.currentTimeMillis() - supertreetime) / 1000d) + "s");
-            result = supertrees;
+            result = buildTreesFromPartitions(partitions);
         }
-    }
-
-    @Override
-    protected FlipCutGraphMultiSimpleWeight createInitGraph(CostComputer costsComputer) {
-        return new FlipCutGraphMultiSimpleWeight(costsComputer, numberOfCuts, type);
-    }
-
-    //this method contains only simple weightings //todo redundant with singlecut version... make better!
-    @Override
-    protected CostComputer initCosts(List<Tree> inputTrees, Tree scaffoldTree) {
-        CostComputer costs = null;
-        if (UnitCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
-            LOGGER.info("Using Unit Costs");
-            costs = new UnitCostComputer(inputTrees, scaffoldTree);
-        } else if (WeightCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
-            costs = new WeightCostComputer(inputTrees, weights, scaffoldTree);
-            LOGGER.info("Using " + weights);
-        } else {
-            LOGGER.warning("No supported weight option set. Setting to standard: " + FlipCutWeights.Weights.EDGE_AND_LEVEL);
-            setWeights(FlipCutWeights.Weights.EDGE_AND_LEVEL);
-            initCosts(inputTrees, scaffoldTree);
-        }
-        return costs;
-    }
-
-
-    public int getNumberOfCuts() {
-        return numberOfCuts;
-    }
-
-    public void setNumberOfCuts(int numberOfCuts) {
-        this.numberOfCuts = numberOfCuts;
     }
 
     // this mehtod builds the new Partition list with respect to the subsBench ;-)
-    private int buildPartitionList(final LinkedList<Partition> newPartitions, final TreeMap<Integer, Set<Partition>> subsBench) {
+    private int buildNextPartitionLevel(final LinkedList<Partition> newPartitions, final TreeMap<Integer, Set<Partition>> subsBench) {
         int minimalPartSize = Integer.MAX_VALUE;
 
         if (!subsBench.isEmpty())
@@ -201,8 +132,78 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, Fl
 
         Collections.sort(newPartitions);
         if (newPartitions.size() > (numberOfCuts))
-            newPartitions.subList(numberOfCuts+1, newPartitions.size()).clear();
+            newPartitions.subList(numberOfCuts, newPartitions.size()).clear();
 
         return minimalPartSize;
+    }
+
+    private List<Tree> buildTreesFromPartitions(List<Partition> partitions) {
+        //this ist just to build the supertree edgelist finally!
+        long supertreetime = System.currentTimeMillis();
+        System.out.println("Builing Supertrees...");
+        int treeNumber = 1;
+        List<Tree> supertrees = new ArrayList<>(numberOfCuts);
+        for (Partition partition : partitions) {
+            //build the supertree from this partition..
+            partition.getKBestNew(numberOfCuts, -1l); //needed to remove the single graphs
+            final Tree s = partition.buildTree();
+            System.out.println("SupertreeScore = " + s.getName());
+            supertrees.add(s);
+            treeNumber++;
+        }
+        System.out.println("...DONE in " + ((double) (System.currentTimeMillis() - supertreetime) / 1000d) + "s");
+        return supertrees;
+    }
+
+    @Override
+    protected FlipCutGraphMultiSimpleWeight createInitGraph(CostComputer costsComputer) {
+        return new FlipCutGraphMultiSimpleWeight(costsComputer, numberOfCuts, type);
+    }
+
+    //this method contains only simple weightings //todo redundant with singlecut version..., conceptional proble,  make better!
+    @Override
+    protected CostComputer initCosts(List<Tree> inputTrees, Tree scaffoldTree) {
+        CostComputer costs = null;
+        if (UnitCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
+            LOGGER.info("Using Unit Costs");
+            costs = new UnitCostComputer(inputTrees, scaffoldTree);
+        } else if (WeightCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
+            costs = new WeightCostComputer(inputTrees, weights, scaffoldTree);
+            LOGGER.info("Using " + weights);
+        } else {
+            LOGGER.warning("No supported weight option set. Setting to standard: " + FlipCutWeights.Weights.EDGE_AND_LEVEL);
+            setWeights(FlipCutWeights.Weights.EDGE_AND_LEVEL);
+            initCosts(inputTrees, scaffoldTree);
+        }
+        return costs;
+    }
+
+
+    public int getNumberOfCuts() {
+        return numberOfCuts;
+    }
+
+    public void setNumberOfCuts(int numberOfCuts) {
+        this.numberOfCuts = numberOfCuts;
+    }
+
+    @Override
+    public Tree getResult() {
+        if (result == null || result.isEmpty())
+            return null;
+        return getResults().get(0);
+    }
+
+    @Override
+    public List<Tree> getResults() {
+        if (result == null || result.isEmpty())
+            return null;
+        return result;
+    }
+
+    @Override
+    public Algorithm<List<Tree>, Tree> call() {
+        calculateSTs();
+        return this;
     }
 }

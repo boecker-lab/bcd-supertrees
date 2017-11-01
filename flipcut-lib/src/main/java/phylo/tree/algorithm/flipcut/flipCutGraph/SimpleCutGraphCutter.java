@@ -193,7 +193,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
     protected void createGoldbergTarjanMerged(MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph) {
         addTaxa(cutGraph);
-        Set<FlipCutNodeSimpleWeight> edgesAlreadySet = new HashSet<FlipCutNodeSimpleWeight>(dummyToMerged.size());
+        Set<FlipCutNodeSimpleWeight> edgesAlreadySet = new HashSet<>(dummyToMerged.size());
 
         // add edges
         for (FlipCutNodeSimpleWeight character : source.characters) {

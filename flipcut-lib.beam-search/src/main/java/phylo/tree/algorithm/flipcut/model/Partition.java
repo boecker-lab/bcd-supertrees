@@ -175,7 +175,7 @@ public class Partition implements Comparable<Partition> {
         return (currentscore < o.currentscore) ? -1 : ((currentscore == o.currentscore) ? 0 : 1);
     }
 
-    public Tree createSupertree(int treeNumber){
+    public Tree buildTree(){
         Map<TreeNode,TreeNode> nodeMap = new HashMap<>();
         Tree tree = new Tree();
         nodeMap.put(root, new TreeNode(root.getLabel()));

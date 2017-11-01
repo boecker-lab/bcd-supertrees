@@ -27,6 +27,8 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      */
     protected Map<T, TreeNode> charToTreeNode = null;
     protected Map<TreeNode, T> treeNodeToChar = null;
+
+
     // active partitions for guide tree based taxa merging
     protected Set<T> activePartitions = new HashSet<>();
 
@@ -327,7 +329,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     }
 
     public void insertScaffPartData(AbstractFlipCutGraph<T> source, final Map<T, T> oldToNew) {
-
         activePartitions = new HashSet<>();
         if (!source.activePartitions.isEmpty()) {
 

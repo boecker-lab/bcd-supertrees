@@ -1,7 +1,6 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 
-import com.google.common.collect.Sets;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 import phylo.tree.algorithm.flipcut.model.MultiCut;
@@ -11,47 +10,44 @@ import java.util.*;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
- *         Date: 17.01.13
- *         Time: 17:59
+ * Date: 17.01.13
+ * Time: 17:59
  */
 
 public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
     private int numTaxaAfterClose = -1;
     private int maxCutNumber;
     private int nextCutIndexToCalculate;
-    protected final Set<MultiCut> splittedCuts;
-    private final MultiCut[] cuts;
-    private MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutter;
+    private Set<MultiCut> splittedCuts; //todo do we rellay need this cleanup to support GC?
+    private MultiCut[] cuts;
+    private MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutter = null;
     private MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory;
 
 
     public FlipCutGraphMultiSimpleWeight(CostComputer costs, int k, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory) {
         super(costs, 0); //todo dummy bootstrapthreshold --> implement it
-        this.cutter = cutterFactory.newInstance(this);
         this.cutterFactory = cutterFactory;
         maxCutNumber = k;
         cuts = new MultiCut[maxCutNumber];
-        splittedCuts =  new HashSet<>(maxCutNumber);
+        splittedCuts = new HashSet<>(maxCutNumber);
         nextCutIndexToCalculate = 0;
     }
 
     protected FlipCutGraphMultiSimpleWeight(LinkedHashSet<FlipCutNodeSimpleWeight> characters, LinkedHashSet<FlipCutNodeSimpleWeight> taxa, TreeNode parentNode, int k, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory) {
         super(characters, taxa, parentNode);
-        this.cutter = cutterFactory.newInstance(this);
         this.cutterFactory = cutterFactory;
         maxCutNumber = k;
         cuts = new MultiCut[maxCutNumber];
-        splittedCuts =  new HashSet<>(maxCutNumber);
+        splittedCuts = new HashSet<>(maxCutNumber);
         nextCutIndexToCalculate = 0;
     }
 
     public FlipCutGraphMultiSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, int k, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory, boolean edgeDeletion) {
         super(nodes, parentNode, edgeDeletion);
-        this.cutter = cutterFactory.newInstance(this);
         this.cutterFactory = cutterFactory;
         maxCutNumber = k;
         cuts = new MultiCut[maxCutNumber];
-        splittedCuts =  new HashSet<>(maxCutNumber);
+        splittedCuts = new HashSet<>(maxCutNumber);
         nextCutIndexToCalculate = 0;
     }
 
@@ -60,25 +56,29 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         return new CutIterator();
     }
 
-    public void setCutSplitted(MultiCut c){
+    public void setCutSplitted(MultiCut c) {
         splittedCuts.add(c);
     }
 
     private boolean calculateNextCut() {
-        MultiCut c = null;
-        if(cutter != null)
-            c = cutter.getNextCut();
+        if (nextCutIndexToCalculate < maxCutNumber) {
+            if (cutter == null)
+                cutter = cutterFactory.newInstance(this);
 
-        if (c != null) {
-            cuts[nextCutIndexToCalculate] = c;
-            nextCutIndexToCalculate++;
-            return true;
-        } else {
+            MultiCut c = cutter.getNextCut();
+            if (c != null) {
+                cuts[nextCutIndexToCalculate++] = c;
+                if (nextCutIndexToCalculate >= maxCutNumber) {
+                    cutter.clear();
+                    cutter = null;
+                }
+                return true;
+            }
             maxCutNumber = nextCutIndexToCalculate;
-            cutter.clear();
-            cutter = null;
-            return false;
         }
+        cutter.clear();
+        cutter = null;
+        return false;
     }
 
     @Override
@@ -110,13 +110,13 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
     // debug method
     private void checkGraph(FlipCutGraphMultiSimpleWeight graph) {
         for (FlipCutNodeSimpleWeight n : graph.characterToDummy.keySet()) {
-            FlipCutNodeSimpleWeight node =  n.isClone()?n.clone:n;
-            if (graph.characterToDummy.keySet().size() != 2 *graph.characters.size())
+            FlipCutNodeSimpleWeight node = n.isClone() ? n.clone : n;
+            if (graph.characterToDummy.keySet().size() != 2 * graph.characters.size())
                 System.out.println("not all chars in map");
-            if (!graph.characters.contains(node)){
+            if (!graph.characters.contains(node)) {
                 System.out.println("Character not in graph: " + node);
             }
-            if (!graph.taxa.containsAll(node.edges)){
+            if (!graph.taxa.containsAll(node.edges)) {
                 System.out.println("at least one edge not in graph " + getSortedEdges(node.edges));
             }
 
@@ -127,7 +127,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         for (Map.Entry<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> entry : graph.dummyToCharacters.entrySet()) {
             if (!entry.getKey().isClone()) {
                 Set<FlipCutNodeSimpleWeight> sets = entry.getValue();
-                if (!graph.characters.containsAll(sets)){
+                if (!graph.characters.containsAll(sets)) {
                     System.out.println("at least on char not in graph " + sets);
                 }
             }
@@ -211,20 +211,21 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
                 // check if the other one is also in the set
                 if (!sinkNodes.contains(node.clone)) {
                     FlipCutNodeSimpleWeight c = node.isClone() ? node.clone : node;
-                    if (DEBUG) System.out.println("--> remove char: " + c.toString() + " with taxa: " + getSortedEdges(c.edges));
+                    if (DEBUG)
+                        System.out.println("--> remove char: " + c.toString() + " with taxa: " + getSortedEdges(c.edges));
                     charactersToRemove.add(c);
-                }else if(DEBUG){//todo debug thing
+                } else if (DEBUG) {//todo debug thing
                     FlipCutNodeSimpleWeight c = node.isClone() ? node.clone : node;
                     System.out.println("--> keep char: " + c.toString() + " with taxa: " + getSortedEdges(c.edges));
                     int count = 0;
                     for (FlipCutNodeSimpleWeight tax : c.edges) {
-                        if(!sinkNodes.contains(tax)) {
+                        if (!sinkNodes.contains(tax)) {
                             System.out.println("===================this is strange");
                             count++;
                         }
                     }
                     if (count > 0)
-                        System.out.println(count+" / " +c.edges.size());
+                        System.out.println(count + " / " + c.edges.size());
                 }
             }
         }
@@ -280,23 +281,24 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
     }
 
     public void close() {
-        if (splittedCuts.size() == maxCutNumber) {
+        if (splittedCuts != null && splittedCuts.size() == maxCutNumber) {
             cutter = null;
-            cutterFactory=null;
+            cutterFactory = null;
             characters = null;
             characterToDummy = null;
             dummyToCharacters = null;
             charToTreeNode = null;
             treeNodeToChar = null;
-            splittedCuts.clear();
 
             numTaxaAfterClose = taxa.size();
             taxa = null;
 
+//            cuts = null;
+            splittedCuts = null;
         }
     }
 
-    public int getNumTaxa(){
+    public int getNumTaxa() {
         if (numTaxaAfterClose >= 0)
             return numTaxaAfterClose;
         return taxa.size();
@@ -392,7 +394,9 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         }
     }
 
-    public int getK(){return cuts.length;}
+    public int getK() {
+        return cuts.length;
+    }
 
 
 }

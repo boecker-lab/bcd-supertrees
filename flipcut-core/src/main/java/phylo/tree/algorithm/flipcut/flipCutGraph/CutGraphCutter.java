@@ -16,14 +16,10 @@ import java.util.concurrent.ExecutorService;
  */
 public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>> implements GraphCutter<N, T> {
     private static final long INFINITY = 1000000;
-
     public static long getInfinity(){
         return CostComputer.ACCURACY * INFINITY;
     }
 
-//    public static long getSCMInfinity(){
-//        return CostComputer.ACCURACY * INFINITY;
-//    }
 
     protected final ExecutorService executorService;
     protected final int threads;
@@ -33,9 +29,6 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends
 
     protected T source = null;
     protected List<N> cutGraphTaxa = null;
-
-//    protected LinkedHashSet<N> mincut;
-//    protected long mincutValue;
 
     protected Cut<N> mincut;
     protected List<T> split = null;
@@ -49,7 +42,6 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends
         this.executorService = executorService;
         this.threads = threads;
     }
-
 
     public Cut<N> getMinCut(T source) {
         if (this.source != source) {
