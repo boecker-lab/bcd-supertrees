@@ -68,6 +68,8 @@ public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
 
     protected abstract T createClone();
 
+    protected abstract T createDummy();
+
     protected abstract T copy();
 
     public abstract boolean isTaxon();

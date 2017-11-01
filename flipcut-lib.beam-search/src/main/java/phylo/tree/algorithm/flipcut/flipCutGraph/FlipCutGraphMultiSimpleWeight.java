@@ -287,9 +287,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
             characters = null;
             characterToDummy = null;
             dummyToCharacters = null;
-            charToTreeNode = null;
-            treeNodeToChar = null;
-
+            scaffoldCharacterMapping = null;
             numTaxaAfterClose = taxa.size();
             taxa = null;
 
@@ -304,6 +302,14 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         return taxa.size();
     }
 
+    public boolean containsCuts() {
+        return nextCutIndexToCalculate > 0;
+    }
+
+    public int getK() {
+        return cuts.length;
+    }
+
     //gets mapping and characters of the new compount to duplicate merging maps;
     private void cloneCharacterMaps(final AbstractFlipCutGraph<FlipCutNodeSimpleWeight> sourceGraph, final Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew) {
         for (FlipCutNodeSimpleWeight sourceChar : sourceGraph.characters) {
@@ -312,7 +318,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
                 FlipCutNodeSimpleWeight targetChar = oldToNew.get(sourceChar);
                 if (targetChar != null && characters.contains(targetChar) && !characterToDummy.containsKey(targetChar)) {
                     Set<FlipCutNodeSimpleWeight> sourceSet = sourceGraph.dummyToCharacters.get(sourceDummy);
-                    FlipCutNodeSimpleWeight targetDummy = new FlipCutNodeSimpleWeight(new HashSet<>(oldToNew.get(sourceChar).edges));
+                    FlipCutNodeSimpleWeight targetDummy = oldToNew.get(sourceChar).createDummy();
 
                     Set<FlipCutNodeSimpleWeight> targetSet = new HashSet<>();
                     Set<FlipCutNodeSimpleWeight> targetCloneSet = new HashSet<>();
@@ -335,13 +341,10 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
             }
         }
     }
+    private void initMapping(){
+        dummyToCharacters = new HashMap<>(characters.size());
+        characterToDummy = new HashMap<>(characters.size());
 
-    public boolean containsCuts() {
-        return nextCutIndexToCalculate > 0;
-    }
-
-    private DefaultMultiCut getCompCut(List<List<FlipCutNodeSimpleWeight>> comp) {
-        return new DefaultMultiCut(comp, this);
     }
 
     @Override
@@ -350,6 +353,8 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         characterToDummy = new HashMap<>(characters.size());
         cloneCharacterMaps(source, oldToNew);
     }
+
+
 
     class CutIterator implements Iterator<MultiCut> {
         CutIterator() {
@@ -394,9 +399,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         }
     }
 
-    public int getK() {
-        return cuts.length;
+    private DefaultMultiCut getCompCut(List<List<FlipCutNodeSimpleWeight>> comp) {
+        return new DefaultMultiCut(comp, this);
     }
-
-
 }

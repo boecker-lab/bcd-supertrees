@@ -1,5 +1,8 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
+import org.slf4j.LoggerFactory;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
@@ -22,8 +25,8 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         super(characters, taxa, parentNode);
     }
 
-    public FlipCutGraphSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, final  boolean edgeDeletion) {
-        super(nodes, parentNode,edgeDeletion);
+    public FlipCutGraphSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, final boolean edgeDeletion) {
+        super(nodes, parentNode, edgeDeletion);
     }
 
     @Override
@@ -40,28 +43,9 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
 
     @Override
     protected List<LinkedHashSet<FlipCutNodeSimpleWeight>> createGraphData(CostComputer costs, int bootstrapThreshold) {
-        System.out.println("Creating intitial FC graph...");
         List<Tree> inputTrees = new ArrayList<>(costs.getTrees());
-        Tree scaff = costs.getScaffoldTree();
-        if (SCAFF_TAXA_MERGE) {
-            final int size;
-            if (scaff != null)
-                size = scaff.vertexCount() - scaff.getNumTaxa();
-            else
-                size = 0;
-            charToTreeNode = new ConcurrentHashMap<>(size);
-            treeNodeToChar = new ConcurrentHashMap<>(size);
-            activePartitions = Collections.newSetFromMap(new ConcurrentHashMap<>(size));
-        }
 
-        if (GLOBAL_CHARACTER_MERGE) {
-            characterToDummy = new ConcurrentHashMap<>();//todo size estimation?
-            dummyToCharacters = new ConcurrentHashMap<>();//todo size estimation?
-        }
-
-        Map<String, FlipCutNodeSimpleWeight> taxa = new HashMap<String, FlipCutNodeSimpleWeight>();
-        Map<List<Set<FlipCutNodeSimpleWeight>>, FlipCutNodeSimpleWeight> characters = new HashMap<>();
-        Map<Set<FlipCutNodeSimpleWeight>, FlipCutNodeSimpleWeight> edgeSetToDummy = new HashMap<>();
+        Map<String, FlipCutNodeSimpleWeight> taxa = new HashMap<>();
 
         //create taxon list
         System.out.println("create taxon list");
@@ -76,13 +60,26 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
 
         //create character list
         System.out.println("create chracter list");
-//        int trees = 0;
         int chars = 0;
         int bsIngnoredChars = 0;
+
+        // identical character merge
+        Map<List<Set<FlipCutNodeSimpleWeight>>, FlipCutNodeSimpleWeight> charactersMap = new HashMap<>();
+
+        //init scaffold merging
+        Tree scaff = costs.getScaffoldTree();
+        final int size;
+        if (scaff != null)
+            size = scaff.vertexCount() - scaff.getNumTaxa();
+        else
+            size = 0;
+        scaffoldCharacterMapping = Maps.synchronizedBiMap(HashBiMap.create(size));
+        activePartitions = Collections.newSetFromMap(new ConcurrentHashMap<>(size));
+        //init scaffold merging end
+
+
         for (Tree tree : inputTrees) {
-//            trees++;
-//            System.out.println("processing tree number: " + trees);
-            Map<String, FlipCutNodeSimpleWeight> leaves = new HashMap<String, FlipCutNodeSimpleWeight>();
+            Map<String, FlipCutNodeSimpleWeight> leaves = new HashMap<>();
             for (TreeNode treeNode : tree.getLeaves()) {
                 leaves.put(treeNode.getLabel(), taxa.get(treeNode.getLabel()));
             }
@@ -93,7 +90,6 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                 // also skip root
                 if (character == tree.getRoot()) continue;
 
-
                 // skip character with small bootstrap value
                 if (character.getLabel() != null) {
                     try {
@@ -103,21 +99,22 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                             continue;
                         }
                     } catch (NumberFormatException e) {
+                        LoggerFactory.getLogger(this.getClass()).warn("Could not parse BS Value of tree vertex.");
                     }
                 }
 
-                Map<String, FlipCutNodeSimpleWeight> chracterLeaves = new HashMap<String, FlipCutNodeSimpleWeight>();
+                Map<String, FlipCutNodeSimpleWeight> characterLeaves = new HashMap<String, FlipCutNodeSimpleWeight>();
                 for (TreeNode treeNode : character.getLeaves()) {
-                    chracterLeaves.put(treeNode.getLabel(), taxa.get(treeNode.getLabel()));
+                    characterLeaves.put(treeNode.getLabel(), taxa.get(treeNode.getLabel()));
                 }
 
-                FlipCutNodeSimpleWeight c = new FlipCutNodeSimpleWeight(null, new HashSet<FlipCutNodeSimpleWeight>(chracterLeaves.size()), new HashSet<FlipCutNodeSimpleWeight>(leaves.size() - chracterLeaves.size()));
+                FlipCutNodeSimpleWeight c = new FlipCutNodeSimpleWeight(null, new HashSet<FlipCutNodeSimpleWeight>(characterLeaves.size()), new HashSet<FlipCutNodeSimpleWeight>(leaves.size() - characterLeaves.size()));
                 c.edgeWeight = costs.getEdgeWeight(character, null, (TreeNode) null);
 
                 chars++;
                 for (FlipCutNodeSimpleWeight taxon : leaves.values()) {
                     //add leaves and set to "1"
-                    if (chracterLeaves.containsKey(taxon.name)) {
+                    if (characterLeaves.containsKey(taxon.name)) {
                         c.addEdgeTo(taxon);
                         // add reverse edge
 //                        taxon.addEdgeTo(c); --> //we have to wait with this until we know if character will be part of the graph --> see below
@@ -133,62 +130,43 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                 characterIndentifier.add(c.imaginaryEdges);
 
                 //identical character merge
-                FlipCutNodeSimpleWeight characerInList = characters.get(characterIndentifier);
+                FlipCutNodeSimpleWeight characerInList = charactersMap.get(characterIndentifier);
                 if (characerInList == null) {
-                    characters.put(characterIndentifier, c);
+                    charactersMap.put(characterIndentifier, c);
                     //know we know that character gets into graph, so we can add reverse edges to the taxa
                     for (FlipCutNodeSimpleWeight taxon : c.edges) {
                         taxon.addEdgeTo(c);
                     }
-
-                    //global character merge for chars with same edgeset
-                    if (GLOBAL_CHARACTER_MERGE) {
-                        FlipCutNodeSimpleWeight dummy = edgeSetToDummy.get(c.edges);
-                        if (dummy == null) {
-                            dummy = new FlipCutNodeSimpleWeight(c.edges);
-                            edgeSetToDummy.put(dummy.edges, dummy);
-                            dummyToCharacters.put(dummy, Collections.newSetFromMap(new ConcurrentHashMap()));
-                            dummyToCharacters.put(dummy.clone, Collections.newSetFromMap(new ConcurrentHashMap()));
-                        }
-                        addCharacterToDummyMapping(c, dummy);
-                    }
-
                     characerInList = c;
                 } else {
                     characerInList.edgeWeight += c.edgeWeight;
-                    if (GLOBAL_CHARACTER_MERGE)
-                        characterToDummy.get(characerInList).edgeWeight += c.edgeWeight;
                 }
 
+                //########## scaffold merging
                 //insert scaffold characters to mapping if activated
-                if (SCAFF_TAXA_MERGE) {
-                    if (scaff != null && tree.equals(scaff)) {
-                        addTreeNodeCharGuideTreeMapping(character, characerInList);
-                        //create set of active partitions
-                        if (character.getParent().equals(scaff.getRoot()))
-                            activePartitions.add(characerInList);
-                    }
+                if (scaff != null && tree.equals(scaff)) {
+                    addTreeNodeCharGuideTreeMapping(character, characerInList);
+                    //create set of active partitions
+                    if (character.getParent().equals(scaff.getRoot()))
+                        activePartitions.add(characerInList);
                 }
+                //########## scaffold merging
             }
         }
         if (DEBUG)
-            if (charToTreeNode != null)
-                System.out.println("Scaffold node number: " + charToTreeNode.size());
+            if (scaffoldCharacterMapping != null)
+                System.out.println("Scaffold node number: " + scaffoldCharacterMapping.size());
 
 
         List<LinkedHashSet<FlipCutNodeSimpleWeight>> out = new ArrayList<>(2);
-        out.add(new LinkedHashSet<>(characters.values()));
+        out.add(new LinkedHashSet<>(charactersMap.values()));
         out.add(new LinkedHashSet<>(taxa.values()));
 
         System.out.println(bsIngnoredChars + " characters were ignored because of a bootstrap value less than " + bootstrapThreshold);
         System.out.println(out.get(0).size() + " of " + chars + " added to initial graph");
-        if (GLOBAL_CHARACTER_MERGE)
-            System.out.println(characterToDummy.size() / 2 + " can be merged to " + dummyToCharacters.size() / 2 + " during mincut phases");
-        System.out.println("...Done!");
-
-
         return out;
     }
+
 
     protected List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> splitToGraphData(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes) {
         LinkedHashSet<FlipCutNodeSimpleWeight> g1Characters = new LinkedHashSet(characters.size());
@@ -253,7 +231,6 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     }
 
 
-
     //helper method for split
     protected void removeEdgesToOtherGraph(Collection<FlipCutNodeSimpleWeight> aCharacters, Collection<FlipCutNodeSimpleWeight> bTaxa) {
         for (FlipCutNodeSimpleWeight aCharacter : aCharacters) {
@@ -263,7 +240,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                     //remove edge to other side
 //                    System.out.println("!!!!!!!!!!!!! IMAGINARY-EDGE remove !!!!!!!!!!!!!");
                 } else if (aCharacter.edges.contains(bTaxon)) { // > 0
-                    System.out.println("!!!!!!!!!!!!!  EDGE remove -> should not the case for bcd: taxon "+ bTaxon.name +" !!!!!!!!!!!!!");
+                    System.out.println("!!!!!!!!!!!!!  EDGE remove -> should not the case for bcd: taxon " + bTaxon.name + " !!!!!!!!!!!!!");
                     System.out.println("--> char: " + aCharacter.toString() + " with taxa: " + getSortedEdges(aCharacter.edges));
                     aCharacter.edges.remove(bTaxon);
                     // remove reverse edge
@@ -274,7 +251,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     }
 
     // just for debug
-    public static List<String> getSortedEdges(Collection<FlipCutNodeSimpleWeight> in){
+    public static List<String> getSortedEdges(Collection<FlipCutNodeSimpleWeight> in) {
         List<String> out = new ArrayList<>(in.size());
         for (FlipCutNodeSimpleWeight flipCutNodeSimpleWeight : in) {
             out.add(flipCutNodeSimpleWeight.name);
@@ -332,7 +309,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     }
 
 
-    //########## methods for edge identical character mappin ##########
+    //########## methods for edge identical character mapping ##########
 
     @Override
     public void insertCharacterMapping(AbstractFlipCutGraph<FlipCutNodeSimpleWeight> source, Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew) {

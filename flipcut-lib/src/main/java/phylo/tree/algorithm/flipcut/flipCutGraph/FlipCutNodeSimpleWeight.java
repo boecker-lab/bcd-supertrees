@@ -22,21 +22,23 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
     protected FlipCutNodeSimpleWeight(String name, Set<FlipCutNodeSimpleWeight> edges, Set<FlipCutNodeSimpleWeight> imaginaryEdges) {
         super(name, edges);
         this.imaginaryEdges = imaginaryEdges;
-        if (!isTaxon() && !isClone()){
+        if (!isTaxon() && !isClone()) {
             createClone();
         }
     }
 
     //Taxon constructor
     public FlipCutNodeSimpleWeight(String name) {
-        this(name, new HashSet<FlipCutNodeSimpleWeight>(),null);
+        this(name, new HashSet<FlipCutNodeSimpleWeight>(), null);
     }
+
     //CharacterConstructor
     public FlipCutNodeSimpleWeight() {
         this(null, new HashSet<FlipCutNodeSimpleWeight>(), new HashSet<FlipCutNodeSimpleWeight>());
     }
+
     //DummyConstructor
-    public FlipCutNodeSimpleWeight(Set<FlipCutNodeSimpleWeight> edges) {
+    FlipCutNodeSimpleWeight(Set<FlipCutNodeSimpleWeight> edges) {
         this(null, edges, null);
     }
 
@@ -59,8 +61,13 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
     }
 
     @Override
+    protected FlipCutNodeSimpleWeight createDummy() {
+        return new FlipCutNodeSimpleWeight(edges);
+    }
+
+    @Override
     public boolean isClone() {
-        return (edges==null && imaginaryEdges==null);
+        return (edges == null && imaginaryEdges == null);
     }
 
     @Override
@@ -79,15 +86,14 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
     }
 
 
-
-    public void addImaginaryEdgeTo(FlipCutNodeSimpleWeight node){
+    public void addImaginaryEdgeTo(FlipCutNodeSimpleWeight node) {
         imaginaryEdges.add(node);
     }
 
     //this is to find redundant characters in a graph
     //unchecked, save use only on an initial graph
     @Override
-    public boolean characterEquals(FlipCutNodeSimpleWeight c2){
+    public boolean characterEquals(FlipCutNodeSimpleWeight c2) {
         if (isTaxon() || c2.isTaxon()) return false;
         return edges.equals(c2.edges) && imaginaryEdges.equals(c2.imaginaryEdges);
     }
@@ -95,9 +101,9 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
     @Override
     protected FlipCutNodeSimpleWeight copy() {
         FlipCutNodeSimpleWeight copy;
-        if (isTaxon()){
+        if (isTaxon()) {
             copy = new FlipCutNodeSimpleWeight(name);
-        }else{
+        } else {
             copy = new FlipCutNodeSimpleWeight();
         }
         copy.edgeWeight = edgeWeight;

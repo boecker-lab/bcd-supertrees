@@ -1,10 +1,14 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.model.TreeNode;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -25,9 +29,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     /**
      * Mapping for guide tree based taxa merging
      */
-    protected Map<T, TreeNode> charToTreeNode = null;
-    protected Map<TreeNode, T> treeNodeToChar = null;
-
+    protected BiMap<T, TreeNode> scaffoldCharacterMapping = null;
 
     // active partitions for guide tree based taxa merging
     protected Set<T> activePartitions = new HashSet<>();
@@ -41,8 +43,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      */
     public Map<T, T> characterToDummy = null;
     public Map<T, Set<T>> dummyToCharacters = null;
-
-
     /**
      * The character vertex set
      */
@@ -74,16 +74,38 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
 
 
     protected AbstractFlipCutGraph(CostComputer costs, int bootstrapThreshold) {
+        System.out.println("Creating graph representation of input trees...");
+
         List<LinkedHashSet<T>> data = createGraphData(costs, bootstrapThreshold);
         this.characters = data.get(0);
         this.taxa = data.get(1);
         parentNode = null;
         treeNode = new TreeNode();
-        /*
-       Sort the leaves alphabetically to ensure we find the same mincut
-       for multiple runs
-        */
-//        sortTaxa();
+
+        if (GLOBAL_CHARACTER_MERGE)
+            createCharacterMapping();
+
+        System.out.println("...Done!");
+    }
+
+    protected void createCharacterMapping() {
+        characterToDummy = new ConcurrentHashMap<>(characters.size());
+        dummyToCharacters = new ConcurrentHashMap<>(characters.size());
+        Map<Set<T>, T> edgeSetToDummy = new HashMap<>();
+
+        for (T character : characters) {
+            //global character merge for chars with same edgeset
+            T dummy = edgeSetToDummy.get(character.edges);
+            if (dummy == null) {
+                dummy = character.createDummy();
+                edgeSetToDummy.put(dummy.edges, dummy);
+                dummyToCharacters.put(dummy, Collections.newSetFromMap(new ConcurrentHashMap()));
+                dummyToCharacters.put(dummy.clone, Collections.newSetFromMap(new ConcurrentHashMap()));
+            }
+            addCharacterToDummyMapping(character, dummy);
+        }
+
+        System.out.println(characterToDummy.size() / 2 + " can be merged to " + dummyToCharacters.size() / 2 + " during mincut phases");
     }
 
 
@@ -160,13 +182,13 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         if (characterToRemove == null || characterToRemove.edges == null)
             System.out.println("fail");
         for (T taxon : characterToRemove.edges) {
-            if(!taxon.edges.remove(characterToRemove))
+            if (!taxon.edges.remove(characterToRemove))
                 System.out.println("WTF");
         }
         //check that no active scaffold character gets removded
         //JUST for DEBUGGING
         if (DEBUG) {
-            if (charToTreeNode.containsKey(characterToRemove)) {
+            if (scaffoldCharacterMapping.containsKey(characterToRemove)) {
                 System.out.println("ERROR: Illegal SCAFFOLD character deletion!!! " + characterToRemove.toString());
             }
         }
@@ -200,18 +222,18 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
                 }
 
                 if (SCAFF_TAXA_MERGE && !activePartitions.isEmpty()) {
-                    TreeNode node = charToTreeNode.get(character);
+                    TreeNode node = scaffoldCharacterMapping.get(character);
                     if (node != null) {
                         Set<T> toInsert = new HashSet(node.childCount());
                         for (TreeNode child : node.getChildren()) {
                             if (child.isInnerNode()) {
-                                T n = treeNodeToChar.get(child);
+                                T n = scaffoldCharacterMapping.inverse().get(child);
                                 toInsert.add(n);
                             }
                         }
                         activePartitions.remove(character);
                         activePartitions.addAll(toInsert);
-                        removeTreNodeCharGuideTreeMapping(character);
+                        removeTreeNodeCharGuideTreeMapping(character);
                     }
                 }
 
@@ -314,18 +336,15 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
 
     //########## methods for guide tree mapping ##########
     protected void addTreeNodeCharGuideTreeMapping(TreeNode character, T c) {
-        charToTreeNode.put(c, character);
-        treeNodeToChar.put(character, c);
+        scaffoldCharacterMapping.put(c,character);
     }
 
     protected void removeTreeNodeCharGuideTreeMapping(TreeNode character) {
-        charToTreeNode.remove(treeNodeToChar.get(character));
-        treeNodeToChar.remove(character);
+        scaffoldCharacterMapping.inverse().remove(character);
     }
 
-    protected void removeTreNodeCharGuideTreeMapping(T c) {
-        treeNodeToChar.remove(charToTreeNode.get(c));
-        charToTreeNode.remove(c);
+    protected void removeTreeNodeCharGuideTreeMapping(T c) {
+        scaffoldCharacterMapping.remove(c);
     }
 
     public void insertScaffPartData(AbstractFlipCutGraph<T> source, final Map<T, T> oldToNew) {
@@ -334,9 +353,8 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
 
             // multicutted version
             if (oldToNew != null) {
-                charToTreeNode = new HashMap();
-                treeNodeToChar = new HashMap();
-                for (Map.Entry<T, TreeNode> entry : source.charToTreeNode.entrySet()) {
+                scaffoldCharacterMapping = Maps.synchronizedBiMap(HashBiMap.create());
+                for (Map.Entry<T, TreeNode> entry : source.scaffoldCharacterMapping.entrySet()) {
                     T sourceNode;
                     if (oldToNew != null) {
                         sourceNode = oldToNew.get(entry.getKey());
@@ -358,10 +376,9 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
                     if (characters.contains(sourceNode))
                         activePartitions.add(sourceNode);
                 }
-            // single cutted version
-            }else{
-                charToTreeNode =  source.charToTreeNode;
-                treeNodeToChar =  source.treeNodeToChar;
+                // single cutted version
+            } else {
+                scaffoldCharacterMapping = source.scaffoldCharacterMapping;
                 for (T sourceNode : source.activePartitions) {
                     if (characters.contains(sourceNode))
                         activePartitions.add(sourceNode);
