@@ -29,9 +29,19 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
     private VertexMapping<FlipCutGraphMultiSimpleWeight> mapping = new VertexMapping<>();
     private Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged;
 
-
     private LinkedHashSet<FlipCutNodeSimpleWeight> characters = null;
 
+    @Override
+    public void clear() {
+        super.clear();
+        queueAscHEAP = null;
+        currentNode = null;
+        initCuts = null;
+        taxa = null;
+        mapping = null;
+        dummyToMerged = null;
+        characters = null;
+    }
 
     public MultiCutGraphCutterVazirani(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut) {
         super(type);
@@ -40,7 +50,6 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
 
     private List<VaziraniCut> findCutsFromPartialCuts(VaziraniCut sourceCut, VaziraniCut[] initCuts) {
         Set<FlipCutNodeSimpleWeight> cut = sourceCut.getCutSet();
-
 
         List<VaziraniCut> cuts = new ArrayList<VaziraniCut>(taxa.size() - sourceCut.k);
 

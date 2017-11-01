@@ -60,9 +60,6 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends
         source = null;
         mincut = null;
         split = null;
-//        nodeToDummy = null;
-//        dummyToMerged = null;
-
     }
 
     protected abstract void calculateMinCut();
