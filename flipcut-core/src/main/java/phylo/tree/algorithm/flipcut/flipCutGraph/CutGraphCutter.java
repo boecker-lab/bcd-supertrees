@@ -24,9 +24,6 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends
     protected final ExecutorService executorService;
     protected final int threads;
 
-    protected Map<N, N> nodeToDummy;
-    protected Map<N, Set<N>> dummyToMerged;
-
     protected T source = null;
     protected List<N> cutGraphTaxa = null;
 
@@ -63,8 +60,8 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends
         source = null;
         mincut = null;
         split = null;
-        nodeToDummy = null;
-        dummyToMerged = null;
+//        nodeToDummy = null;
+//        dummyToMerged = null;
 
     }
 

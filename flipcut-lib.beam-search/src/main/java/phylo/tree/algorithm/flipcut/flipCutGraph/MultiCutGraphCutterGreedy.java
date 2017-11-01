@@ -57,7 +57,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                         cutGraph = new GoldbergTarjanCutGraph<>();
 
                     //create cutgraph
-                    createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, mapping);
+                    final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged = createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, mapping);
 
                     //calculate mincut
                     STCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph);

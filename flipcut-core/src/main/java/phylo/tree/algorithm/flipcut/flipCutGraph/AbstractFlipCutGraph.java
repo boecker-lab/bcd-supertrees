@@ -37,8 +37,8 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     /**
      * Mapping for edge  based character merging (Global character Map)
      */
-    public Map<T, T> characterToDummy = null;
-    public Map<T, Set<T>> dummyToCharacters = null;
+    protected Map<T, T> characterToDummy = null;
+    protected Map<T, Set<T>> dummyToCharacters = null;
     /**
      * The character vertex set
      */
@@ -342,12 +342,35 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
             addCharacterToDummyMapping(character, dummy);
         }
 
+        // remove single mappings
+        Iterator<Set<T>> it = dummyToCharacters.values().iterator();
+        while (it.hasNext()) {
+            Set<T> chracters = it.next();
+            if (chracters.size() <= 1) {
+                it.remove();
+                characterToDummy.remove(chracters.iterator().next());
+            }
+        }
 //        System.out.println(characterToDummy.size() / 2 + " can be merged to " + dummyToCharacters.size() / 2 + " during mincut phases");
     }
 
     public void insertCharacterMapping(AbstractFlipCutGraph<T> source) {
         characterToDummy = source.characterToDummy;
         dummyToCharacters = source.dummyToCharacters;
+    }
+
+    public T getDummyFromMapping(T character) {
+        T dummy = characterToDummy.get(character);
+        if (dummy == null)
+            return character;
+        return dummy;
+    }
+
+    public Set<T> getCharactersFromMapping(T dummy) {
+        Set<T> chars = dummyToCharacters.get(dummy);
+        if (chars == null || chars.isEmpty())
+            return Collections.singleton(dummy);
+        return chars;
     }
 
     public abstract void addCharacterToDummyMapping(T character, T dummy);

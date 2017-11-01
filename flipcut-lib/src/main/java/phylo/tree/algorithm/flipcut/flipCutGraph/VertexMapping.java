@@ -69,7 +69,7 @@ public class VertexMapping<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeigh
                 Set<FlipCutNodeSimpleWeight> trivials = trivialcharacters.get(node);
                 if (trivials != null) {
                     for (FlipCutNodeSimpleWeight trivial : trivials) {
-                        mincut.addAll(sourceGraph.dummyToCharacters.get(trivial));
+                        mincut.addAll(sourceGraph.getCharactersFromMapping(trivial));
                     }
                 }
                 Set<FlipCutNodeSimpleWeight> realT = dummyToTaxa.get(node);
@@ -82,7 +82,7 @@ public class VertexMapping<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeigh
             } else {
                 Set<FlipCutNodeSimpleWeight> realNodes = new HashSet<>(sourceGraph.characters.size());
                 for (FlipCutNodeSimpleWeight realNode : dummyToMerged.get(node)) {
-                    realNodes.addAll(sourceGraph.dummyToCharacters.get(realNode));
+                    realNodes.addAll(sourceGraph.getCharactersFromMapping(realNode));
                 }
                 mincut.addAll(realNodes);
             }

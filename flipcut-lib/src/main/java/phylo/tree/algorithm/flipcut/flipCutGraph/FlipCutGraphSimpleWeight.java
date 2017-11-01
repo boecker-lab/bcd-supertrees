@@ -322,11 +322,23 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     @Override
     public void removeCharacterFromDummyMapping(FlipCutNodeSimpleWeight character) {
         FlipCutNodeSimpleWeight dummy = characterToDummy.remove(character);
-        characterToDummy.remove(character.clone);
-        dummyToCharacters.get(dummy).remove(character);
-        dummyToCharacters.get(dummy.clone).remove(character.clone);
+        if (dummy != null) {
+            characterToDummy.remove(character.clone);
 
-        dummy.edgeWeight -= character.edgeWeight;
+            Set<FlipCutNodeSimpleWeight> chars = dummyToCharacters.get(dummy);
+            chars.remove(character);
+            if (chars.size() <= 1) {
+                dummyToCharacters.remove(dummy);
+                dummyToCharacters.remove(dummy.clone);
+                for (FlipCutNodeSimpleWeight aChar : chars) {
+                    characterToDummy.remove(aChar);
+                    characterToDummy.remove(aChar.clone);
+                }
+            } else {
+                dummyToCharacters.get(dummy.clone).remove(character.clone);
+                dummy.edgeWeight -= character.edgeWeight;
+            }
+        }
     }
     //########## methods for edge identical character mappin END ##########
 }

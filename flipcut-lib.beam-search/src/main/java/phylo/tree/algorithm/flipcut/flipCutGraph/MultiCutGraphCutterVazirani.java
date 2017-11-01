@@ -25,9 +25,11 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
     private VaziraniCut<FlipCutNodeSimpleWeight> currentNode = null;
     private VaziraniCut<FlipCutNodeSimpleWeight>[] initCuts;
 
-
     private ArrayList<FlipCutNodeSimpleWeight> taxa;
     private VertexMapping<FlipCutGraphMultiSimpleWeight> mapping = new VertexMapping<>();
+    private Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged;
+
+
     private LinkedHashSet<FlipCutNodeSimpleWeight> characters = null;
 
 
@@ -180,7 +182,7 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
 
         //j=0
         GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph = new GoldbergTarjanCutGraph<>();
-        createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, mapping);
+        dummyToMerged = createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, mapping);
 
         minCut = cutGraph.calculateMinSTCut(taxa.get(0), taxa.get(1));
         lightestCut = new VaziraniCut(minCut.getCutSet(), minCut.minCutValue, 1);
