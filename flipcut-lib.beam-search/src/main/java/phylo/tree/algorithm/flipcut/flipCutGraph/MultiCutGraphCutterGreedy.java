@@ -4,7 +4,6 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 import mincut.cutGraphAPI.AhujaOrlinCutGraph;
 import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.MaxFlowCutGraph;
-import mincut.cutGraphAPI.bipartition.BasicCut;
 import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.BlackList;
@@ -44,7 +43,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
 
     @Override
     protected Cut<FlipCutNodeSimpleWeight> calculateMinCut() {
-        BasicCut<FlipCutNodeSimpleWeight> mincut = null;
+        Cut<FlipCutNodeSimpleWeight> mincut = null;
         if (type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG || type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN) {
             if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
                 //create mapping
@@ -59,13 +58,16 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                         cutGraph = new GoldbergTarjanCutGraph<>();
 
                     //create cutgraph
-                    final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged = createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, mapping);
+                    List<FlipCutNodeSimpleWeight> cutGraphTaxa = new ArrayList<>();
+                    final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged = createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, mapping, cutGraphTaxa);
 
                     //calculate mincut
-                    STCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph);
+                    STCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph,cutGraphTaxa);
 
                     //undo mapping
                     mincut = mapping.undoMapping((Cut<FlipCutNodeSimpleWeight>) newMinCut, dummyToMerged);
+                } else {
+                    mincut = null;
                 }
             } else {
                 throw new IllegalArgumentException("SCAFFOLD MERGE has to be enabled");
@@ -73,7 +75,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
         } else {
             throw new IllegalArgumentException("Hypergraph max flow has to be enabled");
         }
-        return mincut;
+        return null;
     }
 
 
@@ -83,7 +85,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
         while (mincut == null) {
             blacklist = blacklists.poll();
             if (blacklist != null) {
-                mincut = calculateMinCut();
+                calculateMinCut();
             } else {
                 if (DEBUG) System.out.println("Stop  Cutting");
                 return null;
@@ -116,7 +118,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
     }
 
     @Override
-    public DefaultMultiCut cut(FlipCutGraphMultiSimpleWeight source) {
+    public Cut<FlipCutNodeSimpleWeight> cut(FlipCutGraphMultiSimpleWeight source) {
         return getNextCut();
     }
 

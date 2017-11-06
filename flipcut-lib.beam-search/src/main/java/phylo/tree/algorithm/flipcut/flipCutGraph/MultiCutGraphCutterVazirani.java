@@ -2,10 +2,10 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.bipartition.BasicCut;
+import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
-import phylo.tree.algorithm.flipcut.model.MultiCut;
 import phylo.tree.algorithm.flipcut.model.VaziraniCut;
 
 import java.util.*;
@@ -193,7 +193,7 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
 
         //j=0
         GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph = new GoldbergTarjanCutGraph<>();
-        dummyToMerged = createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, mapping);
+        dummyToMerged = createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, mapping, new ArrayList<>(taxa.size()));
 
         minCut = cutGraph.calculateMinSTCut(taxa.get(0), taxa.get(1));
         lightestCut = new VaziraniCut(minCut.getCutSet(), minCut.minCutValue, 1);
@@ -271,7 +271,7 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
     }
 
     @Override
-    public DefaultMultiCut cut(FlipCutGraphMultiSimpleWeight source) {
+    public Cut<FlipCutNodeSimpleWeight> cut(FlipCutGraphMultiSimpleWeight source) {
         return getNextCut();
 
     }

@@ -24,8 +24,6 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends
     protected final int threads;
 
     protected T source = null;
-    protected List<N> cutGraphTaxa = null;
-
 
     protected CutGraphCutter() {
         this.executorService = null;
