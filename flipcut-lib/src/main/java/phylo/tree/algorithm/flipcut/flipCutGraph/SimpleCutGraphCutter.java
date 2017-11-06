@@ -6,6 +6,7 @@ import mincut.cutGraphAPI.CutGraph;
 import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.MaxFlowCutGraph;
 import mincut.cutGraphAPI.bipartition.BasicCut;
+import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 
@@ -303,8 +304,9 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     }
 
     @Override
-    protected void calculateMinCut() {
+    protected Cut<FlipCutNodeSimpleWeight> calculateMinCut() {
         MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph;
+        BasicCut<FlipCutNodeSimpleWeight> mincut = null;
         if (type == CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG || type == CutGraphTypes.MAXFLOW_AHOJI_ORLIN) {
 
             if (type == CutGraphTypes.MAXFLOW_AHOJI_ORLIN)
@@ -355,6 +357,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         } else {
             System.err.println("ERROR: Unsupported cut-graph type!");
         }
+        return mincut;
     }
 
 

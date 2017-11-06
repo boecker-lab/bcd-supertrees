@@ -60,8 +60,14 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
     }
 
     @Override
-    protected void calculateMinCut() {
-        mincuts = new TreeSet<>();
+    protected Cut<FlipCutNodeSimpleWeight> calculateMinCut() {
+        if (mincuts != null)
+            mincuts = calculateMinCuts();
+        return mincuts.first();
+    }
+
+    protected TreeSet<Cut<FlipCutNodeSimpleWeight>> calculateMinCuts() {
+        TreeSet<Cut<FlipCutNodeSimpleWeight>> mincuts = new TreeSet<>();
 
 //        long time = System.currentTimeMillis();
         //search the optimal cat
@@ -80,12 +86,13 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
                 mincuts.addAll(cutGraph.calculateMinCuts(toGo));
             }
         }
+        return mincuts;
     }
 
     @Override
     public MultiCut getNextCut() {
         if (mincuts == null)
-            calculateMinCut();
+            mincuts = calculateMinCuts();
         if (mincuts.isEmpty()) {
             return null;
         }

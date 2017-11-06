@@ -4,6 +4,7 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 import mincut.cutGraphAPI.AhujaOrlinCutGraph;
 import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.MaxFlowCutGraph;
+import mincut.cutGraphAPI.bipartition.BasicCut;
 import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.BlackList;
@@ -42,7 +43,8 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
     }
 
     @Override
-    protected void calculateMinCut() {
+    protected Cut<FlipCutNodeSimpleWeight> calculateMinCut() {
+        BasicCut<FlipCutNodeSimpleWeight> mincut = null;
         if (type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG || type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN) {
             if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
                 //create mapping
@@ -64,8 +66,6 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
 
                     //undo mapping
                     mincut = mapping.undoMapping((Cut<FlipCutNodeSimpleWeight>) newMinCut, dummyToMerged);
-                } else {
-                    mincut = null;
                 }
             } else {
                 throw new IllegalArgumentException("SCAFFOLD MERGE has to be enabled");
@@ -73,16 +73,17 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
         } else {
             throw new IllegalArgumentException("Hypergraph max flow has to be enabled");
         }
+        return mincut;
     }
 
 
     public DefaultMultiCut getNextCut() {
         if (cuts >= source.getK()) return null;
-        mincut = null;
+        Cut<FlipCutNodeSimpleWeight> mincut = null;
         while (mincut == null) {
             blacklist = blacklists.poll();
             if (blacklist != null) {
-                calculateMinCut();
+                mincut = calculateMinCut();
             } else {
                 if (DEBUG) System.out.println("Stop  Cutting");
                 return null;

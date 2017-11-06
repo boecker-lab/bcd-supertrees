@@ -20,15 +20,12 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends
         return CostComputer.ACCURACY * INFINITY;
     }
 
-
     protected final ExecutorService executorService;
     protected final int threads;
 
     protected T source = null;
     protected List<N> cutGraphTaxa = null;
 
-    protected Cut<N> mincut;
-    protected List<T> split = null;
 
     protected CutGraphCutter() {
         this.executorService = null;
@@ -43,9 +40,9 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends
     public Cut<N> getMinCut(T source) {
         if (this.source != source) {
             this.source = source;
-            calculateMinCut();
+
         }
-        return mincut;
+        return  calculateMinCut();
     }
 
     /*public LinkedHashSet<N> getMinCutSet(T source) {
@@ -58,9 +55,7 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends
 
     public void clear() {
         source = null;
-        mincut = null;
-        split = null;
     }
 
-    protected abstract void calculateMinCut();
+    protected abstract Cut<N> calculateMinCut();
 }
