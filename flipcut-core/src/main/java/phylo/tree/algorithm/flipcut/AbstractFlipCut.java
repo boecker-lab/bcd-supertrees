@@ -5,8 +5,8 @@ import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
-import phylo.tree.algorithm.flipcut.flipCutGraph.CutterFactory;
-import phylo.tree.algorithm.flipcut.flipCutGraph.GraphCutter;
+import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
+import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 import phylo.tree.model.Tree;
 
 import java.util.List;

@@ -1,12 +1,12 @@
-package phylo.tree.algorithm.flipcut.flipCutGraph;
+package phylo.tree.algorithm.flipcut.cutter;
 
 import mincut.cutGraphAPI.bipartition.Cut;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
+import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
+import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -48,9 +48,9 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends
         return mincut;
     }
 
-    public LinkedHashSet<N> getMinCutSet(T source) {
+    /*public LinkedHashSet<N> getMinCutSet(T source) {
         return getMinCut(source).getCutSet();
-    }
+    }*/
 
     public long getMinCutValue(T source) {
         return getMinCut(source).minCutValue();

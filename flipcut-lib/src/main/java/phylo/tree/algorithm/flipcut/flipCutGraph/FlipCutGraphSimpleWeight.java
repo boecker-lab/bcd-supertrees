@@ -30,7 +30,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     }
 
     @Override
-    List<? extends FlipCutGraphSimpleWeight> split(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes) {
+    public List<? extends FlipCutGraphSimpleWeight> split(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes) {
         List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> graphData = splitToGraphData(sinkNodes);
         List<FlipCutGraphSimpleWeight> graphs = new LinkedList<FlipCutGraphSimpleWeight>();
         FlipCutGraphSimpleWeight g1 = new FlipCutGraphSimpleWeight(graphData.get(0).get(0), graphData.get(0).get(1), treeNode);

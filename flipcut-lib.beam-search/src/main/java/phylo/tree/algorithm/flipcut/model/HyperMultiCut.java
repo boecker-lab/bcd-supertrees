@@ -43,9 +43,10 @@ public class HyperMultiCut extends MultiCut<FlipCutNodeSimpleWeight, FlipCutGrap
 
             splittedGraphs = (List<FlipCutGraphMultiSimpleWeight>) sourceGraph.split(getCutSet());
             sourceCut = null;
+            sourceGraph.setCutSplitted(this);
+            sourceGraph.close();
         }
-        sourceGraph.setCutSplitted(this);
-        sourceGraph.close();
+
         return splittedGraphs;
     }
 

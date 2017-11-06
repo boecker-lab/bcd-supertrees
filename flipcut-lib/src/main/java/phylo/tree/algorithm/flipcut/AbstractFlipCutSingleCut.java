@@ -4,7 +4,7 @@ import core.algorithm.Algorithm;
 import core.utils.progressBar.CLIProgressBar;
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
-import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
+import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.MaxFlowCutterFactory;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
@@ -201,7 +201,8 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
 
                     // just one component, we have to cut
                     cutter.clear();
-                    List<T> componentGraphs = cutter.cut(initialGraph);
+
+                    List<T> componentGraphs = (List<T>) initialGraph.calculatePartition(cutter);
                     //mincut value in graph needed?
                     if (CALCULATE_SCORE) {
                         long v = cutter.getMinCutValue(initialGraph);
@@ -286,7 +287,7 @@ public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>,
                     if (cutter == null)
                         cutter = type.newInstance(currentGraph);
 
-                    List<T> componentGraphs = cutter.cut(currentGraph);
+                    List<T> componentGraphs = (List<T>) currentGraph.calculatePartition(cutter);
                     //mincut value in graph needed?
                     if (CALCULATE_SCORE) globalWeight += cutter.getMinCutValue(currentGraph);
 

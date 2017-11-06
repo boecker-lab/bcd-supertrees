@@ -4,6 +4,9 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;/**
  * 16.02.17.
  */
 
+import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
+import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
+
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */

@@ -1,5 +1,6 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
+import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 import phylo.tree.algorithm.flipcut.model.MultiCut;
 
 /**

@@ -7,6 +7,7 @@ import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.MaxFlowCutGraph;
 import mincut.cutGraphAPI.bipartition.BasicCut;
 import mincut.cutGraphAPI.bipartition.STCut;
+import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;

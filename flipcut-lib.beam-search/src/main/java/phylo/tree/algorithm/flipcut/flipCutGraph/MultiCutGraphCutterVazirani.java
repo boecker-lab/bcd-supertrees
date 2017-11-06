@@ -3,7 +3,9 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.bipartition.BasicCut;
 import mincut.cutGraphAPI.bipartition.STCut;
+import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
+import phylo.tree.algorithm.flipcut.model.MultiCut;
 import phylo.tree.algorithm.flipcut.model.VaziraniCut;
 
 import java.util.*;
@@ -269,8 +271,8 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
     }
 
     @Override
-    public List<FlipCutGraphMultiSimpleWeight> cut(FlipCutGraphMultiSimpleWeight source) {
-        return getNextCut().getSplittedGraphs();
+    public DefaultMultiCut cut(FlipCutGraphMultiSimpleWeight source) {
+        return getNextCut();
 
     }
 

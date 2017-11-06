@@ -9,13 +9,13 @@ import mincut.cutGraphAPI.KargerSteinCutGraph;
 import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.FlipCutCutFactory;
 import mincut.cutGraphAPI.bipartition.HyperCut;
+import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.ChracterScoreModifier;
 import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.KargerGraphCreator;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 import phylo.tree.algorithm.flipcut.model.HyperMultiCut;
 import phylo.tree.algorithm.flipcut.model.MultiCut;
 
-import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 
@@ -55,8 +55,8 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
 
 
     @Override
-    public List<FlipCutGraphMultiSimpleWeight> cut(FlipCutGraphMultiSimpleWeight source) {
-        return getNextCut().getSplittedGraphs();
+    public MultiCut cut(FlipCutGraphMultiSimpleWeight source) {
+        return getNextCut();
     }
 
     @Override

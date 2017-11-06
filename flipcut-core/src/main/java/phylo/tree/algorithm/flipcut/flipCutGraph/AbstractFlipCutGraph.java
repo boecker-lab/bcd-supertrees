@@ -4,7 +4,10 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
+import mincut.cutGraphAPI.bipartition.Cut;
+import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
+import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 import phylo.tree.model.TreeNode;
 
 import java.util.*;
@@ -15,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Date: 29.11.12
  * Time: 14:36
  */
-public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
+public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> implements SourceTreeGraph {
 
     /**
      * Turn on/off debug mode
@@ -154,6 +157,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
     /**
      * Remove semi universal characters
      */
+    @Override
     public void deleteSemiUniversals() {
         if (characterToDummy == null)
             createCharacterMapping();
@@ -198,7 +202,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
      * @param sinkNodes the set of nodes for
      * @return graphs list of two graphs created
      */
-    abstract List<? extends AbstractFlipCutGraph<T>> split(LinkedHashSet<T> sinkNodes);
+    public abstract List<? extends AbstractFlipCutGraph<T>> split(LinkedHashSet<T> sinkNodes);
 
 
     /**
@@ -236,8 +240,6 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
         v.color = GREY;
         component.add(v);
         for (T edge : v.edges) {
-            //for (int i = 0; i < v.edges.size(); i++) {
-            //T next = v.edges.get(i);
             if (edge != null && edge.color == WHITE) {
                 dfs(edge, component);
             }
@@ -377,4 +379,11 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> {
 
     public abstract void removeCharacterFromDummyMapping(T character);
     //########## methods for edge identical character mappin END ##########
+
+    @Override
+    public List<? extends AbstractFlipCutGraph<T>> calculatePartition(GraphCutter c) {
+        Cut<T> cut = c.cut(this);
+        LinkedHashSet<T> minCut = cut.getCutSet();
+        return split(minCut);
+    }
 }

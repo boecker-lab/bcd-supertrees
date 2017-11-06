@@ -38,6 +38,7 @@ allprojects {
 
 
         compile 'net.openhft:affinity:3.0'
+        compile group: 'org.roaringbitmap', name: 'RoaringBitmap', version: '0.6.51'
         compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
 
         testCompile 'de.unijena.bioinf.phylo:phyloTree-lib.utils:0.9.9'

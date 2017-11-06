@@ -115,8 +115,8 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
     }
 
     @Override
-    public List<FlipCutGraphMultiSimpleWeight> cut(FlipCutGraphMultiSimpleWeight source) {
-        return getNextCut().getSplittedGraphs();
+    public DefaultMultiCut cut(FlipCutGraphMultiSimpleWeight source) {
+        return getNextCut();
     }
 
 

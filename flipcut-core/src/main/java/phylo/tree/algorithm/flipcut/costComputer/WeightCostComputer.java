@@ -2,7 +2,7 @@ package phylo.tree.algorithm.flipcut.costComputer;
 
 
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
-import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
+import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 

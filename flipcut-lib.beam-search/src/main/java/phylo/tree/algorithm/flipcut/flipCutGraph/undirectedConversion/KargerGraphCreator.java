@@ -2,7 +2,7 @@ package phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion;
 
 import mincut.cutGraphAPI.KargerSteinCutGraph;
 import mincut.cutGraphAPI.bipartition.FlipCutCutFactory;
-import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphCutter;
+import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 
