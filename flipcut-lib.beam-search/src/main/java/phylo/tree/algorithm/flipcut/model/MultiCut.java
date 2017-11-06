@@ -4,18 +4,17 @@ package phylo.tree.algorithm.flipcut.model;/**
  * 15.02.17.
  */
 
-import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
-import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
+import mincut.cutGraphAPI.bipartition.Cut;
+import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
-import mincut.cutGraphAPI.bipartition.Cut;
 
 import java.util.List;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public abstract class MultiCut<V extends AbstractFlipCutNode<V>, G extends AbstractFlipCutGraph<V>> implements Cut<V> {
+public abstract class MultiCut<S, G extends SourceTreeGraph> implements Cut<S> {
     protected int hashCache;
     private boolean hash = false;
 
@@ -52,7 +51,7 @@ public abstract class MultiCut<V extends AbstractFlipCutNode<V>, G extends Abstr
         return hashCache;
     }
 
-    protected void calculateHash(){
+    protected void calculateHash() {
         hashCache = getCutSet() != null ? getCutSet().hashCode() : 0;
         hashCache = 31 * hashCache + (comp() != null ? comp().hashCode() : 0);
         hashCache = 31 * hashCache + (int) (minCutValue() ^ (minCutValue() >>> 32));

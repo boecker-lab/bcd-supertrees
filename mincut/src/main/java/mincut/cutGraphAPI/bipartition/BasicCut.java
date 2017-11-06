@@ -2,7 +2,7 @@ package mincut.cutGraphAPI.bipartition;
 
 import java.util.LinkedHashSet;
 
-public class BasicCut<V> implements Cut<V> {
+public class BasicCut<V> implements Cut<LinkedHashSet<V>> {
     protected final LinkedHashSet<V> cutSet;
     protected final long minCutValue;
 

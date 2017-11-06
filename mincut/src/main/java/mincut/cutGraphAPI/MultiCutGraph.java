@@ -3,6 +3,7 @@ package mincut.cutGraphAPI;
 
 import mincut.cutGraphAPI.bipartition.Cut;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ public interface MultiCutGraph<V> extends CutGraph<V> {
      *
      * @return mincuts: all cut calculate by this algorithm
      */
-    List<? extends Cut<V>> calculateMinCuts();
+    List<? extends Cut<LinkedHashSet<V>>> calculateMinCuts();
 
-    List<? extends Cut<V>> calculateMinCuts(int numberOfCuts);
+    List<? extends Cut<LinkedHashSet<V>>> calculateMinCuts(int numberOfCuts);
 }

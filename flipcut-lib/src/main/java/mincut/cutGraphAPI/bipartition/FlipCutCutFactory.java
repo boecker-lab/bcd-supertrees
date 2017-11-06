@@ -12,7 +12,7 @@ import java.util.LinkedHashSet;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public class FlipCutCutFactory implements CutFactory<FlipCutNodeSimpleWeight, FlipCutHyperCut<FlipCutNodeSimpleWeight>> {
+public class FlipCutCutFactory implements CutFactory<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutHyperCut<FlipCutNodeSimpleWeight>> {
 
     @Override
     public FlipCutHyperCut<FlipCutNodeSimpleWeight> newCutInstance(LinkedHashSet<FlipCutNodeSimpleWeight> cutTaxaSource, LinkedHashSet<FlipCutNodeSimpleWeight> cutTaxaSink, LinkedHashSet<FlipCutNodeSimpleWeight> cutEdges, long mincutValue) {

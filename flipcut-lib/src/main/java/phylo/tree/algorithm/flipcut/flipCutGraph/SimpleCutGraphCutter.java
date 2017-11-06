@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutorService;
  * Date: 14.02.13
  * Time: 11:12
  */
-public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> extends CutGraphCutter<FlipCutNodeSimpleWeight, T> {
+public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> extends CutGraphCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, T> {
 
     protected static final boolean DEBUG = false;
 
@@ -301,9 +301,9 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     }
 
     @Override
-    protected Cut<FlipCutNodeSimpleWeight> calculateMinCut() {
+    protected Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> calculateMinCut() {
         MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph;
-        Cut<FlipCutNodeSimpleWeight> mincut = null;
+        Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> mincut = null;
         if (type == CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG || type == CutGraphTypes.MAXFLOW_AHOJI_ORLIN) {
 
             if (type == CutGraphTypes.MAXFLOW_AHOJI_ORLIN)

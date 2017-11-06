@@ -9,6 +9,7 @@ import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 import phylo.tree.model.Tree;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
@@ -19,7 +20,7 @@ import java.util.logging.Logger;
  *         Date: 29.11.12
  *         Time: 14:10
  */
-public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends GraphCutter<N, T>, F extends CutterFactory<C, N, T>> extends SupertreeAlgorithm {
+public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends GraphCutter<LinkedHashSet<N>, T>, F extends CutterFactory<C, LinkedHashSet<N>, T>> extends SupertreeAlgorithm {
     public static final boolean DEBUG = false;
     public static final int CORES_AVAILABLE = Runtime.getRuntime().availableProcessors();
     /**

@@ -3,6 +3,7 @@ package mincut.cutGraphAPI;
 
 import mincut.cutGraphAPI.bipartition.Cut;
 
+import java.util.LinkedHashSet;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -16,7 +17,7 @@ public interface CutGraph<V> {
      *
      * @return mincut all connected components of the input graph
      */
-    Cut<V> calculateMinCut() throws ExecutionException, InterruptedException;
+    Cut<LinkedHashSet<V>> calculateMinCut() throws ExecutionException, InterruptedException;
 
     /**
      * Adds the given node to the graph. Does nothing if the graph already contains the node.

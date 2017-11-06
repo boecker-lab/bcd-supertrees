@@ -9,10 +9,7 @@ import phylo.tree.algorithm.flipcut.flipCutGraph.MaxFlowCutterFactory;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
 
@@ -21,7 +18,7 @@ import java.util.logging.Logger;
  * Date: 29.11.12
  * Time: 14:42
  */
-public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends CutGraphCutter<N, T>> extends AbstractFlipCut<N, T, C, MaxFlowCutterFactory<C, N, T>> {
+public abstract class AbstractFlipCutSingleCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends CutGraphCutter<LinkedHashSet<N>, T>> extends AbstractFlipCut<N, T, C, MaxFlowCutterFactory<C, N, T>> {
     private static final boolean CALCULATE_SCORE = true;
     private long globalWeight;
 

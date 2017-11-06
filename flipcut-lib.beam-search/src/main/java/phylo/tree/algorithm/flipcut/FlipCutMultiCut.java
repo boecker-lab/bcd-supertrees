@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  * Date: 17.01.13
  * Time: 13:56
  */
-public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight, MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>> {
+public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight, MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>> {
     protected int numberOfCuts = 1;
     protected List<Tree> result;
 
@@ -34,15 +34,15 @@ public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, Fl
         return getClass().getSimpleName();
     }
 
-    public FlipCutMultiCut(MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> type) {
+    public FlipCutMultiCut(MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> type) {
         super(type);
     }
 
-    public FlipCutMultiCut(Logger log, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> type) {
+    public FlipCutMultiCut(Logger log, MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> type) {
         super(log, type);
     }
 
-    public FlipCutMultiCut(Logger log, ExecutorService executorService1, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> type) {
+    public FlipCutMultiCut(Logger log, ExecutorService executorService1, MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> type) {
         super(log, executorService1, type);
     }
 

@@ -18,7 +18,7 @@ import java.util.concurrent.ExecutorService;
  * Date: 19.04.13
  * Time: 12:02
  */
-public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
 
     protected final Queue<BlackList> blacklists;
     protected BlackList blacklist = null;
@@ -42,8 +42,8 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
     }
 
     @Override
-    protected Cut<FlipCutNodeSimpleWeight> calculateMinCut() {
-        Cut<FlipCutNodeSimpleWeight> mincut = null;
+    protected Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> calculateMinCut() {
+        Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> mincut = null;
         if (type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG || type == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_AHOJI_ORLIN) {
             if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE) {
                 //create mapping
@@ -65,7 +65,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
                     STCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph,cutGraphTaxa);
 
                     //undo mapping
-                    mincut = mapping.undoMapping((Cut<FlipCutNodeSimpleWeight>) newMinCut, dummyToMerged);
+                    mincut = mapping.undoMapping((Cut<LinkedHashSet<FlipCutNodeSimpleWeight>>) newMinCut, dummyToMerged);
                 } else {
                     mincut = null;
                 }
@@ -81,7 +81,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
 
     public DefaultMultiCut getNextCut() {
         if (cuts >= source.getK()) return null;
-        Cut<FlipCutNodeSimpleWeight> mincut = null;
+        Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> mincut = null;
         while (mincut == null) {
             blacklist = blacklists.poll();
             if (blacklist != null) {
@@ -118,12 +118,12 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
     }
 
     @Override
-    public Cut<FlipCutNodeSimpleWeight> cut(FlipCutGraphMultiSimpleWeight source) {
+    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(FlipCutGraphMultiSimpleWeight source) {
         return getNextCut();
     }
 
 
-    static class Factory implements MultiCutterFactory<MultiCutGraphCutterGreedy, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutterGreedy, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+    static class Factory implements MultiCutterFactory<MultiCutGraphCutterGreedy, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutterGreedy, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
         private final CutGraphTypes type;
         private final BlackList blPrototype;
 

@@ -7,7 +7,7 @@ import java.util.Set;
  * Date: 30.11.12
  * Time: 11:29
  */
-public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
+public abstract class AbstractFlipCutNode<N extends AbstractFlipCutNode<N>> {
     protected final static String DUMMY_INDETIFIER = "Dummy";
     /**
      * The nodes name
@@ -17,7 +17,7 @@ public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
     /**
      * The list of outgoing edges 1(1) entries
      */
-    public final Set<T> edges;
+    public final Set<N> edges;
 
     /**
      * DFS marker
@@ -26,9 +26,9 @@ public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
     /**
      * Clone node used for min cut graph
      */
-    protected T clone;
+    protected N clone;
 
-    protected AbstractFlipCutNode(String name, Set<T> edges) {
+    protected AbstractFlipCutNode(String name, Set<N> edges) {
         this.name = name;
         this.edges = edges;
     }
@@ -50,27 +50,27 @@ public abstract class AbstractFlipCutNode<T extends AbstractFlipCutNode<T>> {
         }
     }
 
-    public T getClone() {
+    public N getClone() {
         return clone;
     }
 
-    public void addEdgeTo(T node) {
+    public void addEdgeTo(N node) {
         edges.add(node);
     }
 
     //this is to find redundant characters in a graph and should be high performing
-    public abstract boolean characterEquals(T c2);
+    public abstract boolean characterEquals(N c2);
 
 
     public abstract boolean isSemiUniversal();
 
-    public abstract long getEdgeWeight(T node);
+    public abstract long getEdgeWeight(N node);
 
-    protected abstract T createClone();
+    protected abstract N createClone();
 
-    protected abstract T createDummy();
+    protected abstract N createDummy();
 
-    protected abstract T copy();
+    protected abstract N copy();
 
     public abstract boolean isTaxon();
 

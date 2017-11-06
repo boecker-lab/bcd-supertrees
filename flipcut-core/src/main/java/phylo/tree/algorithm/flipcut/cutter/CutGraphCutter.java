@@ -1,12 +1,9 @@
 package phylo.tree.algorithm.flipcut.cutter;
 
 import mincut.cutGraphAPI.bipartition.Cut;
+import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
-import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
-import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
 
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -14,9 +11,10 @@ import java.util.concurrent.ExecutorService;
  * Date: 15.01.13
  * Time: 14:15
  */
-public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>> implements GraphCutter<N, T> {
+public abstract class CutGraphCutter<S, T extends SourceTreeGraph> implements GraphCutter<S, T> {
     private static final long INFINITY = 1000000;
-    public static long getInfinity(){
+
+    public static long getInfinity() {
         return CostComputer.ACCURACY * INFINITY;
     }
 
@@ -35,12 +33,12 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends
         this.threads = threads;
     }
 
-    public Cut<N> getMinCut(T source) {
+    public Cut<S> getMinCut(T source) {
         if (this.source != source) {
             this.source = source;
 
         }
-        return  calculateMinCut();
+        return calculateMinCut();
     }
 
     /*public LinkedHashSet<N> getMinCutSet(T source) {
@@ -55,5 +53,5 @@ public abstract class CutGraphCutter<N extends AbstractFlipCutNode<N>, T extends
         source = null;
     }
 
-    protected abstract Cut<N> calculateMinCut();
+    protected abstract Cut<S> calculateMinCut();
 }

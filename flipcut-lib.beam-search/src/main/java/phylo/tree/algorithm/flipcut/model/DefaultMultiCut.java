@@ -13,7 +13,7 @@ import java.util.List;
  * Date: 18.01.13
  * Time: 18:10
  */
-public class DefaultMultiCut extends MultiCut<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+public class DefaultMultiCut extends MultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
     protected LinkedHashSet<FlipCutNodeSimpleWeight> cutSet;
     protected final long minCutValue;
     private List<List<FlipCutNodeSimpleWeight>> comp;
@@ -26,7 +26,7 @@ public class DefaultMultiCut extends MultiCut<FlipCutNodeSimpleWeight, FlipCutGr
         calculateHash();
     }
 
-    public DefaultMultiCut(Cut<FlipCutNodeSimpleWeight> cut, FlipCutGraphMultiSimpleWeight sourceGraph) {
+    public DefaultMultiCut(Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut, FlipCutGraphMultiSimpleWeight sourceGraph) {
         this(cut.getCutSet(), cut.minCutValue(), null, sourceGraph);
     }
 

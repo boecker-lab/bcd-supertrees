@@ -3,7 +3,6 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 import mincut.cutGraphAPI.bipartition.Cut;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -23,7 +22,7 @@ public class SingleCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphSimpl
     }
 
     @Override
-    public Cut<FlipCutNodeSimpleWeight> cut(FlipCutGraphSimpleWeight source){
+    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(FlipCutGraphSimpleWeight source){
         return getMinCut(source);
     }
 

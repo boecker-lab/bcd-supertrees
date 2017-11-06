@@ -16,6 +16,7 @@ import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 import phylo.tree.algorithm.flipcut.model.HyperMultiCut;
 import phylo.tree.algorithm.flipcut.model.MultiCut;
 
+import java.util.LinkedHashSet;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 
@@ -23,12 +24,12 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> implements MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
     private final boolean singleSampling;
     private final ChracterScoreModifier modder;
     private final KargerGraphCreator graphCreator;
 
-    private TreeSet<Cut<FlipCutNodeSimpleWeight>> mincuts = null;
+    private TreeSet<Cut<LinkedHashSet<FlipCutNodeSimpleWeight>>> mincuts = null;
 
     public MultiCutGraphCutterUndirectedTranfomation(FlipCutGraphMultiSimpleWeight graphToCut, final ChracterScoreModifier modder, KargerGraphCreator graphCreator, boolean singleSampling) {
         super();
@@ -60,14 +61,13 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
     }
 
     @Override
-    protected Cut<FlipCutNodeSimpleWeight> calculateMinCut() {
+    protected Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> calculateMinCut() {
         if (mincuts != null)
             mincuts = calculateMinCuts();
         return mincuts.first();
     }
-
-    protected TreeSet<Cut<FlipCutNodeSimpleWeight>> calculateMinCuts() {
-        TreeSet<Cut<FlipCutNodeSimpleWeight>> mincuts = new TreeSet<>();
+    protected TreeSet<Cut<LinkedHashSet<FlipCutNodeSimpleWeight>>> calculateMinCuts() {
+        TreeSet<Cut<LinkedHashSet<FlipCutNodeSimpleWeight>>> mincuts = new TreeSet<>();
 
 //        long time = System.currentTimeMillis();
         //search the optimal cat
@@ -97,7 +97,7 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
             return null;
         }
 
-        Cut<FlipCutNodeSimpleWeight> c = mincuts.pollFirst();
+        Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> c = mincuts.pollFirst();
 
         if (c instanceof DefaultMultiCut)
             return (MultiCut) c;
@@ -107,7 +107,7 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Fl
     }
 
 
-    static class Factory implements MultiCutterFactory<MultiCutGraphCutterUndirectedTranfomation, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+    static class Factory implements MultiCutterFactory<MultiCutGraphCutterUndirectedTranfomation, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
         private final ChracterScoreModifier modder;
         private final KargerGraphCreator graphCreator;
         private final boolean singleSampling;

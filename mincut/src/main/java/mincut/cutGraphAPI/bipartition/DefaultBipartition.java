@@ -15,7 +15,7 @@ public class DefaultBipartition<V> extends AbstractBipartition<V> {
         super(minCutValue, sSet, tSet);
     }
 
-    public static class Factory<V> implements CutFactory<V,DefaultBipartition<V>> {
+    public static class Factory<V> implements CutFactory<LinkedHashSet<V>,DefaultBipartition<V>> {
         @Override
         public DefaultBipartition<V> newCutInstance(LinkedHashSet<V> cutTaxaSource, LinkedHashSet<V> cutTaxaSink, LinkedHashSet<V> cutEdges, long mincutValue) {
             return new DefaultBipartition<V>(mincutValue, cutTaxaSource, cutTaxaSink);

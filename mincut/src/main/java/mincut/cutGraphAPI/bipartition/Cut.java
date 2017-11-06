@@ -4,17 +4,17 @@ package mincut.cutGraphAPI.bipartition;/**
  * 15.02.17.
  */
 
-import java.util.LinkedHashSet;
-
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public interface Cut<V> extends Comparable<Cut<V>> {
+public interface Cut<S> extends Comparable<Cut<S>> {
 
 
     long minCutValue();
-    LinkedHashSet<V> getCutSet();
-    default int compareTo(Cut<V> o) {
+
+    S getCutSet();
+
+    default int compareTo(Cut<S> o) {
         return Long.compare(minCutValue(), o.minCutValue());
     }
 }

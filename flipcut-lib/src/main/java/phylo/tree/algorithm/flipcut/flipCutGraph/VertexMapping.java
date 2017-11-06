@@ -56,7 +56,7 @@ public class VertexMapping<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeigh
         return new STCut<>(nuSset, nuTset, newMinCut.minCutValue());
     }
 
-    protected BasicCut<FlipCutNodeSimpleWeight> undoMapping(final Cut<FlipCutNodeSimpleWeight> newMinCut, final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged) {
+    protected BasicCut<FlipCutNodeSimpleWeight> undoMapping(final Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> newMinCut, final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged) {
         final LinkedHashSet<FlipCutNodeSimpleWeight> cutSet = undoMapping(newMinCut.getCutSet(), dummyToMerged);
         return new BasicCut<>(cutSet, newMinCut.minCutValue());
     }

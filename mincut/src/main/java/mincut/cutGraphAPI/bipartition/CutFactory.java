@@ -10,6 +10,6 @@ import java.util.LinkedHashSet;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public interface CutFactory<V,C extends Cut<V>> {
-    C newCutInstance(LinkedHashSet<V> cutTaxaSource, LinkedHashSet<V> cutTaxaSink, LinkedHashSet<V> cutEdges, long mincutValue);
+public interface CutFactory<S,C extends Cut<S>> {
+    C newCutInstance(S cutTaxaSource, S cutTaxaSink, S cutEdges, long mincutValue);
 }

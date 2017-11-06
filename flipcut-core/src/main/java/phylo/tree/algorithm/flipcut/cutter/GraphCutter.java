@@ -5,13 +5,13 @@ package phylo.tree.algorithm.flipcut.cutter;/**
  */
 
 import mincut.cutGraphAPI.bipartition.Cut;
-import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
-import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
+import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public interface GraphCutter<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>> {
+public interface GraphCutter<S, T extends SourceTreeGraph> {
     void clear();
-    Cut<N> cut(T source);
+
+    Cut<S> cut(T source);
 }

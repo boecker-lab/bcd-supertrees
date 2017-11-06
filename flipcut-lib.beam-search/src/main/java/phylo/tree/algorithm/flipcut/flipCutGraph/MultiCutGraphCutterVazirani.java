@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService;
  * VAZIRANI ALGORITHM
  */
 
-public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
 
     private PriorityQueue<VaziraniCut> queueAscHEAP = null;
     private VaziraniCut<FlipCutNodeSimpleWeight> currentNode = null;
@@ -271,12 +271,12 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
     }
 
     @Override
-    public Cut<FlipCutNodeSimpleWeight> cut(FlipCutGraphMultiSimpleWeight source) {
+    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(FlipCutGraphMultiSimpleWeight source) {
         return getNextCut();
 
     }
 
-    static class Factory implements MultiCutterFactory<MultiCutGraphCutterVazirani, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutterVazirani, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+    static class Factory implements MultiCutterFactory<MultiCutGraphCutterVazirani, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutterVazirani, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
         private final CutGraphTypes type;
 
         Factory(CutGraphTypes type) {

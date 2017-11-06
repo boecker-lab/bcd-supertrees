@@ -20,11 +20,11 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
     private int nextCutIndexToCalculate;
     private Set<MultiCut> splittedCuts; //todo do we rellay need this cleanup to support GC?
     private MultiCut[] cuts;
-    private MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutter = null;
-    private MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory;
+    private MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> cutter = null;
+    private MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> cutterFactory;
 
 
-    public FlipCutGraphMultiSimpleWeight(CostComputer costs, int k, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory) {
+    public FlipCutGraphMultiSimpleWeight(CostComputer costs, int k, MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> cutterFactory) {
         super(costs, 0); //todo dummy bootstrapthreshold --> implement it
         this.cutterFactory = cutterFactory;
         maxCutNumber = k;
@@ -33,7 +33,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         nextCutIndexToCalculate = 0;
     }
 
-    protected FlipCutGraphMultiSimpleWeight(LinkedHashSet<FlipCutNodeSimpleWeight> characters, LinkedHashSet<FlipCutNodeSimpleWeight> taxa, TreeNode parentNode, int k, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory) {
+    protected FlipCutGraphMultiSimpleWeight(LinkedHashSet<FlipCutNodeSimpleWeight> characters, LinkedHashSet<FlipCutNodeSimpleWeight> taxa, TreeNode parentNode, int k, MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> cutterFactory) {
         super(characters, taxa, parentNode);
         this.cutterFactory = cutterFactory;
         maxCutNumber = k;
@@ -42,7 +42,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         nextCutIndexToCalculate = 0;
     }
 
-    public FlipCutGraphMultiSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, int k, MultiCutterFactory<MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> cutterFactory, boolean edgeDeletion) {
+    public FlipCutGraphMultiSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, int k, MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> cutterFactory, boolean edgeDeletion) {
         super(nodes, parentNode, edgeDeletion);
         this.cutterFactory = cutterFactory;
         maxCutNumber = k;

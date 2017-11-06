@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Date: 29.11.12
  * Time: 14:36
  */
-public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> implements SourceTreeGraph {
+public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> implements SourceTreeGraph {
 
     /**
      * Turn on/off debug mode
@@ -31,25 +31,25 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
     /**
      * Mapping for guide tree based taxa merging
      */
-    protected BiMap<T, TreeNode> scaffoldCharacterMapping = null;
+    protected BiMap<N, TreeNode> scaffoldCharacterMapping = null;
     /**
      * Active partitions for guide tree based taxa merging
      */
-    protected Set<T> activePartitions = new HashSet<>();
+    protected Set<N> activePartitions = new HashSet<>();
 
     /**
      * Mapping for edge  based character merging (Global character Map)
      */
-    protected Map<T, T> characterToDummy = null;
-    protected Map<T, Set<T>> dummyToCharacters = null;
+    protected Map<N, N> characterToDummy = null;
+    protected Map<N, Set<N>> dummyToCharacters = null;
     /**
      * The character vertex set
      */
-    public LinkedHashSet<T> characters;
+    public LinkedHashSet<N> characters;
     /**
      * The taxa vertex set
      */
-    public LinkedHashSet<T> taxa;
+    public LinkedHashSet<N> taxa;
     /**
      * Marker for DFS
      */
@@ -75,7 +75,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
     protected AbstractFlipCutGraph(CostComputer costs, int bootstrapThreshold) {
         System.out.println("Creating graph representation of input trees...");
 
-        List<LinkedHashSet<T>> data = createGraphData(costs, bootstrapThreshold);
+        List<LinkedHashSet<N>> data = createGraphData(costs, bootstrapThreshold);
         this.characters = data.get(0);
         this.taxa = data.get(1);
         parentNode = null;
@@ -93,7 +93,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
      * @param characters the character
      * @param taxa       the taxa
      */
-    protected AbstractFlipCutGraph(LinkedHashSet<T> characters, LinkedHashSet<T> taxa, TreeNode parentNode) {
+    protected AbstractFlipCutGraph(LinkedHashSet<N> characters, LinkedHashSet<N> taxa, TreeNode parentNode) {
         this.characters = characters;
         this.taxa = taxa;
         this.parentNode = parentNode;
@@ -107,10 +107,10 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
      *
      * @param nodes the nodes
      */
-    public AbstractFlipCutGraph(List<T> nodes, TreeNode parentNode, final boolean edgeDeletion) {
+    public AbstractFlipCutGraph(List<N> nodes, TreeNode parentNode, final boolean edgeDeletion) {
         characters = new LinkedHashSet<>(nodes.size());
         taxa = new LinkedHashSet<>(nodes.size());
-        for (T node : nodes) {
+        for (N node : nodes) {
             if (node.isTaxon()) {
                 taxa.add(node);
             } else {
@@ -126,13 +126,13 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
         treeNode = new TreeNode();
     }
 
-    protected abstract List<LinkedHashSet<T>> createGraphData(CostComputer costs, int bootstrapThreshold);
+    protected abstract List<LinkedHashSet<N>> createGraphData(CostComputer costs, int bootstrapThreshold);
 
-    protected void removeAdjacentEdges(T characterToRemove) {
+    protected void removeAdjacentEdges(N characterToRemove) {
         // remove edges to taxa
         if (characterToRemove == null || characterToRemove.edges == null)
             System.out.println("fail");
-        for (T taxon : characterToRemove.edges) {
+        for (N taxon : characterToRemove.edges) {
             if (!taxon.edges.remove(characterToRemove))
                 System.out.println("WTF");
         }
@@ -145,9 +145,9 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
         }
     }
 
-    protected void removeCharacters(Collection<T> toRemove, Collection<T> characters) {
+    protected void removeCharacters(Collection<N> toRemove, Collection<N> characters) {
         //remove chracters and edges to them from graph
-        for (T remove : toRemove) {
+        for (N remove : toRemove) {
             if (characters.remove(remove)) {
                 removeAdjacentEdges(remove);
             }
@@ -161,9 +161,9 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
     public void deleteSemiUniversals() {
         if (characterToDummy == null)
             createCharacterMapping();
-        Iterator<T> it = characters.iterator();
+        Iterator<N> it = characters.iterator();
         while (it.hasNext()) {
-            T character = it.next();
+            N character = it.next();
             if (character.isSemiUniversal()) {
                 //remove deleted partitions an insert child partitions
 
@@ -172,10 +172,10 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
                 if (SCAFF_TAXA_MERGE && !activePartitions.isEmpty()) {
                     TreeNode node = scaffoldCharacterMapping.get(character);
                     if (node != null) {
-                        Set<T> toInsert = new HashSet(node.childCount());
+                        Set<N> toInsert = new HashSet(node.childCount());
                         for (TreeNode child : node.getChildren()) {
                             if (child.isInnerNode()) {
-                                T n = scaffoldCharacterMapping.inverse().get(child);
+                                N n = scaffoldCharacterMapping.inverse().get(child);
                                 toInsert.add(n);
                             }
                         }
@@ -202,7 +202,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
      * @param sinkNodes the set of nodes for
      * @return graphs list of two graphs created
      */
-    public abstract List<? extends AbstractFlipCutGraph<T>> split(LinkedHashSet<T> sinkNodes);
+    public abstract List<? extends AbstractFlipCutGraph<N>> split(LinkedHashSet<N> sinkNodes);
 
 
     /**
@@ -210,21 +210,21 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
      *
      * @return components list of components
      */
-    public List<List<T>> getComponents() {
-        List<List<T>> components = new ArrayList<List<T>>(2);
-        List<T> currentComponent;
-        for (T node : characters) {
+    public List<List<N>> getComponents() {
+        List<List<N>> components = new ArrayList<List<N>>(2);
+        List<N> currentComponent;
+        for (N node : characters) {
             node.color = WHITE;
         }
-        for (T node : taxa) {
+        for (N node : taxa) {
             node.color = WHITE;
         }
 
-        for (T t : taxa) {
-            if (t.color == WHITE) {
-                currentComponent = new ArrayList<T>();
+        for (N n : taxa) {
+            if (n.color == WHITE) {
+                currentComponent = new ArrayList<N>();
                 components.add(currentComponent);
-                dfs(t, currentComponent);
+                dfs(n, currentComponent);
             }
         }
         return components;
@@ -236,17 +236,17 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
      * @param v         the current node v
      * @param component the current component
      */
-    protected void dfs(T v, List<T> component) {
+    protected void dfs(N v, List<N> component) {
         v.color = GREY;
         component.add(v);
-        for (T edge : v.edges) {
+        for (N edge : v.edges) {
             if (edge != null && edge.color == WHITE) {
                 dfs(edge, component);
             }
         }
     }
 
-    protected abstract Map<T, T> copyNodes();
+    protected abstract Map<N, N> copyNodes();
 
 
     public long getMinCutValue() {
@@ -259,11 +259,11 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
         if (edgeDeletion) {
             boolean deleted = false;
             // check edges from characters
-            for (T character : characters) {
+            for (N character : characters) {
                 deleted = deleted || character.edges.retainAll(taxa);
             }
             // check reverse edges from taxa
-            for (T taxon : taxa) {
+            for (N taxon : taxa) {
                 deleted = deleted || taxon.edges.retainAll(characters);
             }
             return deleted;
@@ -273,7 +273,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
 
 
     //########## methods for guide tree mapping ##########
-    protected void addTreeNodeCharGuideTreeMapping(TreeNode character, T c) {
+    protected void addTreeNodeCharGuideTreeMapping(TreeNode character, N c) {
         scaffoldCharacterMapping.put(c, character);
     }
 
@@ -281,18 +281,18 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
         scaffoldCharacterMapping.inverse().remove(character);
     }
 
-    protected void removeTreeNodeCharGuideTreeMapping(T c) {
+    protected void removeTreeNodeCharGuideTreeMapping(N c) {
         scaffoldCharacterMapping.remove(c);
     }
 
-    public void insertScaffPartData(AbstractFlipCutGraph<T> source, final Map<T, T> oldToNew) {
+    public void insertScaffPartData(AbstractFlipCutGraph<N> source, final Map<N, N> oldToNew) {
         activePartitions = new HashSet<>();
         if (!source.activePartitions.isEmpty()) {
             // multicutted version
             if (oldToNew != null) {
                 scaffoldCharacterMapping = Maps.synchronizedBiMap(HashBiMap.create());
-                for (Map.Entry<T, TreeNode> entry : source.scaffoldCharacterMapping.entrySet()) {
-                    T sourceNode;
+                for (Map.Entry<N, TreeNode> entry : source.scaffoldCharacterMapping.entrySet()) {
+                    N sourceNode;
                     if (oldToNew != null) {
                         sourceNode = oldToNew.get(entry.getKey());
                     } else {
@@ -303,8 +303,8 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
                     }
                 }
 
-                for (T activePartition : source.activePartitions) {
-                    T sourceNode;
+                for (N activePartition : source.activePartitions) {
+                    N sourceNode;
                     if (oldToNew != null) {
                         sourceNode = oldToNew.get(activePartition);
                     } else {
@@ -316,7 +316,7 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
                 // single cutted version
             } else {
                 scaffoldCharacterMapping = source.scaffoldCharacterMapping;
-                for (T sourceNode : source.activePartitions) {
+                for (N sourceNode : source.activePartitions) {
                     if (characters.contains(sourceNode))
                         activePartitions.add(sourceNode);
                 }
@@ -330,11 +330,11 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
 //        System.out.println("Creating character mapping for Graph: " + this.toString());
         characterToDummy = new ConcurrentHashMap<>(characters.size());
         dummyToCharacters = new ConcurrentHashMap<>(characters.size());
-        Map<Set<T>, T> edgeSetToDummy = new HashMap<>();
+        Map<Set<N>, N> edgeSetToDummy = new HashMap<>();
 
-        for (T character : characters) {
+        for (N character : characters) {
             //global character merge for chars with same edgeset
-            T dummy = edgeSetToDummy.get(character.edges);
+            N dummy = edgeSetToDummy.get(character.edges);
             if (dummy == null) {
                 dummy = character.createDummy();
                 edgeSetToDummy.put(dummy.edges, dummy);
@@ -345,9 +345,9 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
         }
 
         // remove single mappings
-        Iterator<Set<T>> it = dummyToCharacters.values().iterator();
+        Iterator<Set<N>> it = dummyToCharacters.values().iterator();
         while (it.hasNext()) {
-            Set<T> chracters = it.next();
+            Set<N> chracters = it.next();
             if (chracters.size() <= 1) {
                 it.remove();
                 characterToDummy.remove(chracters.iterator().next());
@@ -356,34 +356,34 @@ public abstract class AbstractFlipCutGraph<T extends AbstractFlipCutNode<T>> imp
 //        System.out.println(characterToDummy.size() / 2 + " can be merged to " + dummyToCharacters.size() / 2 + " during mincut phases");
     }
 
-    public void insertCharacterMapping(AbstractFlipCutGraph<T> source) {
+    public void insertCharacterMapping(AbstractFlipCutGraph<N> source) {
         characterToDummy = source.characterToDummy;
         dummyToCharacters = source.dummyToCharacters;
     }
 
-    public T getDummyFromMapping(T character) {
-        T dummy = characterToDummy.get(character);
+    public N getDummyFromMapping(N character) {
+        N dummy = characterToDummy.get(character);
         if (dummy == null)
             return character;
         return dummy;
     }
 
-    public Set<T> getCharactersFromMapping(T dummy) {
-        Set<T> chars = dummyToCharacters.get(dummy);
+    public Set<N> getCharactersFromMapping(N dummy) {
+        Set<N> chars = dummyToCharacters.get(dummy);
         if (chars == null || chars.isEmpty())
             return Collections.singleton(dummy);
         return chars;
     }
 
-    public abstract void addCharacterToDummyMapping(T character, T dummy);
+    public abstract void addCharacterToDummyMapping(N character, N dummy);
 
-    public abstract void removeCharacterFromDummyMapping(T character);
+    public abstract void removeCharacterFromDummyMapping(N character);
     //########## methods for edge identical character mappin END ##########
 
     @Override
-    public List<? extends AbstractFlipCutGraph<T>> calculatePartition(GraphCutter c) {
-        Cut<T> cut = c.cut(this);
-        LinkedHashSet<T> minCut = cut.getCutSet();
+    public List<? extends AbstractFlipCutGraph<N>> calculatePartition(GraphCutter c) {
+        Cut<LinkedHashSet<N>> cut = c.cut(this);
+        LinkedHashSet<N> minCut = cut.getCutSet();
         return split(minCut);
     }
 }

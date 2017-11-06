@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService;
  */
 //TODO THE VAZIRANI should be an own Cutgraph not a cut graph cutter --> it should extend directed cut graph an use some max flow implemetation
 
-public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiSimpleWeight> implements MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
 
     private PriorityQueue<VaziraniCut> queueAscHEAP = null;
     private VaziraniCut<FlipCutNodeSimpleWeight> currentNode = null;
@@ -299,7 +299,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
 
     }
 
-    static class Factory implements MultiCutterFactory<MultiCutGraphCutter, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutter, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+    static class Factory implements MultiCutterFactory<MultiCutGraphCutter, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutter, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
         private final CutGraphTypes type;
 
         Factory(CutGraphTypes type) {
