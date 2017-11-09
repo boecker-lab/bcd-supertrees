@@ -1,10 +1,10 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
+import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
-import phylo.tree.algorithm.flipcut.model.MultiCut;
 import phylo.tree.algorithm.flipcut.model.VaziraniCut;
 
 import java.util.*;
@@ -28,6 +28,7 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
     private VaziraniCut<FlipCutNodeSimpleWeight>[] initCuts;
     private final ArrayList<FlipCutNodeSimpleWeight> taxa;
     private final LinkedHashSet<FlipCutNodeSimpleWeight> characters;
+    private final FlipCutGraphMultiSimpleWeight source;//todo make reusable??
 
 
     public MultiCutGraphCutter(CutGraphTypes type, FlipCutGraphMultiSimpleWeight graphToCut) {
@@ -75,11 +76,11 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
             //todo character merging stuff
             switch (type) {
                 case MAXFLOW_TARJAN_GOLDBERG: {
-                    createGoldbergTarjanCharacterWeights(cutGraph,source.characters);
+                    createGoldbergTarjanCharacterWeights(cutGraph, source.characters);
                     break;
                 }
                 case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
-                    createGoldbergTarjanCharacterWeights(cutGraph,source.characters);
+                    createGoldbergTarjanCharacterWeights(cutGraph, source.characters);
                     break;
                 }
             }
@@ -202,14 +203,14 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
         switch (type) {
             case MAXFLOW_TARJAN_GOLDBERG: {
                 cutGraph = new GoldbergTarjanCutGraph<>();
-                createGoldbergTarjanCharacterWeights(cutGraph,source.characters);
-                createGoldbergTarjan(cutGraph);
+                createGoldbergTarjanCharacterWeights(cutGraph, source.characters);
+                createGoldbergTarjan(cutGraph, source);
                 break;
             }
             case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
                 cutGraph = new GoldbergTarjanCutGraph<>();
-                createGoldbergTarjanCharacterWeights(cutGraph,source.characters);
-                createTarjanGoldbergHyperGraph(cutGraph);
+                createGoldbergTarjanCharacterWeights(cutGraph, source.characters);
+                createTarjanGoldbergHyperGraph(cutGraph, source);
                 break;
             }
         }
@@ -237,11 +238,11 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
             //todo character merging stuff
             switch (type) {
                 case MAXFLOW_TARJAN_GOLDBERG: {
-                    createGoldbergTarjanCharacterWeights(cutGraph,source.characters);
+                    createGoldbergTarjanCharacterWeights(cutGraph, source.characters);
                     break;
                 }
                 case HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG: {
-                    createGoldbergTarjanCharacterWeights(cutGraph,source.characters);
+                    createGoldbergTarjanCharacterWeights(cutGraph, source.characters);
                     break;
                 }
             }
@@ -294,12 +295,19 @@ public class MultiCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphMultiS
     }
 
     @Override
-    public MultiCut cut(FlipCutGraphMultiSimpleWeight source) {
+    public DefaultMultiCut getMinCut() {
         return getNextCut();
-
     }
 
-    static class Factory implements MultiCutterFactory<MultiCutGraphCutter, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutter, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+    @Override
+    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(FlipCutGraphMultiSimpleWeight source) {
+        if (source.equals(this.source))
+            return getMinCut();
+        return null;
+    }
+
+
+    static class Factory implements MultiCutterFactory<MultiCutGraphCutter, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutter, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
         private final CutGraphTypes type;
 
         Factory(CutGraphTypes type) {

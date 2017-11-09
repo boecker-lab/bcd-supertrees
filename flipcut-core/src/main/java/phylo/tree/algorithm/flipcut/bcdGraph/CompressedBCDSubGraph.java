@@ -24,16 +24,21 @@ public class CompressedBCDSubGraph extends CompressedBCDGraph {
 
     @Override
     public Iterable<RoaringBitmap> hyperEdges() {
-        return new BitMapIteratable(getSource().sourceHyperEdges, characters);
+        return new BitMapIteratable<>(getSource().sourceHyperEdges, characters);
     }
 
     @Override
     public Iterable<RoaringBitmap> imaginaryHyperEdges() {
-        return new BitMapIteratable(getSource().sourceImaginaryHyperEdges, characters);
+        return new BitMapIteratable<>(getSource().sourceImaginaryHyperEdges, characters);
     }
 
     @Override
     public CompressedBCDSourceGraph getSource() {
         return source;
+    }
+
+    @Override
+    public Iterable<String> taxaLabels() {
+        return new BitMapIteratable<>(getSource().sourceTaxa, taxa);
     }
 }

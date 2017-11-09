@@ -4,6 +4,7 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import org.slf4j.LoggerFactory;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
+import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
@@ -21,22 +22,23 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         super(costs, bootstrapThreshold);
     }
 
-    protected FlipCutGraphSimpleWeight(LinkedHashSet<FlipCutNodeSimpleWeight> characters, LinkedHashSet<FlipCutNodeSimpleWeight> taxa, TreeNode parentNode) {
-        super(characters, taxa, parentNode);
+    protected FlipCutGraphSimpleWeight(LinkedHashSet<FlipCutNodeSimpleWeight> characters, LinkedHashSet<FlipCutNodeSimpleWeight> taxa) {
+        super(characters, taxa);
     }
 
-    public FlipCutGraphSimpleWeight(List<FlipCutNodeSimpleWeight> nodes, TreeNode parentNode, final boolean edgeDeletion) {
-        super(nodes, parentNode, edgeDeletion);
+    public FlipCutGraphSimpleWeight(List<FlipCutNodeSimpleWeight> nodes) {
+        super(nodes);
     }
 
     @Override
     public List<? extends FlipCutGraphSimpleWeight> split(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes) {
-        List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> graphData = splitToGraphData(sinkNodes);
+        List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> graphDatas = splitToGraphData(sinkNodes);
         List<FlipCutGraphSimpleWeight> graphs = new LinkedList<FlipCutGraphSimpleWeight>();
-        FlipCutGraphSimpleWeight g1 = new FlipCutGraphSimpleWeight(graphData.get(0).get(0), graphData.get(0).get(1), treeNode);
-        FlipCutGraphSimpleWeight g2 = new FlipCutGraphSimpleWeight(graphData.get(1).get(0), graphData.get(1).get(1), treeNode);
-        graphs.add(g1);
-        graphs.add(g2);
+
+        for (List<LinkedHashSet<FlipCutNodeSimpleWeight>> graphData : graphDatas) {
+            FlipCutGraphSimpleWeight g = new FlipCutGraphSimpleWeight(graphData.get(0), graphData.get(1));
+            graphs.add(g);
+        }
 
         return graphs;
     }
@@ -308,6 +310,21 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
 
     }
 
+    @Override
+    public List<? extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> getPartitions(GraphCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> c) {
+        List<? extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> graphs = calculatePartitions(c);
+        for (AbstractFlipCutGraph<FlipCutNodeSimpleWeight> graph : graphs) {
+            // checks an removes edges to taxa that are not in this component!
+            if (graph.checkEdges(c.isFlipCut()))
+                System.out.println("INFO: Edges between graphs deleted! - Not possible for BCD");
+            if (SCAFF_TAXA_MERGE)
+                graph.insertScaffPartData(this,null);
+            if (c.isBCD())
+                graph.insertCharacterMapping(this);
+        }
+        return graphs;
+    }
+
     //########## methods for edge identical character mapping ##########
     @Override
     public void addCharacterToDummyMapping(FlipCutNodeSimpleWeight character, FlipCutNodeSimpleWeight dummy) {
@@ -341,4 +358,21 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         }
     }
     //########## methods for edge identical character mappin END ##########
+
+
+    /*@Override
+    public List<? extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> calculatePartition(GraphCutter c) {
+        List<? extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> graphs = super.calculatePartition(c);
+        for (AbstractFlipCutGraph<FlipCutNodeSimpleWeight> graph : graphs) {
+            if (SCAFF_TAXA_MERGE) graph.insertScaffPartData(this, null);
+            graph.insertCharacterMapping(this);
+        }
+        return graphs;
+    }*/
+
+
+    @Override
+    protected FlipCutGraphSimpleWeight newInstance(List<FlipCutNodeSimpleWeight> component) {
+        return new FlipCutGraphSimpleWeight(component);
+    }
 }

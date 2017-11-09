@@ -14,4 +14,12 @@ public interface GraphCutter<S, T extends SourceTreeGraph> {
     void clear();
 
     Cut<S> cut(T source);
+
+    Cut<S> getMinCut();
+
+    default boolean isFlipCut() {
+        return !isBCD();
+    }
+
+    boolean isBCD();
 }

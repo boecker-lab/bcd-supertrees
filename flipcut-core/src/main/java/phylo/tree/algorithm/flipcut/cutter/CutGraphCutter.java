@@ -21,8 +21,6 @@ public abstract class CutGraphCutter<S, T extends SourceTreeGraph> implements Gr
     protected final ExecutorService executorService;
     protected final int threads;
 
-    protected T source = null;
-
     protected CutGraphCutter() {
         this.executorService = null;
         this.threads = 1;
@@ -33,25 +31,7 @@ public abstract class CutGraphCutter<S, T extends SourceTreeGraph> implements Gr
         this.threads = threads;
     }
 
-    public Cut<S> getMinCut(T source) {
-        if (this.source != source) {
-            this.source = source;
-
-        }
-        return calculateMinCut();
-    }
-
-    /*public LinkedHashSet<N> getMinCutSet(T source) {
-        return getMinCut(source).getCutSet();
-    }*/
-
-    public long getMinCutValue(T source) {
-        return getMinCut(source).minCutValue();
-    }
-
+    //default method, override if needed
     public void clear() {
-        source = null;
     }
-
-    protected abstract Cut<S> calculateMinCut();
 }

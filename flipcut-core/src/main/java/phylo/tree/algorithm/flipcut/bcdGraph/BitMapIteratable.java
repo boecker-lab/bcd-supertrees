@@ -8,30 +8,30 @@ import org.roaringbitmap.RoaringBitmap;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
-public class BitMapIteratable implements Iterable<RoaringBitmap> {
-    final RoaringBitmap[] source;
+public class BitMapIteratable<T> implements Iterable<T> {
+    final T[] source;
     final RoaringBitmap indeces;
 
 
-    public BitMapIteratable(RoaringBitmap[] source, RoaringBitmap indeces) {
+    public BitMapIteratable(T[] source, RoaringBitmap indeces) {
         this.source = source;
         this.indeces = indeces;
     }
 
     @NotNull
     @Override
-    public Iterator<RoaringBitmap> iterator() {
+    public Iterator<T> iterator() {
         return new BitMapIterator();
     }
 
     @Override
-    public void forEach(Consumer<? super RoaringBitmap> action) {
+    public void forEach(Consumer<? super T> action) {
         indeces.forEach((IntConsumer) i -> {
             action.accept(source[i]);
         });
     }
 
-    class BitMapIterator implements Iterator<RoaringBitmap> {
+    class BitMapIterator implements Iterator<T> {
         final PeekableIntIterator it = indeces.getIntIterator();
 
         @Override
@@ -40,7 +40,7 @@ public class BitMapIteratable implements Iterable<RoaringBitmap> {
         }
 
         @Override
-        public RoaringBitmap next() {
+        public T next() {
             return source[it.next()];
         }
     }

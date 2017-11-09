@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  * Date: 17.01.13
  * Time: 13:56
  */
-public class FlipCutMultiCut extends AbstractFlipCut<FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight, MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>> {
+public class FlipCutMultiCut extends AbstractFlipCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight, MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>> {
     protected int numberOfCuts = 1;
     protected List<Tree> result;
 

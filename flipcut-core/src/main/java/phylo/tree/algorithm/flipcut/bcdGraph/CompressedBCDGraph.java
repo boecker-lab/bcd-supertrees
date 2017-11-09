@@ -2,13 +2,15 @@ package phylo.tree.algorithm.flipcut.bcdGraph;
 
 import org.roaringbitmap.IntConsumer;
 import org.roaringbitmap.RoaringBitmap;
+import phylo.tree.algorithm.flipcut.SourceTreeGraph;
+import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class CompressedBCDGraph {
+public abstract class CompressedBCDGraph implements SourceTreeGraph {
     protected final RoaringBitmap taxa;
     final RoaringBitmap characters;
 
@@ -95,5 +97,13 @@ public abstract class CompressedBCDGraph {
         return subCharacters;
     }
 
-
+    @Override
+    public List<? extends SourceTreeGraph> getPartitions(GraphCutter c) {
+        RoaringBitmap component = getConnectedComponent();
+        if (component.equals(characters)) { //todo is this fast?
+            CompressedCut cut = (CompressedCut) c.cut(this);
+            deleteCharacters(cut.getCutSet());
+        }
+        return split();
+    }
 }

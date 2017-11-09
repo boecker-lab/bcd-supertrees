@@ -24,6 +24,7 @@ public class CompressedBCDSourceGraph extends CompressedBCDGraph {
         this.chracterWeights = chracterWeights;
     }
 
+
     public String getTaxon(int pos) {
         return sourceTaxa[pos];
     }
@@ -71,4 +72,8 @@ public class CompressedBCDSourceGraph extends CompressedBCDGraph {
         return new LinkedList<>(Arrays.asList(sourceHyperEdges));
     }
 
+    @Override
+    public Iterable<String> taxaLabels() {
+        return Arrays.asList(sourceTaxa);
+    }
 }

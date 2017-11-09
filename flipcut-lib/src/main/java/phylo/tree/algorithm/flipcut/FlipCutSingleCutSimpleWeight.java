@@ -9,8 +9,8 @@ import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.SingleCutGraphCutter;
 import phylo.tree.model.Tree;
-import phylo.tree.model.TreeNode;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
@@ -20,9 +20,10 @@ import java.util.logging.Logger;
  * Date: 15.01.13
  * Time: 18:13
  */
-public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipCutNodeSimpleWeight, FlipCutGraphSimpleWeight, SingleCutGraphCutter> {
+public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphSimpleWeight, SingleCutGraphCutter> {
 
-    public FlipCutSingleCutSimpleWeight() {}
+    public FlipCutSingleCutSimpleWeight() {
+    }
 
     public FlipCutSingleCutSimpleWeight(SingleCutGraphCutter.Factory type) {
         super(type);
@@ -39,11 +40,6 @@ public class FlipCutSingleCutSimpleWeight extends AbstractFlipCutSingleCut<FlipC
     @Override
     protected String name() {
         return getClass().getSimpleName();
-    }
-
-    @Override
-    protected FlipCutGraphSimpleWeight createGraph(List<FlipCutNodeSimpleWeight> component, TreeNode treeNode) {
-        return new FlipCutGraphSimpleWeight(component, treeNode, type.getType().isFlipCut());
     }
 
     @Override

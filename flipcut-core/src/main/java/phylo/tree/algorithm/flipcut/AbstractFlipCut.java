@@ -3,13 +3,10 @@ package phylo.tree.algorithm.flipcut;
 import phylo.tree.algorithm.SupertreeAlgorithm;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
-import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
-import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
 import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 import phylo.tree.model.Tree;
 
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Logger;
@@ -17,10 +14,10 @@ import java.util.logging.Logger;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
- *         Date: 29.11.12
- *         Time: 14:10
+ * Date: 29.11.12
+ * Time: 14:10
  */
-public abstract class AbstractFlipCut<N extends AbstractFlipCutNode<N>, T extends AbstractFlipCutGraph<N>, C extends GraphCutter<LinkedHashSet<N>, T>, F extends CutterFactory<C, LinkedHashSet<N>, T>> extends SupertreeAlgorithm {
+public abstract class AbstractFlipCut<S, T extends SourceTreeGraph, C extends GraphCutter<S, T>, F extends CutterFactory<C, S, T>> extends SupertreeAlgorithm {
     public static final boolean DEBUG = false;
     public static final int CORES_AVAILABLE = Runtime.getRuntime().availableProcessors();
     /**

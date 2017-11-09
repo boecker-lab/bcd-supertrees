@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
  * Time: 16:37
  */
 public class SingleCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphSimpleWeight> {
+    private Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cachedMinCut = null;
 
 
     public SingleCutGraphCutter(CutGraphTypes type) {
@@ -22,12 +23,24 @@ public class SingleCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphSimpl
     }
 
     @Override
-    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(FlipCutGraphSimpleWeight source){
-        return getMinCut(source);
+    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(FlipCutGraphSimpleWeight source) {
+        cachedMinCut = super.cut(source);
+        return cachedMinCut;
+    }
+
+    @Override
+    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> getMinCut() {
+        return cachedMinCut;
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        cachedMinCut = null;
     }
 
 
-    public static class Factory implements MaxFlowCutterFactory<SingleCutGraphCutter, FlipCutNodeSimpleWeight,FlipCutGraphSimpleWeight>{
+    public static class Factory implements MaxFlowCutterFactory<SingleCutGraphCutter, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphSimpleWeight> {
         private final CutGraphTypes type;
 
         public Factory(CutGraphTypes type) {
@@ -46,7 +59,7 @@ public class SingleCutGraphCutter extends SimpleCutGraphCutter<FlipCutGraphSimpl
 
         @Override
         public SingleCutGraphCutter newInstance(FlipCutGraphSimpleWeight graph, ExecutorService executorService, int threads) {
-            return  new SingleCutGraphCutter(type,executorService,threads);
+            return new SingleCutGraphCutter(type, executorService, threads);
         }
 
         @Override

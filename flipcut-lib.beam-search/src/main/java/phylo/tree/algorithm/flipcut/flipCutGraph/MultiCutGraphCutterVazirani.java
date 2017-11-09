@@ -32,6 +32,8 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
     private Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged;
 
     private LinkedHashSet<FlipCutNodeSimpleWeight> characters = null;
+    private final FlipCutGraphMultiSimpleWeight source;//todo make reusable??
+
 
     @Override
     public void clear() {
@@ -193,7 +195,7 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
 
         //j=0
         GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph = new GoldbergTarjanCutGraph<>();
-        dummyToMerged = createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, mapping, new ArrayList<>(taxa.size()));
+        dummyToMerged = createTarjanGoldbergHyperGraphTaxaMerged(cutGraph,source, mapping, new ArrayList<>(taxa.size()));
 
         minCut = cutGraph.calculateMinSTCut(taxa.get(0), taxa.get(1));
         lightestCut = new VaziraniCut(minCut.getCutSet(), minCut.minCutValue, 1);
@@ -272,11 +274,17 @@ public class MultiCutGraphCutterVazirani extends SimpleCutGraphCutter<FlipCutGra
 
     @Override
     public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(FlipCutGraphMultiSimpleWeight source) {
-        return getNextCut();
-
+        if (source.equals(this.source))
+            return getMinCut();
+        return null;
     }
 
-    static class Factory implements MultiCutterFactory<MultiCutGraphCutterVazirani, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutterVazirani, FlipCutNodeSimpleWeight, FlipCutGraphMultiSimpleWeight> {
+    @Override
+    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> getMinCut() {
+        return getNextCut();
+    }
+
+    static class Factory implements MultiCutterFactory<MultiCutGraphCutterVazirani, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, MaxFlowCutterFactory<MultiCutGraphCutterVazirani, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
         private final CutGraphTypes type;
 
         Factory(CutGraphTypes type) {

@@ -1,12 +1,11 @@
 package phylo.tree.algorithm.flipcut;
 
 
-
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 
 import java.util.List;
 
-public interface SourceTreeGraph {
+public interface SourceTreeGraph<C, G extends SourceTreeGraph> {
 
 
     /**
@@ -21,6 +20,12 @@ public interface SourceTreeGraph {
      *
      * @return graphs list of two graphs created
      */
-    List<? extends SourceTreeGraph> calculatePartition(final GraphCutter c);
+    List<? extends G> getPartitions(final GraphCutter<C, G> c);
 
+
+    Iterable<String> taxaLabels();
+
+    int numTaxa();
+
+    int numCharacter();
 }

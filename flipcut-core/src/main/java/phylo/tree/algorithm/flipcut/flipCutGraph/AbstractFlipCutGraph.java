@@ -5,6 +5,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import mincut.cutGraphAPI.bipartition.Cut;
+import org.jetbrains.annotations.NotNull;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
@@ -18,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Date: 29.11.12
  * Time: 14:36
  */
-public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> implements SourceTreeGraph {
+public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> implements SourceTreeGraph<LinkedHashSet<N>, AbstractFlipCutGraph<N>> {
 
     /**
      * Turn on/off debug mode
@@ -62,14 +63,6 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
      * cashes micut value from cut() for global scoring
      */
     protected long minCutValue = Long.MAX_VALUE;
-    /**
-     * parentNode in the Supertree
-     */
-    public final TreeNode parentNode;
-    /**
-     * node in the Supertree
-     */
-    public final TreeNode treeNode;
 
 
     protected AbstractFlipCutGraph(CostComputer costs, int bootstrapThreshold) {
@@ -78,9 +71,6 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
         List<LinkedHashSet<N>> data = createGraphData(costs, bootstrapThreshold);
         this.characters = data.get(0);
         this.taxa = data.get(1);
-        parentNode = null;
-        treeNode = new TreeNode();
-
         System.out.println("...Done!");
     }
 
@@ -93,11 +83,9 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
      * @param characters the character
      * @param taxa       the taxa
      */
-    protected AbstractFlipCutGraph(LinkedHashSet<N> characters, LinkedHashSet<N> taxa, TreeNode parentNode) {
+    protected AbstractFlipCutGraph(LinkedHashSet<N> characters, LinkedHashSet<N> taxa) {
         this.characters = characters;
         this.taxa = taxa;
-        this.parentNode = parentNode;
-        treeNode = new TreeNode();
     }
 
 
@@ -107,9 +95,10 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
      *
      * @param nodes the nodes
      */
-    public AbstractFlipCutGraph(List<N> nodes, TreeNode parentNode, final boolean edgeDeletion) {
+    public AbstractFlipCutGraph(List<N> nodes) {
         characters = new LinkedHashSet<>(nodes.size());
         taxa = new LinkedHashSet<>(nodes.size());
+
         for (N node : nodes) {
             if (node.isTaxon()) {
                 taxa.add(node);
@@ -117,13 +106,6 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
                 characters.add(node);
             }
         }
-
-        // checks an removes edges to taxa that are not in this component!
-        if (checkEdges(edgeDeletion))
-            System.out.println("INFO: Edges between graphs deleted! - Not possible for BCD");
-
-        this.parentNode = parentNode;
-        treeNode = new TreeNode();
     }
 
     protected abstract List<LinkedHashSet<N>> createGraphData(CostComputer costs, int bootstrapThreshold);
@@ -202,7 +184,7 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
      * @param sinkNodes the set of nodes for
      * @return graphs list of two graphs created
      */
-    public abstract List<? extends AbstractFlipCutGraph<N>> split(LinkedHashSet<N> sinkNodes);
+    protected abstract List<? extends AbstractFlipCutGraph<N>> split(LinkedHashSet<N> sinkNodes);
 
 
     /**
@@ -210,7 +192,7 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
      *
      * @return components list of components
      */
-    public List<List<N>> getComponents() {
+    protected List<List<N>> getComponents() {
         List<List<N>> components = new ArrayList<List<N>>(2);
         List<N> currentComponent;
         for (N node : characters) {
@@ -361,6 +343,7 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
         dummyToCharacters = source.dummyToCharacters;
     }
 
+
     public N getDummyFromMapping(N character) {
         N dummy = characterToDummy.get(character);
         if (dummy == null)
@@ -380,10 +363,46 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
     public abstract void removeCharacterFromDummyMapping(N character);
     //########## methods for edge identical character mappin END ##########
 
+
+    protected List<? extends AbstractFlipCutGraph<N>> calculatePartitions(GraphCutter<LinkedHashSet<N>, AbstractFlipCutGraph<N>> c) {
+        final List<AbstractFlipCutGraph<N>> graphs;
+        final List<List<N>> components = getComponents();
+        if (components.size() == 1) {
+            Cut<LinkedHashSet<N>> cut = c.cut(this);
+            LinkedHashSet<N> minCut = cut.getCutSet();
+            graphs = (List<AbstractFlipCutGraph<N>>) split(minCut);
+        } else {
+            graphs = new ArrayList<>(components.size());
+            for (List<N> component : components) {
+                graphs.add(newInstance(component));
+            }
+        }
+
+        return graphs;
+    }
+
+    protected abstract AbstractFlipCutGraph<N> newInstance(List<N> component);
+
     @Override
-    public List<? extends AbstractFlipCutGraph<N>> calculatePartition(GraphCutter c) {
-        Cut<LinkedHashSet<N>> cut = c.cut(this);
-        LinkedHashSet<N> minCut = cut.getCutSet();
-        return split(minCut);
+    public Iterable<String> taxaLabels() {
+        return new TaxaLabelIteratable();
+    }
+
+    @Override
+    public int numTaxa() {
+        return taxa.size();
+    }
+
+    @Override
+    public int numCharacter() {
+        return characters.size();
+    }
+
+    private class TaxaLabelIteratable implements Iterable<String> {
+        @NotNull
+        @Override
+        public Iterator<String> iterator() {
+            return new NodeLabelIterator<>(taxa);
+        }
     }
 }

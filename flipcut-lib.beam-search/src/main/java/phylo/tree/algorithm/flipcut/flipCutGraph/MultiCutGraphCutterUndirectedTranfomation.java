@@ -6,6 +6,7 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
  */
 
 import mincut.cutGraphAPI.KargerSteinCutGraph;
+import mincut.cutGraphAPI.MultiCutGraph;
 import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.FlipCutCutFactory;
 import mincut.cutGraphAPI.bipartition.HyperCut;
@@ -28,8 +29,9 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Li
     private final boolean singleSampling;
     private final ChracterScoreModifier modder;
     private final KargerGraphCreator graphCreator;
-
     private TreeSet<Cut<LinkedHashSet<FlipCutNodeSimpleWeight>>> mincuts = null;
+    private final FlipCutGraphMultiSimpleWeight source;//todo make reusable??
+
 
     public MultiCutGraphCutterUndirectedTranfomation(FlipCutGraphMultiSimpleWeight graphToCut, final ChracterScoreModifier modder, KargerGraphCreator graphCreator, boolean singleSampling) {
         super();
@@ -54,25 +56,20 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Li
         this.singleSampling = singleSampling;
     }
 
-
     @Override
-    public MultiCut cut(FlipCutGraphMultiSimpleWeight source) {
-        return getNextCut();
+    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(FlipCutGraphMultiSimpleWeight source) {
+        if (source.equals(this.source))
+            return getMinCut();
+        return null;
     }
 
-    @Override
-    protected Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> calculateMinCut() {
-        if (mincuts != null)
-            mincuts = calculateMinCuts();
-        return mincuts.first();
-    }
     protected TreeSet<Cut<LinkedHashSet<FlipCutNodeSimpleWeight>>> calculateMinCuts() {
         TreeSet<Cut<LinkedHashSet<FlipCutNodeSimpleWeight>>> mincuts = new TreeSet<>();
 
 //        long time = System.currentTimeMillis();
         //search the optimal cat
         SingleCutGraphCutter optCutter = new SingleCutGraphCutter(CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
-        DefaultMultiCut optCut = new DefaultMultiCut(optCutter.getMinCut(source), source);
+        DefaultMultiCut optCut = new DefaultMultiCut(optCutter.cut(source), source);
         mincuts.add(optCut);
 
         KargerSteinCutGraph<FlipCutNodeSimpleWeight, FlipCutCutFactory> cutGraph = graphCreator.createGraph(modder, source);
@@ -90,7 +87,7 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Li
     }
 
     @Override
-    public MultiCut getNextCut() {
+    public MultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>,FlipCutGraphMultiSimpleWeight> getNextCut() {
         if (mincuts == null)
             mincuts = calculateMinCuts();
         if (mincuts.isEmpty()) {
@@ -100,12 +97,21 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Li
         Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> c = mincuts.pollFirst();
 
         if (c instanceof DefaultMultiCut)
-            return (MultiCut) c;
+            return (DefaultMultiCut) c;
         else {
             return new HyperMultiCut(source, (HyperCut<FlipCutNodeSimpleWeight>) c);
         }
     }
 
+    @Override
+    public MultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>,FlipCutGraphMultiSimpleWeight> getMinCut() {
+        return getNextCut();
+    }
+
+    @Override
+    public boolean isBCD() {
+        return true;
+    }
 
     static class Factory implements MultiCutterFactory<MultiCutGraphCutterUndirectedTranfomation, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
         private final ChracterScoreModifier modder;
