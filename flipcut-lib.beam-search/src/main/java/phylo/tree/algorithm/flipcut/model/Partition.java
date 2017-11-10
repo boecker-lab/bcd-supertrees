@@ -1,11 +1,14 @@
 
 package phylo.tree.algorithm.flipcut.model;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 /**
@@ -17,53 +20,51 @@ import java.util.*;
 public class Partition implements Comparable<Partition> {
     public final long currentscore;
     public final int cachedHash;
+    public final AtomicInteger treeNodeIndex;
 
-    private final Set<FlipCutGraphMultiSimpleWeight> graphs;
-    private TreeNode root;
-    private Set<Edge> supertreeEdges = new HashSet<>();
+    private final Map<FlipCutGraphMultiSimpleWeight, Edge> graphs;
+    private List<Edge> supertreeEdges = new LinkedList<>();
     private int finishedGraphs;
 
-
-    public Partition(long score, FlipCutGraphMultiSimpleWeight graph) {
-        currentscore = score;
+    public Partition(FlipCutGraphMultiSimpleWeight initialGraph) {
+        currentscore = 0;
         finishedGraphs = 0;
+        treeNodeIndex = new AtomicInteger(0);
 
-        graphs = new HashSet<>();
-        graphs.add(graph);
-        cachedHash = this.graphs.hashCode();
-        root = graph.treeNode;
+        graphs = new HashMap<>();
+        graphs.put(initialGraph, new Edge(0, treeNodeIndex.incrementAndGet()));
+        cachedHash = this.graphs.keySet().hashCode();
     }
 
-    public Partition(long score, Set<FlipCutGraphMultiSimpleWeight> graphs, TreeNode root, Set<Edge> edges, int finished) {
+    private Partition(long score, Map<FlipCutGraphMultiSimpleWeight, Edge> graphs, List<Edge> edges, int finished, final AtomicInteger treeNodeIndex) {
         currentscore = score;
         finishedGraphs = 0;
 
         this.graphs = graphs;
         cachedHash = this.graphs.hashCode();
-        this.root = root;
         supertreeEdges = edges;
         finishedGraphs = finished;
+        this.treeNodeIndex = treeNodeIndex;
     }
 
     /*
     * This method constructs the k best new partitions based on this
     * Attention this may calculate time critical minimum Cuts
     */
-    //todo parallelize this step
     public LinkedList<Partition> getKBestNew(int k, long upperBound) {
-        PriorityQueue<MultiCut> cutsDesc = new PriorityQueue<>(k,new Comparator<MultiCut>() {
+        PriorityQueue<MultiCut> cutsDesc = new PriorityQueue<>(k, new Comparator<MultiCut>() {
             public int compare(MultiCut o1, MultiCut o2) {
-                return - o1.compareTo(o2);
+                return -o1.compareTo(o2);
             }
         });
 
         List<Iterator<MultiCut>> graphIterList = new LinkedList<>();
-        List<FlipCutGraphMultiSimpleWeight> toRemove = new LinkedList<FlipCutGraphMultiSimpleWeight>();
-        for (FlipCutGraphMultiSimpleWeight graph : graphs) {
+        List<FlipCutGraphMultiSimpleWeight> toRemove = new LinkedList<>();
+        for (FlipCutGraphMultiSimpleWeight graph : graphs.keySet()) {
             //only 1 taxon left --> labeling node corresponding to the graph with the label of the last taxon
-            final int taxaNum =graph.getNumTaxa();
+            final int taxaNum = graph.getNumTaxa();
             if (taxaNum == 1) {
-                graph.treeNode.setLabel(graph.taxa.iterator().next().name);
+                graphs.get(graph).treeNodeLabel = graph.taxa.iterator().next().name;
                 toRemove.add(graph);
                 finishedGraphs++;
                 System.out.println("WARNING: shouldn't be possible anymore!!! or?!"); //todo remove this if sure
@@ -79,20 +80,23 @@ public class Partition implements Comparable<Partition> {
                 if ((c.minCutValue() + currentscore) < upperBound) {
                     //add the graphs that have a chance
                     if (cutsDesc.size() >= k) {
-                        if (c.minCutValue() < cutsDesc.peek().minCutValue()){
+                        if (c.minCutValue() < cutsDesc.peek().minCutValue()) {
                             cutsDesc.add(c);
                             graphIterList.add(iter);
                             //remove last cut
                             cutsDesc.poll();
                         }
-                    }else{
+                    } else {
                         cutsDesc.add(c);
                         graphIterList.add(iter);
                     }
                 }
             }
         }
-        graphs.removeAll(toRemove);
+
+        for (FlipCutGraphMultiSimpleWeight g : toRemove) {
+            supertreeEdges.add(graphs.remove(g));
+        }
 
         //find the k-best mincut of all k^2
         while (!graphIterList.isEmpty()) {
@@ -103,7 +107,7 @@ public class Partition implements Comparable<Partition> {
                     MultiCut cut = cutIterator.next();
                     //check upper bound
                     if ((cut.minCutValue() + currentscore) < upperBound) {
-                            //check if better than the k we have
+                        //check if better than the k we have
                         if (cutsDesc.size() >= k) {
                             if (cut.minCutValue() < cutsDesc.peek().minCutValue()) {
                                 cutsDesc.add(cut);
@@ -112,7 +116,7 @@ public class Partition implements Comparable<Partition> {
                             } else {
                                 break;
                             }
-                        }else{
+                        } else {
                             cutsDesc.add(cut);
                         }
                     }
@@ -130,34 +134,34 @@ public class Partition implements Comparable<Partition> {
             //add new edge for cutted graph to supertree edgeset
             List<FlipCutGraphMultiSimpleWeight> splittedGraphs = cut.getSplittedGraphs();
 
-            Set<Edge> edges = new HashSet<Edge>(supertreeEdges.size() + splittedGraphs.size());
-            edges.addAll(supertreeEdges);
-
-            for (FlipCutGraphMultiSimpleWeight g : splittedGraphs) {
-                edges.add(new Edge(g.parentNode, g.treeNode));
-            }
+            //edges for new partition
+            List<Edge> edges = new LinkedList<>(supertreeEdges);
 
             //build new partition
-            Set<FlipCutGraphMultiSimpleWeight> newPartitionGraphs = new HashSet<>(graphs);
-            newPartitionGraphs.remove(cut.sourceGraph); //todo is there a better way
+            Map<FlipCutGraphMultiSimpleWeight, Edge> newPartitionGraphs = new HashMap<>(graphs);
+            Edge sourceGraphEdge = newPartitionGraphs.remove(cut.sourceGraph);
+            edges.add(sourceGraphEdge);
+
 
             //check if one of the splitted graphes is finished
             int newFinished = finishedGraphs;
             Iterator<FlipCutGraphMultiSimpleWeight> it = splittedGraphs.iterator();
             while (it.hasNext()) {
                 FlipCutGraphMultiSimpleWeight splitGraph = it.next();
+                Edge splitGraphEdge = new Edge(sourceGraphEdge.treeNode, treeNodeIndex.incrementAndGet());
                 final int taxaNum = splitGraph.getNumTaxa();
                 if (taxaNum == 1) {
-                    splitGraph.treeNode.setLabel(splitGraph.taxa.iterator().next().name); //todo if or not
+                    sourceGraphEdge.treeNodeLabel = splitGraph.taxa.iterator().next().name;
+                    edges.add(splitGraphEdge);
                     newFinished++;
-                }else if(taxaNum == 0){
-                    System.out.println("WTF?");
-                }else{
-                    newPartitionGraphs.add(splitGraph);
+                } else if (taxaNum == 0) {
+                    System.err.println("Error: empty graph in partition");
+                } else {
+                    newPartitionGraphs.put(splitGraph, sourceGraphEdge);
                 }
             }
 
-            Partition p = new Partition(currentscore + cut.minCutValue(), newPartitionGraphs, root, edges, newFinished);
+            Partition p = new Partition(currentscore + cut.minCutValue(), newPartitionGraphs, edges, newFinished, treeNodeIndex);
             partitions.add(p);
         }
         return partitions;
@@ -175,18 +179,25 @@ public class Partition implements Comparable<Partition> {
         return (currentscore < o.currentscore) ? -1 : ((currentscore == o.currentscore) ? 0 : 1);
     }
 
-    public Tree buildTree(){
-        Map<TreeNode,TreeNode> nodeMap = new HashMap<>();
+    public Tree buildTree() {
+        TIntObjectMap<TreeNode> nodeMap = new TIntObjectHashMap<>();
         Tree tree = new Tree();
-        nodeMap.put(root, new TreeNode(root.getLabel()));
-        tree.addVertex(nodeMap.get(root));
-        for (Edge edge : supertreeEdges) {
-            nodeMap.put(edge.target, new TreeNode(edge.target.getLabel()));
-            tree.addVertex(nodeMap.get(edge.target));
+
+        Iterator<Edge> it = supertreeEdges.iterator();
+        while (it.hasNext()) {
+            Edge edge = it.next();
+            nodeMap.put(edge.treeNode, new TreeNode(edge.treeNodeLabel));
+            tree.addVertex(nodeMap.get(edge.treeNode));
+            if (edge.parentNode == 0) {
+                tree.setRoot(nodeMap.get(edge.treeNode));
+                it.remove();
+            }
         }
+
         for (Edge edge : supertreeEdges) {
-            tree.addEdge(nodeMap.get(edge.source),nodeMap.get(edge.target));
+            tree.addEdge(nodeMap.get(edge.parentNode), nodeMap.get(edge.treeNode));
         }
+
         tree.setName(String.valueOf(currentscore));
         return tree;
     }
@@ -213,12 +224,13 @@ public class Partition implements Comparable<Partition> {
     }
 
     class Edge {
-        TreeNode source;
-        TreeNode target;
+        final int parentNode;
+        final int treeNode;
+        String treeNodeLabel = null;
 
-        Edge(TreeNode source, TreeNode target) {
-            this.source = source;
-            this.target = target;
+        Edge(int parentNode, int treeNode) {
+            this.parentNode = parentNode;
+            this.treeNode = treeNode;
         }
     }
 }

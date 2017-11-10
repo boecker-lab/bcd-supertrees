@@ -6,7 +6,6 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
  */
 
 import mincut.cutGraphAPI.KargerSteinCutGraph;
-import mincut.cutGraphAPI.MultiCutGraph;
 import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.FlipCutCutFactory;
 import mincut.cutGraphAPI.bipartition.HyperCut;
@@ -87,7 +86,7 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Li
     }
 
     @Override
-    public MultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>,FlipCutGraphMultiSimpleWeight> getNextCut() {
+    public MultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> getNextCut() {
         if (mincuts == null)
             mincuts = calculateMinCuts();
         if (mincuts.isEmpty()) {
@@ -104,7 +103,7 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Li
     }
 
     @Override
-    public MultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>,FlipCutGraphMultiSimpleWeight> getMinCut() {
+    public MultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> getMinCut() {
         return getNextCut();
     }
 
@@ -133,6 +132,11 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Li
         @Override
         public MultiCutGraphCutterUndirectedTranfomation newInstance(FlipCutGraphMultiSimpleWeight graph, ExecutorService executorService, int threads) {
             return new MultiCutGraphCutterUndirectedTranfomation(graph, executorService, threads, modder, graphCreator, singleSampling);
+        }
+
+        @Override
+        public boolean isBCD() {
+            return true;
         }
     }
 }

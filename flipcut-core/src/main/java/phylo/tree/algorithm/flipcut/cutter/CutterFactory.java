@@ -16,4 +16,9 @@ import java.util.concurrent.ExecutorService;
 public interface CutterFactory< C extends GraphCutter<S,T>,S,T extends SourceTreeGraph> {
     C newInstance(T graph);
     C newInstance(T graph,ExecutorService executorService, int threads);
+
+    default boolean isFlipCut() {
+        return !isBCD();
+    }
+    boolean isBCD();
 }

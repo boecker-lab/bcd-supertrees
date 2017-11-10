@@ -97,7 +97,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         for (List<LinkedHashSet<FlipCutNodeSimpleWeight>> data : graphData) {
             FlipCutGraphMultiSimpleWeight graph = new FlipCutGraphMultiSimpleWeight(data.get(0), data.get(1), cuts.length, cutterFactory);
 
-            if (graph.checkEdges(cutter.isFlipCut()))
+            if (graph.checkEdges(cutterFactory.isFlipCut()))
                 System.out.println("INFO: Edges between graphs deleted! - Not possible for BCD");
 
             if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE)
@@ -266,7 +266,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
 
             FlipCutGraphMultiSimpleWeight g = new FlipCutGraphMultiSimpleWeight(new ArrayList<>(oldToNew.values()), cuts.length, cutterFactory);
 
-            if (g.checkEdges(cutter.isFlipCut()))
+            if (g.checkEdges(cutterFactory.isFlipCut()))
                 System.out.println("INFO: Edges between graphs deleted! - Not possible for BCD");
 
             if (AbstractFlipCutGraph.SCAFF_TAXA_MERGE)

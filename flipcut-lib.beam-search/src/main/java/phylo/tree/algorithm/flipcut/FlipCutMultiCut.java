@@ -55,12 +55,12 @@ public class FlipCutMultiCut extends AbstractFlipCut<LinkedHashSet<FlipCutNodeSi
             long calctime = System.currentTimeMillis();
             //map to store partitions which are already cutted in more parts than the others
             final TreeMap<Integer, Set<Partition>> subsBench = new TreeMap<>();
-            final int numTaxa = initialGraph.taxa.size();
+            final int numTaxa = initialGraph.getNumTaxa();
 
             System.out.println("Calculating Partitions...");
 
             //initial step to generate
-            final LinkedList<Partition> partitions = new Partition(0, initialGraph).getKBestNew(numberOfCuts, Long.MAX_VALUE);
+            final LinkedList<Partition> partitions = new Partition(initialGraph).getKBestNew(numberOfCuts, Long.MAX_VALUE);
             int minimalPartLevel = buildNextPartitionLevel(partitions, subsBench);
             initialGraph = null; //get rid of these large graph
 
