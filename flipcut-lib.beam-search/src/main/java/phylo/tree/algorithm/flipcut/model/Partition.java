@@ -3,7 +3,7 @@ package phylo.tree.algorithm.flipcut.model;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
+import phylo.tree.algorithm.flipcut.SourceTreeGraphMultiCut;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
@@ -22,11 +22,11 @@ public class Partition implements Comparable<Partition> {
     public final int cachedHash;
     public final AtomicInteger treeNodeIndex;
 
-    private final Map<FlipCutGraphMultiSimpleWeight, Edge> graphs;
+    private final Map<SourceTreeGraphMultiCut, Edge> graphs;
     private List<Edge> supertreeEdges = new LinkedList<>();
     private int finishedGraphs;
 
-    public Partition(FlipCutGraphMultiSimpleWeight initialGraph) {
+    public Partition(SourceTreeGraphMultiCut initialGraph) {
         currentscore = 0;
         finishedGraphs = 0;
         treeNodeIndex = new AtomicInteger(0);
@@ -36,7 +36,7 @@ public class Partition implements Comparable<Partition> {
         cachedHash = this.graphs.keySet().hashCode();
     }
 
-    private Partition(long score, Map<FlipCutGraphMultiSimpleWeight, Edge> graphs, List<Edge> edges, int finished, final AtomicInteger treeNodeIndex) {
+    private Partition(long score, Map<SourceTreeGraphMultiCut, Edge> graphs, List<Edge> edges, int finished, final AtomicInteger treeNodeIndex) {
         currentscore = score;
         finishedGraphs = 0;
 
@@ -59,12 +59,12 @@ public class Partition implements Comparable<Partition> {
         });
 
         List<Iterator<MultiCut>> graphIterList = new LinkedList<>();
-        List<FlipCutGraphMultiSimpleWeight> toRemove = new LinkedList<>();
-        for (FlipCutGraphMultiSimpleWeight graph : graphs.keySet()) {
+        List<SourceTreeGraphMultiCut> toRemove = new LinkedList<>();
+        for (SourceTreeGraphMultiCut graph : graphs.keySet()) {
             //only 1 taxon left --> labeling node corresponding to the graph with the label of the last taxon
-            final int taxaNum = graph.getNumTaxa();
+            final int taxaNum = graph.numTaxa();
             if (taxaNum == 1) {
-                graphs.get(graph).treeNodeLabel = graph.taxa.iterator().next().name;
+                graphs.get(graph).treeNodeLabel = (String) graph.taxaLabels().iterator().next();
                 toRemove.add(graph);
                 finishedGraphs++;
                 System.out.println("WARNING: shouldn't be possible anymore!!! or?!"); //todo remove this if sure
@@ -94,7 +94,7 @@ public class Partition implements Comparable<Partition> {
             }
         }
 
-        for (FlipCutGraphMultiSimpleWeight g : toRemove) {
+        for (SourceTreeGraphMultiCut g : toRemove) {
             supertreeEdges.add(graphs.remove(g));
         }
 
@@ -132,26 +132,26 @@ public class Partition implements Comparable<Partition> {
         LinkedList<Partition> partitions = new LinkedList<>();
         for (MultiCut cut : cuts) {
             //add new edge for cutted graph to supertree edgeset
-            List<FlipCutGraphMultiSimpleWeight> splittedGraphs = cut.getSplittedGraphs();
+            List<SourceTreeGraphMultiCut> splittedGraphs = cut.getSplittedGraphs();
 
             //edges for new partition
             List<Edge> edges = new LinkedList<>(supertreeEdges);
 
             //build new partition
-            Map<FlipCutGraphMultiSimpleWeight, Edge> newPartitionGraphs = new HashMap<>(graphs);
+            Map<SourceTreeGraphMultiCut, Edge> newPartitionGraphs = new HashMap<>(graphs);
             Edge sourceGraphEdge = newPartitionGraphs.remove(cut.sourceGraph);
             edges.add(sourceGraphEdge);
 
 
             //check if one of the splitted graphes is finished
             int newFinished = finishedGraphs;
-            Iterator<FlipCutGraphMultiSimpleWeight> it = splittedGraphs.iterator();
+            Iterator<SourceTreeGraphMultiCut> it = splittedGraphs.iterator();
             while (it.hasNext()) {
-                FlipCutGraphMultiSimpleWeight splitGraph = it.next();
+                SourceTreeGraphMultiCut splitGraph = it.next();
                 Edge splitGraphEdge = new Edge(sourceGraphEdge.treeNode, treeNodeIndex.incrementAndGet());
-                final int taxaNum = splitGraph.getNumTaxa();
+                final int taxaNum = splitGraph.numTaxa();
                 if (taxaNum == 1) {
-                    sourceGraphEdge.treeNodeLabel = splitGraph.taxa.iterator().next().name;
+                    sourceGraphEdge.treeNodeLabel = (String) splitGraph.taxaLabels().iterator().next();
                     edges.add(splitGraphEdge);
                     newFinished++;
                 } else if (taxaNum == 0) {
@@ -218,9 +218,7 @@ public class Partition implements Comparable<Partition> {
     }
 
     public boolean compareGraphs(Partition p2) {
-        if (graphs.isEmpty() || p2.graphs.isEmpty())
-            return false; //todo proof!!!
-        return cachedHash == p2.cachedHash;
+        return !graphs.isEmpty() && !p2.graphs.isEmpty() && cachedHash == p2.cachedHash;
     }
 
     class Edge {

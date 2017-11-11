@@ -2,10 +2,14 @@ package phylo.tree.algorithm.flipcut.cli;
 
 import phylo.tree.algorithm.consensus.Consensus;
 import phylo.tree.algorithm.flipcut.AbstractFlipCut;
-import phylo.tree.algorithm.flipcut.FlipCutSingleCutSimpleWeight;
+import phylo.tree.algorithm.flipcut.FlipCutSingleCut;
+import phylo.tree.algorithm.flipcut.SourceTreeGraph;
+import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDSourceGraph;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
+import phylo.tree.algorithm.flipcut.costComputer.SimpleCosts;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
-import phylo.tree.algorithm.flipcut.flipCutGraph.SimpleCutterFactories;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
+import phylo.tree.algorithm.flipcut.flipCutGraph.MaxFlowCutterFactory;
 import phylo.tree.io.TreeFileUtils;
 import phylo.tree.model.Tree;
 
@@ -15,6 +19,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.List;
 
 /**
  * Created by fleisch on 03.02.16.
@@ -93,16 +98,22 @@ public class BCDCLI<A extends AbstractFlipCut> extends BasicBCDCLI<A> {
     public void setParameters(AbstractFlipCut algo) {
         algo.setNumberOfThreads(getNumberOfThreads());
         algo.setPrintProgress(isProgressBar());
-        algo.setBootstrapThreshold(getBootstrapThreshold());
-        algo.setWeights(getWeights());
     }
 
     @Override
     public AbstractFlipCut createAlgorithmInstance() {
-        AbstractFlipCut algo = new FlipCutSingleCutSimpleWeight();
-        algo.setCutter(SimpleCutterFactories.newInstance(getGraphType()));
+        AbstractFlipCut algo = new FlipCutSingleCut();
+        algo.setCutter(MaxFlowCutterFactory.newInstance(getGraphType()));
         setParameters(algo);
         return algo;
+    }
+
+    public SourceTreeGraph createGraphInstance(List<Tree> source, Tree scaffold){
+        if (true){ //todo enable compressed graph
+            return new FlipCutGraphSimpleWeight(SimpleCosts.newCostComputer(source,scaffold,getWeights()),getBootstrapThreshold());
+        }else{
+            return new CompressedBCDSourceGraph(SimpleCosts.newCostComputer(source,scaffold,getWeights()),getBootstrapThreshold());
+        }
     }
 
 

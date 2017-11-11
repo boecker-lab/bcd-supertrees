@@ -3,6 +3,7 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import org.slf4j.LoggerFactory;
+import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 import phylo.tree.model.Tree;
@@ -17,6 +18,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * Time: 14:58
  */
 public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight> {
+
+
+    public FlipCutGraphSimpleWeight(CostComputer costs) {
+        super(costs);
+    }
 
     public FlipCutGraphSimpleWeight(CostComputer costs, int bootstrapThreshold) {
         super(costs, bootstrapThreshold);
@@ -264,34 +270,6 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
     }
 
     @Override
-    protected Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> copyNodes() {
-        //clone all nodes
-        Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew = new HashMap<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight>(characters.size() + taxa.size());
-
-        for (FlipCutNodeSimpleWeight character : characters) {
-            oldToNew.put(character, character.copy());
-        }
-        for (FlipCutNodeSimpleWeight taxon : taxa) {
-            oldToNew.put(taxon, taxon.copy());
-        }
-
-        for (FlipCutNodeSimpleWeight character : characters) {
-            FlipCutNodeSimpleWeight cClone = oldToNew.get(character);
-            for (FlipCutNodeSimpleWeight taxon : character.edges) {
-                FlipCutNodeSimpleWeight tClone = oldToNew.get(taxon);
-                cClone.addEdgeTo(tClone);
-                tClone.addEdgeTo(cClone);
-            }
-            for (FlipCutNodeSimpleWeight taxon : character.imaginaryEdges) {
-                FlipCutNodeSimpleWeight tClone = oldToNew.get(taxon);
-                cClone.addImaginaryEdgeTo(tClone);
-            }
-        }
-
-        return oldToNew;
-    }
-
-    @Override
     protected boolean checkEdges(final boolean edgeDeletion) {
         boolean deleted = false;
         // check edges from characters
@@ -310,15 +288,16 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
 
     }
 
+
     @Override
-    public List<? extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> getPartitions(GraphCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> c) {
+    public List<? extends SourceTreeGraph<LinkedHashSet<FlipCutNodeSimpleWeight>>> getPartitions(GraphCutter<LinkedHashSet<FlipCutNodeSimpleWeight>> c) {
         List<? extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> graphs = calculatePartitions(c);
         for (AbstractFlipCutGraph<FlipCutNodeSimpleWeight> graph : graphs) {
             // checks an removes edges to taxa that are not in this component!
             if (graph.checkEdges(c.isFlipCut()))
                 System.out.println("INFO: Edges between graphs deleted! - Not possible for BCD");
             if (SCAFF_TAXA_MERGE)
-                graph.insertScaffPartData(this,null);
+                graph.insertScaffPartData(this, null);
             if (c.isBCD())
                 graph.insertCharacterMapping(this);
         }

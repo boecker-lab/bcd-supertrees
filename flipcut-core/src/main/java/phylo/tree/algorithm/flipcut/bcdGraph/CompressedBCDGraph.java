@@ -13,10 +13,18 @@ import java.util.List;
 public abstract class CompressedBCDGraph implements SourceTreeGraph {
     protected final RoaringBitmap taxa;
     final RoaringBitmap characters;
+    final RoaringBitmap activeScaffolds;
 
-    protected CompressedBCDGraph(RoaringBitmap taxa, RoaringBitmap characters) {
+    protected CompressedBCDGraph(RoaringBitmap taxa, RoaringBitmap characters, RoaringBitmap activeScaffolds) {
         this.taxa = taxa;
         this.characters = characters;
+        this.activeScaffolds = activeScaffolds;
+    }
+
+    protected CompressedBCDGraph(RoaringBitmap activeScaffolds) {
+        this.taxa = new RoaringBitmap();
+        this.characters = new RoaringBitmap();
+        this.activeScaffolds = activeScaffolds;
     }
 
 
@@ -78,11 +86,11 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph {
 
     protected void split(final List<CompressedBCDSubGraph> graphs) {
         RoaringBitmap connectedTaxa = getConnectedComponent();
-        CompressedBCDSubGraph gCurrent = new CompressedBCDSubGraph(getSource(), connectedTaxa, getCharacterForSubSetOfTaxa(connectedTaxa));
+        CompressedBCDSubGraph gCurrent = new CompressedBCDSubGraph(getSource(), connectedTaxa, getCharacterForSubSetOfTaxa(connectedTaxa),null); //todo parse scaffold information corectly
         graphs.add(gCurrent);
         RoaringBitmap reverseTaxa = RoaringBitmap.xor(connectedTaxa, taxa);
         if (reverseTaxa.getCardinality() > 0) {
-            CompressedBCDSubGraph gRest = new CompressedBCDSubGraph(getSource(), connectedTaxa, getCharacterForSubSetOfTaxa(connectedTaxa));
+            CompressedBCDSubGraph gRest = new CompressedBCDSubGraph(getSource(), connectedTaxa, getCharacterForSubSetOfTaxa(connectedTaxa), null);
             gRest.split(graphs);
         }
     }

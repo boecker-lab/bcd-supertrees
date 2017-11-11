@@ -1,6 +1,8 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 
+import phylo.tree.algorithm.flipcut.SourceTreeGraph;
+import phylo.tree.algorithm.flipcut.SourceTreeGraphMultiCut;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
@@ -14,7 +16,7 @@ import java.util.*;
  * Time: 17:59
  */
 
-public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
+public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight implements SourceTreeGraphMultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
     private int numTaxaAfterClose = -1;
     private int maxCutNumber;
     private int nextCutIndexToCalculate;
@@ -52,7 +54,8 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
     }
 
 
-    public Iterator<MultiCut> getCutIterator() {
+    @Override
+    public Iterator<MultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>> getCutIterator() {
         return new CutIterator();
     }
 
@@ -139,6 +142,34 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         }
     }
 
+    protected Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> copyNodes() {
+        //clone all nodes
+        Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew = new HashMap<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight>(characters.size() + taxa.size());
+
+        for (FlipCutNodeSimpleWeight character : characters) {
+            oldToNew.put(character, character.copy());
+        }
+        for (FlipCutNodeSimpleWeight taxon : taxa) {
+            oldToNew.put(taxon, taxon.copy());
+        }
+
+        for (FlipCutNodeSimpleWeight character : characters) {
+            FlipCutNodeSimpleWeight cClone = oldToNew.get(character);
+            for (FlipCutNodeSimpleWeight taxon : character.edges) {
+                FlipCutNodeSimpleWeight tClone = oldToNew.get(taxon);
+                cClone.addEdgeTo(tClone);
+                tClone.addEdgeTo(cClone);
+            }
+            for (FlipCutNodeSimpleWeight taxon : character.imaginaryEdges) {
+                FlipCutNodeSimpleWeight tClone = oldToNew.get(taxon);
+                cClone.addImaginaryEdgeTo(tClone);
+            }
+        }
+
+        return oldToNew;
+    }
+
+
     //overwritten --> creates cloned nodes for multiple splits
     protected List<List<LinkedHashSet<FlipCutNodeSimpleWeight>>> splitToGraphData(LinkedHashSet<FlipCutNodeSimpleWeight> sinkNodes, final Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> oldToNew) {
         LinkedHashSet<FlipCutNodeSimpleWeight> g1Characters = new LinkedHashSet<>();
@@ -207,7 +238,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         return Arrays.asList(g1, g2);
     }
 
-    public List<FlipCutNodeSimpleWeight> checkRemoveCharacter(Set<FlipCutNodeSimpleWeight> sinkNodes) {
+    private List<FlipCutNodeSimpleWeight> checkRemoveCharacter(Set<FlipCutNodeSimpleWeight> sinkNodes) {
         if (DEBUG) System.out.println("===================");
         List<FlipCutNodeSimpleWeight> charactersToRemove = new LinkedList<FlipCutNodeSimpleWeight>();
         for (FlipCutNodeSimpleWeight node : sinkNodes) {
@@ -281,10 +312,13 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         return splittedGraphs;
     }
 
+
+
     @Override
-    public List<? extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> getPartitions(GraphCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> c) {
+    public List<? extends SourceTreeGraph<LinkedHashSet<FlipCutNodeSimpleWeight>>> getPartitions(GraphCutter<LinkedHashSet<FlipCutNodeSimpleWeight>> c) {
         return calculatePartitions(c);
     }
+
 
     public void close() {
         if (splittedCuts != null && splittedCuts.size() == maxCutNumber) {
@@ -299,7 +333,8 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         }
     }
 
-    public int getNumTaxa() {
+    @Override
+    public int numTaxa() {
         if (numTaxaAfterClose >= 0)
             return numTaxaAfterClose;
         return taxa.size();
@@ -313,7 +348,7 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight {
         return cuts.length;
     }
 
-    class CutIterator implements Iterator<MultiCut> {
+    class CutIterator implements Iterator<MultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>> {
         CutIterator() {
             //check if graph is already disconnected
             if (nextCutIndexToCalculate == 0 && maxCutNumber == cuts.length) {

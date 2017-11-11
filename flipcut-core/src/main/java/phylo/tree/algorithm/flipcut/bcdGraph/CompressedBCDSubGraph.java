@@ -8,8 +8,8 @@ import java.util.LinkedList;
 public class CompressedBCDSubGraph extends CompressedBCDGraph {
     private final CompressedBCDSourceGraph source;
 
-    public CompressedBCDSubGraph(CompressedBCDSourceGraph source, RoaringBitmap taxa, RoaringBitmap characters) {
-        super(taxa, characters);
+    public CompressedBCDSubGraph(CompressedBCDSourceGraph source, RoaringBitmap taxa, RoaringBitmap characters, RoaringBitmap activeScaffolds) {
+        super(taxa, characters, activeScaffolds);
         this.source = source;
     }
 

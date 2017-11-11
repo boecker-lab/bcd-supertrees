@@ -8,6 +8,7 @@ import mincut.cutGraphAPI.MaxFlowCutGraph;
 import mincut.cutGraphAPI.bipartition.BasicCut;
 import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.STCut;
+import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 
 import java.util.*;
@@ -19,7 +20,7 @@ import java.util.concurrent.ExecutorService;
  * Date: 14.02.13
  * Time: 11:12
  */
-public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> extends CutGraphCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, T> {
+public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> extends CutGraphCutter<LinkedHashSet<FlipCutNodeSimpleWeight>> {
 
     protected static final boolean DEBUG = false;
 
@@ -306,7 +307,8 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     }
 
     @Override
-    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(final T source) {
+    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(SourceTreeGraph<LinkedHashSet<FlipCutNodeSimpleWeight>> s) {
+        T source = (T) s;
         MaxFlowCutGraph<FlipCutNodeSimpleWeight> cutGraph;
         Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> mincut = null;
         if (type == CutGraphTypes.MAXFLOW_TARJAN_GOLDBERG || type == CutGraphTypes.MAXFLOW_AHOJI_ORLIN) {

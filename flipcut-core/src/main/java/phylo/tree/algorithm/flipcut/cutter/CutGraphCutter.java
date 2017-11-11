@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
  * Date: 15.01.13
  * Time: 14:15
  */
-public abstract class CutGraphCutter<S, T extends SourceTreeGraph> implements GraphCutter<S, T> {
+public abstract class CutGraphCutter<S> implements GraphCutter<S> {
     private static final long INFINITY = 1000000;
 
     public static long getInfinity() {

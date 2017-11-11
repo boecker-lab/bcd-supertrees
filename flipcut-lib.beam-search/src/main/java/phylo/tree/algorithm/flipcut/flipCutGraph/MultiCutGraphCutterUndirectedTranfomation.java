@@ -9,6 +9,7 @@ import mincut.cutGraphAPI.KargerSteinCutGraph;
 import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.FlipCutCutFactory;
 import mincut.cutGraphAPI.bipartition.HyperCut;
+import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.ChracterScoreModifier;
 import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.KargerGraphCreator;
@@ -24,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> implements MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
+public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<LinkedHashSet<FlipCutNodeSimpleWeight>> implements MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
     private final boolean singleSampling;
     private final ChracterScoreModifier modder;
     private final KargerGraphCreator graphCreator;
@@ -55,8 +56,9 @@ public class MultiCutGraphCutterUndirectedTranfomation extends CutGraphCutter<Li
         this.singleSampling = singleSampling;
     }
 
+
     @Override
-    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(FlipCutGraphMultiSimpleWeight source) {
+    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(SourceTreeGraph<LinkedHashSet<FlipCutNodeSimpleWeight>> source) {
         if (source.equals(this.source))
             return getMinCut();
         return null;

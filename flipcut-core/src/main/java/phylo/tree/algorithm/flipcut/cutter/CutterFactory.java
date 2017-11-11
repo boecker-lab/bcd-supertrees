@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public interface CutterFactory< C extends GraphCutter<S,T>,S,T extends SourceTreeGraph> {
+public interface CutterFactory< C extends GraphCutter<S>,S,T extends SourceTreeGraph<S>> {
     C newInstance(T graph);
     C newInstance(T graph,ExecutorService executorService, int threads);
 

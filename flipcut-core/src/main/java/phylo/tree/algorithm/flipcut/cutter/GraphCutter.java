@@ -10,10 +10,10 @@ import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public interface GraphCutter<S, T extends SourceTreeGraph> {
+public interface GraphCutter<S> {
     void clear();
 
-    Cut<S> cut(T source);
+    Cut<S> cut(SourceTreeGraph<S> source);
 
     Cut<S> getMinCut();
 

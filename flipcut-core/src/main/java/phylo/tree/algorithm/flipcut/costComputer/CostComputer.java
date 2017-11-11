@@ -1,8 +1,9 @@
 package phylo.tree.algorithm.flipcut.costComputer;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
-import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
@@ -20,6 +21,8 @@ import java.util.Set;
  * node weight styles
  */
 public abstract class CostComputer {
+    protected static final Logger LOGGER = LoggerFactory.getLogger(CostComputer.class);
+
     /**
      * The accuracy used to go from double to long
      */
@@ -114,6 +117,11 @@ public abstract class CostComputer {
     public abstract long getEdgeWeight(TreeNode node, List<? extends AbstractFlipCutNode> leafes, AbstractFlipCutNode leaf);
 
     public abstract long getEdgeWeight(TreeNode node, List<TreeNode> leafes, TreeNode leaf);
+
+    public long getEdgeWeight(TreeNode node) {
+        return getEdgeWeight(node, null, (TreeNode) null);
+    }
+
 
     public List<Tree> getTrees() {
         return trees;

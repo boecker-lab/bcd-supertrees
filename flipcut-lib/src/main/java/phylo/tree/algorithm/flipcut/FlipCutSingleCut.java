@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  * Date: 29.11.12
  * Time: 14:42
  */
-public abstract class AbstractFlipCutSingleCut<S, T extends SourceTreeGraph, C extends CutGraphCutter<S, T>> extends AbstractFlipCut<S, T, C, MaxFlowCutterFactory<C, S, T>> {
+public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends CutGraphCutter<S>> extends AbstractFlipCut<S, T, C, MaxFlowCutterFactory<C, S, T>> {
     private static final boolean CALCULATE_SCORE = true;
     private long globalWeight;
 
@@ -34,18 +34,18 @@ public abstract class AbstractFlipCutSingleCut<S, T extends SourceTreeGraph, C e
 
     protected Tree supertree = null;
 
-    public AbstractFlipCutSingleCut() {
+    public FlipCutSingleCut() {
     }
 
-    public AbstractFlipCutSingleCut(MaxFlowCutterFactory<C, S, T> type) {
+    public FlipCutSingleCut(MaxFlowCutterFactory<C, S, T> type) {
         super(type);
     }
 
-    public AbstractFlipCutSingleCut(Logger log, MaxFlowCutterFactory<C, S, T> type) {
+    public FlipCutSingleCut(Logger log, MaxFlowCutterFactory<C, S, T> type) {
         super(log, type);
     }
 
-    public AbstractFlipCutSingleCut(Logger log, ExecutorService executorService1, MaxFlowCutterFactory<C, S, T> type) {
+    public FlipCutSingleCut(Logger log, ExecutorService executorService1, MaxFlowCutterFactory<C, S, T> type) {
         super(log, executorService1, type);
     }
 
@@ -392,4 +392,8 @@ public abstract class AbstractFlipCutSingleCut<S, T extends SourceTreeGraph, C e
     }
 
 
+    @Override
+    protected String name() {
+        return getClass().getSimpleName();
+    }
 }

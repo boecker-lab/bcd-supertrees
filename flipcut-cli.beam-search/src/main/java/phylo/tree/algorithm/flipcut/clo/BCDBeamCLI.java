@@ -5,8 +5,11 @@ import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.IntOptionHandler;
 import phylo.tree.algorithm.flipcut.AbstractFlipCut;
 import phylo.tree.algorithm.flipcut.FlipCutMultiCut;
+import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.cli.BCDCLI;
-import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutGrapCutterFactories;
+import phylo.tree.algorithm.flipcut.costComputer.SimpleCosts;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
+import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutterFactory;
 import phylo.tree.model.Tree;
 
 import java.io.BufferedWriter;
@@ -21,10 +24,10 @@ import java.util.List;
  */
 public class BCDBeamCLI extends BCDCLI<FlipCutMultiCut> {
     //todo maybe extend or overwrite algorithm enum
-    public MultiCutGrapCutterFactories.MultiCutterType multiType = null;
+    public MultiCutterFactory.MultiCutterType multiType = null;
 
     @Option(name = "-x", aliases = "--beamSearch", usage = "Use beam search implementation")
-    public void setMultiType(MultiCutGrapCutterFactories.MultiCutterType multiType) {
+    public void setMultiType(MultiCutterFactory.MultiCutterType multiType) {
         this.multiType = multiType;
     }
 
@@ -41,18 +44,27 @@ public class BCDBeamCLI extends BCDCLI<FlipCutMultiCut> {
     @Option(name = "-k", aliases = "--cutNumber", handler = IntOptionHandler.class, usage = "Number of suboptimal solutions")
     public void setCutNumber(int cutNumber) {
         this.cutNumber = Math.max(1, cutNumber);
-    };
+    }
 
 
     @Override
     public AbstractFlipCut createAlgorithmInstance() {
         if (multiType != null) {
-            FlipCutMultiCut algo = new FlipCutMultiCut(MultiCutGrapCutterFactories.newInstance(multiType, getGraphType()));
+            FlipCutMultiCut algo = new FlipCutMultiCut(MultiCutterFactory.newInstance(multiType, getGraphType()));
             algo.setNumberOfCuts(cutNumber);
             setParameters(algo);
             return algo;
         } else {
             return super.createAlgorithmInstance();
+        }
+    }
+
+    @Override
+    public SourceTreeGraph createGraphInstance(List<Tree> source, Tree scaffold) {
+        if (multiType != null) {
+            return new FlipCutGraphMultiSimpleWeight(SimpleCosts.newCostComputer(source, scaffold, getWeights()), cutNumber, MultiCutterFactory.newInstance(multiType, getGraphType()));
+        } else {
+            return super.createGraphInstance(source, scaffold);
         }
     }
 
@@ -69,7 +81,7 @@ public class BCDBeamCLI extends BCDCLI<FlipCutMultiCut> {
             try (BufferedWriter wr = Files.newBufferedWriter(Paths.get(name))) {
                 for (Tree tree : treesToWrite) {
                     String s = tree.getName();
-                    wr.write(s==null?"NaN":s);
+                    wr.write(s == null ? "NaN" : s);
                     wr.write(System.lineSeparator());
                 }
             } catch (Exception e) {

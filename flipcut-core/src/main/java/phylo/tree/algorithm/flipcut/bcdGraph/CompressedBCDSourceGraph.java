@@ -1,5 +1,6 @@
 package phylo.tree.algorithm.flipcut.bcdGraph;
 
+import gnu.trove.map.TIntObjectMap;
 import org.roaringbitmap.IntConsumer;
 import org.roaringbitmap.RoaringBitmap;
 
@@ -12,16 +13,22 @@ public class CompressedBCDSourceGraph extends CompressedBCDGraph {
     final String[] sourceTaxa;
     final RoaringBitmap[] sourceHyperEdges;
     final RoaringBitmap[] sourceImaginaryHyperEdges;
-    RoaringBitmap scaffoldCharacters;
+
+    final TIntObjectMap<RoaringBitmap> scaffoldCharacterMaping;
+
 
     final long[] chracterWeights;
 
-    public CompressedBCDSourceGraph(String[] sourceTaxa, RoaringBitmap[] sourceCharacters, RoaringBitmap[] sourceCharacterImaginaryEdgeSets, long[] chracterWeights) {
-        super(new RoaringBitmap(), new RoaringBitmap());
+
+    public CompressedBCDSourceGraph(String[] sourceTaxa, RoaringBitmap[] sourceCharacters, RoaringBitmap[] sourceCharacterImaginaryEdgeSets, RoaringBitmap activeScaffoldChars, long[] chracterWeights, TIntObjectMap<RoaringBitmap> scaffoldCharacterMaping) {
+        super(activeScaffoldChars);
         this.sourceTaxa = sourceTaxa;
         this.sourceHyperEdges = sourceCharacters;
         this.sourceImaginaryHyperEdges = sourceCharacterImaginaryEdgeSets;
         this.chracterWeights = chracterWeights;
+        this.scaffoldCharacterMaping = scaffoldCharacterMaping;
+        taxa.add(0L, sourceTaxa.length);
+        characters.add(0L, sourceCharacters.length);
     }
 
 

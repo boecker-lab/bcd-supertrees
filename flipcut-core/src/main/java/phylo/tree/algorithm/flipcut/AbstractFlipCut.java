@@ -1,8 +1,6 @@
 package phylo.tree.algorithm.flipcut;
 
 import phylo.tree.algorithm.SupertreeAlgorithm;
-import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
-import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 import phylo.tree.model.Tree;
@@ -17,7 +15,7 @@ import java.util.logging.Logger;
  * Date: 29.11.12
  * Time: 14:10
  */
-public abstract class AbstractFlipCut<S, T extends SourceTreeGraph, C extends GraphCutter<S, T>, F extends CutterFactory<C, S, T>> extends SupertreeAlgorithm {
+public abstract class AbstractFlipCut<S, T extends SourceTreeGraph<S>, C extends GraphCutter<S>, F extends CutterFactory<C, S, T>> extends SupertreeAlgorithm {
     public static final boolean DEBUG = false;
     public static final int CORES_AVAILABLE = Runtime.getRuntime().availableProcessors();
     /**
@@ -32,14 +30,6 @@ public abstract class AbstractFlipCut<S, T extends SourceTreeGraph, C extends Gr
 
 
     protected F type;
-    /**
-     * Use edge weights
-     */
-    protected FlipCutWeights.Weights weights = FlipCutWeights.Weights.UNIT_COST;
-    /**
-     * Set minimum bootstrap value of a clade to be part of the analysis
-     */
-    protected int bootstrapThreshold = 0;
     /**
      * The Graph actual working on
      */
@@ -73,8 +63,8 @@ public abstract class AbstractFlipCut<S, T extends SourceTreeGraph, C extends Gr
      *
      * @param log the logger
      */
-    protected AbstractFlipCut(Logger log, ExecutorService executorService1, F type) {
-        super(log, executorService1);
+    protected AbstractFlipCut(Logger log, ExecutorService executorService, F type) {
+        super(log, executorService);
         this.type = type;
     }
 
@@ -87,24 +77,17 @@ public abstract class AbstractFlipCut<S, T extends SourceTreeGraph, C extends Gr
     }
 
 
-    /**
-     * Sets the edge weights function
-     *
-     * @param weights the weighting scheme
-     */
-    public void setWeights(FlipCutWeights.Weights weights) {
-        this.weights = weights;
+    public void setInput(T initGraph) {
+        this.initialGraph = initGraph;
     }
-
 
     @Override
-    public void setInput(List<Tree> inputTrees) {
-        setInput(inputTrees, null);
-    }
-
-    public void setInput(List<Tree> inputTrees, Tree scaffoldTree) {
-        final CostComputer costs = initCosts(inputTrees, scaffoldTree);
-        initialGraph = createInitGraph(costs);
+    public void setInput(List<Tree> input) {
+        try {
+            throw new NoSuchMethodException("Method not supported");
+        } catch (NoSuchMethodException e) {
+            LOGGER.warning(e.toString());
+        }
     }
 
     public void setCutter(F type) {
@@ -115,21 +98,9 @@ public abstract class AbstractFlipCut<S, T extends SourceTreeGraph, C extends Gr
         return type;
     }
 
-    public void setBootstrapThreshold(int bootstrapThreshold) {
-        this.bootstrapThreshold = bootstrapThreshold;
-    }
-
-    public int getBootstrapThreshold() {
-        return bootstrapThreshold;
-    }
-
     public void setNumberOfThreads(int numberOfThreads) {
         this.numberOfThreads = numberOfThreads;
     }
-
-    protected abstract T createInitGraph(CostComputer costsComputer);
-
-    protected abstract CostComputer initCosts(List<Tree> inputTrees, Tree scaffoldTree);
 
 
 }

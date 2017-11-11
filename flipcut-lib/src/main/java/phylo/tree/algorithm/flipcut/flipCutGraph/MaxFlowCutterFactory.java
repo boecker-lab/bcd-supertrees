@@ -11,7 +11,7 @@ import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public interface MaxFlowCutterFactory<C extends CutGraphCutter<S, T>, S, T extends SourceTreeGraph> extends CutterFactory<C, S, T> {
+public interface MaxFlowCutterFactory<C extends CutGraphCutter<S>, S, T extends SourceTreeGraph<S>> extends CutterFactory<C, S, T> {
     CutGraphTypes getType();
 
     @Override
@@ -22,5 +22,16 @@ public interface MaxFlowCutterFactory<C extends CutGraphCutter<S, T>, S, T exten
     @Override
     default boolean isFlipCut() {
         return getType().isFlipCut();
+    }
+
+    static MaxFlowCutterFactory newInstance() {
+        return newInstance(CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+    }
+
+    static MaxFlowCutterFactory newInstance(CutGraphTypes simpleCutterType) {
+        switch (simpleCutterType) {
+            default:
+                return new SingleCutGraphCutter.Factory(simpleCutterType);
+        }
     }
 }

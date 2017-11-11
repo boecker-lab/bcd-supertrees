@@ -6,6 +6,7 @@ import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.MaxFlowCutGraph;
 import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.STCut;
+import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.BlackList;
 import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.GreedyBlackList;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
@@ -123,7 +124,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
     }
 
     @Override
-    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(FlipCutGraphMultiSimpleWeight source) {
+    public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(SourceTreeGraph<LinkedHashSet<FlipCutNodeSimpleWeight>> source) {
         if (source.equals(this.source))
             return getMinCut();
         return null;

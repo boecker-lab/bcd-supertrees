@@ -1,12 +1,7 @@
 package phylo.tree.algorithm.flipcut;
 
 import core.algorithm.Algorithm;
-import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
-import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
-import phylo.tree.algorithm.flipcut.costComputer.UnitCostComputer;
-import phylo.tree.algorithm.flipcut.costComputer.WeightCostComputer;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
-import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutterFactory;
 import phylo.tree.algorithm.flipcut.model.Partition;
@@ -21,9 +16,11 @@ import java.util.logging.Logger;
  * Date: 17.01.13
  * Time: 13:56
  */
-public class FlipCutMultiCut extends AbstractFlipCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight, MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>> {
+public class FlipCutMultiCut<S, T extends SourceTreeGraphMultiCut<S, T>, C extends MultiCutter<S, T>> extends AbstractFlipCut<S, T, C, MultiCutterFactory<C, S, T>> {
     protected int numberOfCuts = 1;
     protected List<Tree> result;
+
+    //todo set type to null
 
     public FlipCutMultiCut() {
         super();
@@ -34,16 +31,16 @@ public class FlipCutMultiCut extends AbstractFlipCut<LinkedHashSet<FlipCutNodeSi
         return getClass().getSimpleName();
     }
 
-    public FlipCutMultiCut(MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> type) {
+    public FlipCutMultiCut(MultiCutterFactory<C, S, T> type) {
         super(type);
     }
 
-    public FlipCutMultiCut(Logger log, MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> type) {
+    public FlipCutMultiCut(Logger log, MultiCutterFactory<C, S, T> type) {
         super(log, type);
     }
 
-    public FlipCutMultiCut(Logger log, ExecutorService executorService1, MultiCutterFactory<MultiCutter<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight>, LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> type) {
-        super(log, executorService1, type);
+    public FlipCutMultiCut(Logger log, ExecutorService executorService, MultiCutterFactory<C, S, T> type) {
+        super(log, executorService, type);
     }
 
     private void calculateSTs() {
@@ -55,7 +52,7 @@ public class FlipCutMultiCut extends AbstractFlipCut<LinkedHashSet<FlipCutNodeSi
             long calctime = System.currentTimeMillis();
             //map to store partitions which are already cutted in more parts than the others
             final TreeMap<Integer, Set<Partition>> subsBench = new TreeMap<>();
-            final int numTaxa = initialGraph.getNumTaxa();
+            final int numTaxa = initialGraph.numTaxa();
 
             System.out.println("Calculating Partitions...");
 
@@ -153,29 +150,6 @@ public class FlipCutMultiCut extends AbstractFlipCut<LinkedHashSet<FlipCutNodeSi
         }
         System.out.println("...DONE in " + ((double) (System.currentTimeMillis() - supertreetime) / 1000d) + "s");
         return supertrees;
-    }
-
-    @Override
-    protected FlipCutGraphMultiSimpleWeight createInitGraph(CostComputer costsComputer) {
-        return new FlipCutGraphMultiSimpleWeight(costsComputer, numberOfCuts, type);
-    }
-
-    //this method contains only simple weightings //todo redundant with singlecut version..., conceptional proble,  make better!
-    @Override
-    protected CostComputer initCosts(List<Tree> inputTrees, Tree scaffoldTree) {
-        CostComputer costs = null;
-        if (UnitCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
-            LOGGER.info("Using Unit Costs");
-            costs = new UnitCostComputer(inputTrees, scaffoldTree);
-        } else if (WeightCostComputer.SUPPORTED_COST_TYPES.contains(weights)) {
-            costs = new WeightCostComputer(inputTrees, weights, scaffoldTree);
-            LOGGER.info("Using " + weights);
-        } else {
-            LOGGER.warning("No supported weight option set. Setting to standard: " + FlipCutWeights.Weights.EDGE_AND_LEVEL);
-            setWeights(FlipCutWeights.Weights.EDGE_AND_LEVEL);
-            initCosts(inputTrees, scaffoldTree);
-        }
-        return costs;
     }
 
 

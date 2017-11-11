@@ -4,6 +4,8 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.InterfaceCmdLineParser;
 import phylo.tree.algorithm.flipcut.cli.BCDCLI;
+import phylo.tree.algorithm.flipcut.costComputer.SimpleCosts;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
 import phylo.tree.algorithm.flipcut.utils.Utils;
 import phylo.tree.algorithm.gscm.SCMAlgorithm;
 import phylo.tree.model.Tree;
@@ -66,7 +68,7 @@ public class BCDSupertrees {
                     guideTree = algo.getResult();
                     scmRuntime = ((double) System.currentTimeMillis() - scmRuntime) / 1000d;
                     CLI.LOGGER.info("...SCM Guide Tree calculation DONE in " + scmRuntime + "s");
-                }else{
+                } else {
 
                 }
                 guideTreeToCut = guideTree;
@@ -92,9 +94,9 @@ public class BCDSupertrees {
 
             // configure algorithm
             AbstractFlipCut algorithm = CLI.createAlgorithmInstance();
-//            CLI.setParameters(algorithm);
+
             //set input trees
-            algorithm.setInput(inputTrees, guideTreeToCut);
+            algorithm.setInput(CLI.createGraphInstance(inputTrees,guideTreeToCut));
 
             //run bcd supertrees
             algorithm.run();

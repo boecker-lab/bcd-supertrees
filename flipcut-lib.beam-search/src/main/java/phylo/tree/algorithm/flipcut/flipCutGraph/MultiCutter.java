@@ -9,6 +9,6 @@ import phylo.tree.algorithm.flipcut.model.MultiCut;
  * Date: 19.04.13
  * Time: 15:19
  */
-public interface MultiCutter<S, T extends SourceTreeGraph> extends GraphCutter<S, T> {
-    MultiCut getNextCut();
+public interface MultiCutter<S, T extends SourceTreeGraph<S>> extends GraphCutter<S> {
+    MultiCut<S,T> getNextCut();
 }

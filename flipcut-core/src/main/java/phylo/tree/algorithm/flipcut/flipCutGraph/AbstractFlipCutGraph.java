@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Date: 29.11.12
  * Time: 14:36
  */
-public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> implements SourceTreeGraph<LinkedHashSet<N>, AbstractFlipCutGraph<N>> {
+public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> implements SourceTreeGraph<LinkedHashSet<N>> {
 
     /**
      * Turn on/off debug mode
@@ -64,6 +64,10 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
      */
     protected long minCutValue = Long.MAX_VALUE;
 
+
+    protected AbstractFlipCutGraph(CostComputer costs) {
+        this(costs, 0);
+    }
 
     protected AbstractFlipCutGraph(CostComputer costs, int bootstrapThreshold) {
         System.out.println("Creating graph representation of input trees...");
@@ -228,9 +232,6 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
         }
     }
 
-    protected abstract Map<N, N> copyNodes();
-
-
     public long getMinCutValue() {
         return minCutValue;
     }
@@ -364,7 +365,7 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
     //########## methods for edge identical character mappin END ##########
 
 
-    protected List<? extends AbstractFlipCutGraph<N>> calculatePartitions(GraphCutter<LinkedHashSet<N>, AbstractFlipCutGraph<N>> c) {
+    protected List<? extends AbstractFlipCutGraph<N>> calculatePartitions(GraphCutter<LinkedHashSet<N>> c) {
         final List<AbstractFlipCutGraph<N>> graphs;
         final List<List<N>> components = getComponents();
         if (components.size() == 1) {
@@ -405,4 +406,6 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
             return new NodeLabelIterator<>(taxa);
         }
     }
+
+
 }

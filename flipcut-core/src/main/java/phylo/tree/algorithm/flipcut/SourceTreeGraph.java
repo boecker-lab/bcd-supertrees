@@ -5,7 +5,7 @@ import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 
 import java.util.List;
 
-public interface SourceTreeGraph<C, G extends SourceTreeGraph> {
+public interface SourceTreeGraph<C> {
 
 
     /**
@@ -20,12 +20,13 @@ public interface SourceTreeGraph<C, G extends SourceTreeGraph> {
      *
      * @return graphs list of two graphs created
      */
-    List<? extends G> getPartitions(final GraphCutter<C, G> c);
+    List<? extends SourceTreeGraph<C>> getPartitions(GraphCutter<C> c);
 
 
     Iterable<String> taxaLabels();
 
     int numTaxa();
-
     int numCharacter();
+
+//    boolean hastActiveScaffoldPartitions();
 }

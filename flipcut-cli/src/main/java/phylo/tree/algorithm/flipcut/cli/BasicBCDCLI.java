@@ -3,6 +3,7 @@ package phylo.tree.algorithm.flipcut.cli;
 import core.cli.Multithreaded;
 import core.cli.Progressbar;
 import phylo.tree.algorithm.flipcut.AbstractFlipCut;
+import phylo.tree.algorithm.flipcut.BCDSupertrees;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
