@@ -14,22 +14,17 @@ public class CompressedBCDSubGraph extends CompressedBCDGraph {
     }
 
     @Override
-    public LinkedList<RoaringBitmap> getHyperEdgesAsList() {
-        LinkedList<RoaringBitmap> l = new LinkedList<>();
+    public LinkedList<Hyperedge> getHyperEdgesAsList() {
+        LinkedList<Hyperedge> l = new LinkedList<>();
         characters.forEach((IntConsumer) i -> {
-            l.add(getSource().sourceHyperEdges[i]);
+            l.add(getSource().sourceMergedHyperEdges[i]);
         });
         return l;
     }
 
     @Override
-    public Iterable<RoaringBitmap> hyperEdges() {
-        return new BitMapIteratable<>(getSource().sourceHyperEdges, characters);
-    }
-
-    @Override
-    public Iterable<RoaringBitmap> imaginaryHyperEdges() {
-        return new BitMapIteratable<>(getSource().sourceImaginaryHyperEdges, characters);
+    public Iterable<Hyperedge> hyperEdges() {
+        return new BitMapIteratable<>(getSource().sourceMergedHyperEdges, characters);
     }
 
     @Override

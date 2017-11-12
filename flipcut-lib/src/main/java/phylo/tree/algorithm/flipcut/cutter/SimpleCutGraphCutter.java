@@ -1,4 +1,4 @@
-package phylo.tree.algorithm.flipcut.flipCutGraph;
+package phylo.tree.algorithm.flipcut.cutter;
 
 
 import mincut.cutGraphAPI.AhujaOrlinCutGraph;
@@ -10,6 +10,10 @@ import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
+import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
+import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
+import phylo.tree.algorithm.flipcut.flipCutGraph.VertexMapping;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;

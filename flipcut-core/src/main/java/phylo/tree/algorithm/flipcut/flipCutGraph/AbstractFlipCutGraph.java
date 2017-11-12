@@ -36,7 +36,7 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
     /**
      * Active partitions for guide tree based taxa merging
      */
-    protected Set<N> activePartitions = new HashSet<>();
+    public Set<N> activePartitions = new HashSet<>();
 
     /**
      * Mapping for edge  based character merging (Global character Map)

@@ -7,6 +7,8 @@ import mincut.cutGraphAPI.MaxFlowCutGraph;
 import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
+import phylo.tree.algorithm.flipcut.cutter.MaxFlowCutterFactory;
+import phylo.tree.algorithm.flipcut.cutter.SimpleCutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.BlackList;
 import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.GreedyBlackList;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;

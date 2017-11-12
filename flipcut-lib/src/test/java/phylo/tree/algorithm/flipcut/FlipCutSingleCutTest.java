@@ -4,14 +4,16 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.roaringbitmap.RoaringBitmap;
 import phylo.tree.algorithm.TreeAlgorithm;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDSourceGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedGraphFactory;
+import phylo.tree.algorithm.flipcut.bcdGraph.Hyperedge;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.costComputer.SimpleCosts;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
-import phylo.tree.algorithm.flipcut.flipCutGraph.SingleCutGraphCutter;
+import phylo.tree.algorithm.flipcut.cutter.SingleCutGraphCutter;
 import phylo.tree.algorithm.gscm.GreedySCMAlgorithm;
 import phylo.tree.algorithm.gscm.treeMerger.TreeScorers;
 import phylo.tree.io.Newick;
@@ -262,6 +264,11 @@ public class FlipCutSingleCutTest {
                 FlipCutWeights.Weights.UNIT_COST), 0);
 
         System.out.println("Created Compressed Graph Guide in: " + (double) (System.currentTimeMillis() - time) / 1000d);
+
+        System.out.println("Characters: ");
+        for (Hyperedge bitmap : test.hyperEdges()) {
+            System.out.println(Arrays.toString(bitmap.ones.toArray()));
+        }
 
         time = System.currentTimeMillis();
         FlipCutGraphSimpleWeight g2 = new FlipCutGraphSimpleWeight(SimpleCosts.newCostComputer(

@@ -5,6 +5,8 @@ import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
+import phylo.tree.algorithm.flipcut.cutter.MaxFlowCutterFactory;
+import phylo.tree.algorithm.flipcut.cutter.SimpleCutGraphCutter;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
 import phylo.tree.algorithm.flipcut.model.VaziraniCut;
 

@@ -11,6 +11,7 @@ import mincut.cutGraphAPI.bipartition.FlipCutCutFactory;
 import mincut.cutGraphAPI.bipartition.HyperCut;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
+import phylo.tree.algorithm.flipcut.cutter.SingleCutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.ChracterScoreModifier;
 import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.KargerGraphCreator;
 import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;

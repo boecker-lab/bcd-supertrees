@@ -16,7 +16,7 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
     /**
      * The edges weight
      */
-    protected long edgeWeight;
+    public long edgeWeight;
 
     //main constructor
     protected FlipCutNodeSimpleWeight(String name, Set<FlipCutNodeSimpleWeight> edges, Set<FlipCutNodeSimpleWeight> imaginaryEdges) {
@@ -38,7 +38,7 @@ public class FlipCutNodeSimpleWeight extends AbstractFlipCutNode<FlipCutNodeSimp
     }
 
     //DummyConstructor
-    FlipCutNodeSimpleWeight(Set<FlipCutNodeSimpleWeight> edges) {
+    public FlipCutNodeSimpleWeight(Set<FlipCutNodeSimpleWeight> edges) {
         this(null, edges, null);
     }
 

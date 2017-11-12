@@ -28,11 +28,9 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph {
     }
 
 
-    public abstract LinkedList<RoaringBitmap> getHyperEdgesAsList();
+    public abstract LinkedList<Hyperedge> getHyperEdgesAsList();
 
-    public abstract Iterable<RoaringBitmap> hyperEdges();
-
-    public abstract Iterable<RoaringBitmap> imaginaryHyperEdges();
+    public abstract Iterable<Hyperedge> hyperEdges();
 
     public abstract CompressedBCDSourceGraph getSource();
 
@@ -46,16 +44,16 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph {
     }
 
     public RoaringBitmap getConnectedComponent() {
-        LinkedList<RoaringBitmap> edges = getHyperEdgesAsList();
-        RoaringBitmap component = edges.poll().clone();
+        LinkedList<Hyperedge> edges = getHyperEdgesAsList();
+        RoaringBitmap component = edges.poll().ones.clone();
         boolean changed = true;
         while (changed) {
             changed = false;
-            Iterator<RoaringBitmap> it = edges.iterator();
+            Iterator<Hyperedge> it = edges.iterator();
             while (it.hasNext()) {
-                RoaringBitmap next = it.next();
-                if (RoaringBitmap.intersects(component, next)) {
-                    component.or(next);
+                RoaringBitmap currentEdge = it.next().ones;
+                if (RoaringBitmap.intersects(component, currentEdge)) {
+                    component.or(currentEdge);
                     it.remove();
                     changed = true;
                 }
@@ -67,7 +65,7 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph {
     public void deleteSemiUniversals() {
         RoaringBitmap toDelete = new RoaringBitmap();
         characters.forEach((IntConsumer) i -> {
-            if (!RoaringBitmap.intersects(getSource().getImaginaryHyperEdge(i), taxa)) {
+            if (getSource().getHyperEdge(i).removeSemiuniversals(taxa)) {
                 toDelete.add(i);
             }
         });
@@ -86,7 +84,7 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph {
 
     protected void split(final List<CompressedBCDSubGraph> graphs) {
         RoaringBitmap connectedTaxa = getConnectedComponent();
-        CompressedBCDSubGraph gCurrent = new CompressedBCDSubGraph(getSource(), connectedTaxa, getCharacterForSubSetOfTaxa(connectedTaxa),null); //todo parse scaffold information corectly
+        CompressedBCDSubGraph gCurrent = new CompressedBCDSubGraph(getSource(), connectedTaxa, getCharacterForSubSetOfTaxa(connectedTaxa), null); //todo parse scaffold information corectly
         graphs.add(gCurrent);
         RoaringBitmap reverseTaxa = RoaringBitmap.xor(connectedTaxa, taxa);
         if (reverseTaxa.getCardinality() > 0) {
@@ -98,7 +96,7 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph {
     protected RoaringBitmap getCharacterForSubSetOfTaxa(RoaringBitmap taxa) {
         RoaringBitmap subCharacters = new RoaringBitmap();
         characters.forEach((IntConsumer) i -> {
-            if (RoaringBitmap.intersects(getSource().getHyperEdge(i), taxa)) {
+            if (RoaringBitmap.intersects(getSource().getHyperEdge(i).ones, taxa)) {
                 subCharacters.add(i);
             }
         });

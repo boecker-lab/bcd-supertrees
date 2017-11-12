@@ -4,7 +4,7 @@ import core.algorithm.Algorithm;
 import core.utils.progressBar.CLIProgressBar;
 import mincut.cutGraphAPI.bipartition.Cut;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
-import phylo.tree.algorithm.flipcut.flipCutGraph.MaxFlowCutterFactory;
+import phylo.tree.algorithm.flipcut.cutter.MaxFlowCutterFactory;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 

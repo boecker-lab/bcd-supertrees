@@ -8,9 +8,9 @@ import java.util.*;
 
 public class VertexMapping<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> {
     protected T sourceGraph = null;
-    protected final Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> taxonToDummy = new HashMap<>();
-    protected final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToTaxa = new HashMap<>();
-    protected final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> trivialcharacters = new HashMap<>();
+    public final Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> taxonToDummy = new HashMap<>();
+    public final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToTaxa = new HashMap<>();
+    public  final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> trivialcharacters = new HashMap<>();
 
     protected int mergedTaxonIndex = 0;
 
@@ -26,7 +26,7 @@ public class VertexMapping<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeigh
         clear(null);
     }
 
-    protected ArrayList<FlipCutNodeSimpleWeight> createMapping(final T s) {
+    public ArrayList<FlipCutNodeSimpleWeight> createMapping(final T s) {
         clear(s);
         //create mapping
         //todo optimize all these mapping stuff if it works well
@@ -50,7 +50,7 @@ public class VertexMapping<T extends AbstractFlipCutGraph<FlipCutNodeSimpleWeigh
         return taxonGroups;
     }
 
-    protected STCut<FlipCutNodeSimpleWeight> undoMapping(final STCut<FlipCutNodeSimpleWeight> newMinCut, final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged) {
+    public STCut<FlipCutNodeSimpleWeight> undoMapping(final STCut<FlipCutNodeSimpleWeight> newMinCut, final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged) {
         final LinkedHashSet<FlipCutNodeSimpleWeight> nuSset = undoMapping(newMinCut.getsSet(), dummyToMerged);
         final LinkedHashSet<FlipCutNodeSimpleWeight> nuTset = undoMapping(newMinCut.gettSet(), dummyToMerged);
         return new STCut<>(nuSset, nuTset, newMinCut.minCutValue());

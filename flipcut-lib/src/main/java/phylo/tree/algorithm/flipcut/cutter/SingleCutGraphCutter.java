@@ -1,7 +1,10 @@
-package phylo.tree.algorithm.flipcut.flipCutGraph;
+package phylo.tree.algorithm.flipcut.cutter;
 
 import mincut.cutGraphAPI.bipartition.Cut;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
+import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 
 import java.util.LinkedHashSet;
 import java.util.concurrent.ExecutorService;

@@ -9,7 +9,7 @@ import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.costComputer.SimpleCosts;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
-import phylo.tree.algorithm.flipcut.flipCutGraph.MaxFlowCutterFactory;
+import phylo.tree.algorithm.flipcut.cutter.MaxFlowCutterFactory;
 import phylo.tree.io.TreeFileUtils;
 import phylo.tree.model.Tree;
 

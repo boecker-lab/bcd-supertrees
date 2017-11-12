@@ -26,8 +26,7 @@ public abstract class AbstractFlipCutNode<N extends AbstractFlipCutNode<N>> {
     /**
      * Clone node used for min cut graph
      */
-    protected N clone;
-
+    public N clone; //todo make protected with getter
     protected AbstractFlipCutNode(String name, Set<N> edges) {
         this.name = name;
         this.edges = edges;
