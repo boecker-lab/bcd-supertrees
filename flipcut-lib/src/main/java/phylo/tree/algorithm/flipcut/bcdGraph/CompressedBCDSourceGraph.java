@@ -11,7 +11,6 @@ import java.util.List;
 
 public class CompressedBCDSourceGraph extends CompressedBCDGraph {
     final String[] sourceTaxa;
-
     final Hyperedge[] sourceMergedHyperEdges;
 
 
@@ -30,9 +29,7 @@ public class CompressedBCDSourceGraph extends CompressedBCDGraph {
     }
 
 
-    public String getTaxon(int pos) {
-        return sourceTaxa[pos];
-    }
+
 
     public List<String> getTaxa(RoaringBitmap bits) {
         final List<String> taxa = new ArrayList<>();
@@ -41,9 +38,6 @@ public class CompressedBCDSourceGraph extends CompressedBCDGraph {
     }
 
 
-    public Hyperedge getHyperEdge(int character) {
-        return sourceMergedHyperEdges[character];
-    }
 
 //    public long getCharacterWeight(int character) {
 //        return getHyperEdge(character).getWeight();

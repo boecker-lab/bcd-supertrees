@@ -3,21 +3,25 @@ package phylo.tree.algorithm.flipcut.bcdGraph;
 import mincut.cutGraphAPI.bipartition.Cut;
 import org.roaringbitmap.RoaringBitmap;
 
-import java.util.LinkedHashSet;
-
 
 public class CompressedCut implements Cut<RoaringBitmap> {
 
-    LinkedHashSet<Integer> toDelete;
+    final RoaringBitmap toDelete;
+    final long minCutValue;
+
+    public CompressedCut(RoaringBitmap toDelete, long minCutValue) {
+        this.toDelete = toDelete;
+        this.minCutValue = minCutValue;
+    }
 
     @Override
     public long minCutValue() {
-        return 0;
+        return minCutValue;
     }
 
     @Override
     public RoaringBitmap getCutSet() {
-        return RoaringBitmap.bitmapOf(); //todo finish
+        return toDelete;
 
     }
 }

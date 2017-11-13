@@ -1,7 +1,6 @@
 package phylo.tree.algorithm.flipcut.bcdGraph;
 
 import gnu.trove.impl.Constants;
-import gnu.trove.list.TLongList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -13,6 +12,7 @@ import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
+import phylo.tree.model.TreeUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,23 +31,24 @@ public class CompressedGraphFactory {
         TObjectIntMap<String> leafs = new TObjectIntHashMap<>(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1);
 
 
-        Map<TIntSet, Hyperedge> edges = new LinkedHashMap<>();
-        Map<TIntSet, RoaringBitmap> duplicates = new HashMap<>();
+        Map<Set<String>, Hyperedge> edges = new LinkedHashMap<>();
+        Map<Set<String>, RoaringBitmap> duplicates = new HashMap<>();
 
 
         RoaringBitmap activeScaffoldCharacters = null;
         if (scaffold != null) {
             TreeNode scaffoldRoot = scaffold.getRoot();
-            TIntSet treeTaxa = new TIntHashSet();
+            Set<String> treeTaxa = new HashSet<>();
 
             for (TreeNode scaffoldNode : scaffold.vertices()) {
                 if (scaffoldNode.isLeaf()) {
-                    leafs.put(scaffoldNode.getLabel(), leafIndex);
-                    treeTaxa.add(leafIndex++);
+                    leafs.put(scaffoldNode.getLabel(), leafIndex++);
+//                    treeTaxa.add(leafIndex++);
+                    treeTaxa.add(scaffoldNode.getLabel());
                 }
             }
 
-            activeScaffoldCharacters = addChildren(scaffoldRoot.getChildren(), characterIndex, costComputer, treeTaxa, leafs, duplicates, edges, scaffoldMapping);
+            activeScaffoldCharacters = addScaffoldCharacterRecursive(scaffoldRoot.getChildren(), characterIndex, costComputer, treeTaxa, leafs, duplicates, edges, scaffoldMapping);
         }
 
 
@@ -55,14 +56,14 @@ public class CompressedGraphFactory {
         for (Tree tree : trees) {
             if (tree != scaffold) {
                 TreeNode root = tree.getRoot();
-                TIntSet treeTaxa = new TIntHashSet(tree.vertexCount());
+                Set<String> treeTaxa = new HashSet<>(tree.vertexCount());
                 List<TreeNode> inner = new LinkedList<>();
 
                 for (TreeNode node : root.depthFirstIterator()) {
                     if (node.isLeaf()) {
                         if (scaffold == null && leafs.putIfAbsent(node.getLabel(), leafIndex) == leafs.getNoEntryValue())
                             leafIndex++;
-                        treeTaxa.add(leafs.get(node.getLabel()));
+                        treeTaxa.add((node.getLabel()));
                     } else if (!node.equals(root)) {
                         inner.add(node);
                     }
@@ -70,7 +71,7 @@ public class CompressedGraphFactory {
 
                 for (TreeNode node : inner) {
                     //collect no edges and zero edges
-                    Hyperedge edge = addEdge(node,treeTaxa,leafs,duplicates,edges,costComputer);
+                    Hyperedge edge = addEdge(node, treeTaxa, leafs, duplicates, edges, costComputer);
                     if (edge.isInfinite())
                         System.out.println("guide tree edge overlaps with normal one: ");
                 }
@@ -98,29 +99,26 @@ public class CompressedGraphFactory {
         return new CompressedBCDSourceGraph(taxa, hyperedges, activeScaffoldCharacters, scaffoldMapping);
     }
 
-    private static Hyperedge addEdge(final TreeNode node, final TIntSet treeTaxa, final TObjectIntMap<String> leafs, final Map<TIntSet, RoaringBitmap> zs, final Map<TIntSet, Hyperedge> edges, final CostComputer costComputer) {
+    private static TIntSet createBits(TreeNode node, final TObjectIntMap<String> leafs) {
         TIntSet oneBits = new TIntHashSet();
         for (TreeNode treeNode : node.depthFirstIterator()) {
             if (treeNode.isLeaf()) {
                 oneBits.add(leafs.get(treeNode.getLabel()));
             }
         }
+        return oneBits;
+    }
 
-        Hyperedge hyperedge = edges.get(oneBits);
-        if (hyperedge == null) {
-            RoaringBitmap edge = getCompressedBits(zs, oneBits);
-            hyperedge = new Hyperedge(edge);
-            edges.put(oneBits, hyperedge);
+    private static RoaringBitmap getCompressedBits(final Map<Set<String>, RoaringBitmap> zs, Set<String> bits, final TObjectIntMap<String> leafs) {
+        RoaringBitmap cbits = zs.get(bits);
+        if (cbits == null) {
+            cbits = new RoaringBitmap();
+            for (String s : bits) {
+                cbits.add(leafs.get(s));
+                zs.put(bits, cbits);
+            }
         }
-        TIntHashSet zeroBits = new TIntHashSet(treeTaxa);
-        zeroBits.removeAll(oneBits);
-
-        hyperedge.addZero(
-                getCompressedBits(zs, zeroBits),
-                costComputer.getEdgeWeight(node)
-        );
-
-        return hyperedge;
+        return cbits;
     }
 
     private static RoaringBitmap getCompressedBits(final Map<TIntSet, RoaringBitmap> zs, TIntSet bits) {
@@ -132,13 +130,35 @@ public class CompressedGraphFactory {
         return edge;
     }
 
-    private static RoaringBitmap addChildren(final List<TreeNode> children, final AtomicInteger charIndex,
-                                             final CostComputer costComputer,
-                                             final TIntSet treeTaxa,
-                                             TObjectIntMap<String> leafs,
-                                             final Map<TIntSet, RoaringBitmap> zs,
-                                             final Map<TIntSet, Hyperedge> edges,
-                                             final TIntObjectMap<RoaringBitmap> scaffoldMapping) {
+
+    private static Hyperedge addEdge(final TreeNode node, final Set<String> treeTaxa, final TObjectIntMap<String> leafs, final Map<Set<String>, RoaringBitmap> zs, final Map<Set<String>, Hyperedge> edges, final CostComputer costComputer) {
+        Set<String> oneBits = TreeUtils.getLeafLabels(node);
+
+        Hyperedge hyperedge = edges.get(oneBits);
+        if (hyperedge == null) {
+            RoaringBitmap edge = getCompressedBits(zs, oneBits, leafs);
+            hyperedge = new Hyperedge(edge);
+            edges.put(oneBits, hyperedge);
+        }
+        Set<String> zeroBits = new HashSet<>(treeTaxa);
+        zeroBits.removeAll(oneBits);
+
+        hyperedge.addZero(
+                getCompressedBits(zs, zeroBits, leafs),
+                costComputer.getEdgeWeight(node)
+        );
+
+        return hyperedge;
+    }
+
+
+    private static RoaringBitmap addScaffoldCharacterRecursive(final List<TreeNode> children, final AtomicInteger charIndex,
+                                                               final CostComputer costComputer,
+                                                               final Set<String> treeTaxa,
+                                                               TObjectIntMap<String> leafs,
+                                                               final Map<Set<String>, RoaringBitmap> zs,
+                                                               final Map<Set<String>, Hyperedge> edges,
+                                                               final TIntObjectMap<RoaringBitmap> scaffoldMapping) {
 
         RoaringBitmap childrenI = new RoaringBitmap();
 
@@ -150,8 +170,11 @@ public class CompressedGraphFactory {
                 assert hyperedge.getWeight() == CutGraphCutter.getInfinity();
 
                 childrenI.add(charIndex.get());
-                scaffoldMapping.put(charIndex.getAndIncrement(),
-                        addChildren(scaffoldNode.getChildren(), charIndex, costComputer, treeTaxa, leafs, zs, edges, scaffoldMapping));
+
+                RoaringBitmap set = addScaffoldCharacterRecursive(scaffoldNode.getChildren(), charIndex, costComputer, treeTaxa, leafs, zs, edges, scaffoldMapping);
+                if (!set.isEmpty())
+                    scaffoldMapping.put(charIndex.getAndIncrement(), set);
+                charIndex.incrementAndGet();
             }
         }
 

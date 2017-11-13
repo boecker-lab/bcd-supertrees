@@ -32,6 +32,6 @@ public class CompressedBCDGraphTest {
                 TreeUtils.cloneTrees(TreeUtils.cloneTrees(largeInput)),
                 FlipCutWeights.Weights.UNIT_COST));
         System.out.println("Created Standard Graph in: " + (double) (System.currentTimeMillis() - time) / 1000d);
-        assert test != null;
+        assert time != 0;
     }
 }
