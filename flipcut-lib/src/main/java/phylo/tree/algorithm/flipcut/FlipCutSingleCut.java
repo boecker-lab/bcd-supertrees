@@ -3,8 +3,9 @@ package phylo.tree.algorithm.flipcut;
 import core.algorithm.Algorithm;
 import core.utils.progressBar.CLIProgressBar;
 import mincut.cutGraphAPI.bipartition.Cut;
-import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
-import phylo.tree.algorithm.flipcut.cutter.MaxFlowCutterFactory;
+import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
+import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
+import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
@@ -20,7 +21,7 @@ import java.util.logging.Logger;
  * Date: 29.11.12
  * Time: 14:42
  */
-public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends CutGraphCutter<S>> extends AbstractFlipCut<S, T, C, MaxFlowCutterFactory<C, S, T>> {
+public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCutter<S>> extends AbstractFlipCut<S, T, C, CutterFactory<C, S, T>> {
     private static final boolean CALCULATE_SCORE = true;
     private long globalWeight;
 
@@ -37,15 +38,15 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends CutGrap
     public FlipCutSingleCut() {
     }
 
-    public FlipCutSingleCut(MaxFlowCutterFactory<C, S, T> type) {
+    public FlipCutSingleCut(CutterFactory<C, S, T> type) {
         super(type);
     }
 
-    public FlipCutSingleCut(Logger log, MaxFlowCutterFactory<C, S, T> type) {
+    public FlipCutSingleCut(Logger log, CutterFactory<C, S, T> type) {
         super(log, type);
     }
 
-    public FlipCutSingleCut(Logger log, ExecutorService executorService1, MaxFlowCutterFactory<C, S, T> type) {
+    public FlipCutSingleCut(Logger log, ExecutorService executorService1, CutterFactory<C, S, T> type) {
         super(log, executorService1, type);
     }
 
@@ -120,6 +121,7 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends CutGrap
             System.out.println("...Supertree construction FINISHED!");
             this.supertree = supertree;
             System.out.println("SupertreeScore: " + supertree.getName());
+            System.out.println("SuperTree: " + Newick.getStringFromTree(supertree));
             System.out.println("calculations time: " + (double) (System.currentTimeMillis() - time) / 1000d + "s");
 
 

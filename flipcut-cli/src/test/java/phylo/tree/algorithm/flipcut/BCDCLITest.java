@@ -227,7 +227,7 @@ public class BCDCLITest extends BCDCLI { //extending from class to test to get p
         String[] test = {"-w","BRANCH_AND_LEVEL",this.getClass().getResource("/mincut_sourcetrees.nwk").getPath(),this.getClass().getResource("/mincut_sourcetrees.nwk").getPath()};
 
         //more realistic example, but much to slow (more than 300s)
-        // String[] test = {"-el",this.getClass().getResource("/mcmahon.source_trees").getPath(),this.getClass().getResource("/mincut_sourcetrees.nwk").getPath()};
+        // String[] test = {"-el",this.getClass().getResource("/mcmahon.source_trees.tre").getPath(),this.getClass().getResource("/mincut_sourcetrees.nwk").getPath()};
         final BCDCommandLineInterface test2 =  new BCDCommandLineInterface();
         final CmdLineParser parser = new CmdLineParser(test2);
         parser.parseArgument(test);

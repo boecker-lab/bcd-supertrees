@@ -99,7 +99,7 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
             V vertex = entry.getKey();
 
             algoNodeMapToFill.put(node, hipri.createNode(
-                    vertex, node.edges.size() + node.revEdges.size()));
+                    vertex, node.edges.size() + node.revEdges));
         }
 
         for (N node : nodes.values()) {
@@ -130,14 +130,15 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
          */
         E e = new E(nodes.get(target), capacity);
         nodes.get(source).edges.add(e);
+
         /*
          * Add reverse edge with capacity 0
          */
-        E reverse = new E(nodes.get(source), 0);
-        nodes.get(target).revEdges.add(reverse);
+        nodes.get(target).revEdges++;
 
-        e.reverseEdge = reverse;
-        reverse.reverseEdge = e;
+        /*
+         * increase edge counter
+         */
         edges += 2;
     }
 
@@ -219,7 +220,7 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
      */
     private class N {
         private List<E> edges = new ArrayList<E>();
-        private List<E> revEdges = new ArrayList<E>();
+        private int revEdges = 0;
     }
 
     /**
@@ -228,7 +229,6 @@ public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements Dir
     private class E {
         long cap;
         N target;
-        E reverseEdge;
 
         public E(N target, long capacity) {
             this.target = target;

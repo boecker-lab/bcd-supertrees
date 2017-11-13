@@ -1,4 +1,4 @@
-package phylo.tree.algorithm.flipcut.model;
+package mincut.cutGraphAPI.bipartition;
 /**
  * Created by Markus Fleischauer (markus.fleischauer@gmail.com)
  * as part of the flipcut
@@ -7,7 +7,6 @@ package phylo.tree.algorithm.flipcut.model;
 
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
-import mincut.cutGraphAPI.bipartition.HyperCut;
 
 import java.util.LinkedHashSet;
 import java.util.List;

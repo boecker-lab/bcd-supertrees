@@ -1,6 +1,6 @@
 package phylo.tree.algorithm.flipcut;
 
-import phylo.tree.algorithm.flipcut.model.MultiCut;
+import mincut.cutGraphAPI.bipartition.MultiCut;
 
 import java.util.Iterator;
 

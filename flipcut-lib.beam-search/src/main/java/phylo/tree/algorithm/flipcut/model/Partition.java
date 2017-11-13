@@ -3,6 +3,7 @@ package phylo.tree.algorithm.flipcut.model;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import mincut.cutGraphAPI.bipartition.MultiCut;
 import phylo.tree.algorithm.flipcut.SourceTreeGraphMultiCut;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
@@ -139,7 +140,7 @@ public class Partition implements Comparable<Partition> {
 
             //build new partition
             Map<SourceTreeGraphMultiCut, Edge> newPartitionGraphs = new HashMap<>(graphs);
-            Edge sourceGraphEdge = newPartitionGraphs.remove(cut.sourceGraph);
+            Edge sourceGraphEdge = newPartitionGraphs.remove(cut.sourceGraph());
             edges.add(sourceGraphEdge);
 
 

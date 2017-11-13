@@ -14,9 +14,9 @@ import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.algorithm.flipcut.cutter.SingleCutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.ChracterScoreModifier;
 import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.KargerGraphCreator;
-import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
-import phylo.tree.algorithm.flipcut.model.HyperMultiCut;
-import phylo.tree.algorithm.flipcut.model.MultiCut;
+import mincut.cutGraphAPI.bipartition.DefaultMultiCut;
+import mincut.cutGraphAPI.bipartition.HyperMultiCut;
+import mincut.cutGraphAPI.bipartition.MultiCut;
 
 import java.util.LinkedHashSet;
 import java.util.TreeSet;

@@ -5,16 +5,11 @@ import org.roaringbitmap.IntConsumer;
 import org.roaringbitmap.RoaringBitmap;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 public class CompressedBCDSourceGraph extends CompressedBCDGraph {
     final String[] sourceTaxa;
     final Hyperedge[] sourceMergedHyperEdges;
-
-
-
 
     final TIntObjectMap<RoaringBitmap> scaffoldCharacterHirarchie;
 
@@ -28,9 +23,6 @@ public class CompressedBCDSourceGraph extends CompressedBCDGraph {
         characters.add(0L, sourceCharacters.length);
     }
 
-
-
-
     public List<String> getTaxa(RoaringBitmap bits) {
         final List<String> taxa = new ArrayList<>();
         bits.forEach((IntConsumer) i -> taxa.add(sourceTaxa[i]));
@@ -38,33 +30,8 @@ public class CompressedBCDSourceGraph extends CompressedBCDGraph {
     }
 
 
-
-//    public long getCharacterWeight(int character) {
-//        return getHyperEdge(character).getWeight();
-//    }
-
-    @Override
-    public int numCharacter() {
-        return sourceMergedHyperEdges.length;
-    }
-
     @Override
     public CompressedBCDSourceGraph getSource() {
         return this;
-    }
-
-    @Override
-    public Iterable<Hyperedge> hyperEdges() {
-        return Arrays.asList(sourceMergedHyperEdges);
-    }
-
-    @Override
-    public LinkedList<Hyperedge> getHyperEdgesAsList() {
-        return new LinkedList<>(Arrays.asList(sourceMergedHyperEdges));
-    }
-
-    @Override
-    public Iterable<String> taxaLabels() {
-        return Arrays.asList(sourceTaxa);
     }
 }

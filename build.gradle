@@ -42,6 +42,7 @@ allprojects {
         compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
 
         testCompile 'de.unijena.bioinf.phylo:phyloTree-lib.utils:0.9.9'
+        testCompile group: 'org.slf4j', name: 'slf4j-jdk14', version: "1.7.12"
         testCompile 'junit:junit:4.11'
 
     }

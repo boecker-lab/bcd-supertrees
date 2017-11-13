@@ -5,8 +5,8 @@ import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.SourceTreeGraphMultiCut;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
-import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
-import phylo.tree.algorithm.flipcut.model.MultiCut;
+import mincut.cutGraphAPI.bipartition.DefaultMultiCut;
+import mincut.cutGraphAPI.bipartition.MultiCut;
 
 import java.util.*;
 

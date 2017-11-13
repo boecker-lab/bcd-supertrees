@@ -13,21 +13,26 @@ public class Hyperedge {
     private long weight = 0L;
     private final TObjectLongMap<RoaringBitmap> zerosS = new TObjectLongHashMap<>();
 
+    public int umergedNumber() {
+        return zerosS.size();
+    }
+
     public Hyperedge(RoaringBitmap ones) {
         this.ones = ones;
     }
 
-
     //returns true if the whole edge is semiuniversal.
     public boolean removeSemiuniversals(RoaringBitmap taxaInGraph) {
         TObjectLongIterator<RoaringBitmap> tit = zerosS.iterator();
-
         while (tit.hasNext()) {
             tit.advance();
-            if (RoaringBitmap.intersects(tit.key(), taxaInGraph)) {
-                tit.remove();
-                if (!isInfinite())
+            if (!RoaringBitmap.intersects(tit.key(), taxaInGraph)) {
+                if (!isInfinite()) {
+//                    System.out.println("reduced weight from " + weight + "...");
                     weight -= tit.value();
+//                    System.out.println("...to " + weight);
+                }
+                tit.remove();
             }
         }
         return zerosS.isEmpty();

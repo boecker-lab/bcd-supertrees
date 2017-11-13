@@ -1,15 +1,14 @@
-package phylo.tree.algorithm.flipcut.bcdGraph;
+package mincut.cutGraphAPI.bipartition;
 
-import mincut.cutGraphAPI.bipartition.Cut;
 import org.roaringbitmap.RoaringBitmap;
 
 
-public class CompressedCut implements Cut<RoaringBitmap> {
+public class CompressedBCDCut implements Cut<RoaringBitmap> {
 
-    final RoaringBitmap toDelete;
-    final long minCutValue;
+    private final RoaringBitmap toDelete;
+    private long minCutValue;
 
-    public CompressedCut(RoaringBitmap toDelete, long minCutValue) {
+    public CompressedBCDCut(RoaringBitmap toDelete, long minCutValue) {
         this.toDelete = toDelete;
         this.minCutValue = minCutValue;
     }

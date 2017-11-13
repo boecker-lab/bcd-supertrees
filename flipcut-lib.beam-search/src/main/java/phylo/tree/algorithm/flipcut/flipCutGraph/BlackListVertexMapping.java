@@ -20,7 +20,7 @@ public class BlackListVertexMapping extends VertexMapping<FlipCutGraphMultiSimpl
     }
 
     @Override
-    protected ArrayList<FlipCutNodeSimpleWeight> createMapping(final FlipCutGraphMultiSimpleWeight s) {
+    public ArrayList<FlipCutNodeSimpleWeight> createMapping(final FlipCutGraphMultiSimpleWeight s) {
         return createMapping(s, new GreedyBlackList());
     }
 

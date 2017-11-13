@@ -6,14 +6,17 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.roaringbitmap.RoaringBitmap;
 import phylo.tree.algorithm.TreeAlgorithm;
+import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDSourceGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedGraphFactory;
 import phylo.tree.algorithm.flipcut.bcdGraph.Hyperedge;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.costComputer.SimpleCosts;
+import phylo.tree.algorithm.flipcut.cutter.CompressedSingleCutter;
+import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
+import phylo.tree.algorithm.flipcut.cutter.SingleCutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
-import phylo.tree.algorithm.flipcut.cutter.SingleCutGraphCutter;
 import phylo.tree.algorithm.gscm.GreedySCMAlgorithm;
 import phylo.tree.algorithm.gscm.treeMerger.TreeScorers;
 import phylo.tree.io.Newick;
@@ -27,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -156,6 +160,7 @@ public class FlipCutSingleCutTest {
     @Parameterized.Parameters
     public static Collection<Object[]> parameters() {
         Collection<Object[]> params = new ArrayList<>();
+
         //trivial example
         params.add(new Object[]{Newick.getTreeFromString("((A,B),C);"), Newick.getTreeFromString("((A,B),C);"), trivialSource});
         params.add(new Object[]{Newick.getTreeFromString("(((a,b),c),e),d);"), Newick.getTreeFromString("(((a,b),c),e),d);"), caterpillar});
@@ -170,6 +175,8 @@ public class FlipCutSingleCutTest {
 
         return params;
     }
+
+
 
 
     public List<Tree> calculateSupertrees(TreeAlgorithm fs, Tree expected) {
@@ -252,10 +259,11 @@ public class FlipCutSingleCutTest {
         System.out.println("Created Standard Graph in: " + (double) (System.currentTimeMillis() - time) / 1000d);
 
 
-        FlipCutSingleCut fs = new FlipCutSingleCut(new SingleCutGraphCutter.Factory(CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
+//        FlipCutSingleCut fs = new FlipCutSingleCut(new SingleCutGraphCutter.Factory(CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG));
+        FlipCutSingleCut fs = new FlipCutSingleCut(new CompressedSingleCutter.CompressedSingleCutterFactory());
 
 
-        fs.setInput(g1);
+        fs.setInput(test);
         Tree sNoGuide = calculateSupertrees(fs, expected).get(0);
 
         time = System.currentTimeMillis();
@@ -277,7 +285,7 @@ public class FlipCutSingleCutTest {
 
         System.out.println("Created Standard Graph Guide in: " + (double) (System.currentTimeMillis() - time) / 1000d);
 
-        fs.setInput(g2);
+        fs.setInput(test2);
         Tree sGuide = calculateSupertrees(fs, expected, guide).get(0);
         //todo check difference?
     }
@@ -489,7 +497,7 @@ public class FlipCutSingleCutTest {
     //    @Test
     public void testManyInputTrees() {
         File inputFile = new File(getClass().getResource("/phylo/tree/algorithm/flipcut/omm.source.Trees.tre").getFile());
-//        File inputFile =  new File(getClass().getResource("/flipcut/mcmahon.source_trees").getFile());
+//        File inputFile =  new File(getClass().getResource("/flipcut/mcmahon.source_trees.tre").getFile());
 //        File inputFile =  new File(getClass().getResource("/flipcut/berrysemple-sourcetrees.tre").getFile());
 //        File inputFile =  new File(getClass().getResource("/flipcut/smo.9.sourceTrees.tre").getFile());
 //        File inputFile =  new File(getClass().getResource("/flipcut/sm.9.sourceTrees_OptSCM-Rooting.tre").getFile());

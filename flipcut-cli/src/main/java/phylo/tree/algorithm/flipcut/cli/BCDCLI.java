@@ -4,12 +4,13 @@ import phylo.tree.algorithm.consensus.Consensus;
 import phylo.tree.algorithm.flipcut.AbstractFlipCut;
 import phylo.tree.algorithm.flipcut.FlipCutSingleCut;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
-import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDSourceGraph;
+import phylo.tree.algorithm.flipcut.bcdGraph.CompressedGraphFactory;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.costComputer.SimpleCosts;
+import phylo.tree.algorithm.flipcut.cutter.CompressedSingleCutter;
+import phylo.tree.algorithm.flipcut.cutter.MaxFlowCutterFactory;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
-import phylo.tree.algorithm.flipcut.cutter.MaxFlowCutterFactory;
 import phylo.tree.io.TreeFileUtils;
 import phylo.tree.model.Tree;
 
@@ -57,7 +58,7 @@ public class BCDCLI<A extends AbstractFlipCut> extends BasicBCDCLI<A> {
     }
 
     //cut graph type
-    CutGraphTypes graphType = CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG;
+    CutGraphTypes graphType = CutGraphTypes.COMPRESSED_BCD_VIA_MAXFLOW_TARJAN_GOLDBERG;
 
     @Override
     public void setGraphType(CutGraphTypes graphType) {
@@ -103,16 +104,20 @@ public class BCDCLI<A extends AbstractFlipCut> extends BasicBCDCLI<A> {
     @Override
     public AbstractFlipCut createAlgorithmInstance() {
         AbstractFlipCut algo = new FlipCutSingleCut();
-        algo.setCutter(MaxFlowCutterFactory.newInstance(getGraphType()));
+        if (getGraphType() == CutGraphTypes.COMPRESSED_BCD_VIA_MAXFLOW_TARJAN_GOLDBERG) {
+            algo.setCutter(new CompressedSingleCutter.CompressedSingleCutterFactory());
+        } else {
+            algo.setCutter(MaxFlowCutterFactory.newInstance(getGraphType()));
+        }
         setParameters(algo);
         return algo;
     }
 
-    public SourceTreeGraph createGraphInstance(List<Tree> source, Tree scaffold){
-        if (true){ //todo enable compressed graph
-            return new FlipCutGraphSimpleWeight(SimpleCosts.newCostComputer(source,scaffold,getWeights()),getBootstrapThreshold());
-        }else{
-            return new CompressedBCDSourceGraph(SimpleCosts.newCostComputer(source,scaffold,getWeights()),getBootstrapThreshold());
+    public SourceTreeGraph createGraphInstance(List<Tree> source, Tree scaffold) {
+        if (getGraphType() == CutGraphTypes.COMPRESSED_BCD_VIA_MAXFLOW_TARJAN_GOLDBERG) { //todo enable compressed graph
+            return CompressedGraphFactory.createSourceGraph(SimpleCosts.newCostComputer(source, scaffold, getWeights()), getBootstrapThreshold());
+        } else {
+            return new FlipCutGraphSimpleWeight(SimpleCosts.newCostComputer(source, scaffold, getWeights()), getBootstrapThreshold());
         }
     }
 

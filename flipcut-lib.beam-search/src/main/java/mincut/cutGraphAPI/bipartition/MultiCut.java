@@ -1,10 +1,9 @@
-package phylo.tree.algorithm.flipcut.model;/**
+package mincut.cutGraphAPI.bipartition;/**
  * Created by Markus Fleischauer (markus.fleischauer@gmail.com)
  * as part of the flipcut
  * 15.02.17.
  */
 
-import mincut.cutGraphAPI.bipartition.Cut;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
@@ -21,6 +20,9 @@ public abstract class MultiCut<S, G extends SourceTreeGraph> implements Cut<S> {
     protected final G sourceGraph;
     protected List<FlipCutGraphMultiSimpleWeight> splittedGraphs;
 
+    public G sourceGraph() {
+        return sourceGraph;
+    }
 
     public MultiCut(G sourceGraph) {
         this.sourceGraph = sourceGraph;

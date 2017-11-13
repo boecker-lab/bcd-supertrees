@@ -1,4 +1,4 @@
-package phylo.tree.algorithm.flipcut.model;
+package mincut.cutGraphAPI.bipartition;
 
 import mincut.cutGraphAPI.bipartition.BasicCut;
 import mincut.cutGraphAPI.bipartition.STCut;

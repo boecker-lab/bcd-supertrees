@@ -1,5 +1,6 @@
 package phylo.tree.algorithm.flipcut.bcdGraph;
 
+import mincut.cutGraphAPI.bipartition.CompressedBCDCut;
 import org.roaringbitmap.IntConsumer;
 import org.roaringbitmap.RoaringBitmap;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
@@ -27,23 +28,42 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
         this.activeGuideEdges = activeGuideEdges;
     }
 
-
-    public abstract LinkedList<Hyperedge> getHyperEdgesAsList();
-
-    public abstract Iterable<Hyperedge> hyperEdges();
-
-    public Hyperedge getEdge(int hyperEdgeIndex){
+    //this is unchecked
+    public Hyperedge getEdge(int hyperEdgeIndex) {
         return getSource().sourceMergedHyperEdges[hyperEdgeIndex];
     }
 
+    //this is unchecked
     public String getTaxon(int taxonIndex) {
         return getSource().sourceTaxa[taxonIndex];
     }
 
     public abstract CompressedBCDSourceGraph getSource();
 
+
+    public Iterable<String> taxaLabels() {
+        return new BitMapIteratable<>(getSource().sourceTaxa, taxa);
+    }
+
+    public LinkedList<Hyperedge> getHyperEdgesAsList() {
+        LinkedList<Hyperedge> l = new LinkedList<>();
+        characters.forEach((IntConsumer) i -> {
+            l.add(getSource().sourceMergedHyperEdges[i]);
+        });
+        return l;
+    }
+
+    public Iterable<Hyperedge> hyperEdges() {
+        return new BitMapIteratable<>(getSource().sourceMergedHyperEdges, characters);
+    }
+
     public boolean hasGuideEdges() {
         return activeGuideEdges != null && !activeGuideEdges.isEmpty();
+    }
+
+    public int numGuideEdges() {
+        if (activeGuideEdges == null) return 0;
+        return activeGuideEdges.getCardinality();
     }
 
     public Iterable<Hyperedge> guideHyperEdges() {
@@ -60,21 +80,30 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
     }
 
     public RoaringBitmap getConnectedComponent() {
+        long t = System.currentTimeMillis();
         LinkedList<Hyperedge> edges = getHyperEdgesAsList();
-        RoaringBitmap component = edges.poll().ones.clone();
-        boolean changed = true;
-        while (changed) {
-            changed = false;
-            Iterator<Hyperedge> it = edges.iterator();
-            while (it.hasNext()) {
-                RoaringBitmap currentEdge = it.next().ones;
-                if (RoaringBitmap.intersects(component, currentEdge)) {
-                    component.or(currentEdge);
-                    it.remove();
-                    changed = true;
+
+        RoaringBitmap component;
+        if (!edges.isEmpty()) {
+            component = edges.poll().ones.clone();
+            boolean changed = true;
+            while (changed) {
+                changed = false;
+                Iterator<Hyperedge> it = edges.iterator();
+                while (it.hasNext()) {
+                    RoaringBitmap currentEdge = it.next().ones;
+                    if (RoaringBitmap.intersects(component, currentEdge)) {
+                        component.or(currentEdge);
+                        it.remove();
+                        changed = true;
+                    }
                 }
             }
+        } else {
+            component = new RoaringBitmap();
+            component.add(taxa.first());
         }
+        System.out.println("Connected Component in: " + (double) (System.currentTimeMillis() - t) / 1000d + "s");
         return component;
     }
 
@@ -89,23 +118,42 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
     }
 
     public void deleteCharacters(RoaringBitmap toDelete) {
-        characters.andNot(toDelete);
+        characters.xor(toDelete);
+        RoaringBitmap guidesToDelete = RoaringBitmap.and(activeGuideEdges, toDelete);
+        activeGuideEdges.xor(guidesToDelete);
+        guidesToDelete.forEach((IntConsumer) key -> {
+            RoaringBitmap nuGuideEdges = getSource().scaffoldCharacterHirarchie.remove(key);
+            if (nuGuideEdges != null)
+                activeGuideEdges.or(nuGuideEdges);
+        });
     }
 
-    public List<CompressedBCDSubGraph> split() {
-        List<CompressedBCDSubGraph> comps = new ArrayList<>();
+    public List<CompressedBCDGraph> split() {
+        List<CompressedBCDGraph> comps = new ArrayList<>();
         split(comps);
         return comps;
     }
 
-    protected void split(final List<CompressedBCDSubGraph> graphs) {
-        RoaringBitmap connectedTaxa = getConnectedComponent();
-        CompressedBCDSubGraph gCurrent = new CompressedBCDSubGraph(getSource(), connectedTaxa, getCharacterForSubSetOfTaxa(connectedTaxa), null); //todo parse scaffold information corectly
-        graphs.add(gCurrent);
-        RoaringBitmap reverseTaxa = RoaringBitmap.xor(connectedTaxa, taxa);
-        if (reverseTaxa.getCardinality() > 0) {
-            CompressedBCDSubGraph gRest = new CompressedBCDSubGraph(getSource(), connectedTaxa, getCharacterForSubSetOfTaxa(connectedTaxa), null);
-            gRest.split(graphs);
+    protected void split(final List<CompressedBCDGraph> graphs) {
+        if (taxa.getCardinality() > 1) {
+            RoaringBitmap connectedTaxa = getConnectedComponent();
+            if (!connectedTaxa.equals(taxa)) {
+                RoaringBitmap cCurrent = getCharacterForSubSetOfTaxa(connectedTaxa);
+                RoaringBitmap guideCurrent = RoaringBitmap.and(cCurrent, activeGuideEdges);
+                CompressedBCDSubGraph gCurrent = new CompressedBCDSubGraph(getSource(), connectedTaxa, cCurrent, guideCurrent);
+                graphs.add(gCurrent);
+                RoaringBitmap reverseTaxa = RoaringBitmap.xor(connectedTaxa, taxa);
+                if (reverseTaxa.getCardinality() > 0) {
+                    RoaringBitmap cRest = getCharacterForSubSetOfTaxa(reverseTaxa);
+                    RoaringBitmap guideRest = RoaringBitmap.and(cRest, activeGuideEdges);
+                    CompressedBCDSubGraph gRest = new CompressedBCDSubGraph(getSource(), reverseTaxa, getCharacterForSubSetOfTaxa(reverseTaxa), guideRest);
+                    gRest.split(graphs);
+                }
+            } else {
+                graphs.add(this);
+            }
+        } else {
+            graphs.add(this);
         }
     }
 
@@ -122,8 +170,8 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
     @Override
     public List<? extends SourceTreeGraph> getPartitions(GraphCutter c) {
         RoaringBitmap component = getConnectedComponent();
-        if (component.equals(characters)) { //todo is this fast?
-            CompressedCut cut = (CompressedCut) c.cut(this);
+        if (component.equals(taxa)) { //todo is this fast?
+            CompressedBCDCut cut = (CompressedBCDCut) c.cut(this);
             deleteCharacters(cut.getCutSet());
         }
         return split();

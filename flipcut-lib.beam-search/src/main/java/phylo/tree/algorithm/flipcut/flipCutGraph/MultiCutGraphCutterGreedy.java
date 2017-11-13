@@ -11,7 +11,7 @@ import phylo.tree.algorithm.flipcut.cutter.MaxFlowCutterFactory;
 import phylo.tree.algorithm.flipcut.cutter.SimpleCutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.BlackList;
 import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.GreedyBlackList;
-import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
+import mincut.cutGraphAPI.bipartition.DefaultMultiCut;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;

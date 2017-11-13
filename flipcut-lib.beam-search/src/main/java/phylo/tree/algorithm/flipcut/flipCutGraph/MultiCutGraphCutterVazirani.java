@@ -8,8 +8,8 @@ import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.algorithm.flipcut.cutter.MaxFlowCutterFactory;
 import phylo.tree.algorithm.flipcut.cutter.SimpleCutGraphCutter;
-import phylo.tree.algorithm.flipcut.model.DefaultMultiCut;
-import phylo.tree.algorithm.flipcut.model.VaziraniCut;
+import mincut.cutGraphAPI.bipartition.DefaultMultiCut;
+import mincut.cutGraphAPI.bipartition.VaziraniCut;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;

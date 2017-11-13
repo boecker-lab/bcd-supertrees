@@ -8,6 +8,8 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.roaringbitmap.RoaringBitmap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.model.Tree;
@@ -18,9 +20,10 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CompressedGraphFactory {
+    private final static Logger LOGGER = LoggerFactory.getLogger(CompressedGraphFactory.class);
 
     public static CompressedBCDSourceGraph createSourceGraph(CostComputer costComputer, double bootstrapTheshold) {
-
+        System.out.println("Creating graph representation of input trees...");
         final Tree scaffold = costComputer.getScaffoldTree();
         final List<Tree> trees = costComputer.getTrees();
 
@@ -34,7 +37,9 @@ public class CompressedGraphFactory {
         Map<Set<String>, Hyperedge> edges = new LinkedHashMap<>();
         Map<Set<String>, RoaringBitmap> duplicates = new HashMap<>();
 
+        int allChars = 0;
 
+        LOGGER.info("Reading trees...");
         RoaringBitmap activeScaffoldCharacters = null;
         if (scaffold != null) {
             TreeNode scaffoldRoot = scaffold.getRoot();
@@ -45,11 +50,14 @@ public class CompressedGraphFactory {
                     leafs.put(scaffoldNode.getLabel(), leafIndex++);
 //                    treeTaxa.add(leafIndex++);
                     treeTaxa.add(scaffoldNode.getLabel());
+                }else {
+                    allChars++;
                 }
             }
 
             activeScaffoldCharacters = addScaffoldCharacterRecursive(scaffoldRoot.getChildren(), characterIndex, costComputer, treeTaxa, leafs, duplicates, edges, scaffoldMapping);
         }
+        if (activeScaffoldCharacters == null) activeScaffoldCharacters = new RoaringBitmap();
 
 
         //do character stuff
@@ -68,6 +76,7 @@ public class CompressedGraphFactory {
                         inner.add(node);
                     }
                 }
+                allChars += inner.size() ;
 
                 for (TreeNode node : inner) {
                     //collect no edges and zero edges
@@ -83,14 +92,21 @@ public class CompressedGraphFactory {
 
 
         //chreate chars
+
         int charIndex = 0;
         final Hyperedge[] hyperedges = new Hyperedge[edges.size()];
+        LOGGER.info("Add " + edges.size() + " merged Characters to graph...");
+        int allMergedChars = 0;
         for (Hyperedge hyperedge : edges.values()) {
             hyperedges[charIndex++] = hyperedge;
+            allMergedChars += hyperedge.umergedNumber();
         }
+        LOGGER.info(allChars + " where merged to " + allMergedChars + " and can be further reduced to " + edges.size() + " during mincut");
+
 
         //create taxa;
         final String[] taxa = new String[leafs.size()];
+        LOGGER.info("Add " + taxa.length + " Taxa to graph...");
         leafs.forEachEntry((a, b) -> {
             taxa[b] = a;
             return true;

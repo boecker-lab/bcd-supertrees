@@ -1,5 +1,3 @@
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 
 buildscript {
@@ -20,6 +18,8 @@ dependencies {
     compile 'de.unijena.bioinf.phylo:gscm-cli:1.0.1'
     compile 'de.unijena.bioinf.phylo:phyloTree-lib.utils:0.9.9'
     compile 'de.unijena.bioinf.phylo:phyloTree-lib.cli:0.9.9'
+    compile group: 'org.slf4j', name: 'slf4j-jdk14', version: "1.7.12"
+
 
     testCompile 'com.github.stefanbirkner:system-rules:1.5.0'
 }
@@ -154,9 +154,6 @@ installLinuxDist.dependsOn 'fatJar'
 winDistZip.dependsOn 'createExe'
 winDistTar.dependsOn 'createExe'
 installWinDist.dependsOn 'createExe'
-
-
-
 
 /*
 // what should be published
