@@ -1,6 +1,7 @@
 package mincut.cutGraphImpl.maxFlowAhujaOrlin;
 
 import mincut.cutGraphAPI.AhujaOrlinCutGraph;
+import mincut.cutGraphAPI.CutGraph;
 import mincut.cutGraphAPI.MaxFlowCutGraph;
 import mincut.cutGraphAPI.bipartition.STCut;
 import org.junit.Test;
@@ -99,7 +100,7 @@ public class AhujaOrlinCutGraphTest {
 
     @Test
     public void testExample() {
-        MaxFlowCutGraph hp = new AhujaOrlinCutGraph<>();
+        AhujaOrlinCutGraph hp = new AhujaOrlinCutGraph<>();
         hp.addNode(1);
         hp.addNode(2);
         hp.addNode(3);

@@ -2,6 +2,7 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 
 import mincut.cutGraphAPI.AhujaOrlinCutGraph;
+import mincut.cutGraphAPI.CutGraph;
 import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.MaxFlowCutGraph;
 import mincut.cutGraphAPI.bipartition.Cut;
@@ -62,7 +63,7 @@ public class MultiCutGraphCutterGreedy extends SimpleCutGraphCutter<FlipCutGraph
 
                     //create cutgraph
                     List<FlipCutNodeSimpleWeight> cutGraphTaxa = new ArrayList<>();
-                    final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged = createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, source, mapping, cutGraphTaxa);
+                    final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> dummyToMerged = createTarjanGoldbergHyperGraphTaxaMerged((CutGraph<FlipCutNodeSimpleWeight>) cutGraph, source, mapping, cutGraphTaxa);
 
                     //calculate mincut
                     STCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut(cutGraph, cutGraphTaxa);

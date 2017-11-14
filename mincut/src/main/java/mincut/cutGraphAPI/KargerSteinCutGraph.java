@@ -16,7 +16,7 @@ import java.util.*;
 /**
  * Created by fleisch on 15.04.15.
  */
-public class KargerSteinCutGraph<V, C extends CutFactory<LinkedHashSet<V>, ? extends AbstractBipartition<V>>> implements MultiCutGraph<V>, EdgeColorableUndirectedGraph<V> {
+public class KargerSteinCutGraph<V, C extends CutFactory<LinkedHashSet<V>, ? extends AbstractBipartition<V>>> implements MultiCutGraph<V>, Cutting<V>, EdgeColorableUndirectedGraph<V> {
     private static final boolean RESCURSIVE_KARGER = true;
     private TIntObjectMap<V> vertexMap = new TIntObjectHashMap<>();
     private Map<V, Vertex> vertexMapBack = new HashMap<>();
@@ -84,9 +84,9 @@ public class KargerSteinCutGraph<V, C extends CutFactory<LinkedHashSet<V>, ? ext
         } else {
             List<AbstractBipartition<V>> cuts = calculateMinCuts();
             if (cuts.size() > numberOfCuts) {
-                System.out.println("leght before: " +cuts.size());
-                cuts.subList(numberOfCuts+1, cuts.size()).clear();
-                System.out.println("leght after: " +cuts.size());
+                System.out.println("leght before: " + cuts.size());
+                cuts.subList(numberOfCuts + 1, cuts.size()).clear();
+                System.out.println("leght after: " + cuts.size());
             }
             return cuts;
         }

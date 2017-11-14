@@ -72,7 +72,7 @@ import java.util.*;
  * @param <V> the nodes type
  * @author Thasso Griebel (thasso.griebel@gmail.com)
  */
-public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
+public class GoldbergTarjanCutGraph<V> extends MaxFlowCutGraph<V> implements CutGraph<V> {
     /**
      * Global edge counter
      */

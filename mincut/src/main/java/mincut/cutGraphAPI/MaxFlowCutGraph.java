@@ -16,7 +16,7 @@ import java.util.concurrent.Future;
 /**
  * Created by fleisch on 07.05.15.
  */
-public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
+public abstract class MaxFlowCutGraph<V> implements DirectedCutting<V>, Cutting<V> {
     private ExecutorService executorService;
     private int threads;
 
@@ -47,7 +47,6 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
         return stCuts;
     }
 
-    @Override
     public STCut<V> calculateMinCut() throws ExecutionException, InterruptedException {
         if (threads == 1 || executorService == null) {
             return calculatMinCutSingle();
@@ -84,12 +83,11 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutGraph<V> {
         return cut;
     }
 
-    @Override
     public void clear() {
         stToCalculate.clear();
     }
 
-//    abstract <T extends MaxFlowCallable> IterationCallableFactory<T, SS> getMaxFlowCallableFactory();
+    //    abstract <T extends MaxFlowCallable> IterationCallableFactory<T, SS> getMaxFlowCallableFactory();
     abstract IterationCallableFactory<? extends DefaultIterationCallable<SS, STCut<V>>, SS> getMaxFlowCallableFactory();
 
     abstract class MaxFlowCallable extends DefaultIterationCallable<SS, STCut<V>> {

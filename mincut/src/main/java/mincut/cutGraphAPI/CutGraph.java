@@ -1,23 +1,10 @@
 package mincut.cutGraphAPI;
 
 
-import mincut.cutGraphAPI.bipartition.Cut;
-
-import java.util.LinkedHashSet;
-import java.util.concurrent.ExecutionException;
-
 /**
  * Created by fleisch on 23.09.15.
  */
 public interface CutGraph<V> {
-
-    /**
-     * Returns the minimum cut.
-     * This does lazy computation, if the cut was not computed, it computes the cut.
-     *
-     * @return mincut all connected components of the input graph
-     */
-    Cut<LinkedHashSet<V>> calculateMinCut() throws ExecutionException, InterruptedException;
 
     /**
      * Adds the given node to the graph. Does nothing if the graph already contains the node.
@@ -35,5 +22,6 @@ public interface CutGraph<V> {
      * @param capacity the capacity
      */
     void addEdge(V vertex1, V vertex2, long capacity);
+
     void clear();
 }

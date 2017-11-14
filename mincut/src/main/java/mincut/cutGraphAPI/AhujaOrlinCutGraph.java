@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Created by fleisch on 21.09.15.
  */
-public class AhujaOrlinCutGraph<V> extends MaxFlowCutGraph<V> {
+public class AhujaOrlinCutGraph<V> extends MaxFlowCutGraph<V> implements CutGraph<V> {
     /**
      * The internal nodes to simplify graph construction
      */

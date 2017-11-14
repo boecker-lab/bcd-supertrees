@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by fleisch on 15.04.15.
  */
-public interface DirectedCutGraph<V> extends CutGraph<V>{
+public interface DirectedCutting<V> {
     /**
      * Returns the minimum ST cut.
      * This does lazy computation, if the cut was not computed, it computes the cut.

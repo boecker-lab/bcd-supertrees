@@ -3,6 +3,7 @@ package mincut.cutGraphImpl.maxFlowGoldbergTarjan;
 /**
  * Created by fleisch on 09.10.15.
  */
+
 /**
  * Internal node representation
  */
