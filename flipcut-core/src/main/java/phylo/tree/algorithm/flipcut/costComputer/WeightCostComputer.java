@@ -1,8 +1,8 @@
 package phylo.tree.algorithm.flipcut.costComputer;
 
 
-import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
+import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
@@ -172,6 +172,9 @@ public class WeightCostComputer extends SimpleCosts {
             } else {
                 w = Math.round(ACCURACY * Math.max(ZERO, edgeWeight) * Math.max(ZERO, nodeLevel) * Math.max(ZERO, treeWeight));
             }
+
+            if (w == 0)
+                LOGGER.warn("Not enough ACCURACY -> character weight was rounded to zero!");
             return w;
         }
     }
@@ -221,6 +224,13 @@ public class WeightCostComputer extends SimpleCosts {
     }
 
     private double calcEdgeWeight(TreeNode node) {
-        return (node.getDistanceToParent() / longestBranch);
+        double weight = node.getDistanceToParent();
+        if (weight == 0d) {
+            LOGGER.warn("There are branches with length zero in your input trees. Setting 0 branches to " + MIN_VALUE);
+            return MIN_VALUE;
+        } else {
+            return (weight / longestBranch);
+
+        }
     }
 }

@@ -53,18 +53,19 @@ public class CutGraphImpl {
     private static final long MAXLONG = Long.MAX_VALUE - 1;
 
     private static final float GLOB_UPDT_FREQ = 0.5f;
-    private static final int ALPHA = 6;
-    private static final int BETA = 12;
-    private static final int WHITE = 0;
-    private static final int GREY = 1;
-    private static final int BLACK = 2;
+    private static final byte ALPHA = 6;
+    private static final byte BETA = 12;
+    private static final byte WHITE = 0;
+    private static final byte GREY = 1;
+    private static final byte BLACK = 2;
 
-    private static final boolean FORWARD_SEARCH = true;
+//    private static final boolean FORWARD_SEARCH = true;
 
 /* global variables */
 
-    long n;                    /* number of nodes */
-    long m;                    /* number of arcs */
+    public final int n;                    /* number of nodes */
+    public final int m;                    /* number of arcs */
+
     long nm;                   /* n + ALPHA * m */
     Node[] nodes;               /* array of nodes */
     Bucket[] buckets;             /* array of buckets */
@@ -85,6 +86,10 @@ public class CutGraphImpl {
     long i_dist;
 
     private int createdNodes = 0;
+
+    public Node[] getNodes() {
+        return nodes;
+    }
 
     public CutGraphImpl(int nodes, int edges) {
         this.n = nodes;
@@ -180,6 +185,8 @@ public class CutGraphImpl {
             Node node = nodes[i];
             node.excess = 0;
             for (Arc arc : node.arcs) {
+                if (arc == null)
+                    System.out.println("help");
                 arc.resCap = arc.cap;
             }
         }
@@ -767,18 +774,16 @@ public class CutGraphImpl {
         for (Node j : nodes) {
             if (j.d < n) {
                 sSet.add(j.name);
-            }else{
+            } else {
                 tSet.add(j.name);
             }
         }
-        return Arrays.asList(sSet,tSet);
+        return Arrays.asList(sSet, tSet);
     }
 
     public LinkedHashSet<Object> calculateMaxSTFlow(final boolean activateChecks) {
         return calculateMaxSTFlowFull(activateChecks).get(0);
     }
-
-
 
 
     /**

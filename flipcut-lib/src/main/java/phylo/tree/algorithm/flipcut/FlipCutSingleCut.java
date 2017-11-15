@@ -162,7 +162,7 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
     }
 
     private Tree computeSTIterativeSingleThreaded() {
-        final C cutter = type.newInstance(initialGraph);
+        final C cutter = type.newInstance(initialGraph, executorService, numberOfThreads);
         final Tree supertree = new Tree();
 
         Queue<T> graphs = new LinkedList<>();
@@ -262,7 +262,7 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
                 //partition the current graph
                 C cutter = cutterQueue.poll();
                 if (cutter == null)
-                    cutter = type.newInstance(currentGraph);
+                    cutter = type.newInstance(currentGraph, executorService, numberOfThreads);
                 cutter.clear();
                 List<T> componentGraphs = (List<T>) initialGraph.getPartitions(cutter);
                 for (T componentGraph : componentGraphs) {

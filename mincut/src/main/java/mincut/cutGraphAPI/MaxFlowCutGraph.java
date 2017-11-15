@@ -51,7 +51,7 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutting<V>, Cutting<
         if (threads == 1 || executorService == null) {
             return calculatMinCutSingle();
         } else {
-            return calculatMinCutParallel(); //minus 1 because it is daster if 1 thread is left for other things
+            return calculatMinCutParallel();
         }
     }
 

@@ -27,6 +27,7 @@ public abstract class CostComputer {
      * The accuracy used to go from double to long
      */
     public final static long ACCURACY = 1000000000L; //100000000;
+    public final static double MIN_VALUE = 1d/ACCURACY;
     public final static double ZERO = Double.MIN_VALUE;
 
     public final static Set<FlipCutWeights.Weights> SUPPORTED_COST_TYPES = Collections.emptySet();

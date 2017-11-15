@@ -7,9 +7,21 @@ package mincut.cutGraphImpl.maxFlowGoldbergTarjan;
 /**
  * Internal edge representation
  */
-class Arc {
+public class Arc {
     long cap;    /* capacity */
     long resCap;          /* residual capasity */
     Node head;           /* arc head */
     Arc rev;            /* reverse arc */
+
+    public Node getSource() {
+        return rev.head;
+    }
+
+    public Node getTarget() {
+        return head;
+    }
+
+    public long getCap() {
+        return cap;
+    }
 }

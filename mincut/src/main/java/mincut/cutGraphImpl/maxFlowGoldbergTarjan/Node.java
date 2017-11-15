@@ -16,13 +16,17 @@ public class Node {
     Node bPrev;           /* previous node in bucket */
     int current;          /* arc pointer */
     int bucketIndex;
-    Object name;
+    public final Object name;
 
     private int createdArcs = 0;
 
     Node(int edges, Object name) {
         this.name = name;
         this.arcs = new Arc[edges];
+    }
+
+    public Arc[] getArcs() {
+        return arcs;
     }
 
     Arc current() {

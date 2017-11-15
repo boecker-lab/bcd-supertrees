@@ -24,19 +24,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
 
     private CompressedBCDCut cachedCut = null;
-    private int threats = 1;
+    private final int threats;
+    private final ExecutorService executorService;
 
 
-    public CompressedSingleCutter(int threats) {
-        this.threats = threats;
+    public CompressedSingleCutter() {
+        this.threats = 2;
+        this.executorService = null;
     }
 
-    public int getThreats() {
-        return threats;
-    }
-
-    public void setThreats(int threats) {
+    public CompressedSingleCutter(int threats, ExecutorService executorService) {
         this.threats = threats;
+        this.executorService = executorService;
     }
 
     @Override
@@ -53,6 +52,7 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
         long tm = System.currentTimeMillis();
         final CompressedGoldbergTarjanCutGraph cutGraph = createCutGraph(source);
         cutGraph.setThreads(threats);
+        cutGraph.setExecutorService(executorService);
         System.out.println("Set up CutGraph in in: " + (double) (System.currentTimeMillis() - tm) / 1000d + "s");
 
 
@@ -149,9 +149,9 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
 
             for (String taxon : hyperEdges.get(edgeIndex)) {
                 Node t = cutgraphTaxa.get(taxon);
-                if (t == null){
+                if (t == null) {
                     t = hipri.createNode(taxon, nodeToEdges.get(taxon));
-                    cutgraphTaxa.put(taxon,t);
+                    cutgraphTaxa.put(taxon, t);
                 }
                 hipri.addEdge(t, out, CutGraphCutter.getInfinity());
                 hipri.addEdge(in, t, CutGraphCutter.getInfinity());
@@ -183,13 +183,13 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
 
         @Override
         public CompressedSingleCutter newInstance(CompressedBCDGraph graph) {
-            return new CompressedSingleCutter(1);
+            return new CompressedSingleCutter();
         }
 
         @Override
         public CompressedSingleCutter newInstance(CompressedBCDGraph graph, ExecutorService executorService,
                                                   int threads) {
-            return new CompressedSingleCutter(threads);
+            return new CompressedSingleCutter(threads, executorService);
         }
 
         @Override
