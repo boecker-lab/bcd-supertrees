@@ -5,7 +5,7 @@ import org.roaringbitmap.RoaringBitmap;
 
 public class CompressedBCDCut implements Cut<RoaringBitmap> {
 
-    protected final RoaringBitmap toDelete;
+    protected RoaringBitmap toDelete;
     protected long minCutValue;
 
     public CompressedBCDCut(RoaringBitmap toDelete, long minCutValue) {
@@ -23,4 +23,6 @@ public class CompressedBCDCut implements Cut<RoaringBitmap> {
         return toDelete;
 
     }
+
+
 }

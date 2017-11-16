@@ -22,6 +22,8 @@ public interface SourceTreeGraph<C> {
      */
     List<? extends SourceTreeGraph<C>> getPartitions(GraphCutter<C> c);
 
+    boolean isConnected();
+
 
     Iterable<String> taxaLabels();
 

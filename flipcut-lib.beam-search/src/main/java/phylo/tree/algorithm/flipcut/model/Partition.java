@@ -4,6 +4,7 @@ package phylo.tree.algorithm.flipcut.model;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import mincut.cutGraphAPI.bipartition.MultiCut;
+import org.jetbrains.annotations.NotNull;
 import phylo.tree.algorithm.flipcut.SourceTreeGraphMultiCut;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
@@ -176,8 +177,8 @@ public class Partition implements Comparable<Partition> {
         return graphs.size();
     }
 
-    public int compareTo(Partition o) {
-        return (currentscore < o.currentscore) ? -1 : ((currentscore == o.currentscore) ? 0 : 1);
+    public int compareTo(@NotNull Partition o) {
+        return Long.compare(currentscore, o.currentscore);
     }
 
     public Tree buildTree() {

@@ -122,10 +122,10 @@ public class FlipCutMultiCut<S, T extends SourceTreeGraphMultiCut<S, T>, C exten
                 }
             }
         }
-        Set<Partition> p = subsBench.get(minimalPartSize);
-        subsBench.remove(minimalPartSize);
-        if (p != null)
+        Set<Partition> p = subsBench.remove(minimalPartSize);
+        if (p != null) {
             newPartitions.addAll(p);
+        }
 
         Collections.sort(newPartitions);
         if (newPartitions.size() > (numberOfCuts))

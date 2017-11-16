@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public class HyperMultiCut extends MultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
+public class HyperMultiCut extends AbstractMultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
 
     private HyperCut<FlipCutNodeSimpleWeight> sourceCut;
     private final long minCutValue;

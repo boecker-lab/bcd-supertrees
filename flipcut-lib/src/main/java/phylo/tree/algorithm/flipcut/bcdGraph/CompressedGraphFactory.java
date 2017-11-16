@@ -48,9 +48,8 @@ public class CompressedGraphFactory {
             for (TreeNode scaffoldNode : scaffold.vertices()) {
                 if (scaffoldNode.isLeaf()) {
                     leafs.put(scaffoldNode.getLabel(), leafIndex++);
-//                    treeTaxa.add(leafIndex++);
                     treeTaxa.add(scaffoldNode.getLabel());
-                }else {
+                } else {
                     allChars++;
                 }
             }
@@ -58,7 +57,6 @@ public class CompressedGraphFactory {
             activeScaffoldCharacters = addScaffoldCharacterRecursive(scaffoldRoot.getChildren(), characterIndex, costComputer, treeTaxa, leafs, duplicates, edges, scaffoldMapping);
         }
         if (activeScaffoldCharacters == null) activeScaffoldCharacters = new RoaringBitmap();
-
 
         //do character stuff
         for (Tree tree : trees) {
@@ -76,7 +74,7 @@ public class CompressedGraphFactory {
                         inner.add(node);
                     }
                 }
-                allChars += inner.size() ;
+                allChars += inner.size();
 
                 for (TreeNode node : inner) {
                     //collect no edges and zero edges
@@ -185,12 +183,12 @@ public class CompressedGraphFactory {
 
                 assert hyperedge.getWeight() == CutGraphCutter.getInfinity();
 
-                childrenI.add(charIndex.get());
+                final int currentIndex = charIndex.getAndIncrement();
+                childrenI.add(currentIndex);
 
                 RoaringBitmap set = addScaffoldCharacterRecursive(scaffoldNode.getChildren(), charIndex, costComputer, treeTaxa, leafs, zs, edges, scaffoldMapping);
                 if (!set.isEmpty())
-                    scaffoldMapping.put(charIndex.getAndIncrement(), set);
-                charIndex.incrementAndGet();
+                    scaffoldMapping.put(currentIndex, set);
             }
         }
 

@@ -380,15 +380,6 @@ public class FlipCutGraphMultiSimpleWeight extends FlipCutGraphSimpleWeight impl
             return cuts[index++];
 
         }
-
-        /*ATTENTION this method is not supported!!!*/
-        public void remove() {
-            try {
-                throw new NoSuchMethodException("Remove operation is not Supported for this Iterator");
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private DefaultMultiCut getCompCut(List<List<FlipCutNodeSimpleWeight>> comp) {

@@ -12,7 +12,7 @@ import java.util.List;
  * Date: 18.01.13
  * Time: 18:10
  */
-public class DefaultMultiCut extends MultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
+public class DefaultMultiCut extends AbstractMultiCut<LinkedHashSet<FlipCutNodeSimpleWeight>, FlipCutGraphMultiSimpleWeight> {
     protected LinkedHashSet<FlipCutNodeSimpleWeight> cutSet;
     protected final long minCutValue;
     private List<List<FlipCutNodeSimpleWeight>> comp;

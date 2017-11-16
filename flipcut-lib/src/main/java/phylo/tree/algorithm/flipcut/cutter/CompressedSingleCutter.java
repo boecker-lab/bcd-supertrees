@@ -81,12 +81,10 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
     }
 
     private CompressedGoldbergTarjanCutGraph createCutGraph(CompressedBCDGraph source) {
-        int numMergedTaxe = 0;
         //create cutgraph with merged taxa
         List<RoaringBitmap> guiEdges = new ArrayList<>(source.numGuideEdges());
         if (source.hasGuideEdges()) {
             for (Hyperedge guidEdge : source.guideHyperEdges()) {
-                numMergedTaxe += guidEdge.ones.getCardinality();
                 guiEdges.add(guidEdge.ones);
             }
         }
@@ -127,11 +125,9 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
                     }
                     l.add(t);
 
-                    nodeToEdges.adjustOrPutValue(t, 1, 1);
                     nodeToEdges.adjustOrPutValue(edgeIndex, 1, 1);
-
                     nodeToEdges.adjustOrPutValue(edge, 1, 1);
-                    nodeToEdges.adjustOrPutValue(t, 1, 1);
+                    nodeToEdges.adjustOrPutValue(t, 2, 2);
 
                     numEdges.getAndAdd(4);
 //

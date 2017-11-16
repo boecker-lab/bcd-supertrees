@@ -5,6 +5,7 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;/**
  */
 
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
+import phylo.tree.algorithm.flipcut.SourceTreeGraphMultiCut;
 import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
 import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.GreedyBlackList;
 import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.RandomizedBlackList;
@@ -17,7 +18,7 @@ import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.StaticKarg
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public interface MultiCutterFactory<C extends MultiCutter<S, T>, S, T extends SourceTreeGraph<S>> extends CutterFactory<C, S, T> {
+public interface MultiCutterFactory<C extends MultiCutter<S, T>, S, T extends SourceTreeGraphMultiCut<S,T>> extends CutterFactory<C, S, T> {
     enum MultiCutterType {
         VAZIRANI,
         GREEDY,

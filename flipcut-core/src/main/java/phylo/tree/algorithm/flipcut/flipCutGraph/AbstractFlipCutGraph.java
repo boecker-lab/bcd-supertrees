@@ -112,6 +112,11 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
         }
     }
 
+    @Override
+    public boolean isConnected() {
+        return getComponents().size() == 1;
+    }
+
     protected abstract List<LinkedHashSet<N>> createGraphData(CostComputer costs, int bootstrapThreshold);
 
     protected void removeAdjacentEdges(N characterToRemove) {

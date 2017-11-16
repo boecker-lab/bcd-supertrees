@@ -114,17 +114,29 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
                 toDelete.add(i);
             }
         });
+
         deleteCharacters(toDelete);
     }
 
     public void deleteCharacters(RoaringBitmap toDelete) {
-        characters.xor(toDelete);
-        RoaringBitmap guidesToDelete = RoaringBitmap.and(activeGuideEdges, toDelete);
-        activeGuideEdges.xor(guidesToDelete);
+        deleteCharacters(toDelete, this);
+    }
+
+    public static CompressedBCDGraph cloneAndDeleteCharacters(RoaringBitmap toDelete, CompressedBCDGraph g) {
+        CompressedBCDGraph clone = new CompressedBCDSubGraph(g.getSource(), g.taxa, g.characters.clone(), g.activeGuideEdges.clone());
+        deleteCharacters(toDelete, clone);
+        return clone;
+    }
+
+    public static void deleteCharacters(RoaringBitmap toDelete, CompressedBCDGraph g) {
+        if (toDelete == null || toDelete.isEmpty()) return;
+        g.characters.xor(toDelete);
+        RoaringBitmap guidesToDelete = RoaringBitmap.and(g.activeGuideEdges, toDelete);
+        g.activeGuideEdges.xor(guidesToDelete);
         guidesToDelete.forEach((IntConsumer) key -> {
-            RoaringBitmap nuGuideEdges = getSource().scaffoldCharacterHirarchie.remove(key);
+            RoaringBitmap nuGuideEdges = g.getSource().scaffoldCharacterHirarchie.get(key);
             if (nuGuideEdges != null)
-                activeGuideEdges.or(nuGuideEdges);
+                g.activeGuideEdges.or(nuGuideEdges);
         });
     }
 
@@ -170,10 +182,19 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
     @Override
     public List<? extends SourceTreeGraph> getPartitions(GraphCutter c) {
         RoaringBitmap component = getConnectedComponent();
-        if (component.equals(taxa)) { //todo is this fast?
+        if (isConnected(component)) {
             CompressedBCDCut cut = (CompressedBCDCut) c.cut(this);
             deleteCharacters(cut.getCutSet());
         }
         return split();
+    }
+
+    @Override
+    public boolean isConnected() {
+        return isConnected(getConnectedComponent());
+    }
+
+    private boolean isConnected(RoaringBitmap component) {
+        return component.equals(taxa);
     }
 }
