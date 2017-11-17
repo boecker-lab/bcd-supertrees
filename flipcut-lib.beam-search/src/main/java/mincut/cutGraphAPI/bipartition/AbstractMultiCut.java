@@ -30,7 +30,7 @@ public abstract class AbstractMultiCut<S, G extends SourceTreeGraphMultiCut<S, G
     public abstract List<G> getSplittedGraphs();
 
 
-    protected abstract List<List<FlipCutNodeSimpleWeight>> comp(); //todo this should be noe independent
+    protected abstract List<List<FlipCutNodeSimpleWeight>> comp(); //todo this should be node independent
 
     @Override
     public boolean equals(Object o) {

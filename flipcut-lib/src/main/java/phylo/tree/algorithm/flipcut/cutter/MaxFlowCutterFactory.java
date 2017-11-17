@@ -10,7 +10,7 @@ import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public interface MaxFlowCutterFactory<C extends CutGraphCutter<S>, S, T extends SourceTreeGraph<S>> extends CutterFactory<C, S, T> {
+public interface MaxFlowCutterFactory<C extends GraphCutter<S>, S, T extends SourceTreeGraph<S>> extends CutterFactory<C, S, T> {
     CutGraphTypes getType();
 
     @Override

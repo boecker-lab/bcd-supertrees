@@ -1,4 +1,4 @@
-package phylo.tree.algorithm.flipcut.flipCutGraph;
+package phylo.tree.algorithm.flipcut.cutter;
 
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.SourceTreeGraphMultiCut;

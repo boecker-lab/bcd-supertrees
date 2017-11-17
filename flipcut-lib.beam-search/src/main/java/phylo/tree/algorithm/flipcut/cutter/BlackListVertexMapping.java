@@ -1,8 +1,10 @@
-package phylo.tree.algorithm.flipcut.flipCutGraph;
+package phylo.tree.algorithm.flipcut.cutter;
 
 import com.google.common.collect.Sets;
-import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.BlackList;
-import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.GreedyBlackList;
+import phylo.tree.algorithm.flipcut.cutter.blacklists.BlackList;
+import phylo.tree.algorithm.flipcut.cutter.blacklists.GreedyBlackList;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 
 import java.util.ArrayList;
 import java.util.HashSet;

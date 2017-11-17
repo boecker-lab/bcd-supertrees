@@ -1,9 +1,8 @@
 package phylo.tree.algorithm.flipcut;
 
 import core.algorithm.Algorithm;
-import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
-import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutter;
-import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutterFactory;
+import phylo.tree.algorithm.flipcut.cutter.MultiCutter;
+import phylo.tree.algorithm.flipcut.cutter.MultiCutterFactory;
 import phylo.tree.algorithm.flipcut.model.Partition;
 import phylo.tree.model.Tree;
 

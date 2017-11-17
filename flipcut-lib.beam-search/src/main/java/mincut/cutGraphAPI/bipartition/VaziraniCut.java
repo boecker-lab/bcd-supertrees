@@ -1,27 +1,28 @@
 package mincut.cutGraphAPI.bipartition;
 
-import mincut.cutGraphAPI.bipartition.BasicCut;
-import mincut.cutGraphAPI.bipartition.STCut;
-import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutNode;
-
-import java.util.Collection;
-import java.util.LinkedHashSet;
-
-/**
- * User: Markus Fleischauer (markus.fleischauerquni-jena.de)
- * 09.07.12 17:14
- */
-public class VaziraniCut<T extends AbstractFlipCutNode<T>> extends BasicCut<T> {
+public class VaziraniCut<S> implements Cut<S> {
     public final int k;
+    public final S cutSet;
+    public long minCutValue;
 
-    public VaziraniCut(STCut<T> cut, Collection<T> sSet, int k) {
-        super(new LinkedHashSet<>(cut.getCutSet()), cut.minCutValue);
-        cutSet.addAll(sSet);
+
+    public VaziraniCut(S cutSet, long minCutValue, int k) {
         this.k = k;
+        this.cutSet = cutSet;
+        this.minCutValue = minCutValue;
     }
 
-    public VaziraniCut(LinkedHashSet<T> cutSet, long minCutValue, int k) {
-        super(cutSet, minCutValue);
-        this.k = k;
+    @Override
+    public long minCutValue() {
+        return minCutValue;
     }
+
+    @Override
+    public S getCutSet() {
+        return cutSet;
+    }
+
+    public int k() {
+        return k;
+    }//todo remove
 }

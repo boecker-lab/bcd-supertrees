@@ -13,6 +13,7 @@ import phylo.tree.algorithm.flipcut.FlipCutMultiCut;
 import phylo.tree.algorithm.flipcut.FlipCutSingleCut;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.costComputer.SimpleCosts;
+import phylo.tree.algorithm.flipcut.cutter.MultiCutterFactory;
 import phylo.tree.algorithm.flipcut.cutter.SingleCutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.*;
 import phylo.tree.io.Newick;

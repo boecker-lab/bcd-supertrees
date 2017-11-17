@@ -9,7 +9,7 @@ import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.cli.BCDCLI;
 import phylo.tree.algorithm.flipcut.costComputer.SimpleCosts;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
-import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutterFactory;
+import phylo.tree.algorithm.flipcut.cutter.MultiCutterFactory;
 import phylo.tree.model.Tree;
 
 import java.io.BufferedWriter;

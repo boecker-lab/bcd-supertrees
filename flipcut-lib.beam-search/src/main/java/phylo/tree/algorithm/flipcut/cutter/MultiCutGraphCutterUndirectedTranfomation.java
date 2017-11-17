@@ -1,4 +1,4 @@
-package phylo.tree.algorithm.flipcut.flipCutGraph;
+package phylo.tree.algorithm.flipcut.cutter;
 /**
  * Created by Markus Fleischauer (markus.fleischauer@gmail.com)
  * as part of the flipcut
@@ -10,13 +10,14 @@ import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.FlipCutCutFactory;
 import mincut.cutGraphAPI.bipartition.HyperCut;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
-import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
-import phylo.tree.algorithm.flipcut.cutter.SingleCutGraphCutter;
-import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.ChracterScoreModifier;
-import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.KargerGraphCreator;
+import phylo.tree.algorithm.flipcut.cutter.undirectedConversion.ChracterScoreModifier;
+import phylo.tree.algorithm.flipcut.cutter.undirectedConversion.KargerGraphCreator;
 import mincut.cutGraphAPI.bipartition.DefaultMultiCut;
 import mincut.cutGraphAPI.bipartition.HyperMultiCut;
 import mincut.cutGraphAPI.bipartition.MultiCut;
+import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 
 import java.util.LinkedHashSet;
 import java.util.TreeSet;

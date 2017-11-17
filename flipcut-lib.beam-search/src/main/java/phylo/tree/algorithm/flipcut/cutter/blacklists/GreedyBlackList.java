@@ -1,4 +1,4 @@
-package phylo.tree.algorithm.flipcut.flipCutGraph.blacklists;
+package phylo.tree.algorithm.flipcut.cutter.blacklists;
 
 
 import org.jetbrains.annotations.NotNull;

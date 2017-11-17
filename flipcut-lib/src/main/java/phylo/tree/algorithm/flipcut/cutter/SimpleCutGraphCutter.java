@@ -1,16 +1,17 @@
 package phylo.tree.algorithm.flipcut.cutter;
 
 
-import mincut.cutGraphAPI.*;
+import mincut.cutGraphAPI.AhujaOrlinCutGraph;
+import mincut.cutGraphAPI.CutGraph;
+import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
+import mincut.cutGraphAPI.MaxFlowCutGraph;
 import mincut.cutGraphAPI.bipartition.BasicCut;
 import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.STCut;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
-import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
-import phylo.tree.algorithm.flipcut.flipCutGraph.VertexMapping;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -47,7 +48,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     }
 
     //################### graph creation ######################
-    protected void createTarjanGoldbergHyperGraph(final CutGraph<FlipCutNodeSimpleWeight> cutGraph, final T source) {
+    public static void createTarjanGoldbergHyperGraph(final CutGraph<FlipCutNodeSimpleWeight> cutGraph, final AbstractFlipCutGraph<FlipCutNodeSimpleWeight> source) {
         // add edges
         for (FlipCutNodeSimpleWeight character : source.characters) {
             for (FlipCutNodeSimpleWeight taxon : character.edges) {
@@ -59,7 +60,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         }
     }
 
-    protected void createTarjanGoldbergHyperGraphMerged(final CutGraph<FlipCutNodeSimpleWeight> cutGraph, final T source) {
+    public static void createTarjanGoldbergHyperGraphMerged(final CutGraph<FlipCutNodeSimpleWeight> cutGraph, final AbstractFlipCutGraph<FlipCutNodeSimpleWeight> source) {
         Set<FlipCutNodeSimpleWeight> edgesAlreadySet = new HashSet<FlipCutNodeSimpleWeight>();
         // add edges
         for (FlipCutNodeSimpleWeight character : source.characters) {
@@ -88,7 +89,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     }
 
     //helper method for the goldberg tarjan graphs
-    protected Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> createTarjanGoldbergHyperGraphTaxaMerged(final CutGraph<FlipCutNodeSimpleWeight> cutGraph, final T source, final VertexMapping<T> mapping, List<FlipCutNodeSimpleWeight> cutGraphTaxa) {
+    public static Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> createTarjanGoldbergHyperGraphTaxaMerged(final CutGraph<FlipCutNodeSimpleWeight> cutGraph, final AbstractFlipCutGraph<FlipCutNodeSimpleWeight> source, final VertexMapping<? extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight>> mapping, List<FlipCutNodeSimpleWeight> cutGraphTaxa) {
         final Map<FlipCutNodeSimpleWeight, FlipCutNodeSimpleWeight> taxonToMerged = mapping.taxonToDummy;
         final Map<FlipCutNodeSimpleWeight, Set<FlipCutNodeSimpleWeight>> taxonGroupTotrivialcharacters = mapping.trivialcharacters;
 
@@ -152,7 +153,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                     FlipCutNodeSimpleWeight tax = edgesTo.iterator().next();
 
                     if (!taxonGroupTotrivialcharacters.containsKey(tax)) {
-                        taxonGroupTotrivialcharacters.put(tax, new HashSet<FlipCutNodeSimpleWeight>());
+                        taxonGroupTotrivialcharacters.put(tax, new HashSet<>());
                     }
                     taxonGroupTotrivialcharacters.get(tax).add(characterDummyGlobalMerged);
                     taxonGroupTotrivialcharacters.get(tax).add(characterDummyGlobalMerged.clone);
@@ -180,7 +181,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     }
 
 
-    protected void createGoldbergTarjan(final CutGraph<FlipCutNodeSimpleWeight> cutGraph, final T source) {
+    public static void createGoldbergTarjan(final CutGraph<FlipCutNodeSimpleWeight> cutGraph, final AbstractFlipCutGraph<FlipCutNodeSimpleWeight> source) {
         // add edges
         for (FlipCutNodeSimpleWeight character : source.characters) {
             for (FlipCutNodeSimpleWeight taxon : character.edges) {
@@ -215,7 +216,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
     }*/
 
     //helper method for the goldberg tarjan graphs
-    protected List<FlipCutNodeSimpleWeight> addTaxa(final CutGraph<FlipCutNodeSimpleWeight> cutGraph, final T source) {
+    public static List<FlipCutNodeSimpleWeight> addTaxa(final CutGraph<FlipCutNodeSimpleWeight> cutGraph, final AbstractFlipCutGraph<FlipCutNodeSimpleWeight> source) {
         List<FlipCutNodeSimpleWeight> cutGraphTaxa = new ArrayList<>(source.taxa.size());
         for (FlipCutNodeSimpleWeight node : source.taxa) {
             cutGraphTaxa.add(node);
@@ -224,7 +225,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         return cutGraphTaxa;
     }
 
-    protected long calculateCharacterCap(FlipCutNodeSimpleWeight character) {
+    public static long calculateCharacterCap(FlipCutNodeSimpleWeight character) {
         long characterCap;
         if (IGNORE_MATRIX_ENTRIES) {
             characterCap = character.edgeWeight;
@@ -245,7 +246,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
         return characterCap;
     }
 
-    protected void createGoldbergTarjanCharacterWeights(CutGraph<FlipCutNodeSimpleWeight> cutGraph, final Collection<FlipCutNodeSimpleWeight> characters) {
+    public static void createGoldbergTarjanCharacterWeights(CutGraph<FlipCutNodeSimpleWeight> cutGraph, final Collection<FlipCutNodeSimpleWeight> characters) {
         // add characters, character clones and edges between them
         for (FlipCutNodeSimpleWeight character : characters) {
             cutGraph.addNode(character);

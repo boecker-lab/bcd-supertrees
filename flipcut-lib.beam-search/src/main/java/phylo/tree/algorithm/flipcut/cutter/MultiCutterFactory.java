@@ -1,19 +1,18 @@
-package phylo.tree.algorithm.flipcut.flipCutGraph;/**
+package phylo.tree.algorithm.flipcut.cutter;/**
  * Created by Markus Fleischauer (markus.fleischauer@gmail.com)
  * as part of the flipcut
  * 16.02.17.
  */
 
-import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.SourceTreeGraphMultiCut;
-import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
-import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.GreedyBlackList;
-import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.RandomizedBlackList;
-import phylo.tree.algorithm.flipcut.flipCutGraph.blacklists.RecursiveBlackList;
-import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.ChracterScoreModifier;
-import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.KargerGraphCreator;
-import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.RelativeToNumOfConnection;
-import phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion.StaticKargerGraphCreator;
+import phylo.tree.algorithm.flipcut.cutter.blacklists.GreedyBlackList;
+import phylo.tree.algorithm.flipcut.cutter.blacklists.RandomizedBlackList;
+import phylo.tree.algorithm.flipcut.cutter.blacklists.RecursiveBlackList;
+import phylo.tree.algorithm.flipcut.cutter.undirectedConversion.ChracterScoreModifier;
+import phylo.tree.algorithm.flipcut.cutter.undirectedConversion.KargerGraphCreator;
+import phylo.tree.algorithm.flipcut.cutter.undirectedConversion.RelativeToNumOfConnection;
+import phylo.tree.algorithm.flipcut.cutter.undirectedConversion.StaticKargerGraphCreator;
+import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
@@ -45,7 +44,7 @@ public interface MultiCutterFactory<C extends MultiCutter<S, T>, S, T extends So
     static MultiCutterFactory newInstance(MultiCutterType multiCutterType, CutGraphTypes simpleCutterType) {
         switch (multiCutterType) {
             case VAZIRANI:
-                return new MultiCutGraphCutterVazirani.Factory(simpleCutterType);
+                return new MultiCutGraphCutterVazirani.Factory();
             case GREEDY:
                 return new MultiCutGraphCutterGreedy.Factory(simpleCutterType, new GreedyBlackList());
             case GREEDY_RAND:
@@ -66,7 +65,7 @@ public interface MultiCutterFactory<C extends MultiCutter<S, T>, S, T extends So
             case MC_STATIC_REL:
                 return new MultiCutGraphCutterUndirectedTranfomation.Factory(new RelativeToNumOfConnection(), new StaticKargerGraphCreator(), false);
             default:
-                return new MultiCutGraphCutterVazirani.Factory(simpleCutterType);
+                return new MultiCutGraphCutterVazirani.Factory();
         }
     }
 

@@ -1,8 +1,8 @@
 package phylo.tree.algorithm.flipcut;
 
 import mincut.cutGraphAPI.bipartition.MultiCut;
-import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutter;
-import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutterFactory;
+import phylo.tree.algorithm.flipcut.cutter.MultiCutter;
+import phylo.tree.algorithm.flipcut.cutter.MultiCutterFactory;
 
 import java.util.Iterator;
 

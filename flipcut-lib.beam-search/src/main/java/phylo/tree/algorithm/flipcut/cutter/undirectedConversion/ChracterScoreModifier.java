@@ -1,4 +1,4 @@
-package phylo.tree.algorithm.flipcut.flipCutGraph.undirectedConversion;
+package phylo.tree.algorithm.flipcut.cutter.undirectedConversion;
 
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 

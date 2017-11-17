@@ -6,8 +6,8 @@ import org.roaringbitmap.RoaringBitmap;
 import phylo.tree.algorithm.flipcut.MultiCutGraph;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
-import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutter;
-import phylo.tree.algorithm.flipcut.flipCutGraph.MultiCutterFactory;
+import phylo.tree.algorithm.flipcut.cutter.MultiCutter;
+import phylo.tree.algorithm.flipcut.cutter.MultiCutterFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,8 +58,6 @@ public class CompressedBCDMultiCutGraph extends MultiCutGraph<RoaringBitmap, Com
 
 
     //Multi cutter methods
-
-
     @Override
     protected MultiCut<RoaringBitmap, CompressedBCDMultiCutGraph> getCutFromCompenents() {
         return new CompressedBCDMultiCut(this);
