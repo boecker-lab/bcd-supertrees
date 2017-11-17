@@ -1,13 +1,14 @@
 package phylo.tree.algorithm.flipcut.cutter;
 
+import mincut.cutGraphAPI.CompressedGoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.bipartition.CompressedBCDCut;
 import mincut.cutGraphAPI.bipartition.MultiCut;
 import mincut.cutGraphAPI.bipartition.VaziraniCut;
 import org.roaringbitmap.RoaringBitmap;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDMultiCutGraph;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 
 public class MultiCutGrgaphCutterVaziraniCompressedBCD extends  AbstractMultiCutGraphCutterVazirani<RoaringBitmap,CompressedBCDMultiCutGraph>{
 
@@ -19,7 +20,7 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends  AbstractMultiCut
 
     @Override
     protected void initialCut() {
-       /* // get the mincut, fix s iterate over t
+        /*// get the mincut, fix s iterate over t
         int s; //taxon
         int t;
         VaziraniCut<RoaringBitmap> currentNode;
@@ -28,15 +29,14 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends  AbstractMultiCut
 
         // inti data structures
         taxa = source.getTaxa().toArray();
-        initCuts = new VaziraniCutNode[taxa.size() - 1];
+        initCuts = new VaziraniCut[taxa.length - 1];
         queueAscHEAP = new PriorityQueue<>();
 
         //j=0
-        GoldbergTarjanCutGraph<FlipCutNodeSimpleWeight> cutGraph = new GoldbergTarjanCutGraph<>();
-        dummyToMerged = SimpleCutGraphCutter.createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, source, mapping, new ArrayList<>(taxa.size()));
+        CompressedGoldbergTarjanCutGraph cutGraph = new CompressedGoldbergTarjanCutGraph();
 
-        minCut = cutGraph.calculateMinSTCut(taxa.get(0), taxa.get(1));
-        lightestCut = new VaziraniCutNode<FlipCutNodeSimpleWeight>(minCut.getCutSet(), minCut.minCutValue, 1);
+        minCut = cutGraph.calculateMinSTCut(taxa[0], taxa[1]);
+        lightestCut = new VaziraniCut<>(minCut.getCutSet(), minCut.minCutValue(), 1);
         initCuts[0] = lightestCut;
 
 
@@ -57,7 +57,7 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends  AbstractMultiCut
                 System.out.println("trivials removed");
         }
 
-        //ATTENTION this is  the undirected graph version as tweak for flipCut Graph
+        //ATTENTION this is  the undirected graph version as tweak for symmetric bcd graph
         for (int j = 1; j < taxa.size() - 1; j++) {
             s = taxa.get(j);
             t = taxa.get(j + 1);

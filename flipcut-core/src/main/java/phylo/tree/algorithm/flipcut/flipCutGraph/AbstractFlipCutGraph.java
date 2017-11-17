@@ -202,7 +202,7 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
      * @return components list of components
      */
     protected List<List<N>> getComponents() {
-        long t = System.currentTimeMillis();
+//        long t = System.currentTimeMillis();
         List<List<N>> components = new ArrayList<List<N>>(2);
         List<N> currentComponent;
         for (N node : characters) {
@@ -219,7 +219,7 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
                 dfs(n, currentComponent);
             }
         }
-        System.out.println("Connected Component in: " + (double) (System.currentTimeMillis() - t) / 1000d + "s");
+//        System.out.println("Connected Component in: " + (double) (System.currentTimeMillis() - t) / 1000d + "s");
         return components;
     }
 

@@ -80,7 +80,7 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
     }
 
     public RoaringBitmap getConnectedComponent() {
-        long t = System.currentTimeMillis();
+//        long t = System.currentTimeMillis();
         LinkedList<Hyperedge> edges = getHyperEdgesAsList();
 
         RoaringBitmap component;
@@ -103,7 +103,7 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
             component = new RoaringBitmap();
             component.add(taxa.first());
         }
-        System.out.println("Connected Component in: " + (double) (System.currentTimeMillis() - t) / 1000d + "s");
+//        System.out.println("Connected Component in: " + (double) (System.currentTimeMillis() - t) / 1000d + "s");
         return component;
     }
 

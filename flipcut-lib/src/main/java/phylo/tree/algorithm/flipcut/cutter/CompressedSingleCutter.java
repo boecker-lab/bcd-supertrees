@@ -1,5 +1,8 @@
 package phylo.tree.algorithm.flipcut.cutter;
 
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -29,7 +32,7 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
 
 
     public CompressedSingleCutter() {
-        this.threats = 2;
+        this.threats = 1;
         this.executorService = null;
     }
 
@@ -49,12 +52,10 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
     }
 
     public Cut<RoaringBitmap> cut(final CompressedBCDGraph source) {
-        long tm = System.currentTimeMillis();
-        final CompressedGoldbergTarjanCutGraph cutGraph = createCutGraph(source);
+        TIntObjectMap<TIntList> charMapping = new TIntObjectHashMap<>();
+        final CompressedGoldbergTarjanCutGraph cutGraph = createCutGraph(source, charMapping);
         cutGraph.setThreads(threats);
         cutGraph.setExecutorService(executorService);
-        System.out.println("Set up CutGraph in in: " + (double) (System.currentTimeMillis() - tm) / 1000d + "s");
-
 
         //we do not have to map merged taxa back, hence we need only the hyperedges we have to delete
         try {
@@ -65,13 +66,22 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
             for (LinkedHashSet cs : css) {
                 for (Object o : cs) {
                     if (o instanceof Integer) {
-                        int index = (int) o;
+                        final int index = (int) o;
                         if (!cs.contains(source.getEdge(index))) {
-                            toDelete.add(index);
+                            TIntList indeces = charMapping.get(index);
+                            if (indeces == null) {
+                                toDelete.add(index);
+                            } else {
+                                indeces.forEach(i -> {
+                                    toDelete.add(i);
+                                    return true;
+                                });
+                            }
                         }
                     }
                 }
             }
+
             cachedCut = new CompressedBCDCut(toDelete, cut.minCutValue());
             return cachedCut;
         } catch (ExecutionException | InterruptedException e) {
@@ -80,7 +90,7 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
         }
     }
 
-    private CompressedGoldbergTarjanCutGraph createCutGraph(CompressedBCDGraph source) {
+    public static CompressedGoldbergTarjanCutGraph createCutGraph(CompressedBCDGraph source, TIntObjectMap<TIntList> charMapping) {
         //create cutgraph with merged taxa
         List<RoaringBitmap> guiEdges = new ArrayList<>(source.numGuideEdges());
         if (source.hasGuideEdges()) {
@@ -89,12 +99,9 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
             }
         }
 
-
         final TObjectIntMap<Object> nodeToEdges = new TObjectIntHashMap<>(source.numTaxa() + 2 * source.numCharacter());
-        final TIntObjectMap<List<String>> hyperEdges = new TIntObjectHashMap<>(source.numCharacter());
-
         final AtomicInteger numEdges = new AtomicInteger(0);
-
+        final Map<RoaringBitmap, TIntList> hyperEdgeMerging = new HashMap<>();
 
         // add edge to cutgraph (maybe with merged taxa)
         source.characters.forEach((IntConsumer) edgeIndex -> {
@@ -112,38 +119,56 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
             }
 
             if (edgeOnes.getCardinality() > 1) {
-                nodeToEdges.adjustOrPutValue(edgeIndex, 1, 1);
-                nodeToEdges.adjustOrPutValue(edge, 1, 1);
-                numEdges.getAndAdd(2);
-
-                edgeOnes.forEach((IntConsumer) taxonIndex -> {
-                    final String t = source.getTaxon(taxonIndex);
-                    List<String> l = hyperEdges.get(edgeIndex);
-                    if (l == null) {
-                        l = new LinkedList<>();
-                        hyperEdges.put(edgeIndex, l);
-                    }
-                    l.add(t);
+                //merging hyperedges, that are identical because of guide tree merging
+                TIntList merged = hyperEdgeMerging.get(edgeOnes);
+                if (merged == null) {
+                    merged = new TIntLinkedList();
+                    hyperEdgeMerging.put(edgeOnes, merged);
 
                     nodeToEdges.adjustOrPutValue(edgeIndex, 1, 1);
                     nodeToEdges.adjustOrPutValue(edge, 1, 1);
-                    nodeToEdges.adjustOrPutValue(t, 2, 2);
 
-                    numEdges.getAndAdd(4);
-//
-                });
+                    numEdges.getAndAdd(2);
+
+                    edgeOnes.forEach((IntConsumer) taxonIndex -> {
+                        final String t = source.getTaxon(taxonIndex);
+
+                        nodeToEdges.adjustOrPutValue(edgeIndex, 1, 1);
+                        nodeToEdges.adjustOrPutValue(edge, 1, 1);
+                        nodeToEdges.adjustOrPutValue(t, 2, 2);
+
+                        numEdges.getAndAdd(4);
+                    });
+                }
+                merged.add(edgeIndex);
             }
         });
 
+
         Map<String, Node> cutgraphTaxa = new HashMap<>(source.numTaxa());
         final CutGraphImpl hipri = new CutGraphImpl(nodeToEdges.size(), numEdges.get());
-        for (int edgeIndex : hyperEdges.keys()) {
+
+        hyperEdgeMerging.forEach((edgeOnes, mergedIndeces) -> {
+            int edgeIndex = mergedIndeces.get(0);
             Hyperedge edge = source.getEdge(edgeIndex);
             Node out = hipri.createNode(edgeIndex, nodeToEdges.get(edge));
             Node in = hipri.createNode(edge, nodeToEdges.get(edge));
-            hipri.addEdge(out, in, edge.getWeight());
 
-            for (String taxon : hyperEdges.get(edgeIndex)) {
+            long weight = 0;
+            if (mergedIndeces.size() > 1) {
+                TIntIterator it = mergedIndeces.iterator();
+                while (it.hasNext()) {
+                    weight += source.getEdge(it.next()).getWeight();
+                }
+                charMapping.put(edgeIndex, mergedIndeces);
+            } else {
+                weight = edge.getWeight();
+            }
+
+            hipri.addEdge(out, in, weight);
+
+            edgeOnes.forEach((IntConsumer) taxonIndex -> {
+                final String taxon = source.getTaxon(taxonIndex);
                 Node t = cutgraphTaxa.get(taxon);
                 if (t == null) {
                     t = hipri.createNode(taxon, nodeToEdges.get(taxon));
@@ -151,8 +176,8 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
                 }
                 hipri.addEdge(t, out, CutGraphCutter.getInfinity());
                 hipri.addEdge(in, t, CutGraphCutter.getInfinity());
-            }
-        }
+            });
+        });
 
         CompressedGoldbergTarjanCutGraph cutGraph = new CompressedGoldbergTarjanCutGraph(hipri);
         Iterator<Node> taxit = cutgraphTaxa.values().iterator();

@@ -310,7 +310,6 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
 
     @Override
     public Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> cut(SourceTreeGraph<LinkedHashSet<FlipCutNodeSimpleWeight>> s) {
-        long tm = System.currentTimeMillis();
         T source = (T) s;
         CutGraph<FlipCutNodeSimpleWeight> cutGraph;
         Cut<LinkedHashSet<FlipCutNodeSimpleWeight>> mincut = null;
@@ -352,10 +351,6 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                 List<FlipCutNodeSimpleWeight> cutGraphTaxa = addTaxa(cutGraph, source);
                 //create rest of the graph
                 createTarjanGoldbergHyperGraphMerged(cutGraph, source);
-
-
-                System.out.println("Set up CutGraph in in: " + (double) (System.currentTimeMillis() - tm) / 1000d + "s");
-
 
                 STCut<FlipCutNodeSimpleWeight> newMinCut = calculateTarjanMinCut((MaxFlowCutGraph<FlipCutNodeSimpleWeight>) cutGraph, cutGraphTaxa);
 

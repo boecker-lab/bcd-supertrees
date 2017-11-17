@@ -2,8 +2,10 @@ package phylo.tree.algorithm.flipcut.cutter;
 
 import mincut.cutGraphAPI.GoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.bipartition.*;
-import phylo.tree.algorithm.flipcut.SourceTreeGraph;
-import phylo.tree.algorithm.flipcut.flipCutGraph.*;
+import phylo.tree.algorithm.flipcut.flipCutGraph.AbstractFlipCutGraph;
+import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -125,21 +127,19 @@ public class MultiCutGraphCutterVazirani extends AbstractMultiCutGraphCutterVazi
                 currentCut = new VaziraniCut<>(nuCutset, tmpCut.minCutValue(), k + 1);
                 cuts.add(currentCut);
 
-            } else {
+            } else if (sSet.size() < taxa.size()) {
                 //find cut for 0^k case
-                if (sSet.size() < taxa.size()) {
-                    //tSet empty --> adding new init Graph! 0^k case);
-                    VaziraniCut<LinkedHashSet<FlipCutNodeSimpleWeight>> initCut = null;
-                    //find best
-                    for (int i = k; i < initCuts.length; i++) {
-                        if (initCut == null || initCuts[i].minCutValue() < initCut.minCutValue()) {
-                            initCut = initCuts[i];
-                        }
+                //tSet empty --> adding new init Graph! 0^k case);
+                VaziraniCut<LinkedHashSet<FlipCutNodeSimpleWeight>> initCut = null;
+                //find best
+                for (int i = k; i < initCuts.length; i++) {
+                    if (initCut == null || initCuts[i].minCutValue() < initCut.minCutValue()) {
+                        initCut = initCuts[i];
                     }
-                    //copy to new object
-                    initCut = new VaziraniCut<>(initCut.getCutSet(), initCut.minCutValue(), k + 1);
-                    cuts.add(initCut);
                 }
+                //copy to new object
+                initCut = new VaziraniCut<>(initCut.getCutSet(), initCut.minCutValue(), k + 1);
+                cuts.add(initCut);
             }
         }
         return cuts;

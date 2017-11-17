@@ -1,12 +1,12 @@
 package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 
+import mincut.cutGraphAPI.bipartition.DefaultMultiCut;
+import mincut.cutGraphAPI.bipartition.MultiCut;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.SourceTreeGraphMultiCut;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
-import mincut.cutGraphAPI.bipartition.DefaultMultiCut;
-import mincut.cutGraphAPI.bipartition.MultiCut;
 import phylo.tree.algorithm.flipcut.cutter.MultiCutter;
 import phylo.tree.algorithm.flipcut.cutter.MultiCutterFactory;
 

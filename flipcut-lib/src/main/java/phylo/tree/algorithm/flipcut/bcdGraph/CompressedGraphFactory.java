@@ -79,8 +79,6 @@ public class CompressedGraphFactory {
                 for (TreeNode node : inner) {
                     //collect no edges and zero edges
                     Hyperedge edge = addEdge(node, treeTaxa, leafs, duplicates, edges, costComputer);
-                    if (edge.isInfinite())
-                        System.out.println("guide tree edge overlaps with normal one: ");
                 }
             }
         }
