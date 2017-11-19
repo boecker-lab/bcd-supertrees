@@ -365,7 +365,7 @@ public abstract class SimpleCutGraphCutter<T extends AbstractFlipCutGraph<FlipCu
                         nuCutSet.addAll(realNodes);
                     }
                 }
-                mincut = new BasicCut<>(nuCutSet, newMinCut.minCutValue);
+                mincut = new BasicCut<>(nuCutSet, newMinCut.minCutValue());
             }
         } else {
             System.err.println("ERROR: Unsupported cut-graph type!");

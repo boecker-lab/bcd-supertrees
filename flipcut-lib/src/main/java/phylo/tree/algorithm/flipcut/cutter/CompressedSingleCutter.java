@@ -1,12 +1,13 @@
 package phylo.tree.algorithm.flipcut.cutter;
 
 import gnu.trove.iterator.TIntIterator;
+import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import mincut.cutGraphAPI.CompressedGoldbergTarjanCutGraph;
 import mincut.cutGraphAPI.bipartition.CompressedBCDCut;
 import mincut.cutGraphAPI.bipartition.Cut;
@@ -52,8 +53,22 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
     }
 
     public Cut<RoaringBitmap> cut(final CompressedBCDGraph source) {
-        TIntObjectMap<TIntList> charMapping = new TIntObjectHashMap<>();
-        final CompressedGoldbergTarjanCutGraph cutGraph = createCutGraph(source, charMapping);
+        final TIntObjectMap<TIntList> charMapping = new TIntObjectHashMap<>();
+        final TIntObjectMap<Node.IntNode> cutgraphTaxa = new TIntObjectHashMap<>(source.numTaxa());
+
+        final CutGraphImpl hipri = createHipri(
+                source, createGuideEdges(source), charMapping, cutgraphTaxa
+        );
+        CompressedGoldbergTarjanCutGraph cutGraph = new CompressedGoldbergTarjanCutGraph(hipri);
+        TIntObjectIterator<Node.IntNode> taxit = cutgraphTaxa.iterator();
+        taxit.advance();
+        Node s = taxit.value();
+        while (taxit.hasNext()) {
+            taxit.advance();
+            cutGraph.submitSTCutCalculation(s, taxit.value());
+        }
+
+
         cutGraph.setThreads(threats);
         cutGraph.setExecutorService(executorService);
 
@@ -65,9 +80,11 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
             LinkedHashSet[] css = new LinkedHashSet[]{cut.getsSet(), cut.gettSet()};
             for (LinkedHashSet cs : css) {
                 for (Object o : cs) {
-                    if (o instanceof Integer) {
-                        final int index = (int) o;
-                        if (!cs.contains(source.getEdge(index))) {
+                    //search for indeces
+                    final int index = (int) o;
+                    //find character indeces -> larger indeces are taxa ;-)
+                    if (source.isCharacter(index)) {
+                        if (!cs.contains(source.getCloneIndex(index))) {
                             TIntList indeces = charMapping.get(index);
                             if (indeces == null) {
                                 toDelete.add(index);
@@ -90,7 +107,7 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
         }
     }
 
-    public static CompressedGoldbergTarjanCutGraph createCutGraph(CompressedBCDGraph source, TIntObjectMap<TIntList> charMapping) {
+    public static List<RoaringBitmap> createGuideEdges(CompressedBCDGraph source) {
         //create cutgraph with merged taxa
         List<RoaringBitmap> guiEdges = new ArrayList<>(source.numGuideEdges());
         if (source.hasGuideEdges()) {
@@ -98,15 +115,17 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
                 guiEdges.add(guidEdge.ones);
             }
         }
+        return guiEdges;
+    }
 
-        final TObjectIntMap<Object> nodeToEdges = new TObjectIntHashMap<>(source.numTaxa() + 2 * source.numCharacter());
-        final AtomicInteger numEdges = new AtomicInteger(0);
+    public static CutGraphImpl createHipri(CompressedBCDGraph source, List<RoaringBitmap> guiEdges, TIntObjectMap<TIntList> charMapping, TIntObjectMap<Node.IntNode> cutgraphTaxa) {
+        final TIntIntMap nodeToEdges = new TIntIntHashMap(source.numTaxa() + 2 * source.numCharacter());
         final Map<RoaringBitmap, TIntList> hyperEdgeMerging = new HashMap<>();
+        final AtomicInteger numEdges = new AtomicInteger(0);
 
         // add edge to cutgraph (maybe with merged taxa)
         source.characters.forEach((IntConsumer) edgeIndex -> {
-            Hyperedge edge = source.getEdge(edgeIndex);
-            RoaringBitmap edgeOnes = edge.ones;
+            RoaringBitmap edgeOnes = source.getEdge(edgeIndex).ones;
 
             // do taxa merging if needed
             for (RoaringBitmap guideOnes : guiEdges) {
@@ -123,18 +142,18 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
                 TIntList merged = hyperEdgeMerging.get(edgeOnes);
                 if (merged == null) {
                     merged = new TIntLinkedList();
+                    final int edgeCloneIndex = source.getCloneIndex(edgeIndex);
                     hyperEdgeMerging.put(edgeOnes, merged);
 
                     nodeToEdges.adjustOrPutValue(edgeIndex, 1, 1);
-                    nodeToEdges.adjustOrPutValue(edge, 1, 1);
+                    nodeToEdges.adjustOrPutValue(edgeCloneIndex, 1, 1);
 
                     numEdges.getAndAdd(2);
 
-                    edgeOnes.forEach((IntConsumer) taxonIndex -> {
-                        final String t = source.getTaxon(taxonIndex);
+                    edgeOnes.forEach((IntConsumer) t -> {
 
                         nodeToEdges.adjustOrPutValue(edgeIndex, 1, 1);
-                        nodeToEdges.adjustOrPutValue(edge, 1, 1);
+                        nodeToEdges.adjustOrPutValue(edgeCloneIndex, 1, 1);
                         nodeToEdges.adjustOrPutValue(t, 2, 2);
 
                         numEdges.getAndAdd(4);
@@ -145,14 +164,15 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
         });
 
 
-        Map<String, Node> cutgraphTaxa = new HashMap<>(source.numTaxa());
         final CutGraphImpl hipri = new CutGraphImpl(nodeToEdges.size(), numEdges.get());
 
         hyperEdgeMerging.forEach((edgeOnes, mergedIndeces) -> {
-            int edgeIndex = mergedIndeces.get(0);
-            Hyperedge edge = source.getEdge(edgeIndex);
-            Node out = hipri.createNode(edgeIndex, nodeToEdges.get(edge));
-            Node in = hipri.createNode(edge, nodeToEdges.get(edge));
+            final int edgeIndex = mergedIndeces.get(0);
+//
+            final int edgeCloneIndex = source.getCloneIndex(edgeIndex);
+
+            Node.IntNode out = hipri.createNode(edgeIndex, nodeToEdges.get(edgeCloneIndex));
+            Node.IntNode in = hipri.createNode(edgeCloneIndex, nodeToEdges.get(edgeCloneIndex));
 
             long weight = 0;
             if (mergedIndeces.size() > 1) {
@@ -162,31 +182,24 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
                 }
                 charMapping.put(edgeIndex, mergedIndeces);
             } else {
-                weight = edge.getWeight();
+                weight = source.getEdge(edgeIndex).getWeight();
             }
 
             hipri.addEdge(out, in, weight);
 
             edgeOnes.forEach((IntConsumer) taxonIndex -> {
-                final String taxon = source.getTaxon(taxonIndex);
-                Node t = cutgraphTaxa.get(taxon);
+                Node.IntNode t = cutgraphTaxa.get(taxonIndex);
                 if (t == null) {
-                    t = hipri.createNode(taxon, nodeToEdges.get(taxon));
-                    cutgraphTaxa.put(taxon, t);
+                    t = hipri.createNode(taxonIndex, nodeToEdges.get(taxonIndex));
+                    cutgraphTaxa.put(taxonIndex, t);
                 }
                 hipri.addEdge(t, out, CutGraphCutter.getInfinity());
                 hipri.addEdge(in, t, CutGraphCutter.getInfinity());
             });
         });
 
-        CompressedGoldbergTarjanCutGraph cutGraph = new CompressedGoldbergTarjanCutGraph(hipri);
-        Iterator<Node> taxit = cutgraphTaxa.values().iterator();
-        Node s = taxit.next();
-        while (taxit.hasNext()) {
-            cutGraph.submitSTCutCalculation(s, taxit.next());
-        }
 
-        return cutGraph;
+        return hipri;
     }
 
 

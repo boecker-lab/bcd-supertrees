@@ -7,7 +7,7 @@ package mincut.cutGraphImpl.maxFlowGoldbergTarjan;
 /**
  * Internal node representation
  */
-public class Node {
+public abstract class Node {
     Arc[] arcs;           /* first outgoing arc */
     long excess;           /* excess at the node
                          change to double if needed */
@@ -16,12 +16,13 @@ public class Node {
     Node bPrev;           /* previous node in bucket */
     int current;          /* arc pointer */
     int bucketIndex;
-    public final Object name;
+
+
+    public abstract Object getName();
 
     private int createdArcs = 0;
 
-    Node(int edges, Object name) {
-        this.name = name;
+    protected Node(int edges) {
         this.arcs = new Arc[edges];
     }
 
@@ -35,7 +36,7 @@ public class Node {
 
     @Override
     public String toString() {
-        return name.toString();
+        return getName().toString();
     }
 
     void addArc(Node head, long cap) {
@@ -55,5 +56,37 @@ public class Node {
 
     private void addArc(Arc arc) {
         arcs[createdArcs++] = arc;
+    }
+
+    public static class IntNode extends Node {
+        private final int name;
+
+        public IntNode(int edges, int name) {
+            super(edges);
+            this.name = name;
+        }
+
+        public int getIntName() {
+            return name;
+        }
+
+        @Override
+        public Object getName() {
+            return getIntName();
+        }
+    }
+
+    public static class ObjectNode extends Node {
+        private final Object name;
+
+        public ObjectNode(int edges, Object name) {
+            super(edges);
+            this.name = name;
+        }
+
+        @Override
+        public Object getName() {
+            return name;
+        }
     }
 }

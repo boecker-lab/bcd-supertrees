@@ -72,6 +72,4 @@ public class CompressedBCDMultiCut extends CompressedBCDCut implements MultiCut<
         result = 31 * result + (int) (minCutValue ^ (minCutValue >>> 32));
         return result;
     }
-
-
 }

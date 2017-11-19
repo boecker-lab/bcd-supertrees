@@ -63,7 +63,7 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutting<V>, Cutting<
             STCut<V> next = calculateMinSTCut(
                     st.source,
                     st.sink);
-            if (next.minCutValue < cut.minCutValue())
+            if (next.minCutValue() < cut.minCutValue())
                 cut = next;
         }
         return cut;
@@ -76,7 +76,7 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutting<V>, Cutting<
         STCut<V> cut = STCut.MAX_CUT_DUMMY;
         for (Future<List<STCut<V>>> future : busyMaxFlow) {
             STCut<V> next = future.get().get(0);
-            if (next.minCutValue < cut.minCutValue)
+            if (next.minCutValue() < cut.minCutValue())
                 cut = next;
         }
 
@@ -105,7 +105,7 @@ public abstract class MaxFlowCutGraph<V> implements DirectedCutting<V>, Cutting<
 
             for (SS job : jobs) {
                 STCut<V> next = doJob(job);
-                if (next.minCutValue < best.minCutValue)
+                if (next.minCutValue() < best.minCutValue())
                     best = next;
             }
             return Arrays.asList(best);

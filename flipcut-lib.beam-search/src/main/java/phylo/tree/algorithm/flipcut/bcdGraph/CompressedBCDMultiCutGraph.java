@@ -24,6 +24,10 @@ public class CompressedBCDMultiCutGraph extends MultiCutGraph<RoaringBitmap, Com
         this.cutterFactory = cutterFactory;
     }
 
+    public CompressedBCDGraph getSource() {
+        return source;
+    }
+
     //delegates from source
     @Override
     public void deleteSemiUniversals() {

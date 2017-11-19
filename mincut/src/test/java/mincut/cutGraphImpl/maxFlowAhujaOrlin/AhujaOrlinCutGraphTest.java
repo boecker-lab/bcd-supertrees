@@ -124,11 +124,11 @@ public class AhujaOrlinCutGraphTest {
         hp.addEdge(7, 8, 1);
 
         STCut cut = hp.calculateMinSTCut(1, 8);
-        System.out.println(cut.minCutValue);
+        System.out.println(cut.minCutValue());
         System.out.println(cut.getCutSet());
 
 
-        assertEquals(4, cut.minCutValue);
+        assertEquals(4, cut.minCutValue());
         assertEquals(4, cut.getCutSet().size());
         assertFalse(cut.getCutSet().contains(5));
         assertFalse(cut.getCutSet().contains(6));

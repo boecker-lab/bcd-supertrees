@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+//todo buid graph for primitive int Node names to save memory and time
 public class CompressedGoldbergTarjanCutGraph extends MaxFlowCutGraph<Object> {
     private final CutGraphImpl hipri;
 
@@ -77,7 +78,7 @@ public class CompressedGoldbergTarjanCutGraph extends MaxFlowCutGraph<Object> {
             h = new CutGraphImpl(hipri.n, hipri.m);
             // iterate over all nodes and create clones
             for (Node node : hipri.getNodes()) {
-                nodeMapping.put(node, h.createNode(node.name, node.getArcs().length));
+                nodeMapping.put(node, h.createNode(node.getName(), node.getArcs().length));
             }
 
 

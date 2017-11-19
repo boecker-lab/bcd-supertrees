@@ -67,11 +67,11 @@ public class GoldbergTarjanCutGraphTest {
         hp.addEdge(7, 8, 1);
 
         STCut cut = hp.calculateMinSTCut(1, 8);
-        System.out.println(cut.minCutValue);
+        System.out.println(cut.minCutValue());
         System.out.println(cut.getCutSet());
 
 
-        assertEquals(4, cut.minCutValue);
+        assertEquals(4, cut.minCutValue());
         assertEquals(4, cut.getCutSet().size());
         assertTrue(cut.getCutSet().contains(5));
         assertTrue(cut.getCutSet().contains(6));
@@ -122,7 +122,7 @@ public class GoldbergTarjanCutGraphTest {
         try {
             STCut cut = gold.calculateMinCut();
             System.out.println("time" +  (System.currentTimeMillis()-time)/1000d);
-            System.out.println("Golderg mincut value: " + cut.minCutValue);
+            System.out.println("Golderg mincut value: " + cut.minCutValue());
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
@@ -190,7 +190,7 @@ public class GoldbergTarjanCutGraphTest {
                 long time =  System.currentTimeMillis();
                 STCut cut = gold.calculateMinCut();
                 System.out.println("time" +  (System.currentTimeMillis()-time)/1000d + " with " + t + " threads");
-                System.out.println("Golderg mincut value: " + cut.minCutValue);
+                System.out.println("Golderg mincut value: " + cut.minCutValue());
             } catch (ExecutionException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {

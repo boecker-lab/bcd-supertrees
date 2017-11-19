@@ -82,7 +82,7 @@ public class KargerSteinTest {
 
         STCut<Integer> goldCut = goldi.calculateMinCut();
         int[] c = goldCut.getCutSet().stream().sorted((i, j) -> Integer.compare(j, i)).mapToInt(i -> ((int) i)).toArray();
-        System.out.println("Gold Score: " + goldCut.minCutValue + " Cutset: " + Arrays.toString(c));
+        System.out.println("Gold Score: " + goldCut.minCutValue() + " Cutset: " + Arrays.toString(c));
         System.out.println("time" + (System.currentTimeMillis() - time) / 1000d);
 
 

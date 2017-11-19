@@ -102,11 +102,19 @@ public class CutGraphImpl {
     }
 
 
-    public Node createNode(Object name, int edges) {
-        nodes[createdNodes] = new Node(edges, name);
+    public Node.ObjectNode createNode(Object name, int edges) {
+        return addNode(new Node.ObjectNode(edges, name));
+    }
+
+    public Node.IntNode createNode(int name, int edges) {
+        return addNode(new Node.IntNode(edges, name));
+    }
+
+    private <T extends Node> T addNode(T node) {
+        nodes[createdNodes] = node;
         nodes[createdNodes].bucketIndex = createdNodes + 1;
         createdNodes++;
-        return nodes[createdNodes - 1];
+        return node;
     }
 
     private void aAdd(Bucket l, Node i) {
@@ -717,6 +725,30 @@ public class CutGraphImpl {
      * @return cut all elements of the component that contains the sink
      */
     public List<LinkedHashSet<Object>> calculateMaxSTFlowFull(final boolean activateChecks) {
+        calculateMaxFlow(activateChecks);
+        LinkedHashSet<Object> sSet = new LinkedHashSet<>();
+        LinkedHashSet<Object> tSet = new LinkedHashSet<>();
+        /// original :
+        for (Node j : nodes) {
+            if (isInSourceSet(j)) {
+                sSet.add(j.getName());
+            } else {
+                tSet.add(j.getName());
+            }
+        }
+        return Arrays.asList(sSet, tSet);
+    }
+
+    public boolean isInSourceSet(Node node) {
+        return node.d < n;
+    }
+
+    public boolean isInSinkSet(Node node) {
+        return !isInSourceSet(node);
+    }
+
+
+    public void calculateMaxFlow(final boolean activateChecks) {
         long sum;
         globUpdtFreq = GLOB_UPDT_FREQ;
 
@@ -767,18 +799,6 @@ public class CutGraphImpl {
                 throw new RuntimeException("ERROR: the solution is not optimal\n");
             }
         }
-
-        LinkedHashSet<Object> sSet = new LinkedHashSet<>();
-        LinkedHashSet<Object> tSet = new LinkedHashSet<>();
-        /// original :
-        for (Node j : nodes) {
-            if (j.d < n) {
-                sSet.add(j.name);
-            } else {
-                tSet.add(j.name);
-            }
-        }
-        return Arrays.asList(sSet, tSet);
     }
 
     public LinkedHashSet<Object> calculateMaxSTFlow(final boolean activateChecks) {

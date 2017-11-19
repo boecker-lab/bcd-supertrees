@@ -27,8 +27,8 @@ public class CompressedGraphFactory {
         final Tree scaffold = costComputer.getScaffoldTree();
         final List<Tree> trees = costComputer.getTrees();
 
-        int leafIndex = 0;
-        AtomicInteger characterIndex = new AtomicInteger(0);
+
+
 
         TIntObjectMap<RoaringBitmap> scaffoldMapping = new TIntObjectHashMap<>(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1);
         TObjectIntMap<String> leafs = new TObjectIntHashMap<>(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1);
@@ -37,7 +37,8 @@ public class CompressedGraphFactory {
         Map<Set<String>, Hyperedge> edges = new LinkedHashMap<>();
         Map<Set<String>, RoaringBitmap> duplicates = new HashMap<>();
 
-        int allChars = 0;
+        int leafIndex = 0;
+        int numOfChars = 0;
 
         LOGGER.info("Reading trees...");
         RoaringBitmap activeScaffoldCharacters = null;
@@ -50,10 +51,10 @@ public class CompressedGraphFactory {
                     leafs.put(scaffoldNode.getLabel(), leafIndex++);
                     treeTaxa.add(scaffoldNode.getLabel());
                 } else {
-                    allChars++;
+                    numOfChars++;
                 }
             }
-
+            AtomicInteger characterIndex = new AtomicInteger(leafIndex);
             activeScaffoldCharacters = addScaffoldCharacterRecursive(scaffoldRoot.getChildren(), characterIndex, costComputer, treeTaxa, leafs, duplicates, edges, scaffoldMapping);
         }
         if (activeScaffoldCharacters == null) activeScaffoldCharacters = new RoaringBitmap();
@@ -74,7 +75,7 @@ public class CompressedGraphFactory {
                         inner.add(node);
                     }
                 }
-                allChars += inner.size();
+                numOfChars += inner.size();
 
                 for (TreeNode node : inner) {
                     //collect no edges and zero edges
@@ -87,19 +88,6 @@ public class CompressedGraphFactory {
         assert leafs.size() == leafIndex;
 
 
-        //chreate chars
-
-        int charIndex = 0;
-        final Hyperedge[] hyperedges = new Hyperedge[edges.size()];
-        LOGGER.info("Add " + edges.size() + " merged Characters to graph...");
-        int allMergedChars = 0;
-        for (Hyperedge hyperedge : edges.values()) {
-            hyperedges[charIndex++] = hyperedge;
-            allMergedChars += hyperedge.umergedNumber();
-        }
-        LOGGER.info(allChars + " where merged to " + allMergedChars + " and can be further reduced to " + edges.size() + " during mincut");
-
-
         //create taxa;
         final String[] taxa = new String[leafs.size()];
         LOGGER.info("Add " + taxa.length + " Taxa to graph...");
@@ -107,6 +95,18 @@ public class CompressedGraphFactory {
             taxa[b] = a;
             return true;
         });
+
+        //chreate chars
+        int charIndex = taxa.length;
+        final TIntObjectMap<Hyperedge> hyperedges = new TIntObjectHashMap<>(edges.size());
+        LOGGER.info("Add " + edges.size() + " merged Characters to graph...");
+        int allMergedChars = 0;
+        for (Hyperedge hyperedge : edges.values()) {
+            hyperedges.put(charIndex++, hyperedge);
+            allMergedChars += hyperedge.umergedNumber();
+        }
+        LOGGER.info(numOfChars + " where merged to " + allMergedChars + " and can be further reduced to " + edges.size() + " during mincut");
+
 
         return new CompressedBCDSourceGraph(taxa, hyperedges, activeScaffoldCharacters, scaffoldMapping);
     }

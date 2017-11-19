@@ -22,15 +22,16 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
         this.activeGuideEdges = activeGuideEdges;
     }
 
-    protected CompressedBCDGraph(RoaringBitmap activeGuideEdges) {
+    protected CompressedBCDGraph(RoaringBitmap characters, RoaringBitmap activeGuideEdges) {
         this.taxa = new RoaringBitmap();
-        this.characters = new RoaringBitmap();
+        this.characters = characters;
         this.activeGuideEdges = activeGuideEdges;
     }
 
     //this is unchecked
     public Hyperedge getEdge(int hyperEdgeIndex) {
-        return getSource().sourceMergedHyperEdges[hyperEdgeIndex];
+//        return getSource().sourceMergedHyperEdges[hyperEdgeIndex];
+        return getSource().sourceMergedHyperEdges.get(hyperEdgeIndex);
     }
 
     //this is unchecked
@@ -42,19 +43,19 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
 
 
     public Iterable<String> taxaLabels() {
-        return new BitMapIteratable<>(getSource().sourceTaxa, taxa);
+        return new ArrayBitMapIteratable<>(getSource().sourceTaxa, taxa);
     }
 
     public LinkedList<Hyperedge> getHyperEdgesAsList() {
         LinkedList<Hyperedge> l = new LinkedList<>();
         characters.forEach((IntConsumer) i -> {
-            l.add(getSource().sourceMergedHyperEdges[i]);
+            l.add(getEdge(i));
         });
         return l;
     }
 
     public Iterable<Hyperedge> hyperEdges() {
-        return new BitMapIteratable<>(getSource().sourceMergedHyperEdges, characters);
+        return new IntMapBitMapIterable<>(getSource().sourceMergedHyperEdges, characters);
     }
 
     public boolean hasGuideEdges() {
@@ -67,7 +68,7 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
     }
 
     public Iterable<Hyperedge> guideHyperEdges() {
-        return new BitMapIteratable<>(getSource().sourceMergedHyperEdges, activeGuideEdges);
+        return new IntMapBitMapIterable<>(getSource().sourceMergedHyperEdges, activeGuideEdges);
     }
 
 
@@ -193,6 +194,23 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
     public boolean isConnected() {
         return isConnected(getConnectedComponent());
     }
+
+    public boolean isCharacterClone(int index) {
+        return index >= getSource().getFirstEdgeCloneIndex();
+    }
+
+    public boolean isCharacter(int index) {
+        return !isTaxon(index) && !isCharacterClone(index);
+    }
+
+    public boolean isTaxon(int index) {
+        return index < getSource().numTaxa();
+    }
+
+    public int getCloneIndex(int edgeIndex) {
+        return edgeIndex + getSource().getFirstEdgeCloneIndex();
+    }
+
 
     private boolean isConnected(RoaringBitmap component) {
         return component.equals(taxa);
