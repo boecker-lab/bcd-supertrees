@@ -12,7 +12,6 @@ import org.roaringbitmap.IntConsumer;
 import org.roaringbitmap.RoaringBitmap;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDMultiCutGraph;
-import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 
 import java.util.*;
@@ -30,59 +29,29 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends AbstractMultiCutG
 
     //creates a cutset, that contains taxa an characters to delete
     //todo, this is ugly, do something nice
-    private RoaringBitmap getCutSet(CutGraphImpl hipri, CompressedBCDGraph source, TIntObjectMap<TIntList> charMapping, RoaringBitmap sourceSetTaxa, RoaringBitmap sinkSetTaxa) {
+    private RoaringBitmap buildCutSet(CutGraphImpl hipri, CompressedBCDGraph source, TIntObjectMap<TIntList> charMapping, RoaringBitmap sourceSetTaxa, RoaringBitmap sinkSetTaxa) {
         RoaringBitmap sourceChars = new RoaringBitmap();
-        RoaringBitmap sinkChars = new RoaringBitmap();
-
-        if (RoaringBitmap.intersects(sinkSetTaxa, sourceSetTaxa)) {
-            System.out.println("cut set taxa intersection");
-        }
 
         for (Node node : hipri.getNodes()) {
             int nodeIndex = ((Node.IntNode) node).getIntName();
-            if (hipri.isInSourceSet(node)) { //todo this seems to be inverted, that would explain the strange implementaion of vazirani
+            if (hipri.isInSourceSet(node)) {
                 if (!source.isTaxon(nodeIndex)) {
                     sourceChars.add(nodeIndex);
                 } else {
                     sourceSetTaxa.add(nodeIndex);
                 }
-            } else {
-                if (!source.isTaxon(nodeIndex)) {
-                    sinkChars.add(nodeIndex);
-                } else {
-                    sinkSetTaxa.add(nodeIndex);
-                }
             }
         }
 
 
-        RoaringBitmap sourceSet = toCutSet(sourceChars, source, charMapping);
-        RoaringBitmap sinkSet = toCutSet(sinkChars, source, charMapping);
-
+        RoaringBitmap sourceSet = collectCharsToRemove(sourceChars, source, charMapping);
         sourceSetTaxa.and(taxaAsMap);
-        sinkSetTaxa.and(taxaAsMap);
-
         sourceSet.or(sourceSetTaxa);
-        sinkSet.or(sinkSetTaxa);
-
-
-        if (RoaringBitmap.intersects(sinkSetTaxa, sourceSetTaxa)) {
-            System.out.println("cut set taxa intersection");
-        }
-
-        /*if (RoaringBitmap.intersects(sinkSet, sourceSet)){
-            System.out.println("cut set intersection");
-        }*/
-
-        RoaringBitmap allTax = RoaringBitmap.or(sourceSetTaxa, sinkSetTaxa);
-        if (!allTax.contains(taxaAsMap)) {
-            System.out.println("Not all taxa restored ????");
-        }
 
         return sourceSet;
     }
 
-    private RoaringBitmap toCutSet(RoaringBitmap cutSetChars, CompressedBCDGraph source, TIntObjectMap<TIntList> charMapping) {
+    private RoaringBitmap collectCharsToRemove(RoaringBitmap cutSetChars, CompressedBCDGraph source, TIntObjectMap<TIntList> charMapping) {
         RoaringBitmap cutSet = new RoaringBitmap();
         cutSetChars.forEach((IntConsumer) value -> {
             if (source.isCharacter(value)) {
@@ -109,7 +78,6 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends AbstractMultiCutG
     }
 
     private List<RoaringBitmap> mergeGuideEdgesWithTaxonSet(final List<RoaringBitmap> guideEdges, final RoaringBitmap taxonSet) {
-        int overlappingGuides = 0;
         //merge taxa with giude edge if they do overlap
         Iterator<RoaringBitmap> it = guideEdges.iterator();
         while (it.hasNext()) {
@@ -117,11 +85,9 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends AbstractMultiCutG
             if (RoaringBitmap.intersects(taxonSet, guideEdge)) {
                 taxonSet.or(guideEdge);
                 it.remove();
-                overlappingGuides++;
             }
         }
         guideEdges.add(taxonSet); //add (merged) taxa to set og guide edges
-//        System.out.println("Overlapping Guides: " + overlappingGuides);
         return guideEdges;
     }
 
@@ -158,22 +124,7 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends AbstractMultiCutG
         long cutValue = hipri.getValue();
 
         //createCutset
-        RoaringBitmap cutSet = getCutSet(hipri, source.getSource(), charMapping, sSet, tSet);
-
-        if (cutValue >= CutGraphCutter.getInfinity()) {
-            System.out.println("Edge Cut???");
-            System.out.println("taxa: " + Arrays.toString(taxa));
-            System.out.println("CutSet: " + cutSet.toString());
-            System.out.println("cut Value: " + cutValue);
-            System.out.println("Infinity: " + CutGraphCutter.getInfinity());
-            System.out.println("numTaxa: " + taxa.length);
-            System.out.println("#### CHARACTERS ####");
-            LinkedList<Hyperedge> es = source.getSource().getHyperEdgesAsList();
-            for (Hyperedge hyperedge : es) {
-                System.out.println(hyperedge.ones());
-            }
-            System.out.println("########");
-        }
+        RoaringBitmap cutSet = buildCutSet(hipri, source.getSource(), charMapping, sSet, tSet);
 
         //here the cutset is the set of characters to delete
         lightestCut = new VaziraniCut<>(cutSet, cutValue, 1);
@@ -194,14 +145,6 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends AbstractMultiCutG
                     CompressedSingleCutter.createGuideEdges(source.getSource()), sSet
             );
 
-            for (RoaringBitmap guideEdge : guideEdges) {
-                if (guideEdge.contains(RoaringBitmap.bitmapOf(taxa))) {
-                    System.out.println("GuideEdge: " + guideEdge.toString());
-                    System.out.println("taxa: " + Arrays.toString(taxa));
-                    System.out.println("GuideEdge vs taxa: " + guideEdge.getCardinality() + " == " + taxa.length);
-                }
-            }
-
             //create graph: add characters and remaining taxa to cutgraph and merge everything that has to
             charMapping.clear();
             cutgraphTaxa.clear();
@@ -213,16 +156,8 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends AbstractMultiCutG
             hipri.calculateMaxFlow(false);
 
             cutValue = hipri.getValue();
-            cutSet = getCutSet(hipri, source.getSource(), charMapping, sSet, tSet);
-            if (cutValue >= CutGraphCutter.getInfinity()) {
-                System.out.println("Edge Cut???");
-                System.out.println("taxa: " + Arrays.toString(taxa));
-                System.out.println("CutSet: " + cutSet.toString());
-                System.out.println("cut Value: " + cutValue);
-                System.out.println("Infinity: " + CutGraphCutter.getInfinity());
-                System.out.println("numTaxa: " + taxa.length);
+            cutSet = buildCutSet(hipri, source.getSource(), charMapping, sSet, tSet);
 
-            }
             currentNode = new VaziraniCut<>(cutSet, cutValue, 1);
             initCuts[j] = currentNode;
             //save lightest cut for HEAP init
@@ -264,55 +199,12 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends AbstractMultiCutG
                 tSet.add(taxon);
             }
 
-            if (sSet.isEmpty()) {
-                System.out.println();
-                System.out.println("taxa: " + Arrays.toString(taxa));
-                System.out.println("CutSet: " + cut.toString());
-                System.out.println("minK: " + sourceCut.k());
-                System.out.println("cut Value: " + sourceCut.minCutValue);
-                System.out.println("Infinity: " + CutGraphCutter.getInfinity());
-                System.out.println("k: " + k);
-                System.out.println("numTaxa: " + taxa.length);
-                System.out.println();
-            }
-
             if (!tSet.isEmpty()) {
                 //build guide tree edgeSet and merge it with s and t set if nessecary
                 List<RoaringBitmap> guideEdges = CompressedSingleCutter.createGuideEdges(source.getSource());
 
-
-                if (sSet.isEmpty()) {
-                    System.out.println("Before merge");
-                    System.out.println("SSet: " + sSet.toString());
-                    System.out.println("TSet: " + tSet.toString());
-                    for (RoaringBitmap guideEdge : guideEdges) {
-                        System.out.println("GuideEdge: " + guideEdge.toString());
-                        System.out.println("GuideEdge vs taxa: " + guideEdge.getCardinality() + " == " + taxa.length);
-
-                    }
-                }
-
-
                 guideEdges = mergeGuideEdgesWithTaxonSet(guideEdges, sSet);
                 guideEdges = mergeGuideEdgesWithTaxonSet(guideEdges, tSet);
-
-                for (RoaringBitmap guideEdge : guideEdges) {
-                    if (guideEdge.contains(RoaringBitmap.bitmapOf(taxa))) {
-                        System.out.println("GuideEdge: " + guideEdge.toString());
-                        System.out.println("taxa: " + Arrays.toString(taxa));
-                        System.out.println("GuideEdge vs taxa: " + guideEdge.getCardinality() + " == " + taxa.length);
-                    }
-
-                }
-
-                if (sSet.isEmpty()) {
-                    System.out.println("After merge");
-                    System.out.println("SSet: " + sSet.toString());
-                    System.out.println("TSet: " + tSet.toString());
-                    for (RoaringBitmap guideEdge : guideEdges) {
-                        System.out.println("GuideEdge: " + guideEdge.toString());
-                    }
-                }
 
                 TIntObjectMap<TIntList> charMapping = new TIntObjectHashMap<>();
                 TIntObjectMap<Node.IntNode> cutgraphTaxa = new TIntObjectHashMap<>(source.numTaxa());
@@ -325,19 +217,7 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends AbstractMultiCutG
                 hipri.calculateMaxFlow(false);
 
                 long cutValue = hipri.getValue();
-                RoaringBitmap cutSet = getCutSet(hipri, source.getSource(), charMapping, sSet, tSet);
-                if (cutValue >= CutGraphCutter.getInfinity()) {
-                    System.out.println("Edge Cut???");
-                    System.out.println("taxa: " + Arrays.toString(taxa));
-                    System.out.println("CutSet: " + cut.toString());
-                    System.out.println("minK: " + sourceCut.k());
-                    System.out.println("cut Value: " + cutValue);
-                    System.out.println("Infinity: " + CutGraphCutter.getInfinity());
-                    System.out.println("k: " + k);
-                    System.out.println("numTaxa: " + taxa.length);
-
-                }
-
+                RoaringBitmap cutSet = buildCutSet(hipri, source.getSource(), charMapping, sSet, tSet);
 
                 VaziraniCut<RoaringBitmap> currentCut = new VaziraniCut<>(cutSet, cutValue, k + 1);
                 cuts.add(currentCut);
@@ -364,9 +244,8 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends AbstractMultiCutG
     @Override
     protected MultiCut<RoaringBitmap, CompressedBCDMultiCutGraph> buildOutputCut(VaziraniCut<RoaringBitmap> currentNode) {
         //remove taxa indeces from cutset
-        //todo maybe do that in place, hence taxa the vazicut is not longer needed when this method is called
-        RoaringBitmap cutset = RoaringBitmap.and(currentNode.cutSet, source.getSource().characters);
-        return new CompressedBCDMultiCut(cutset, currentNode.minCutValue, source);
+        currentNode.cutSet.and(source.getSource().characters);
+        return new CompressedBCDMultiCut(currentNode.cutSet, currentNode.minCutValue, source);
     }
 
     @Override

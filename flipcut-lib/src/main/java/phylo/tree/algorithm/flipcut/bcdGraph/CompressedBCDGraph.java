@@ -131,6 +131,7 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
     }
 
     public static void deleteCharacters(RoaringBitmap toDelete, CompressedBCDGraph g) {
+        if (toDelete == null || toDelete.isEmpty()) return;
         g.characters.xor(toDelete);
         RoaringBitmap guidesToDelete = RoaringBitmap.and(g.activeGuideEdges, toDelete);
         g.activeGuideEdges.xor(guidesToDelete);
