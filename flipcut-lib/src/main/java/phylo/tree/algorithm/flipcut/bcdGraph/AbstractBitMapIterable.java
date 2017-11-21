@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.function.Consumer;
 
 public abstract class AbstractBitMapIterable<T> implements Iterable<T> {
-//    final T[] source;
     final RoaringBitmap indeces;
 
 

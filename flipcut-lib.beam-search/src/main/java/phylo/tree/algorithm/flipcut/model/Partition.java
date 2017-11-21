@@ -153,7 +153,7 @@ public class Partition implements Comparable<Partition> {
                 Edge splitGraphEdge = new Edge(sourceGraphEdge.treeNode, treeNodeIndex.incrementAndGet());
                 final int taxaNum = splitGraph.numTaxa();
                 if (taxaNum == 1) {
-                    sourceGraphEdge.treeNodeLabel = (String) splitGraph.taxaLabels().iterator().next();
+                    splitGraphEdge.treeNodeLabel = (String) splitGraph.taxaLabels().iterator().next();
                     edges.add(splitGraphEdge);
                     newFinished++;
                 } else if (taxaNum == 0) {
