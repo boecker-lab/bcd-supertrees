@@ -737,12 +737,12 @@ public class CutGraphImpl {
         return Arrays.asList(sSet, tSet);
     }
 
-    public boolean isInSourceSet(Node node) {
+    public boolean isInSinkSet(Node node) {
         return node.d < n;
     }
 
-    public boolean isInSinkSet(Node node) {
-        return !isInSourceSet(node);
+    public boolean isInSourceSet(Node node) {
+        return !isInSinkSet(node);
     }
 
 

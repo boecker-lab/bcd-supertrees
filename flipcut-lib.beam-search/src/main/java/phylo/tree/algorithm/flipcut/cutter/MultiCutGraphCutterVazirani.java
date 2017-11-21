@@ -43,7 +43,7 @@ public class MultiCutGraphCutterVazirani extends AbstractMultiCutGraphCutterVazi
 
     @Override
     protected List<VaziraniCut<LinkedHashSet<FlipCutNodeSimpleWeight>>> findCutsFromPartialCuts(VaziraniCut<LinkedHashSet<FlipCutNodeSimpleWeight>> sourceCut, VaziraniCut<LinkedHashSet<FlipCutNodeSimpleWeight>>[] initCuts) {
-        Set<FlipCutNodeSimpleWeight> cut = sourceCut.getCutSet();
+        Set<FlipCutNodeSimpleWeight> cutTSet = sourceCut.getCutSet();
 
         List<VaziraniCut<LinkedHashSet<FlipCutNodeSimpleWeight>>> cuts = new ArrayList<>(taxa.size() - sourceCut.k());
 
@@ -60,7 +60,7 @@ public class MultiCutGraphCutterVazirani extends AbstractMultiCutGraphCutterVazi
             tSet = new HashSet<>();
 
             for (int i = 0; i < k; i++) {
-                if (cut.contains(taxa.get(i))) {
+                if (cutTSet.contains(taxa.get(i))) {
                     tSet.add(taxa.get(i));
                 } else {
                     sSet.add(taxa.get(i));
@@ -68,7 +68,7 @@ public class MultiCutGraphCutterVazirani extends AbstractMultiCutGraphCutterVazi
             }
 
             //change position of taxon number k
-            if (!cut.contains(taxa.get(k))) {
+            if (!cutTSet.contains(taxa.get(k))) {
                 tSet.add(taxa.get(k));
             } else {
                 sSet.add(taxa.get(k));
@@ -122,7 +122,7 @@ public class MultiCutGraphCutterVazirani extends AbstractMultiCutGraphCutterVazi
 
                 // compute mincut an put it to results
                 STCut<FlipCutNodeSimpleWeight> tmpCut = cutGraph.calculateMinSTCut(randomS, randomT);
-                LinkedHashSet<FlipCutNodeSimpleWeight> nuCutset = new LinkedHashSet<>(tmpCut.getCutSet());
+                LinkedHashSet<FlipCutNodeSimpleWeight> nuCutset = new LinkedHashSet<>(tmpCut.gettSet());
                 nuCutset.addAll(tSet);
                 currentCut = new VaziraniCut<>(nuCutset, tmpCut.minCutValue(), k + 1);
                 cuts.add(currentCut);
@@ -170,7 +170,7 @@ public class MultiCutGraphCutterVazirani extends AbstractMultiCutGraphCutterVazi
         dummyToMerged = SimpleCutGraphCutter.createTarjanGoldbergHyperGraphTaxaMerged(cutGraph, source, mapping, new ArrayList<>(taxa.size()));
 
         minCut = cutGraph.calculateMinSTCut(taxa.get(0), taxa.get(1));
-        lightestCut = new VaziraniCut<LinkedHashSet<FlipCutNodeSimpleWeight>>(minCut.getCutSet(), minCut.minCutValue(), 1);
+        lightestCut = new VaziraniCut<LinkedHashSet<FlipCutNodeSimpleWeight>>(minCut.gettSet(), minCut.minCutValue(), 1);
         initCuts[0] = lightestCut;
 
 
@@ -233,7 +233,7 @@ public class MultiCutGraphCutterVazirani extends AbstractMultiCutGraphCutterVazi
             }
 
             minCut = cutGraph.calculateMinSTCut(s, t);
-            currentNode = new VaziraniCut<LinkedHashSet<FlipCutNodeSimpleWeight>>(minCut.getCutSet(), minCut.minCutValue(), 1);
+            currentNode = new VaziraniCut<LinkedHashSet<FlipCutNodeSimpleWeight>>(minCut.gettSet(), minCut.minCutValue(), 1);
             initCuts[j] = currentNode;
             //save lightest cut for HEAP init
             if (currentNode.minCutValue() < lightestCut.minCutValue()) lightestCut = currentNode;

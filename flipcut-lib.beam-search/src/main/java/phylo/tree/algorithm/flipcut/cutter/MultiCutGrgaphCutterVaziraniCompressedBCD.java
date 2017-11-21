@@ -34,16 +34,13 @@ public class MultiCutGrgaphCutterVaziraniCompressedBCD extends AbstractMultiCutG
         RoaringBitmap sourceChars = new RoaringBitmap();
         RoaringBitmap sinkChars = new RoaringBitmap();
 
-//        RoaringBitmap sourceSetTaxa = new RoaringBitmap();
-//        RoaringBitmap sinkSetTaxa = new RoaringBitmap();
-
         if (RoaringBitmap.intersects(sinkSetTaxa, sourceSetTaxa)) {
             System.out.println("cut set taxa intersection");
         }
 
         for (Node node : hipri.getNodes()) {
             int nodeIndex = ((Node.IntNode) node).getIntName();
-            if (hipri.isInSinkSet(node)) { //todo this seems to be inverted, that would explain the strange implementaion of vazirani
+            if (hipri.isInSourceSet(node)) { //todo this seems to be inverted, that would explain the strange implementaion of vazirani
                 if (!source.isTaxon(nodeIndex)) {
                     sourceChars.add(nodeIndex);
                 } else {
