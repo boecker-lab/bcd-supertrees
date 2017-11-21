@@ -98,7 +98,6 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
                     }
                 }
             }
-
             cachedCut = new CompressedBCDCut(toDelete, cut.minCutValue());
             return cachedCut;
         } catch (ExecutionException | InterruptedException e) {
@@ -118,9 +117,9 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
         return guiEdges;
     }
 
-    public static CutGraphImpl createHipri(CompressedBCDGraph source, List<RoaringBitmap> guiEdges, TIntObjectMap<TIntList> charMapping, TIntObjectMap<Node.IntNode> cutgraphTaxa) {
+    public static CutGraphImpl createHipri(CompressedBCDGraph source, List<RoaringBitmap> guideEdges, TIntObjectMap<TIntList> charMapping, TIntObjectMap<Node.IntNode> cutgraphTaxa) {
         final TIntIntMap nodeToEdges = new TIntIntHashMap(source.numTaxa() + 2 * source.numCharacter());
-        final Map<RoaringBitmap, TIntList> hyperEdgeMerging = new HashMap<>();
+        final Map<RoaringBitmap, TIntList> hyperEdgeMerging = new HashMap<>(); //todo: this hashing is not super fast
         final AtomicInteger numEdges = new AtomicInteger(0);
 
         // add edge to cutgraph (maybe with merged taxa)
@@ -128,7 +127,7 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
             RoaringBitmap edgeOnes = source.getEdge(edgeIndex).ones();
 
             // do taxa merging if needed
-            for (RoaringBitmap guideOnes : guiEdges) {
+            for (RoaringBitmap guideOnes : guideEdges) {
                 if (RoaringBitmap.intersects(edgeOnes, guideOnes)) {
                     RoaringBitmap common = RoaringBitmap.and(guideOnes, edgeOnes);
                     common.xor(edgeOnes);
