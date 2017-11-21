@@ -4,16 +4,13 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.roaringbitmap.RoaringBitmap;
 import phylo.tree.algorithm.TreeAlgorithm;
-import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDSourceGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedGraphFactory;
-import phylo.tree.algorithm.flipcut.bcdGraph.Hyperedge;
+import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
 import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.costComputer.SimpleCosts;
 import phylo.tree.algorithm.flipcut.cutter.CompressedSingleCutter;
-import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
 import phylo.tree.algorithm.flipcut.cutter.SingleCutGraphCutter;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphSimpleWeight;
@@ -30,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -248,7 +244,7 @@ public class FlipCutSingleCutTest {
         long time = System.currentTimeMillis();
         CompressedBCDSourceGraph test = CompressedGraphFactory.createSourceGraph(SimpleCosts.newCostComputer(
                 TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)),
-                FlipCutWeights.Weights.UNIT_COST), 0);
+                FlipCutWeights.Weights.UNIT_COST), 0, true);
 
         System.out.println("Created Compressed Graph in: " + (double) (System.currentTimeMillis() - time) / 1000d);
 
@@ -269,13 +265,13 @@ public class FlipCutSingleCutTest {
         time = System.currentTimeMillis();
         CompressedBCDSourceGraph test2 = CompressedGraphFactory.createSourceGraph(SimpleCosts.newCostComputer(
                 TreeUtils.cloneTrees(TreeUtils.cloneTrees(source)), guide,
-                FlipCutWeights.Weights.UNIT_COST), 0);
+                FlipCutWeights.Weights.UNIT_COST), 0, true);
 
         System.out.println("Created Compressed Graph Guide in: " + (double) (System.currentTimeMillis() - time) / 1000d);
 
         System.out.println("Characters: ");
         for (Hyperedge bitmap : test.hyperEdges()) {
-            System.out.println(Arrays.toString(bitmap.ones.toArray()));
+            System.out.println(Arrays.toString(bitmap.ones().toArray()));
         }
 
         time = System.currentTimeMillis();

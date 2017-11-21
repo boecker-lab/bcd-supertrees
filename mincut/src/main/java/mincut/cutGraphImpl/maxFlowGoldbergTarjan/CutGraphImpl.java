@@ -193,8 +193,6 @@ public class CutGraphImpl {
             Node node = nodes[i];
             node.excess = 0;
             for (Arc arc : node.arcs) {
-                if (arc == null)
-                    System.out.println("help");
                 arc.resCap = arc.cap;
             }
         }

@@ -114,8 +114,8 @@ public class BCDCLI<A extends AbstractFlipCut> extends BasicBCDCLI<A> {
     }
 
     public SourceTreeGraph createGraphInstance(List<Tree> source, Tree scaffold) {
-        if (getGraphType() == CutGraphTypes.COMPRESSED_BCD_VIA_MAXFLOW_TARJAN_GOLDBERG) { //todo enable compressed graph
-            return CompressedGraphFactory.createSourceGraph(SimpleCosts.newCostComputer(source, scaffold, getWeights()), getBootstrapThreshold());
+        if (getGraphType() == CutGraphTypes.COMPRESSED_BCD_VIA_MAXFLOW_TARJAN_GOLDBERG) {
+            return CompressedGraphFactory.createSourceGraph(SimpleCosts.newCostComputer(source, scaffold, getWeights()), getBootstrapThreshold(),true);
         } else {
             return new FlipCutGraphSimpleWeight(SimpleCosts.newCostComputer(source, scaffold, getWeights()), getBootstrapThreshold());
         }

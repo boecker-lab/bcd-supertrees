@@ -19,9 +19,9 @@ public class CompressedBCDMultiCutGraph extends MultiCutGraph<RoaringBitmap, Com
         return source.taxa;
     }
 
-    public CompressedBCDMultiCutGraph(CompressedBCDGraph source, MultiCutterFactory<MultiCutter<RoaringBitmap, CompressedBCDMultiCutGraph>, RoaringBitmap, CompressedBCDMultiCutGraph> cutterFactory) {
+    public CompressedBCDMultiCutGraph(CompressedBCDGraph source, int k, MultiCutterFactory<MultiCutter<RoaringBitmap, CompressedBCDMultiCutGraph>, RoaringBitmap, CompressedBCDMultiCutGraph> cutterFactory) {
+        super(k, cutterFactory);
         this.source = source;
-        this.cutterFactory = cutterFactory;
     }
 
     public CompressedBCDGraph getSource() {
@@ -60,7 +60,6 @@ public class CompressedBCDMultiCutGraph extends MultiCutGraph<RoaringBitmap, Com
     }
 
 
-
     //Multi cutter methods
     @Override
     protected MultiCut<RoaringBitmap, CompressedBCDMultiCutGraph> getCutFromCompenents() {
@@ -74,11 +73,11 @@ public class CompressedBCDMultiCutGraph extends MultiCutGraph<RoaringBitmap, Com
 
 
     public List<CompressedBCDMultiCutGraph> split(RoaringBitmap toDelete) {
-        CompressedBCDGraph cutted = CompressedBCDGraph.cloneAndDeleteCharacters(toDelete,this.source);
+        CompressedBCDGraph cutted = CompressedBCDGraph.cloneAndDeleteCharacters(toDelete, this.source);
         List<CompressedBCDGraph> splitSource = cutted.split();
         List<CompressedBCDMultiCutGraph> splitGraphs = new ArrayList<>(splitSource.size());
         for (CompressedBCDGraph bcdGraph : splitSource) {
-            splitGraphs.add(new CompressedBCDMultiCutGraph(bcdGraph, cutterFactory));
+            splitGraphs.add(new CompressedBCDMultiCutGraph(bcdGraph, maxCutNumber, cutterFactory));
         }
         return splitGraphs;
     }

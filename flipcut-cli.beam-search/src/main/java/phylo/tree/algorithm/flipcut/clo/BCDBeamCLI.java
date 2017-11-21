@@ -6,10 +6,13 @@ import org.kohsuke.args4j.spi.IntOptionHandler;
 import phylo.tree.algorithm.flipcut.AbstractFlipCut;
 import phylo.tree.algorithm.flipcut.FlipCutMultiCut;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
+import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDMultiCutGraph;
+import phylo.tree.algorithm.flipcut.bcdGraph.CompressedGraphFactory;
 import phylo.tree.algorithm.flipcut.cli.BCDCLI;
 import phylo.tree.algorithm.flipcut.costComputer.SimpleCosts;
-import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 import phylo.tree.algorithm.flipcut.cutter.MultiCutterFactory;
+import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
+import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutGraphMultiSimpleWeight;
 import phylo.tree.model.Tree;
 
 import java.io.BufferedWriter;
@@ -62,7 +65,13 @@ public class BCDBeamCLI extends BCDCLI<FlipCutMultiCut> {
     @Override
     public SourceTreeGraph createGraphInstance(List<Tree> source, Tree scaffold) {
         if (multiType != null) {
-            return new FlipCutGraphMultiSimpleWeight(SimpleCosts.newCostComputer(source, scaffold, getWeights()), cutNumber, MultiCutterFactory.newInstance(multiType, getGraphType()));
+            MultiCutterFactory factory = MultiCutterFactory.newInstance(multiType, getGraphType());
+            if (getGraphType() == CutGraphTypes.COMPRESSED_BCD_VIA_MAXFLOW_TARJAN_GOLDBERG) {
+                return new CompressedBCDMultiCutGraph(
+                        CompressedGraphFactory.createSourceGraph(SimpleCosts.newCostComputer(source, scaffold, getWeights()), getBootstrapThreshold(), false), cutNumber, factory);
+            } else {
+                return new FlipCutGraphMultiSimpleWeight(SimpleCosts.newCostComputer(source, scaffold, getWeights()), cutNumber, factory);
+            }
         } else {
             return super.createGraphInstance(source, scaffold);
         }

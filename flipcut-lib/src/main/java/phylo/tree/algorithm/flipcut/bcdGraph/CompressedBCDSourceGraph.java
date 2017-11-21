@@ -3,6 +3,7 @@ package phylo.tree.algorithm.flipcut.bcdGraph;
 import gnu.trove.map.TIntObjectMap;
 import org.roaringbitmap.IntConsumer;
 import org.roaringbitmap.RoaringBitmap;
+import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
 
 import java.util.ArrayList;
 import java.util.List;

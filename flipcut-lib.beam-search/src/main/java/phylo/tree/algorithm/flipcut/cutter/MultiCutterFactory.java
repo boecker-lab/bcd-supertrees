@@ -17,7 +17,7 @@ import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public interface MultiCutterFactory<C extends MultiCutter<S, T>, S, T extends SourceTreeGraphMultiCut<S,T>> extends CutterFactory<C, S, T> {
+public interface MultiCutterFactory<C extends MultiCutter<S, T>, S, T extends SourceTreeGraphMultiCut<S, T>> extends CutterFactory<C, S, T> {
     enum MultiCutterType {
         VAZIRANI,
         GREEDY,
@@ -30,21 +30,21 @@ public interface MultiCutterFactory<C extends MultiCutter<S, T>, S, T extends So
     }
 
     static MultiCutterFactory newInstance() {
-        return newInstance(MultiCutterType.GREEDY, CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+        return newInstance(MultiCutterType.VAZIRANI, CutGraphTypes.COMPRESSED_BCD_VIA_MAXFLOW_TARJAN_GOLDBERG);
     }
 
     static MultiCutterFactory newInstance(MultiCutterType multiCutterType) {
-        return newInstance(multiCutterType, CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG);
+        return newInstance(multiCutterType, CutGraphTypes.COMPRESSED_BCD_VIA_MAXFLOW_TARJAN_GOLDBERG);
     }
 
     static MultiCutterFactory newInstance(CutGraphTypes simpleCutterType) {
-        return newInstance(MultiCutterType.GREEDY, simpleCutterType);
+        return newInstance(MultiCutterType.VAZIRANI, simpleCutterType);
     }
 
     static MultiCutterFactory newInstance(MultiCutterType multiCutterType, CutGraphTypes simpleCutterType) {
         switch (multiCutterType) {
             case VAZIRANI:
-                return new MultiCutGraphCutterVazirani.Factory();
+                return createVazirani(simpleCutterType);
             case GREEDY:
                 return new MultiCutGraphCutterGreedy.Factory(simpleCutterType, new GreedyBlackList());
             case GREEDY_RAND:
@@ -65,7 +65,15 @@ public interface MultiCutterFactory<C extends MultiCutter<S, T>, S, T extends So
             case MC_STATIC_REL:
                 return new MultiCutGraphCutterUndirectedTranfomation.Factory(new RelativeToNumOfConnection(), new StaticKargerGraphCreator(), false);
             default:
-                return new MultiCutGraphCutterVazirani.Factory();
+                return createVazirani(simpleCutterType);
+        }
+    }
+
+    static MultiCutterFactory createVazirani(CutGraphTypes simpleCutterType) {
+        if (simpleCutterType == CutGraphTypes.HYPERGRAPH_MINCUT_VIA_MAXFLOW_TARJAN_GOLDBERG) {
+            return new MultiCutGraphCutterVazirani.Factory();
+        } else {
+            return new MultiCutGrgaphCutterVaziraniCompressedBCD.Factory();
         }
     }
 

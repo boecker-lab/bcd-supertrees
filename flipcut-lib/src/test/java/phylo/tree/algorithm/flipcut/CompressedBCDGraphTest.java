@@ -23,7 +23,7 @@ public class CompressedBCDGraphTest {
         long time = System.currentTimeMillis();
         CompressedBCDSourceGraph test = CompressedGraphFactory.createSourceGraph(SimpleCosts.newCostComputer(
                 TreeUtils.cloneTrees(TreeUtils.cloneTrees(largeInput)),
-                FlipCutWeights.Weights.UNIT_COST), 0);
+                FlipCutWeights.Weights.UNIT_COST), 0, true);
 
         System.out.println("Created Compressed Graph in: " + (double) (System.currentTimeMillis() - time) / 1000d);
 

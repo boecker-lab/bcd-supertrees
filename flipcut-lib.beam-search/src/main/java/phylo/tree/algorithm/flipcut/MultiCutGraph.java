@@ -15,6 +15,13 @@ public abstract class MultiCutGraph<C, G extends MultiCutGraph<C, G>> implements
     protected MultiCutterFactory<MultiCutter<C, G>, C, G> cutterFactory;
 
 
+    public MultiCutGraph(int maxCutNumber, MultiCutterFactory<MultiCutter<C, G>, C, G> cutterFactory) {
+        this.maxCutNumber = maxCutNumber;
+        this.cutterFactory = cutterFactory;
+        cuts = new MultiCut[maxCutNumber];
+        nextCutIndexToCalculate = 0;
+    }
+
     public boolean containsCuts() {
         return nextCutIndexToCalculate > 0;
     }

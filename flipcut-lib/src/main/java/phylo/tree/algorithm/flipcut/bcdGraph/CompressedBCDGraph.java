@@ -4,6 +4,7 @@ import mincut.cutGraphAPI.bipartition.CompressedBCDCut;
 import org.roaringbitmap.IntConsumer;
 import org.roaringbitmap.RoaringBitmap;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
+import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 
 import java.util.ArrayList;
@@ -86,13 +87,13 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
 
         RoaringBitmap component;
         if (!edges.isEmpty()) {
-            component = edges.poll().ones.clone();
+            component = edges.poll().ones().clone();
             boolean changed = true;
             while (changed) {
                 changed = false;
                 Iterator<Hyperedge> it = edges.iterator();
                 while (it.hasNext()) {
-                    RoaringBitmap currentEdge = it.next().ones;
+                    RoaringBitmap currentEdge = it.next().ones();
                     if (RoaringBitmap.intersects(component, currentEdge)) {
                         component.or(currentEdge);
                         it.remove();
@@ -130,7 +131,6 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
     }
 
     public static void deleteCharacters(RoaringBitmap toDelete, CompressedBCDGraph g) {
-        if (toDelete == null || toDelete.isEmpty()) return;
         g.characters.xor(toDelete);
         RoaringBitmap guidesToDelete = RoaringBitmap.and(g.activeGuideEdges, toDelete);
         g.activeGuideEdges.xor(guidesToDelete);
@@ -173,7 +173,7 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
     protected RoaringBitmap getCharacterForSubSetOfTaxa(RoaringBitmap taxa) {
         RoaringBitmap subCharacters = new RoaringBitmap();
         characters.forEach((IntConsumer) i -> {
-            if (RoaringBitmap.intersects(getEdge(i).ones, taxa)) {
+            if (RoaringBitmap.intersects(getEdge(i).ones(), taxa)) {
                 subCharacters.add(i);
             }
         });
@@ -209,6 +209,10 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
 
     public int getCloneIndex(int edgeIndex) {
         return edgeIndex + getSource().getFirstEdgeCloneIndex();
+    }
+
+    public int getCharIndex(int cloneIndex) {
+        return cloneIndex - getSource().getFirstEdgeCloneIndex();
     }
 
 

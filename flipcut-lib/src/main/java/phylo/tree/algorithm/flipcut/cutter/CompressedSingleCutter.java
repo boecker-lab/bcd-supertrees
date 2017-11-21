@@ -18,7 +18,7 @@ import org.roaringbitmap.IntConsumer;
 import org.roaringbitmap.RoaringBitmap;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDGraph;
-import phylo.tree.algorithm.flipcut.bcdGraph.Hyperedge;
+import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -112,7 +112,7 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
         List<RoaringBitmap> guiEdges = new ArrayList<>(source.numGuideEdges());
         if (source.hasGuideEdges()) {
             for (Hyperedge guidEdge : source.guideHyperEdges()) {
-                guiEdges.add(guidEdge.ones);
+                guiEdges.add(guidEdge.ones());
             }
         }
         return guiEdges;
@@ -125,7 +125,7 @@ public class CompressedSingleCutter implements GraphCutter<RoaringBitmap> {
 
         // add edge to cutgraph (maybe with merged taxa)
         source.characters.forEach((IntConsumer) edgeIndex -> {
-            RoaringBitmap edgeOnes = source.getEdge(edgeIndex).ones;
+            RoaringBitmap edgeOnes = source.getEdge(edgeIndex).ones();
 
             // do taxa merging if needed
             for (RoaringBitmap guideOnes : guiEdges) {

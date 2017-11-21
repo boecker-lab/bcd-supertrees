@@ -1,4 +1,4 @@
-package phylo.tree.algorithm.flipcut.bcdGraph;
+package phylo.tree.algorithm.flipcut.bcdGraph.edge;
 
 import gnu.trove.iterator.TObjectLongIterator;
 import gnu.trove.map.TObjectLongMap;
@@ -11,17 +11,16 @@ import java.util.Arrays;
 
 //todo maybe special guide tree handling
 
-public class Hyperedge {
-    public final RoaringBitmap ones;
-    private long weight = 0L;
+public class MergedHyperedge extends AbstractHyperedge {
+
     private final TObjectLongMap<RoaringBitmap> zerosS = new TObjectLongHashMap<>();
 
     public int umergedNumber() {
         return zerosS.size();
     }
 
-    public Hyperedge(RoaringBitmap ones) {
-        this.ones = ones;
+    public MergedHyperedge(RoaringBitmap ones) {
+        super(ones);
     }
 
     //returns true if the whole edge is semiuniversal.
@@ -61,12 +60,7 @@ public class Hyperedge {
         return this.weight;
     }
 
-    public long getWeight() {
-        return weight;
-    }
 
-    public boolean isInfinite() {
-        assert weight <= CutGraphCutter.getInfinity();
-        return weight == CutGraphCutter.getInfinity();
-    }
+
+
 }

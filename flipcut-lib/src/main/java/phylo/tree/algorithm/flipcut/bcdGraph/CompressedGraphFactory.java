@@ -10,6 +10,9 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.roaringbitmap.RoaringBitmap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
+import phylo.tree.algorithm.flipcut.bcdGraph.edge.MergedHyperedge;
+import phylo.tree.algorithm.flipcut.bcdGraph.edge.SimpleHyperedge;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.cutter.CutGraphCutter;
 import phylo.tree.model.Tree;
@@ -22,20 +25,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CompressedGraphFactory {
     private final static Logger LOGGER = LoggerFactory.getLogger(CompressedGraphFactory.class);
 
-    public static CompressedBCDSourceGraph createSourceGraph(CostComputer costComputer, double bootstrapTheshold) {
+    public static CompressedBCDSourceGraph createSourceGraph(CostComputer costComputer, double bootstrapTheshold, boolean mergedEdges) {
         System.out.println("Creating graph representation of input trees...");
+        System.out.println("Merge graph data structrure = " + mergedEdges);
         final Tree scaffold = costComputer.getScaffoldTree();
         final List<Tree> trees = costComputer.getTrees();
-
-
-
 
         TIntObjectMap<RoaringBitmap> scaffoldMapping = new TIntObjectHashMap<>(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1);
         TObjectIntMap<String> leafs = new TObjectIntHashMap<>(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1);
 
-
-        Map<Set<String>, Hyperedge> edges = new LinkedHashMap<>();
-        Map<Set<String>, RoaringBitmap> duplicates = new HashMap<>();
+        List<Hyperedge> edges = new LinkedList<>();
+        Map<Set<String>, MergedHyperedge> duplicateEdges = new LinkedHashMap<>();
+        Map<Set<String>, RoaringBitmap> duplicateBits = new HashMap<>();
 
         int leafIndex = 0;
         int numOfChars = 0;
@@ -55,7 +56,7 @@ public class CompressedGraphFactory {
                 }
             }
             AtomicInteger characterIndex = new AtomicInteger(leafIndex);
-            activeScaffoldCharacters = addScaffoldCharacterRecursive(scaffoldRoot.getChildren(), characterIndex, costComputer, treeTaxa, leafs, duplicates, edges, scaffoldMapping);
+            activeScaffoldCharacters = addScaffoldCharacterRecursive(scaffoldRoot.getChildren(), characterIndex, costComputer, treeTaxa, leafs, duplicateBits, edges, duplicateEdges, scaffoldMapping, mergedEdges);
         }
         if (activeScaffoldCharacters == null) activeScaffoldCharacters = new RoaringBitmap();
 
@@ -78,8 +79,8 @@ public class CompressedGraphFactory {
                 numOfChars += inner.size();
 
                 for (TreeNode node : inner) {
-                    //collect no edges and zero edges
-                    Hyperedge edge = addEdge(node, treeTaxa, leafs, duplicates, edges, costComputer);
+                    //collect edges and zero edges
+                    addEdge(node, treeTaxa, leafs, duplicateBits, edges, duplicateEdges, costComputer, mergedEdges);
                 }
             }
         }
@@ -96,16 +97,19 @@ public class CompressedGraphFactory {
             return true;
         });
 
-        //chreate chars
+        //create chars
         int charIndex = taxa.length;
-        final TIntObjectMap<Hyperedge> hyperedges = new TIntObjectHashMap<>(edges.size());
-        LOGGER.info("Add " + edges.size() + " merged Characters to graph...");
+        final TIntObjectMap<Hyperedge> hyperedges = new TIntObjectHashMap<>(duplicateEdges.size());
+        LOGGER.info("Add " + duplicateEdges.size() + " merged Characters to graph...");
         int allMergedChars = 0;
-        for (Hyperedge hyperedge : edges.values()) {
+        for (Hyperedge hyperedge : edges) {
             hyperedges.put(charIndex++, hyperedge);
-            allMergedChars += hyperedge.umergedNumber();
+            if (hyperedge instanceof MergedHyperedge)
+                allMergedChars += ((MergedHyperedge) hyperedge).umergedNumber();
+            else
+                allMergedChars++;
         }
-        LOGGER.info(numOfChars + " where merged to " + allMergedChars + " and can be further reduced to " + edges.size() + " during mincut");
+        LOGGER.info(numOfChars + " where merged to " + allMergedChars + " and can be further reduced to " + duplicateEdges.size() + " during mincut");
 
 
         return new CompressedBCDSourceGraph(taxa, hyperedges, activeScaffoldCharacters, scaffoldMapping);
@@ -143,14 +147,36 @@ public class CompressedGraphFactory {
     }
 
 
-    private static Hyperedge addEdge(final TreeNode node, final Set<String> treeTaxa, final TObjectIntMap<String> leafs, final Map<Set<String>, RoaringBitmap> zs, final Map<Set<String>, Hyperedge> edges, final CostComputer costComputer) {
+    private static Hyperedge addEdge(final TreeNode node, final Set<String> treeTaxa, final TObjectIntMap<String> leafs, final Map<Set<String>, RoaringBitmap> zs, final List<Hyperedge> edges, final Map<Set<String>, MergedHyperedge> duplicateEdges, final CostComputer costComputer, boolean mergedEdge) {
+        if (mergedEdge) {
+            return addMergedEdge(node, treeTaxa, leafs, zs, edges, duplicateEdges, costComputer);
+        } else {
+            return addSimpleEdge(node, treeTaxa, leafs, zs, edges, costComputer);
+        }
+    }
+
+    private static SimpleHyperedge addSimpleEdge(final TreeNode node, final Set<String> treeTaxa, final TObjectIntMap<String> leafs, final Map<Set<String>, RoaringBitmap> zs, final List<Hyperedge> edges, final CostComputer costComputer) {
+        Set<String> oneBits = TreeUtils.getLeafLabels(node);
+        RoaringBitmap edgeOnes = getCompressedBits(zs, oneBits, leafs);
+        Set<String> zeroBits = new HashSet<>(treeTaxa);
+        zeroBits.removeAll(oneBits);
+        RoaringBitmap edgeZeroes = getCompressedBits(zs, zeroBits, leafs);
+        SimpleHyperedge hyperedge = new SimpleHyperedge(edgeOnes, edgeZeroes, costComputer.getEdgeWeight(node));
+
+        edges.add(hyperedge);
+
+        return hyperedge;
+    }
+
+    private static MergedHyperedge addMergedEdge(final TreeNode node, final Set<String> treeTaxa, final TObjectIntMap<String> leafs, final Map<Set<String>, RoaringBitmap> zs, final List<Hyperedge> edges, final Map<Set<String>, MergedHyperedge> duplicateEdges, final CostComputer costComputer) {
         Set<String> oneBits = TreeUtils.getLeafLabels(node);
 
-        Hyperedge hyperedge = edges.get(oneBits);
+        MergedHyperedge hyperedge = duplicateEdges.get(oneBits);
         if (hyperedge == null) {
             RoaringBitmap edge = getCompressedBits(zs, oneBits, leafs);
-            hyperedge = new Hyperedge(edge);
-            edges.put(oneBits, hyperedge);
+            hyperedge = new MergedHyperedge(edge);
+            duplicateEdges.put(oneBits, hyperedge);
+            edges.add(hyperedge);
         }
         Set<String> zeroBits = new HashSet<>(treeTaxa);
         zeroBits.removeAll(oneBits);
@@ -169,22 +195,24 @@ public class CompressedGraphFactory {
                                                                final Set<String> treeTaxa,
                                                                TObjectIntMap<String> leafs,
                                                                final Map<Set<String>, RoaringBitmap> zs,
-                                                               final Map<Set<String>, Hyperedge> edges,
-                                                               final TIntObjectMap<RoaringBitmap> scaffoldMapping) {
+                                                               final List<Hyperedge> edges,
+                                                               final Map<Set<String>, MergedHyperedge> duplicateEdges,
+                                                               final TIntObjectMap<RoaringBitmap> scaffoldMapping,
+                                                               boolean mergedEdges) {
 
         RoaringBitmap childrenI = new RoaringBitmap();
 
         for (TreeNode scaffoldNode : children) {
             if (scaffoldNode.isInnerNode()) {
                 //create hyperedge
-                Hyperedge hyperedge = addEdge(scaffoldNode, treeTaxa, leafs, zs, edges, costComputer);
+                Hyperedge hyperedge = addEdge(scaffoldNode, treeTaxa, leafs, zs, edges, duplicateEdges, costComputer, mergedEdges);
 
                 assert hyperedge.getWeight() == CutGraphCutter.getInfinity();
 
                 final int currentIndex = charIndex.getAndIncrement();
                 childrenI.add(currentIndex);
 
-                RoaringBitmap set = addScaffoldCharacterRecursive(scaffoldNode.getChildren(), charIndex, costComputer, treeTaxa, leafs, zs, edges, scaffoldMapping);
+                RoaringBitmap set = addScaffoldCharacterRecursive(scaffoldNode.getChildren(), charIndex, costComputer, treeTaxa, leafs, zs, edges, duplicateEdges, scaffoldMapping, mergedEdges);
                 if (!set.isEmpty())
                     scaffoldMapping.put(currentIndex, set);
             }
