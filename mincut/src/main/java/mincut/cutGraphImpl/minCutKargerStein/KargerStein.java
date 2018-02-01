@@ -14,13 +14,6 @@ public class KargerStein<G extends KargerGraph<G>> {
     private G best;
     private LinkedHashSet<G> cuts;
 
-    public G contract(G gr, int numOfVerticesLeft) {
-        while (gr.getNumberOfVertices() > numOfVerticesLeft) {
-            gr.contract();
-        }
-        return gr;
-    }
-
     private G recursiveContract(G gr) {
         final int n = gr.getNumberOfVertices();
         if (n <= 6) {
@@ -59,6 +52,18 @@ public class KargerStein<G extends KargerGraph<G>> {
         return cuts;
     }
 
+    public G getMinCut(final G gr, final boolean recursive) {
+        getMinCuts(gr, recursive);
+        return best;
+    }
+
+    private static <G extends KargerGraph<G>> G contract(G gr, int numOfVerticesLeft) {
+        while (gr.getNumberOfVertices() > numOfVerticesLeft) {
+            gr.contract();
+        }
+        return gr;
+    }
+
     public static LinkedHashSet<SimpleGraph> getMinCuts(final int[][] arr, final boolean recursive) {
         SimpleGraph gr = GraphUtils.createGraph(arr);
         return new KargerStein<SimpleGraph>().getMinCuts(gr, recursive);
@@ -71,12 +76,7 @@ public class KargerStein<G extends KargerGraph<G>> {
         return k.best;
     }
 
-    public G getMinCut(final G gr, final boolean recursive) {
-        getMinCuts(gr, recursive);
-        return best;
-    }
-
-    public G sampleCut(G gr) {
+    public static <G extends KargerGraph<G>> G sampleCut(G gr) {
         G grc = gr.clone();
         contract(grc, 2);
         return grc;

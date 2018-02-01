@@ -5,51 +5,42 @@ package phylo.tree.algorithm.flipcut.cutter;
  * 14.02.17.
  */
 
-import mincut.cutGraphAPI.KargerSteinCutGraph;
-import mincut.cutGraphAPI.bipartition.*;
+import mincut.cutGraphAPI.bipartition.CompressedBCDMultiCut;
+import mincut.cutGraphAPI.bipartition.Cut;
+import mincut.cutGraphAPI.bipartition.MultiCut;
+import mincut.cutGraphImpl.minCutKargerStein.CompressedKargerGraph;
+import mincut.cutGraphImpl.minCutKargerStein.KargerStein;
+import org.roaringbitmap.IntConsumer;
 import org.roaringbitmap.RoaringBitmap;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
+import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDMultiCutGraph;
-import phylo.tree.algorithm.flipcut.cutter.undirectedConversion.ChracterScoreModifier;
-import phylo.tree.algorithm.flipcut.cutter.undirectedConversion.KargerGraphCreator;
-import phylo.tree.algorithm.flipcut.flipCutGraph.FlipCutNodeSimpleWeight;
+import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
 
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
 public class MultiCutGraphCutterUndirectedTranfomationCompressed extends CutGraphCutter<RoaringBitmap> implements MultiCutter<RoaringBitmap, CompressedBCDMultiCutGraph> {
-    private final boolean singleSampling;
-    private final ChracterScoreModifier modder;
-    private final KargerGraphCreator graphCreator;
-    private TreeSet<Cut<RoaringBitmap>> mincuts = null;
+    private LinkedList<Cut<RoaringBitmap>> mincuts = null;
     private final CompressedBCDMultiCutGraph source;//todo make reusable??
+    private final boolean rescursive;
 
-
-    public MultiCutGraphCutterUndirectedTranfomationCompressed(CompressedBCDMultiCutGraph graphToCut, final ChracterScoreModifier modder, KargerGraphCreator graphCreator, boolean singleSampling) {
+    public MultiCutGraphCutterUndirectedTranfomationCompressed(CompressedBCDMultiCutGraph graphToCut, boolean recursive) {
         super();
         source = graphToCut;
-        this.modder = modder;
-        this.graphCreator = graphCreator;
-        this.singleSampling = singleSampling;
+        this.rescursive = recursive;
     }
 
-    public MultiCutGraphCutterUndirectedTranfomationCompressed(CompressedBCDMultiCutGraph graphToCut, ExecutorService executorService, int threads) {
-        this(graphToCut, executorService, threads, new ChracterScoreModifier() {
-        }, new KargerGraphCreator() {
-        }, false);
-
-    }
-
-    public MultiCutGraphCutterUndirectedTranfomationCompressed(CompressedBCDMultiCutGraph graphToCut, ExecutorService executorService, int threads, final ChracterScoreModifier modder, KargerGraphCreator graphCreator, boolean singleSampling) {
+    public MultiCutGraphCutterUndirectedTranfomationCompressed(CompressedBCDMultiCutGraph graphToCut, boolean recursive, ExecutorService executorService, int threads) {
         super(executorService, threads);
         source = graphToCut;
-        this.modder = modder;
-        this.graphCreator = graphCreator;
-        this.singleSampling = singleSampling;
+        this.rescursive = recursive;
     }
 
 
@@ -60,32 +51,72 @@ public class MultiCutGraphCutterUndirectedTranfomationCompressed extends CutGrap
         return null;
     }
 
-    protected TreeSet<Cut<RoaringBitmap>> calculateMinCuts() {
-        TreeSet<Cut<RoaringBitmap>> mincuts = new TreeSet<>();
+    private LinkedList<Cut<RoaringBitmap>> calculateMinCuts() {
+        LinkedList<Cut<RoaringBitmap>> mincuts = null;
 
-//        long time = System.currentTimeMillis();
-        //search the optimal cat
-        CompressedSingleCutter optCutter = new CompressedSingleCutter();
-        Cut<RoaringBitmap> optCut = optCutter.cut(source);
-        mincuts.add(optCut);
-/*
-        KargerSteinCutGraph<RoaringBitmap, CutFactory<RoaringBitmap,Cut<RoaringBitmap>>> cutGraph = graphCreator.createGraph(modder, source);
+
+        KargerStein<CompressedKargerGraph> cutter = new KargerStein<>();
+        CompressedKargerGraph virginGraph = new CompressedKargerGraph(source.getSource());
 
         //sample k-1 random cuts
         final int toGo = source.getK() - 1;
         if (toGo > 0) {
-            if (singleSampling) {
-                mincuts.addAll(cutGraph.sampleCuts(toGo));
-            } else {
-                mincuts.addAll(cutGraph.calculateMinCuts(toGo));
-            }
-        }*/
+            List<CompressedKargerGraph> rawCuts = new ArrayList<>(cutter.getMinCuts(virginGraph, rescursive));
+            Collections.sort(rawCuts);
+            mincuts = rawCuts.subList(0, Math.min(toGo, rawCuts.size())).stream().map((it) -> {
+                Iterator<RoaringBitmap> iter = it.getTaxaCutSets().iterator();
+                final CompressedBCDMultiCut cut = createCompressedMulticut(iter.next(), iter.next(), source);
+                assert Double.compare(cut.minCutValue(), it.mincutValue()) == 0 : cut.minCutValue() + " vs " +  it.mincutValue();
+                return cut;
+            }).collect(Collectors.toCollection(LinkedList::new));
+        }
+
+        //search the optimal cut
+        CompressedSingleCutter optCutter = new CompressedSingleCutter();
+        Cut<RoaringBitmap> optCut = optCutter.cut(source.getSource());
+
+        //check if optimal is needed
+        if (mincuts == null) {
+            mincuts = new LinkedList<>();
+            mincuts.add(optCut);
+            return mincuts;
+        } else if (mincuts.isEmpty() || !mincuts.getFirst().equals(optCut)) {
+            mincuts.addFirst(optCut);
+        }
+
         return mincuts;
     }
 
+    //returns the set of characters, that connect an taxon split
+    public static CompressedBCDMultiCut createCompressedMulticut(RoaringBitmap sourceSetTaxa, CompressedBCDMultiCutGraph multiGraph) {
+        RoaringBitmap targetSetTaxa = RoaringBitmap.andNot(multiGraph.getSource().taxa, sourceSetTaxa);
+        return createCompressedMulticut(sourceSetTaxa, targetSetTaxa, multiGraph);
+    }
+
+    //returns the set of characters, that connect an taxon split
+    public static CompressedBCDMultiCut createCompressedMulticut(RoaringBitmap sourceSetTaxa, RoaringBitmap targetSetTaxa, CompressedBCDMultiCutGraph multiGraph) {
+        final CompressedBCDGraph g = multiGraph.getSource();
+
+        final AtomicLong minCutValue = new AtomicLong(0);
+        final RoaringBitmap toDelete = new RoaringBitmap();
+
+        g.characters.forEach((IntConsumer) i -> {
+            Hyperedge hyperEdge = g.getEdge(i);
+
+            if (RoaringBitmap.intersects(hyperEdge.ones(), sourceSetTaxa) && RoaringBitmap.intersects(hyperEdge.ones(), targetSetTaxa)) {
+                assert !hyperEdge.isInfinite(): "HyperEdge is part of Cut: weight=" + hyperEdge.getWeight() + " taxa: " + hyperEdge.ones();
+                toDelete.add(i);
+                minCutValue.addAndGet(hyperEdge.getWeight());
+            }
+        });
+
+        return new CompressedBCDMultiCut(toDelete, minCutValue.longValue(), multiGraph);
+    }
+
+
     @Override
     public MultiCut<RoaringBitmap, CompressedBCDMultiCutGraph> getNextCut() {
-        /*if (mincuts == null)
+        if (mincuts == null)
             mincuts = calculateMinCuts();
         if (mincuts.isEmpty()) {
             return null;
@@ -93,12 +124,14 @@ public class MultiCutGraphCutterUndirectedTranfomationCompressed extends CutGrap
 
         Cut<RoaringBitmap> c = mincuts.pollFirst();
 
-        if (c instanceof DefaultMultiCut)
-            return (DefaultMultiCut) c;
+        if (c == null)
+            return null;
+
+        if (c instanceof CompressedBCDMultiCut)
+            return (MultiCut<RoaringBitmap, CompressedBCDMultiCutGraph>) c;
         else {
-            return new HyperMultiCut(source, (HyperCut<FlipCutNodeSimpleWeight>) c);
-        }*/
-        return null;
+            return new CompressedBCDMultiCut(c.getCutSet(), c.minCutValue(), source);
+        }
     }
 
     @Override
@@ -112,25 +145,20 @@ public class MultiCutGraphCutterUndirectedTranfomationCompressed extends CutGrap
     }
 
     static class Factory implements MultiCutterFactory<MultiCutGraphCutterUndirectedTranfomationCompressed, RoaringBitmap, CompressedBCDMultiCutGraph> {
-        private final ChracterScoreModifier modder;
-        private final KargerGraphCreator graphCreator;
-        private final boolean singleSampling;
+        private final boolean recursive;
 
-        public Factory(ChracterScoreModifier modder, KargerGraphCreator graphCreator, boolean singleSampling) {
-            this.modder = modder;
-            this.graphCreator = graphCreator;
-            this.singleSampling = singleSampling;
+        Factory(boolean recursive) {
+            this.recursive = recursive;
         }
-
 
         @Override
         public MultiCutGraphCutterUndirectedTranfomationCompressed newInstance(CompressedBCDMultiCutGraph graph) {
-            return new MultiCutGraphCutterUndirectedTranfomationCompressed(graph, modder, graphCreator, singleSampling);
+            return new MultiCutGraphCutterUndirectedTranfomationCompressed(graph, recursive);
         }
 
         @Override
         public MultiCutGraphCutterUndirectedTranfomationCompressed newInstance(CompressedBCDMultiCutGraph graph, ExecutorService executorService, int threads) {
-            return new MultiCutGraphCutterUndirectedTranfomationCompressed(graph, executorService, threads, modder, graphCreator, singleSampling);
+            return new MultiCutGraphCutterUndirectedTranfomationCompressed(graph, recursive, executorService, threads);
         }
 
         @Override

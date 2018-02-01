@@ -124,12 +124,6 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
         deleteCharacters(toDelete, this);
     }
 
-    public static CompressedBCDGraph cloneAndDeleteCharacters(RoaringBitmap toDelete, CompressedBCDGraph g) {
-        CompressedBCDGraph clone = new CompressedBCDSubGraph(g.getSource(), g.taxa, g.characters.clone(), g.activeGuideEdges.clone());
-        deleteCharacters(toDelete, clone);
-        return clone;
-    }
-
     public static void deleteCharacters(RoaringBitmap toDelete, CompressedBCDGraph g) {
         if (toDelete == null || toDelete.isEmpty()) return;
         g.characters.xor(toDelete);
@@ -140,6 +134,12 @@ public abstract class CompressedBCDGraph implements SourceTreeGraph<RoaringBitma
             if (nuGuideEdges != null)
                 g.activeGuideEdges.or(nuGuideEdges);
         });
+    }
+
+    public static CompressedBCDGraph cloneAndDeleteCharacters(RoaringBitmap toDelete, CompressedBCDGraph g) {
+        CompressedBCDGraph clone = new CompressedBCDSubGraph(g.getSource(), g.taxa, g.characters.clone(), g.activeGuideEdges.clone());
+        deleteCharacters(toDelete, clone);
+        return clone;
     }
 
     public List<CompressedBCDGraph> split() {

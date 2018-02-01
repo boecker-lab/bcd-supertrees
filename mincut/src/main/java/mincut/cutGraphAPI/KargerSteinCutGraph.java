@@ -98,15 +98,14 @@ public class KargerSteinCutGraph<V, C extends CutFactory<LinkedHashSet<V>, ? ext
     }
 
     public AbstractBipartition<V> sampleCut() {
-        return buildCut(new KargerStein<SimpleGraph>().sampleCut(g));
+        return buildCut(KargerStein.sampleCut(g));
     }
 
     public List<AbstractBipartition<V>> sampleCuts(int numberOfCuts) {
-        KargerStein<SimpleGraph> algo = new KargerStein();
         Set<SimpleGraph> graphs = new HashSet<>(numberOfCuts);
 
         for (int i = 0; i < numberOfCuts; i++) {
-            graphs.add(algo.sampleCut(g));
+            graphs.add(KargerStein.sampleCut(g));
         }
 
         Iterator<SimpleGraph> it = graphs.iterator();

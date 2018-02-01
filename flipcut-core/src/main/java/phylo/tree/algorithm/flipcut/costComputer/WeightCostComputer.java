@@ -191,7 +191,14 @@ public class WeightCostComputer extends SimpleCosts {
     }
 
     private double calcBSValueFromLabelNorm(TreeNode node) {
-        return parseBSValueFromLabel(node) / maxBSValue;
+        final double weight = parseBSValueFromLabel(node);
+        if (Double.isNaN(weight) || weight == 0d) {
+            LOGGER.warn("There are nodes without BS-value or with BS-value zero in your input trees. Setting weights for such nodes to " + MIN_VALUE);
+            return MIN_VALUE;
+        } else {
+            return (weight / maxBSValue);
+        }
+
     }
 
     private double calcBSValueFromLabel(TreeNode node) {
@@ -224,7 +231,7 @@ public class WeightCostComputer extends SimpleCosts {
     }
 
     private double calcEdgeWeight(TreeNode node) {
-        double weight = node.getDistanceToParent();
+        final double weight = node.getDistanceToParent();
         if (weight == 0d) {
             LOGGER.warn("There are branches with length zero in your input trees. Setting 0 branches to " + MIN_VALUE);
             return MIN_VALUE;

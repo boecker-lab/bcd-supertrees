@@ -24,7 +24,6 @@ public class CompressedBCDMultiCut extends CompressedBCDCut implements MultiCut<
         this.source = source;
         getSplittedGraphs(); //todo can we do that on demand?
         cachedHash = calcHashCode();
-
     }
 
     @Override

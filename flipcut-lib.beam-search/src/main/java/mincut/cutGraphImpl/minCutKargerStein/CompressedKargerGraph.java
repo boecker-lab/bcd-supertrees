@@ -21,6 +21,7 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
     private final TIntObjectMap<RoaringBitmap> mergedTaxa;
     private RoaringBitmap[] hyperEdges = null;
     private double[] cumulativeWeights = null;
+    private int hashCache = 0;
 
 
     //this is more for testing than anything else
@@ -69,14 +70,18 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
                     RoaringBitmap taxa = hyperedge.ones().clone();
                     for (Hyperedge guide : sourceGraph.guideHyperEdges()) {
                         RoaringBitmap inter = RoaringBitmap.and(taxa, guide.ones());
-                        //todo better performance with empty check???
-                        taxa.xor(inter);
+                        if (!inter.isEmpty()) {
+                            taxa.xor(inter);
+                            taxa.add(guide.ones().first());
+                        }
                     }
                     //add only if there are edges left after merging
-                    if (taxa.getCardinality() > 1) {
-                        charCandidates.add(taxa);
+                    if (taxa.getCardinality() > 0) {
                         allTaxa.or(taxa);
-                        weights.add(weights.isEmpty() ? hyperedge.getWeight() : hyperedge.getWeight() + weights.get(weights.size()));
+                        if (taxa.getCardinality() > 1) {
+                            charCandidates.add(taxa);
+                            weights.add(weights.isEmpty() ? hyperedge.getWeight() : hyperedge.getWeight() + weights.get(weights.size() - 1));
+                        }
                     }
 
                 }
@@ -84,8 +89,16 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
 
             hyperEdges = charCandidates.toArray(new RoaringBitmap[charCandidates.size()]);
             cumulativeWeights = weights.toArray();
+
+            numberOfvertices = allTaxa.getCardinality();
+            mergedTaxa = createMergedTaxaMap(allTaxa, numberOfvertices);
+            for (Hyperedge hyperedge : sourceGraph.guideHyperEdges()) {
+                mergedTaxa.get(hyperedge.ones().first()).or(hyperedge.ones());
+            }
+            //todo postprocess to find during merging generated semi universals
         } else {
             hyperEdges = new RoaringBitmap[sourceGraph.numCharacter()];
+            cumulativeWeights = new double[sourceGraph.numCharacter()];
             int i = 0;
             double current = 0;
             for (Hyperedge character : sourceGraph.hyperEdges()) {
@@ -95,10 +108,9 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
                 allTaxa.or(hyperEdges[i]);
                 i++;
             }
+            numberOfvertices = allTaxa.getCardinality();
+            mergedTaxa = createMergedTaxaMap(allTaxa, numberOfvertices);
         }
-
-        numberOfvertices = allTaxa.getCardinality();
-        mergedTaxa = createMergedTaxaMap(allTaxa, numberOfvertices);
     }
 
     //clone constructor
@@ -231,5 +243,32 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
                 nuMergedTaxa,
                 numberOfvertices
         );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CompressedKargerGraph)) return false;
+
+        CompressedKargerGraph graph = (CompressedKargerGraph) o;
+
+        if (Double.compare(graph.getSumOfWeights(), getSumOfWeights()) != 0) return false;
+        if (isCutted() != graph.isCutted()) return false;
+        return mergedTaxa.valueCollection().equals(graph.mergedTaxa.valueCollection());
+
+    }
+
+    @Override
+    public int hashCode() {
+        if (!isCutted() || hashCache == 0) {
+            int result;
+            long temp;
+            temp = Double.doubleToLongBits(getSumOfWeights());
+            result = (int) (temp ^ (temp >>> 32));
+            result = 31 * result + mergedTaxa.valueCollection().hashCode();
+            result = 31 * result + (isCutted() ? 1 : 0);
+            hashCache = result;
+        }
+        return hashCache;
     }
 }
