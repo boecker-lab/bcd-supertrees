@@ -7,8 +7,8 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import mincut.EdgeColor;
 import mincut.cutGraphAPI.bipartition.AbstractBipartition;
 import mincut.cutGraphAPI.bipartition.CutFactory;
-import mincut.cutGraphImpl.minCutKargerStein.Graph;
 import mincut.cutGraphImpl.minCutKargerStein.KargerStein;
+import mincut.cutGraphImpl.minCutKargerStein.SimpleGraph;
 import mincut.cutGraphImpl.minCutKargerStein.Vertex;
 
 import java.util.*;
@@ -22,7 +22,7 @@ public class KargerSteinCutGraph<V, C extends CutFactory<LinkedHashSet<V>, ? ext
     private Map<V, Vertex> vertexMapBack = new HashMap<>();
     private BiMap<V, EdgeColor> charactermap = HashBiMap.create();
 
-    private Graph g;
+    private SimpleGraph g;
     private int vertexIndex = 0;
 
     private final C cutFactory;
@@ -35,17 +35,17 @@ public class KargerSteinCutGraph<V, C extends CutFactory<LinkedHashSet<V>, ? ext
     @Override
     public List<AbstractBipartition<V>> calculateMinCuts() {
         KargerStein cutter = new KargerStein();
-        LinkedHashSet<Graph> cuts = cutter.getMinCuts(g, RESCURSIVE_KARGER);
+        LinkedHashSet<SimpleGraph> cuts = cutter.getMinCuts(g, RESCURSIVE_KARGER);
 
         ArrayList<AbstractBipartition<V>> basicCuts = new ArrayList<>(cuts.size());
-        for (Graph cut : cuts) {
+        for (SimpleGraph cut : cuts) {
             basicCuts.add(buildCut(cut));
         }
         Collections.sort(basicCuts);
         return basicCuts;
     }
 
-    private AbstractBipartition<V> buildCut(Graph c) {
+    private AbstractBipartition<V> buildCut(SimpleGraph c) {
         Iterator<Vertex> vIt = c.getVertices().valueCollection().iterator();
 
         //get source taxa set
@@ -94,22 +94,22 @@ public class KargerSteinCutGraph<V, C extends CutFactory<LinkedHashSet<V>, ? ext
 
     @Override
     public AbstractBipartition<V> calculateMinCut() {
-        return buildCut(new KargerStein().getMinCut(g, true));
+        return buildCut(new KargerStein<SimpleGraph>().getMinCut(g, true));
     }
 
     public AbstractBipartition<V> sampleCut() {
-        return buildCut(new KargerStein().sampleCut(g));
+        return buildCut(new KargerStein<SimpleGraph>().sampleCut(g));
     }
 
     public List<AbstractBipartition<V>> sampleCuts(int numberOfCuts) {
-        KargerStein algo = new KargerStein();
-        Set<Graph> graphs = new HashSet<>(numberOfCuts);
+        KargerStein<SimpleGraph> algo = new KargerStein();
+        Set<SimpleGraph> graphs = new HashSet<>(numberOfCuts);
 
         for (int i = 0; i < numberOfCuts; i++) {
             graphs.add(algo.sampleCut(g));
         }
 
-        Iterator<Graph> it = graphs.iterator();
+        Iterator<SimpleGraph> it = graphs.iterator();
 
         List<AbstractBipartition<V>> cuts = new ArrayList<>(graphs.size());
         while (it.hasNext()) {
@@ -157,7 +157,7 @@ public class KargerSteinCutGraph<V, C extends CutFactory<LinkedHashSet<V>, ? ext
     @Override
     public void clear() {
         vertexMap.clear();
-        g = new Graph(/*weighter*/);
+        g = new SimpleGraph(/*weighter*/);
         vertexIndex = 0;
         charactermap.clear();
     }

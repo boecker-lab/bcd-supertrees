@@ -16,6 +16,7 @@ import java.util.Map;
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
 public class GraphUtils {
+
     public static int[][] getArray(String relPath) {
 
         Map<Integer, List<Integer>> vertices = new LinkedHashMap<Integer, List<Integer>>();
@@ -48,8 +49,8 @@ public class GraphUtils {
         return array;
     }
 
-    public static Graph createGraph(int[][] array) {
-        Graph gr = new Graph();
+    public static SimpleGraph createGraph(final int[][] array) {
+        SimpleGraph gr = new SimpleGraph();
         for (int i = 0; i < array.length; i++) {
             Vertex v = gr.getVertex(i);
             if (v == null) {
@@ -70,7 +71,7 @@ public class GraphUtils {
         return gr;
     }
 
-    public static void printGraph(Graph gr) {
+    public static void printGraph(SimpleGraph gr) {
         System.out.println("Printing graph");
         for (Object o : gr.vertices.values()) {
             Vertex v = (Vertex) o;

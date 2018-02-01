@@ -39,7 +39,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Thasso Griebel (thasso.griebel@gmail.com)
  */
-public class GoldbergTarjanCutGraphTest {
+public class GoldbergTarjanCutSimpleGraphTest {
 
     @Test
     public void testExample(){

@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
-import static sun.misc.Version.println;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
@@ -32,19 +31,19 @@ public class KargerSteinTest {
         System.out.println(Math.sqrt(2d));
         System.out.println(KargerStein.SQRT2);
         int f = 0;
+        String testFile = getClass().getResource("/kargerAdj.txt").getFile();
+        final int[][] arr = GraphUtils.getArray(testFile);
         for (int i = 0; i < 1000; i++) {
-            String testFile = getClass().getResource("/kargerAdj.txt").getFile();
-            int[][] arr = GraphUtils.getArray(testFile);
-
             KargerStein cutter = new KargerStein();
-            Graph cuttedGraph = cutter.getMinCut(arr, true);
-            int comparison = Double.compare(3d,cuttedGraph.mincutValue());
+            SimpleGraph cuttedGraph = cutter.getMinCut(arr, true);
+            int comparison = Double.compare(3d, cuttedGraph.mincutValue());
             if (comparison != 0) {
                 f++;
             }
-            System.out.println(comparison);
+            System.out.println((comparison == 0) + ": " + cuttedGraph.getCutsets() + " Score: " + cuttedGraph.mincutValue());
+
         }
-        System.out.println((f/1000d * 100) + "% wrong cuts!");
+        System.out.println((f / 1000d * 100) + "% wrong cuts!");
 
     }
 

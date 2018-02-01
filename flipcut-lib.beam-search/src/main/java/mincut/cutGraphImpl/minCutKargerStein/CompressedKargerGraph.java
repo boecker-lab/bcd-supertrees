@@ -1,35 +1,64 @@
 package mincut.cutGraphImpl.minCutKargerStein;
 
-import com.google.common.collect.Iterables;
+import gnu.trove.TIntCollection;
 import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import org.roaringbitmap.IntConsumer;
 import org.roaringbitmap.RoaringBitmap;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class CompressedKargerGraph implements Cloneable {
-    private TIntObjectMap<RoaringBitmap> mergedTaxa;
-    private RoaringBitmap[] characters = null;
+public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph> {
+
+    private int numberOfvertices;
+    private final TIntObjectMap<RoaringBitmap> mergedTaxa;
+    private RoaringBitmap[] hyperEdges = null;
     private double[] cumulativeWeights = null;
 
+
+    //this is more for testing than anything else
+    public CompressedKargerGraph(List<? extends TIntCollection> hyperedges, List<? extends Number> weights) {
+        final RoaringBitmap allTaxa = new RoaringBitmap();
+
+
+        if (hyperedges == null || weights == null || hyperedges.size() != weights.size())
+            throw new IllegalArgumentException("Input must not be null and there has to be a weight for every edge.");
+
+        //add weights
+        cumulativeWeights = new double[weights.size()];
+        int i = 0;
+        double current = 0d;
+        for (Number weight : weights) {
+            current += weight.doubleValue();
+            cumulativeWeights[i++] = current;
+        }
+
+        //add hyperedges
+        hyperEdges = new RoaringBitmap[hyperedges.size()];
+        i = 0;
+        for (TIntCollection hyperedge : hyperedges) {
+            hyperEdges[i] = RoaringBitmap.bitmapOf(hyperedge.toArray());
+            allTaxa.or(hyperEdges[i++]);
+        }
+
+        numberOfvertices = allTaxa.getCardinality();
+        mergedTaxa = createMergedTaxaMap(allTaxa, numberOfvertices);
+
+    }
 
     public CompressedKargerGraph(CompressedBCDGraph sourceGraph) {
         this(sourceGraph, true);
     }
 
     public CompressedKargerGraph(CompressedBCDGraph sourceGraph, boolean preMergeInfinityChars) {
-        this.mergedTaxa = new TIntObjectHashMap<>();
-
+        final RoaringBitmap allTaxa = new RoaringBitmap();
         if (preMergeInfinityChars && sourceGraph.hasGuideEdges()) {
             List<RoaringBitmap> charCandidates = new ArrayList<>();
             TDoubleList weights = new TDoubleArrayList();
@@ -46,31 +75,46 @@ public class CompressedKargerGraph implements Cloneable {
                     //add only if there are edges left after merging
                     if (taxa.getCardinality() > 1) {
                         charCandidates.add(taxa);
+                        allTaxa.or(taxa);
                         weights.add(weights.isEmpty() ? hyperedge.getWeight() : hyperedge.getWeight() + weights.get(weights.size()));
                     }
 
                 }
             }
 
-            characters = Iterables.toArray(charCandidates, RoaringBitmap.class);
+            hyperEdges = charCandidates.toArray(new RoaringBitmap[charCandidates.size()]);
             cumulativeWeights = weights.toArray();
         } else {
-            characters = new RoaringBitmap[sourceGraph.numCharacter()];
+            hyperEdges = new RoaringBitmap[sourceGraph.numCharacter()];
             int i = 0;
             double current = 0;
             for (Hyperedge character : sourceGraph.hyperEdges()) {
                 current += character.getWeight();
                 cumulativeWeights[i] = current;
-                characters[i] = character.ones().clone();
+                hyperEdges[i] = character.ones().clone();
+                allTaxa.or(hyperEdges[i]);
+                i++;
             }
         }
+
+        numberOfvertices = allTaxa.getCardinality();
+        mergedTaxa = createMergedTaxaMap(allTaxa, numberOfvertices);
     }
 
     //clone constructor
-    private CompressedKargerGraph(RoaringBitmap[] characters, double[] cumulativeWeights, TIntObjectMap<RoaringBitmap> mergedTaxa) {
+    private CompressedKargerGraph(RoaringBitmap[] hyperEdges, double[] cumulativeWeights, TIntObjectMap<RoaringBitmap> mergedTaxa, int numVertices) {
         this.mergedTaxa = mergedTaxa;
-        this.characters = characters;
+        this.hyperEdges = hyperEdges;
         this.cumulativeWeights = cumulativeWeights;
+        this.numberOfvertices = numVertices;
+    }
+
+    private TIntObjectMap<RoaringBitmap> createMergedTaxaMap(final RoaringBitmap allTaxa, final int numOfTaxa) {
+        final TIntObjectMap<RoaringBitmap> mergedTaxa = new TIntObjectHashMap<>(numOfTaxa);
+        allTaxa.forEach((IntConsumer) value -> {
+            mergedTaxa.put(value, RoaringBitmap.bitmapOf(value));
+        });
+        return mergedTaxa;
     }
 
     public void contract() {
@@ -80,47 +124,63 @@ public class CompressedKargerGraph implements Cloneable {
     public void contract(final Random random) {
         final int selectedIndex = drawCharacter(random);
         // select the character from wich we want do merge (probs correspond to weight)
-        final RoaringBitmap selectedCharacter = characters[selectedIndex];
+        final RoaringBitmap selectedCharacter = hyperEdges[selectedIndex];
         final int numberOfTaxaInCharacter = selectedCharacter.getCardinality();
 
         // select an edge to merge (equally distributed)
         //select random pair of taxa -> clique so every edge exists
-        final int first = selectedCharacter.select(random.nextInt(numberOfTaxaInCharacter));
-        int randSecond = random.nextInt(numberOfTaxaInCharacter - 1) + 1;
-        int second = selectedCharacter.select(randSecond);
-        if (second == first)
-            second = selectedCharacter.first();
+        final int firstDrawn = selectedCharacter.select(random.nextInt(numberOfTaxaInCharacter));
+        int randSecond = random.nextInt(numberOfTaxaInCharacter - 1) + 1; //draw from all but the first one
+        int secondDrawn = selectedCharacter.select(randSecond);
+        if (secondDrawn == firstDrawn) //if firstDrawn equals secondDrawn use the first one which was not part of the random selections
+            secondDrawn = selectedCharacter.first();
+
+        assert firstDrawn != secondDrawn;
 
         // merge taxa
-        if (!mergedTaxa.containsKey(first))
-            mergedTaxa.put(first, RoaringBitmap.bitmapOf(first, second));
-        else {
-            RoaringBitmap mergred = mergedTaxa.get(first);
-            if (mergedTaxa.containsKey(second)) {
-                mergred.or(mergedTaxa.remove(second));
-            } else {
-                mergred.add(second);
-            }
-        }
-
+        mergedTaxa.get(firstDrawn).or(mergedTaxa.remove(secondDrawn));
 
         // contract selected edge(s)
-        TIntSet toRemove = new TIntHashSet();
-        for (int i = 0; i < characters.length; i++) {
-            if (mergeEdgeIfExistsAndCheckIsEmpty(characters[i], first, second)) {
-                toRemove.add(i);
+        TIntSet hyperEdgesToRemove = new TIntHashSet();
+        for (int i = 0; i < hyperEdges.length; i++) {
+            if (mergeEdgeIfExistsAndCheckIsEmpty(hyperEdges[i], firstDrawn, secondDrawn)) {
+                hyperEdgesToRemove.add(i);
             }
         }
 
-        // refresh characters abd cumulative weights
-        refreshCharactersAndCumulativeWeights(toRemove);
+        numberOfvertices--;
+
+        // refresh hyperEdges abd cumulative weights
+        refreshCharactersAndCumulativeWeights(hyperEdgesToRemove);
     }
 
-    private boolean mergeEdgeIfExistsAndCheckIsEmpty(final RoaringBitmap connectedTaxa, final int first, final int last) {
-        if (connectedTaxa.contains(last)) {
-            connectedTaxa.flip(last);
-            if (!connectedTaxa.contains(first))
-                connectedTaxa.flip(first);
+
+    public Set<RoaringBitmap> getTaxaCutSets() {
+        if (mergedTaxa.size() != 2)
+            throw new NoResultException("Number of cutsets != 2!");
+        return new HashSet<>(mergedTaxa.valueCollection());
+    }
+
+
+    public boolean isCutted() {
+        return mergedTaxa.size() == 2 && numberOfvertices == 2;
+    }
+
+    @Override
+    public double getSumOfWeights() {
+        return cumulativeWeights[cumulativeWeights.length - 1];
+    }
+
+    @Override
+    public int getNumberOfVertices() {
+        return numberOfvertices;
+    }
+
+    private boolean mergeEdgeIfExistsAndCheckIsEmpty(final RoaringBitmap connectedTaxa, final int firstDrawn, final int secondDrawn) {
+        if (connectedTaxa.contains(secondDrawn)) {
+            connectedTaxa.flip(secondDrawn);
+            if (!connectedTaxa.contains(firstDrawn))
+                connectedTaxa.flip(firstDrawn);
         }
 
         return connectedTaxa.getCardinality() < 2;
@@ -129,12 +189,13 @@ public class CompressedKargerGraph implements Cloneable {
     private int drawCharacter(final Random random) {
         double max = cumulativeWeights[cumulativeWeights.length - 1];
         double r = max * random.nextDouble();
-        return Arrays.binarySearch(cumulativeWeights, r);
+        int i = Arrays.binarySearch(cumulativeWeights, r);
+        return i < 0 ? Math.abs(i) - 1 : i;
     }
 
     private void refreshCharactersAndCumulativeWeights(TIntSet toRemove) {
         if (!toRemove.isEmpty()) {
-            RoaringBitmap[] nuChars = new RoaringBitmap[characters.length - toRemove.size()];
+            RoaringBitmap[] nuChars = new RoaringBitmap[hyperEdges.length - toRemove.size()];
             double[] nuWeights = new double[cumulativeWeights.length - toRemove.size()];
 
             int j = 0;
@@ -145,27 +206,30 @@ public class CompressedKargerGraph implements Cloneable {
                 if (!toRemove.contains(i)) {
                     nuWeights[j] = beforeNu + (cumulativeWeights[i] - before);
                     beforeNu = nuWeights[j];
-                    nuChars[j] = characters[i];
+                    nuChars[j] = hyperEdges[i];
                     j++;
                 }
 
                 before = cumulativeWeights[i];
             }
-            characters = nuChars;
+            hyperEdges = nuChars;
             cumulativeWeights = nuWeights;
         }
     }
 
     @Override
-    public CompressedKargerGraph clone() throws CloneNotSupportedException {
-        super.clone();
+    public CompressedKargerGraph clone() {
         final TIntObjectMap<RoaringBitmap> nuMergedTaxa = new TIntObjectHashMap<>();
-        mergedTaxa.forEachEntry((a, b) -> nuMergedTaxa.put(a, b.clone()) != null);
+        mergedTaxa.forEachEntry((a, b) -> {
+            nuMergedTaxa.put(a, b.clone());
+            return true;
+        });
 
         return new CompressedKargerGraph(
-                (RoaringBitmap[]) Arrays.stream(characters).map(RoaringBitmap::clone).toArray(),
+                Arrays.stream(hyperEdges).map(RoaringBitmap::clone).toArray(RoaringBitmap[]::new),
                 Arrays.copyOf(cumulativeWeights, cumulativeWeights.length),
-                nuMergedTaxa);
-
+                nuMergedTaxa,
+                numberOfvertices
+        );
     }
 }

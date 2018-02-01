@@ -15,7 +15,7 @@ import static org.junit.Assert.assertFalse;
 /**
  * Created by fleisch on 24.09.15.
  */
-public class AhujaOrlinCutGraphTest {
+public class AhujaOrlinCutSimpleGraphTest {
     private FlowGraph buildTestGraph() {
         FlowGraph graph = new FlowGraph();
 
