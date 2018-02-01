@@ -1,10 +1,11 @@
 package mincut.cutGraphImpl.minCutKargerStein;
 
 import gnu.trove.TIntCollection;
-import gnu.trove.list.TDoubleList;
-import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.iterator.TObjectDoubleIterator;
 import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.roaringbitmap.IntConsumer;
@@ -61,41 +62,47 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
     public CompressedKargerGraph(CompressedBCDGraph sourceGraph, boolean preMergeInfinityChars) {
         final RoaringBitmap allTaxa = new RoaringBitmap();
         if (preMergeInfinityChars && sourceGraph.hasGuideEdges()) {
-            List<RoaringBitmap> charCandidates = new ArrayList<>();
-            TDoubleList weights = new TDoubleArrayList();
+            TObjectDoubleMap<RoaringBitmap> charCandidates = new TObjectDoubleHashMap<>();
 
             for (Hyperedge hyperedge : sourceGraph.hyperEdges()) {
                 //check for normal edge
                 if (!hyperedge.isInfinite()) {
                     RoaringBitmap taxa = hyperedge.ones().clone();
                     for (Hyperedge guide : sourceGraph.guideHyperEdges()) {
-                        RoaringBitmap inter = RoaringBitmap.and(taxa, guide.ones());
-                        if (!inter.isEmpty()) {
-                            taxa.xor(inter);
+                        RoaringBitmap intersection = RoaringBitmap.and(taxa, guide.ones());
+                        if (!intersection.isEmpty()) {
+                            taxa.xor(intersection);
                             taxa.add(guide.ones().first());
                         }
                     }
                     //add only if there are edges left after merging
                     if (taxa.getCardinality() > 0) {
                         allTaxa.or(taxa);
-                        if (taxa.getCardinality() > 1) {
-                            charCandidates.add(taxa);
-                            weights.add(weights.isEmpty() ? hyperedge.getWeight() : hyperedge.getWeight() + weights.get(weights.size() - 1));
-                        }
+                        if (taxa.getCardinality() > 1) //add characters and merge identical ones
+                            charCandidates.adjustOrPutValue(taxa, hyperedge.getWeight(), hyperedge.getWeight());
                     }
 
                 }
             }
 
-            hyperEdges = charCandidates.toArray(new RoaringBitmap[charCandidates.size()]);
-            cumulativeWeights = weights.toArray();
+            // write merged character candidates to data structures
+            hyperEdges = new RoaringBitmap[charCandidates.size()];
+            cumulativeWeights = new double[charCandidates.size()];
+            final TObjectDoubleIterator<RoaringBitmap> it = charCandidates.iterator();
+            double before = 0;
+            for (int i = 0; i < hyperEdges.length; i++) {
+                it.advance();
+                before += it.value();
+                hyperEdges[i] = it.key();
+                cumulativeWeights[i] = before;
+            }
 
             numberOfvertices = allTaxa.getCardinality();
             mergedTaxa = createMergedTaxaMap(allTaxa, numberOfvertices);
+            //add pre merged taxa
             for (Hyperedge hyperedge : sourceGraph.guideHyperEdges()) {
                 mergedTaxa.get(hyperedge.ones().first()).or(hyperedge.ones());
             }
-            //todo postprocess to find during merging generated semi universals
         } else {
             hyperEdges = new RoaringBitmap[sourceGraph.numCharacter()];
             cumulativeWeights = new double[sourceGraph.numCharacter()];
@@ -141,11 +148,18 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
 
         // select an edge to merge (equally distributed)
         //select random pair of taxa -> clique so every edge exists
-        final int firstDrawn = selectedCharacter.select(random.nextInt(numberOfTaxaInCharacter));
-        int randSecond = random.nextInt(numberOfTaxaInCharacter - 1) + 1; //draw from all but the first one
-        int secondDrawn = selectedCharacter.select(randSecond);
-        if (secondDrawn == firstDrawn) //if firstDrawn equals secondDrawn use the first one which was not part of the random selections
-            secondDrawn = selectedCharacter.first();
+        final int firstDrawn;
+        int secondDrawn;
+        if (selectedCharacter.getCardinality() == 2) {
+            firstDrawn = selectedCharacter.first();
+            secondDrawn = selectedCharacter.last();
+        } else {
+            firstDrawn = selectedCharacter.select(random.nextInt(numberOfTaxaInCharacter));
+            int randSecond = random.nextInt(numberOfTaxaInCharacter - 1) + 1; //draw from all but the first one
+            secondDrawn = selectedCharacter.select(randSecond);
+            if (secondDrawn == firstDrawn) //if firstDrawn equals secondDrawn use the first one which was not part of the random selections
+                secondDrawn = selectedCharacter.first();
+        }
 
         assert firstDrawn != secondDrawn;
 
@@ -162,7 +176,7 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
 
         numberOfvertices--;
 
-        // refresh hyperEdges abd cumulative weights
+        // refresh hyperEdges and cumulative weights
         refreshCharactersAndCumulativeWeights(hyperEdgesToRemove);
     }
 
