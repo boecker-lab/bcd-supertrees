@@ -1,5 +1,5 @@
 group 'de.unijena.bioinf.phylo'
-version '0.9'
+version '1.0.1-SNAPSHOT'
 
 apply plugin: 'java'
 
