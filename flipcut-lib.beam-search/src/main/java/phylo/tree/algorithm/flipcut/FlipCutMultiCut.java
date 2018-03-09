@@ -4,6 +4,7 @@ import core.algorithm.Algorithm;
 import phylo.tree.algorithm.flipcut.cutter.MultiCutter;
 import phylo.tree.algorithm.flipcut.cutter.MultiCutterFactory;
 import phylo.tree.algorithm.flipcut.model.Partition;
+import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
 
 import java.util.*;
@@ -137,15 +138,14 @@ public class FlipCutMultiCut<S, T extends SourceTreeGraphMultiCut<S, T>, C exten
         //this ist just to build the supertree edgelist finally!
         long supertreetime = System.currentTimeMillis();
         System.out.println("Builing Supertrees...");
-        int treeNumber = 1;
         List<Tree> supertrees = new ArrayList<>(numberOfCuts);
         for (Partition partition : partitions) {
             //build the supertree from this partition..
             partition.getKBestNew(numberOfCuts, -1l); //needed to remove the single graphs
             final Tree s = partition.buildTree();
-            System.out.println("SupertreeScore = " + s.getName());
             supertrees.add(s);
-            treeNumber++;
+//            System.out.println("SupertreeScore = " + s.getName());
+//            System.out.println(Newick.getStringFromTree(s));
         }
         System.out.println("...DONE in " + ((double) (System.currentTimeMillis() - supertreetime) / 1000d) + "s");
         return supertrees;

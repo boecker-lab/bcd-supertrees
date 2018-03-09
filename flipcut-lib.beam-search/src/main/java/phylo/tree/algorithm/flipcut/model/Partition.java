@@ -50,9 +50,9 @@ public class Partition implements Comparable<Partition> {
     }
 
     /*
-    * This method constructs the k best new partitions based on this
-    * Attention this may calculate time critical minimum Cuts
-    */
+     * This method constructs the k best new partitions based on this
+     * Attention this may calculate time critical minimum Cuts
+     */
     public LinkedList<Partition> getKBestNew(int k, long upperBound) {
         PriorityQueue<MultiCut> cutsDesc = new PriorityQueue<>(k, new Comparator<MultiCut>() {
             public int compare(MultiCut o1, MultiCut o2) {
@@ -63,35 +63,27 @@ public class Partition implements Comparable<Partition> {
         List<Iterator<MultiCut>> graphIterList = new LinkedList<>();
         List<SourceTreeGraphMultiCut> toRemove = new LinkedList<>();
         for (SourceTreeGraphMultiCut graph : graphs.keySet()) {
-            //only 1 taxon left --> labeling node corresponding to the graph with the label of the last taxon
-            final int taxaNum = graph.numTaxa();
-            if (taxaNum == 1) {
-                graphs.get(graph).treeNodeLabel = (String) graph.taxaLabels().iterator().next();
-                toRemove.add(graph);
-                finishedGraphs++;
-                System.out.println("WARNING: shouldn't be possible anymore!!! or?!"); //todo remove this if sure
-                //more than 1 taxa left --> cut graph to find split
-            } else {
-                //delete semi universals
-                if (!graph.containsCuts())
-                    graph.deleteSemiUniversals();
-                //get first partition of every graph to preselect and save time and memory
-                Iterator<MultiCut> iter = graph.getCutIterator();
-                MultiCut c = iter.next();
-                //check if this partition can be better than one outside
-                if ((c.minCutValue() + currentscore) < upperBound) {
-                    //add the graphs that have a chance
-                    if (cutsDesc.size() >= k) {
-                        if (c.minCutValue() < cutsDesc.peek().minCutValue()) {
-                            cutsDesc.add(c);
-                            graphIterList.add(iter);
-                            //remove last cut
-                            cutsDesc.poll();
-                        }
-                    } else {
+            assert graph.numTaxa() > 1 : "Error: Graph of size <= 1 shouldn't be possible!!!"; //only 1 taxon left --> labeling node corresponding to the graph with the label of the last taxon
+
+            //delete semi universals
+            if (!graph.containsCuts())
+                graph.deleteSemiUniversals();
+            //get first partition of every graph to preselect and save time and memory
+            Iterator<MultiCut> iter = graph.getCutIterator();
+            MultiCut c = iter.next();
+            //check if this partition can be better than one outside
+            if ((c.minCutValue() + currentscore) < upperBound) {
+                //add the graphs that have a chance
+                if (cutsDesc.size() >= k) {
+                    if (c.minCutValue() < cutsDesc.peek().minCutValue()) {
                         cutsDesc.add(c);
                         graphIterList.add(iter);
+                        //remove last cut
+                        cutsDesc.poll();
                     }
+                } else {
+                    cutsDesc.add(c);
+                    graphIterList.add(iter);
                 }
             }
         }
@@ -152,14 +144,13 @@ public class Partition implements Comparable<Partition> {
                 SourceTreeGraphMultiCut splitGraph = it.next();
                 Edge splitGraphEdge = new Edge(sourceGraphEdge.treeNode, treeNodeIndex.incrementAndGet());
                 final int taxaNum = splitGraph.numTaxa();
+                assert taxaNum >= 0 : "Error: empty graph in partition";
                 if (taxaNum == 1) {
                     splitGraphEdge.treeNodeLabel = (String) splitGraph.taxaLabels().iterator().next();
                     edges.add(splitGraphEdge);
                     newFinished++;
-                } else if (taxaNum == 0) {
-                    System.err.println("Error: empty graph in partition");
                 } else {
-                    newPartitionGraphs.put(splitGraph, sourceGraphEdge);
+                    newPartitionGraphs.put(splitGraph, splitGraphEdge);
                 }
             }
 
