@@ -1,6 +1,6 @@
 *Bad Clade Deletion* (BCD) Supertrees is a *java* library and command line tool providing the
 Bad Clade Deletion supertree algorithm for rooted input trees.
-It provides several strategies to weight the character that have to be removed during the micut phase.
+It provides several strategies to weight the clades that have to be removed during the micut phase.
 Bad Clade Deletion (BCD) Supertrees can use the *Greedy Strict Consensus Merger* (GSCM) algorithm
 to preprocess the input trees. For the GSCM algorithm it provides several scoring functions to determine
 in which oder the input trees get merged. Combining different scorings is also implemented as well as a
@@ -200,13 +200,13 @@ There is currently 1 implementation of `phylo.tree.algorithm.flipcut.AbstractFli
 This class provides the basic Bad Clade Deletion algorithm.
 Parameters:
 * **input** -- List of rooted input trees.
-* **weight** -- character weighting to use
+* **weight** -- clade weighting to use
 
 Returns:
    The bcd supertree
 
 
-### Character Weightings:
+### Clade Weightings:
 
 The interface `phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights` provides
 different weightings. The package `phylo.tree.algorithm.flipcut.costComputer` contains implementations of these weightings.
