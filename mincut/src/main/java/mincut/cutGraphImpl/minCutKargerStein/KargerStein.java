@@ -27,7 +27,7 @@ public class KargerStein<G extends KargerGraph<G, S>, S> {
         final int n = gr.getNumberOfVertices();
         if (n <= 6) {
             G g1 = contract(gr, 2);
-            addCut(g1.asCut());
+            addCut(g1);
             return g1;
         } else {
             final int contractTo = (int) Math.ceil((((double) n) / SQRT2) + 1d);
@@ -62,17 +62,18 @@ public class KargerStein<G extends KargerGraph<G, S>, S> {
         } else {
             final int iter = (int) (n * n * (Math.log(n) / Math.log(2)));
             for (int i = 0; i < iter; i++) {
-                addCut(contract(gr.clone(), 2).asCut());
+                addCut(contract(gr.clone(), 2));
             }
         }
 
         return cutsSorted.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
     }
 
-    private void addCut(HashableCut<S> cut) {
-        final double weight = cut.minCutValue();
+    private void addCut(G graph) {
+        final double weight = graph.getSumOfWeights();
 
         if (cutsSorted.size() < maxCuts || cutsSorted.lastKey() > weight) {
+            final HashableCut<S> cut = graph.asCut();
             final Set<HashableCut<S>> cuts = cutsSorted.computeIfAbsent(weight, k -> new HashSet<>());
             if (cuts.add(cut))
                 sumOfCuts++;

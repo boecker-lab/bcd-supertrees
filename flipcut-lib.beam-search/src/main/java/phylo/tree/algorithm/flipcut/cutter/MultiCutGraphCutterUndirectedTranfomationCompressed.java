@@ -57,7 +57,7 @@ public class MultiCutGraphCutterUndirectedTranfomationCompressed extends CutGrap
         LinkedList<Cut<RoaringBitmap>> mincuts = null;
 
 
-        final int toGo = source.getK() - 1;
+        final int toGo = source.getK();
         KargerStein<CompressedKargerGraph,RoaringBitmap> cutter = new KargerStein<>();
         cutter.setMaxCutNumber(toGo);
         CompressedKargerGraph virginGraph = new CompressedKargerGraph(source.getSource());
@@ -82,6 +82,8 @@ public class MultiCutGraphCutterUndirectedTranfomationCompressed extends CutGrap
             return mincuts;
         } else if (mincuts.isEmpty() || !mincuts.getFirst().equals(optCut)) {
             mincuts.addFirst(optCut);
+        }else{
+            System.out.println("Random found optimal cut");
         }
 
         return mincuts;
