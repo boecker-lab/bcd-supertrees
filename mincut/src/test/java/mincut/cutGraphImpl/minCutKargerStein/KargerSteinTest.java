@@ -12,6 +12,7 @@ import mincut.cutGraphAPI.KargerSteinCutGraph;
 import mincut.cutGraphAPI.bipartition.AbstractBipartition;
 import mincut.cutGraphAPI.bipartition.DefaultBipartition;
 import mincut.cutGraphAPI.bipartition.STCut;
+import mincut.cutGraphAPI.bipartition.SimpleHashableCut;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -35,12 +36,12 @@ public class KargerSteinTest {
         final int[][] arr = GraphUtils.getArray(testFile);
         for (int i = 0; i < 1000; i++) {
             KargerStein cutter = new KargerStein();
-            SimpleGraph cuttedGraph = cutter.getMinCut(arr, true);
-            int comparison = Double.compare(3d, cuttedGraph.mincutValue());
+            SimpleHashableCut cuttedGraph = (SimpleHashableCut) cutter.getMinCut(arr, true);
+            int comparison = Double.compare(3d, cuttedGraph.minCutValue());
             if (comparison != 0) {
                 f++;
             }
-            System.out.println((comparison == 0) + ": " + cuttedGraph.getCutsets() + " Score: " + cuttedGraph.mincutValue());
+            System.out.println((comparison == 0) + ": " + cuttedGraph);
 
         }
         System.out.println((f / 1000d * 100) + "% wrong cuts!");

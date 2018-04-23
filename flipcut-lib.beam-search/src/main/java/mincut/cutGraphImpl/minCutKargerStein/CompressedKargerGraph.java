@@ -1,6 +1,7 @@
 package mincut.cutGraphImpl.minCutKargerStein;
 
 import gnu.trove.TIntCollection;
+import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.iterator.TObjectDoubleIterator;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TObjectDoubleMap;
@@ -8,6 +9,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import mincut.cutGraphAPI.bipartition.HashableCut;
 import org.roaringbitmap.IntConsumer;
 import org.roaringbitmap.RoaringBitmap;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDGraph;
@@ -16,7 +18,7 @@ import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph> {
+public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph,RoaringBitmap> {
 
     private int numberOfvertices;
     private final TIntObjectMap<RoaringBitmap> mergedTaxa;
@@ -60,7 +62,9 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
     }
 
     public CompressedKargerGraph(CompressedBCDGraph sourceGraph, boolean preMergeInfinityChars) {
+        long start = System.currentTimeMillis();
         final RoaringBitmap allTaxa = new RoaringBitmap();
+
         if (preMergeInfinityChars && sourceGraph.hasGuideEdges()) {
             TObjectDoubleMap<RoaringBitmap> charCandidates = new TObjectDoubleHashMap<>();
 
@@ -118,6 +122,8 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
             numberOfvertices = allTaxa.getCardinality();
             mergedTaxa = createMergedTaxaMap(allTaxa, numberOfvertices);
         }
+
+        System.out.println("Create GRAPH took:" + (System.currentTimeMillis() - start) / 1000d + "s");
     }
 
     //clone constructor
@@ -181,12 +187,6 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
     }
 
 
-    public Set<RoaringBitmap> getTaxaCutSets() {
-        if (mergedTaxa.size() != 2)
-            throw new NoResultException("Number of cutsets != 2!");
-        return new HashSet<>(mergedTaxa.valueCollection());
-    }
-
 
     public boolean isCutted() {
         return mergedTaxa.size() == 2 && numberOfvertices == 2;
@@ -245,18 +245,25 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
 
     @Override
     public CompressedKargerGraph clone() {
-        final TIntObjectMap<RoaringBitmap> nuMergedTaxa = new TIntObjectHashMap<>();
+        long start = System.currentTimeMillis();
+        final TIntObjectMap<RoaringBitmap> nuMergedTaxa = new TIntObjectHashMap<>(mergedTaxa.size());
         mergedTaxa.forEachEntry((a, b) -> {
             nuMergedTaxa.put(a, b.clone());
             return true;
         });
-
-        return new CompressedKargerGraph(
-                Arrays.stream(hyperEdges).map(RoaringBitmap::clone).toArray(RoaringBitmap[]::new),
+        long taxaTime = System.currentTimeMillis();
+//        System.out.println("Cloning taxa took" + (taxaTime - taxaTime) / 1000d + "s");
+        RoaringBitmap[] chars = Arrays.stream(hyperEdges).map(RoaringBitmap::clone).toArray(RoaringBitmap[]::new);
+//        System.out.println("Cloning chars took" + (System.currentTimeMillis() - taxaTime) / 1000d + "s");
+        CompressedKargerGraph clone = new CompressedKargerGraph(
+                chars,
                 Arrays.copyOf(cumulativeWeights, cumulativeWeights.length),
                 nuMergedTaxa,
                 numberOfvertices
         );
+//        System.out.println("Cloning took" + (System.currentTimeMillis() - start) / 1000d + "s");
+        return clone;
+
     }
 
     @Override
@@ -268,7 +275,10 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
 
         if (Double.compare(graph.getSumOfWeights(), getSumOfWeights()) != 0) return false;
         if (isCutted() != graph.isCutted()) return false;
-        return mergedTaxa.valueCollection().equals(graph.mergedTaxa.valueCollection());
+        boolean r = mergedTaxa.valueCollection().equals(graph.mergedTaxa.valueCollection());
+        if (r && hashCode() != graph.hashCode())
+            throw new RuntimeException("Hash exception!!!!!!!");
+        return r;
 
     }
 
@@ -284,5 +294,16 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph>
             hashCache = result;
         }
         return hashCache;
+    }
+
+    public HashableCut<RoaringBitmap> asCut() {
+        if (!isCutted())
+            throw new IllegalStateException("Graph has to be cutted to get Cut representation");
+        TIntObjectIterator<RoaringBitmap> it = mergedTaxa.iterator();
+        it.advance();
+        RoaringBitmap s = it.value();
+        it.advance();
+        RoaringBitmap t = it.value();
+        return new HashableCut<>(s, t, getSumOfWeights());
     }
 }

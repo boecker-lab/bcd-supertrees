@@ -28,7 +28,7 @@ public interface MultiCutterFactory<C extends MultiCutter<S, T>, S, T extends So
         MC_STATIC_ABS,
         MC_STATIC_REL,
         CUT_SAMPLING,
-        CUT_SAMPLING_RECURSIVE
+        CUT_SAMPLING_NON_RECURSIVE
     }
 
     static MultiCutterFactory newInstance() {
@@ -48,9 +48,9 @@ public interface MultiCutterFactory<C extends MultiCutter<S, T>, S, T extends So
             case VAZIRANI:
                 return createVazirani(simpleCutterType);
             case CUT_SAMPLING:
-                return new MultiCutGraphCutterUndirectedTranfomationCompressed.Factory(false);
-            case CUT_SAMPLING_RECURSIVE:
                 return new MultiCutGraphCutterUndirectedTranfomationCompressed.Factory(true);
+            case CUT_SAMPLING_NON_RECURSIVE:
+                return new MultiCutGraphCutterUndirectedTranfomationCompressed.Factory(false);
             case GREEDY:
                 return new MultiCutGraphCutterGreedy.Factory(simpleCutterType, new GreedyBlackList());
             case GREEDY_RAND:

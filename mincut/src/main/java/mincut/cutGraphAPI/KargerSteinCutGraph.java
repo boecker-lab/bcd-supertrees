@@ -4,9 +4,11 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
 import mincut.EdgeColor;
 import mincut.cutGraphAPI.bipartition.AbstractBipartition;
 import mincut.cutGraphAPI.bipartition.CutFactory;
+import mincut.cutGraphAPI.bipartition.SimpleHashableCut;
 import mincut.cutGraphImpl.minCutKargerStein.KargerStein;
 import mincut.cutGraphImpl.minCutKargerStein.SimpleGraph;
 import mincut.cutGraphImpl.minCutKargerStein.Vertex;
@@ -35,43 +37,41 @@ public class KargerSteinCutGraph<V, C extends CutFactory<LinkedHashSet<V>, ? ext
     @Override
     public List<AbstractBipartition<V>> calculateMinCuts() {
         KargerStein cutter = new KargerStein();
-        LinkedHashSet<SimpleGraph> cuts = cutter.getMinCuts(g, RESCURSIVE_KARGER);
+        List<SimpleHashableCut> cuts = cutter.getMinCuts(g, RESCURSIVE_KARGER);
 
         ArrayList<AbstractBipartition<V>> basicCuts = new ArrayList<>(cuts.size());
-        for (SimpleGraph cut : cuts) {
+        for (SimpleHashableCut cut : cuts) {
             basicCuts.add(buildCut(cut));
         }
-        Collections.sort(basicCuts);
+//        Collections.sort(basicCuts);
         return basicCuts;
     }
 
-    private AbstractBipartition<V> buildCut(SimpleGraph c) {
-        Iterator<Vertex> vIt = c.getVertices().valueCollection().iterator();
+    private AbstractBipartition<V> buildCut(SimpleHashableCut c) {
 
         //get source taxa set
-        Vertex source = vIt.next();
         LinkedHashSet<V> sSet = new LinkedHashSet<>();
-        source.getMergedLbls().forEach(v -> {
+        c.getSset().forEach(v -> {
             sSet.add(vertexMap.get(v));
             return true;
         });
 
         //get targe taxa set
-        Vertex target = vIt.next();
         LinkedHashSet<V> tSet = new LinkedHashSet<>();
-        target.getMergedLbls().forEach(v -> {
+        c.getTset().forEach(v -> {
             tSet.add(vertexMap.get(v));
             return true;
         });
 
         //get edges
-        LinkedHashSet<V> cutEdges = new LinkedHashSet<>(source.getEdges().size());
+        LinkedHashSet<V> cutEdges = new LinkedHashSet<>();
         //get cutsocre from edges
         for (EdgeColor color : c.getEdgeColors()) {
             cutEdges.add(charactermap.inverse().get(color));
         }
 
-        return cutFactory.newCutInstance(sSet, tSet, cutEdges, (long) c.mincutValue());
+
+        return cutFactory.newCutInstance(sSet, tSet, cutEdges, (long) c.minCutValue());
     }
 
 
@@ -94,11 +94,11 @@ public class KargerSteinCutGraph<V, C extends CutFactory<LinkedHashSet<V>, ? ext
 
     @Override
     public AbstractBipartition<V> calculateMinCut() {
-        return buildCut(new KargerStein<SimpleGraph>().getMinCut(g, true));
+        return buildCut((SimpleHashableCut) new KargerStein<SimpleGraph, TIntSet>().getMinCut(g, true));
     }
 
     public AbstractBipartition<V> sampleCut() {
-        return buildCut(KargerStein.sampleCut(g));
+        return buildCut(KargerStein.sampleCut(g).asCut());
     }
 
     public List<AbstractBipartition<V>> sampleCuts(int numberOfCuts) {
@@ -112,7 +112,7 @@ public class KargerSteinCutGraph<V, C extends CutFactory<LinkedHashSet<V>, ? ext
 
         List<AbstractBipartition<V>> cuts = new ArrayList<>(graphs.size());
         while (it.hasNext()) {
-            cuts.add(buildCut(it.next()));
+            cuts.add(buildCut(it.next().asCut()));
             it.remove();//dont know if i should do that -> doe not double the memory but remove is some overheads
         }
         return cuts;

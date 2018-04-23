@@ -12,13 +12,14 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import mincut.Colorable;
 import mincut.EdgeColor;
+import mincut.cutGraphAPI.bipartition.SimpleHashableCut;
 
 import java.util.*;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@gmail.com)
  */
-public class SimpleGraph implements KargerGraph<SimpleGraph> {
+public class SimpleGraph implements KargerGraph<SimpleGraph, TIntSet> {
     private int hashCache = 0;
 
     final TIntObjectMap<Vertex> vertices = new TIntObjectHashMap<>();
@@ -31,7 +32,7 @@ public class SimpleGraph implements KargerGraph<SimpleGraph> {
     TDoubleList weights;
     private double sumOfWeights = 0;
 
-    private HashSet<TIntSet> cutSets = new HashSet<>(2);
+    private SimpleHashableCut cutSets = null;
 
     public double getSumOfWeights() {
         return sumOfWeights;
@@ -143,6 +144,23 @@ public class SimpleGraph implements KargerGraph<SimpleGraph> {
         return g;
     }
 
+    @Override
+    public SimpleHashableCut asCut() {
+        if (cutSets == null && isCutted()) {
+            Iterator<Vertex> it = vertices.valueCollection().iterator();
+
+            cutSets = new SimpleHashableCut(it.next().getMergedLbls(), it.next().getMergedLbls(), getEdgeColors(), getSumOfWeights());
+        }
+
+        if (cutSets == null)
+            throw new NoResultException("Cutsets are still empty!");
+
+
+        return cutSets;
+
+
+    }
+
     private void refreshWeights() {
         weights = new TDoubleArrayList(edgeColors.size());
         edgeColorList = new ArrayList<>(edgeColors.size());
@@ -163,20 +181,6 @@ public class SimpleGraph implements KargerGraph<SimpleGraph> {
         return vertices.size() == 2;
     }
 
-    public HashSet<TIntSet> getCutsets() {
-        if (cutSets.isEmpty() && isCutted()) {
-            cutSets.clear();
-            Iterator<Vertex> it = vertices.valueCollection().iterator();
-            cutSets.add(it.next().getMergedLbls());
-            cutSets.add(it.next().getMergedLbls());
-        }
-
-        if (cutSets.isEmpty())
-            throw new NoResultException("Cutsets are still empty!");
-
-        return cutSets;
-    }
-
 
     public double mincutValue() {
         if (!isCutted())
@@ -193,7 +197,7 @@ public class SimpleGraph implements KargerGraph<SimpleGraph> {
 
         if (Double.compare(graph.sumOfWeights, sumOfWeights) != 0) return false;
         if (isCutted() != graph.isCutted()) return false;
-        return cutSets.equals(graph.cutSets);
+        return cutSets == null || cutSets.equals(graph.cutSets);
 
     }
 
@@ -204,7 +208,8 @@ public class SimpleGraph implements KargerGraph<SimpleGraph> {
             long temp;
             temp = Double.doubleToLongBits(sumOfWeights);
             result = (int) (temp ^ (temp >>> 32));
-            result = 31 * result + cutSets.hashCode();
+            if (cutSets != null)
+                result = 31 * result + cutSets.hashCode();
             result = 31 * result + (isCutted() ? 1 : 0);
             hashCache = result;
         }

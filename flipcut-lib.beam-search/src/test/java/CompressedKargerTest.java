@@ -1,10 +1,12 @@
 import gnu.trove.TIntCollection;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import mincut.cutGraphAPI.bipartition.HashableCut;
 import mincut.cutGraphImpl.minCutKargerStein.CompressedKargerGraph;
 import mincut.cutGraphImpl.minCutKargerStein.GraphUtils;
 import mincut.cutGraphImpl.minCutKargerStein.KargerStein;
 import org.junit.Test;
+import org.roaringbitmap.RoaringBitmap;
 
 import java.util.*;
 
@@ -73,14 +75,14 @@ public class CompressedKargerTest {
         System.out.println(KargerStein.SQRT2);
         int f = 0;
         for (int i = 0; i < 1000; i++) {
-            KargerStein<CompressedKargerGraph> cutter = new KargerStein<>();
+            KargerStein<CompressedKargerGraph,RoaringBitmap> cutter = new KargerStein<>();
             CompressedKargerGraph cg = new CompressedKargerGraph(edges, weights);
-            CompressedKargerGraph cuttedGraph = cutter.getMinCut(cg, true);
-            int comparison = Double.compare(3d, cuttedGraph.mincutValue());
+            HashableCut<RoaringBitmap> cuttedGraph = cutter.getMinCut(cg, true);
+            int comparison = Double.compare(3d, cuttedGraph.minCutValue());
             if (comparison != 0) {
                 f++;
             }
-            System.out.println((comparison == 0) + ": " + cuttedGraph.getTaxaCutSets() + " Score: " + cuttedGraph.mincutValue());
+            System.out.println((comparison == 0) + ": " + cuttedGraph);
         }
         System.out.println((f / 1000d * 100) + "% wrong cuts!");
     }

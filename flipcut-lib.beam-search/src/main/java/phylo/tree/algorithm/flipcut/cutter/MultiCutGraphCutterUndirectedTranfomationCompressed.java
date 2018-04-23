@@ -7,6 +7,7 @@ package phylo.tree.algorithm.flipcut.cutter;
 
 import mincut.cutGraphAPI.bipartition.CompressedBCDMultiCut;
 import mincut.cutGraphAPI.bipartition.Cut;
+import mincut.cutGraphAPI.bipartition.HashableCut;
 import mincut.cutGraphAPI.bipartition.MultiCut;
 import mincut.cutGraphImpl.minCutKargerStein.CompressedKargerGraph;
 import mincut.cutGraphImpl.minCutKargerStein.KargerStein;
@@ -17,7 +18,8 @@ import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDMultiCutGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -55,18 +57,16 @@ public class MultiCutGraphCutterUndirectedTranfomationCompressed extends CutGrap
         LinkedList<Cut<RoaringBitmap>> mincuts = null;
 
 
-        KargerStein<CompressedKargerGraph> cutter = new KargerStein<>();
+        final int toGo = source.getK() - 1;
+        KargerStein<CompressedKargerGraph,RoaringBitmap> cutter = new KargerStein<>();
+        cutter.setMaxCutNumber(toGo);
         CompressedKargerGraph virginGraph = new CompressedKargerGraph(source.getSource());
 
         //sample k-1 random cuts
-        final int toGo = source.getK() - 1;
         if (toGo > 0) {
-            List<CompressedKargerGraph> rawCuts = new ArrayList<>(cutter.getMinCuts(virginGraph, rescursive));
-            Collections.sort(rawCuts);
-            mincuts = rawCuts.subList(0, Math.min(toGo, rawCuts.size())).stream().map((it) -> {
-                Iterator<RoaringBitmap> iter = it.getTaxaCutSets().iterator();
-                final CompressedBCDMultiCut cut = createCompressedMulticut(iter.next(), iter.next(), source);
-                assert Double.compare(cut.minCutValue(), it.mincutValue()) == 0 : cut.minCutValue() + " vs " +  it.mincutValue();
+            mincuts = cutter.getMinCuts(virginGraph, rescursive).stream().map((it) -> {
+                final CompressedBCDMultiCut cut = createCompressedMulticut(it.getSset(), it.getTset(), source);
+                assert Double.compare(cut.minCutValue(), it.minCutValue()) == 0 : cut.minCutValue() + " vs " + it.minCutValue();
                 return cut;
             }).collect(Collectors.toCollection(LinkedList::new));
         }
@@ -104,7 +104,7 @@ public class MultiCutGraphCutterUndirectedTranfomationCompressed extends CutGrap
             Hyperedge hyperEdge = g.getEdge(i);
 
             if (RoaringBitmap.intersects(hyperEdge.ones(), sourceSetTaxa) && RoaringBitmap.intersects(hyperEdge.ones(), targetSetTaxa)) {
-                assert !hyperEdge.isInfinite(): "HyperEdge is part of Cut: weight=" + hyperEdge.getWeight() + " taxa: " + hyperEdge.ones();
+                assert !hyperEdge.isInfinite() : "HyperEdge is part of Cut: weight=" + hyperEdge.getWeight() + " taxa: " + hyperEdge.ones();
                 toDelete.add(i);
                 minCutValue.addAndGet(hyperEdge.getWeight());
             }

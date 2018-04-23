@@ -54,6 +54,7 @@ public class BCDSupertrees {
             //parse guide trees
             Tree guideTree = CLI.parseSCM();
 
+
             double scmRuntime = Double.NaN;
 
             Tree guideTreeToCut = null;
@@ -73,6 +74,7 @@ public class BCDSupertrees {
                 }
                 guideTreeToCut = guideTree;
                 guideTree = TreeUtils.deleteInnerLabels(guideTreeToCut);
+                System.out.println("Clades in guide tree: " + (guideTree.vertexCount() - guideTree.getNumTaxa()));
             }
 
 
