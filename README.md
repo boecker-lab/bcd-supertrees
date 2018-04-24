@@ -24,10 +24,10 @@ randomized version of the algorithm. For more detailed information about the alg
 
 # Download Links
 
-BCD Supertrees commandline tool v1.1.1
-* for [Windows](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.1.1-Win.zip)
-* for [Linux/Unix/Mac](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.1.1-Nix.zip)
-* as [jar file](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.1.1-Jar.zip)
+BCD Supertrees commandline tool v1.1.2
+* for [Windows](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.1.2-Win.zip)
+* for [Linux/Unix/Mac](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.1.2-Nix.zip)
+* as [jar file](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.1.2-Jar.zip)
 
 The **Source Code** can be found on [GitHub](https://github.com/boecker-lab/bcd-supertrees)
 
@@ -231,6 +231,14 @@ BOOTSTRAP_VALUES
 ```
 
 # Changelog
+### 1.1.2
+* better cut sampling
+* upper bound for cut sampling (optimal cut)
+* much less memory consuption with cut sampling (as good as Vazirani)
+* improved performance for cut sampling (character merging)       
+* bug with too less iterations in recursive cut sampling fixed
+* recursive cut sampling algorithm is now the default cut sampling algorithm
+
 ### 1.1.1
 * Completely new and memory efficient data structure for BCD Graph
     * The Beam Search agorithm can now run on a standard notebook (even for serveral thousand taxa).     
