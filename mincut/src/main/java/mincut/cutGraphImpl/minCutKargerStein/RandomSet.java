@@ -5,7 +5,12 @@ package mincut.cutGraphImpl.minCutKargerStein;
  * 24.02.17.
  */
 
+//todo use trove for indexing to save time and memory
+
 import com.google.common.collect.Iterators;
+import gnu.trove.impl.Constants;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 import java.util.*;
 
@@ -14,13 +19,21 @@ import java.util.*;
  */
 public class RandomSet<E> extends AbstractSet<E> {
 
-    List<E> dta = new ArrayList<E>();
-    Map<E, Integer> idx = new HashMap<E, Integer>();
+    private final List<E> dta;
+    private final TObjectIntMap<E> idx;
 
     public RandomSet() {
+        dta = new ArrayList<E>();
+        idx = new TObjectIntHashMap<>(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1);
+    }
+
+    public RandomSet(int cap) {
+        dta = new ArrayList<E>(cap);
+        idx = new TObjectIntHashMap<>(cap, Constants.DEFAULT_LOAD_FACTOR, -1);
     }
 
     public RandomSet(Collection<E> items) {
+        this(items.size());
         for (E item : items) {
             idx.put(item, dta.size());
             dta.add(item);
@@ -60,8 +73,8 @@ public class RandomSet<E> extends AbstractSet<E> {
     @Override
     public boolean remove(Object item) {
         @SuppressWarnings(value = "element-type-mismatch")
-        Integer id = idx.get(item);
-        if (id == null) {
+        int id = idx.get(item);
+        if (id == idx.getNoEntryValue()) {
             return false;
         }
         removeAt(id);
