@@ -1,6 +1,5 @@
 package mincut.cutGraphImpl.minCutKargerStein;
 
-import gnu.trove.TIntCollection;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.iterator.TObjectDoubleIterator;
 import gnu.trove.list.TDoubleList;
@@ -16,7 +15,6 @@ import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;

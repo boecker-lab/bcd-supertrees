@@ -7,7 +7,6 @@ package phylo.tree.algorithm.flipcut.cutter;
 
 import mincut.cutGraphAPI.bipartition.CompressedBCDMultiCut;
 import mincut.cutGraphAPI.bipartition.Cut;
-import mincut.cutGraphAPI.bipartition.HashableCut;
 import mincut.cutGraphAPI.bipartition.MultiCut;
 import mincut.cutGraphImpl.minCutKargerStein.CompressedKargerGraph;
 import mincut.cutGraphImpl.minCutKargerStein.KargerStein;
@@ -18,7 +17,6 @@ import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDMultiCutGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -30,6 +28,7 @@ import java.util.stream.Collectors;
  */
 public class MultiCutGraphCutterUndirectedTranfomationCompressed extends CutGraphCutter<RoaringBitmap> implements MultiCutter<RoaringBitmap, CompressedBCDMultiCutGraph> {
     private LinkedList<Cut<RoaringBitmap>> mincuts = null;
+    private Cut<RoaringBitmap> mincut = null;
     private final CompressedBCDMultiCutGraph source;//todo make reusable??
     private final boolean rescursive;
 
@@ -56,36 +55,30 @@ public class MultiCutGraphCutterUndirectedTranfomationCompressed extends CutGrap
     private LinkedList<Cut<RoaringBitmap>> calculateMinCuts() {
         LinkedList<Cut<RoaringBitmap>> mincuts = null;
 
-
-        final int toGo = source.getK();
-        KargerStein<CompressedKargerGraph,RoaringBitmap> cutter = new KargerStein<>();
-        cutter.setMaxCutNumber(toGo);
+        KargerStein<CompressedKargerGraph, RoaringBitmap> cutter = new KargerStein<>();
+        cutter.setMaxCutNumber(source.getK());
         CompressedKargerGraph virginGraph = new CompressedKargerGraph(source.getSource());
 
-        //sample k-1 random cuts
-        if (toGo > 0) {
-            mincuts = cutter.getMinCuts(virginGraph, rescursive).stream().map((it) -> {
-                final CompressedBCDMultiCut cut = createCompressedMulticut(it.getSset(), it.getTset(), source);
-                assert Double.compare(cut.minCutValue(), it.minCutValue()) == 0 : cut.minCutValue() + " vs " + it.minCutValue();
-                return cut;
-            }).collect(Collectors.toCollection(LinkedList::new));
-        }
+        //sample k random cuts
+        mincuts = cutter.getMinCuts(virginGraph, rescursive).stream().map((it) -> {
+            final CompressedBCDMultiCut cut = createCompressedMulticut(it.getSset(), it.getTset(), source);
+            assert Double.compare(cut.minCutValue(), it.minCutValue()) == 0 : cut.minCutValue() + " vs " + it.minCutValue();
+            return cut;
+        }).collect(Collectors.toCollection(LinkedList::new));
 
-        //search the optimal cut
-        CompressedSingleCutter optCutter = new CompressedSingleCutter();
-        Cut<RoaringBitmap> optCut = optCutter.cut(source.getSource());
 
-        //check if optimal is needed
+        //check if optimal is found again needed
         if (mincuts == null) {
             mincuts = new LinkedList<>();
-            mincuts.add(optCut);
-            return mincuts;
-        } else if (mincuts.isEmpty() || !mincuts.getFirst().equals(optCut)) {
-            mincuts.addFirst(optCut);
-        }else{
-            System.out.println("Random found optimal cut");
+        } else {
+            if (!mincuts.isEmpty()) {
+                if (mincuts.getFirst().equals(mincut)) {
+                    mincuts.pollFirst();
+                } else if (mincuts.size() == source.getK()) {
+                    mincuts.pollLast();
+                }
+            }
         }
-
         return mincuts;
     }
 
@@ -118,22 +111,21 @@ public class MultiCutGraphCutterUndirectedTranfomationCompressed extends CutGrap
 
     @Override
     public MultiCut<RoaringBitmap, CompressedBCDMultiCutGraph> getNextCut() {
+        if (mincut == null) {
+            CompressedSingleCutter optCutter = new CompressedSingleCutter();
+            mincut = optCutter.cut(source.getSource());
+            return new CompressedBCDMultiCut(mincut.getCutSet(), mincut.minCutValue(), source);
+        }
+
         if (mincuts == null)
             mincuts = calculateMinCuts();
-        if (mincuts.isEmpty()) {
+
+        if (mincuts.isEmpty())
             return null;
-        }
 
         Cut<RoaringBitmap> c = mincuts.pollFirst();
 
-        if (c == null)
-            return null;
-
-        if (c instanceof CompressedBCDMultiCut)
-            return (MultiCut<RoaringBitmap, CompressedBCDMultiCutGraph>) c;
-        else {
-            return new CompressedBCDMultiCut(c.getCutSet(), c.minCutValue(), source);
-        }
+        return (MultiCut<RoaringBitmap, CompressedBCDMultiCutGraph>) c;
     }
 
     @Override
