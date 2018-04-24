@@ -26,13 +26,17 @@ public class KargerStein<G extends KargerGraph<G, S>, S> {
             System.out.println("haehh");
         final int n = gr.getNumberOfVertices();
         if (n <= 6) {
-            G g1 = contract(gr, 2);
-            addCut(g1);
-            return g1;
+            contract(gr, 2);
+            addCut(gr);
+            return gr;
         } else {
             final int contractTo = (int) Math.ceil((((double) n) / SQRT2) + 1d);
-            G g1 = recursiveContract(contract(gr.clone(), contractTo));
-            G g2 = recursiveContract(contract(gr.clone(), contractTo));
+
+            G grClone = contractAndKeep(gr, contractTo);
+            contract(grClone, contractTo);
+
+            G g1 = recursiveContract(gr);
+            G g2 = recursiveContract(grClone);
 
 
             return (g1.getSumOfWeights() < g2.getSumOfWeights()) ? g1 : g2;
@@ -62,7 +66,9 @@ public class KargerStein<G extends KargerGraph<G, S>, S> {
         } else {
             final int iter = (int) (n * n * (Math.log(n) / Math.log(2)));
             for (int i = 0; i < iter; i++) {
-                addCut(contract(gr.clone(), 2));
+                G clone = gr.clone();
+                contract(clone, 2);
+                addCut(clone);
             }
         }
 
@@ -110,13 +116,21 @@ public class KargerStein<G extends KargerGraph<G, S>, S> {
         return getMinCuts(gr, recursive).get(0);
     }
 
-    private static <G extends KargerGraph<G, S>, S> G contract(G gr, int numOfVerticesLeft) {
-        if (gr.isCutted())
-            System.out.println("haehh");
+    private static <G extends KargerGraph<G, S>, S> G contractAndKeep(G gr, int numOfVerticesLeft) {
+        assert !gr.isCutted();
+        G keep = gr;
+        if (gr.getNumberOfVertices() > numOfVerticesLeft) {
+            keep = gr.contractAndKeep();
+            contract(gr, numOfVerticesLeft);
+        }
+        return keep;
+    }
+
+    private static <G extends KargerGraph<G, S>, S> void contract(G gr, int numOfVerticesLeft) {
+        assert !gr.isCutted();
         while (gr.getNumberOfVertices() > numOfVerticesLeft) {
             gr.contract();
         }
-        return gr;
     }
 
     public static List<HashableCut<TIntSet>> getMinCuts(final int[][] arr, final boolean recursive) {

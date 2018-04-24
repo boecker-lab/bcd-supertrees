@@ -63,7 +63,7 @@ public class CompressedKargerTest {
         return Collections.unmodifiableList(new ArrayList<>(edges));
     }
 
-    /*@Test
+    @Test
     public void coreTest() {
         System.out.println(Math.sqrt(2d));
         System.out.println(KargerStein.SQRT2);
@@ -79,5 +79,5 @@ public class CompressedKargerTest {
             System.out.println((comparison == 0) + ": " + cuttedGraph);
         }
         System.out.println((f / 1000d * 100) + "% wrong cuts!");
-    }*/
+    }
 }
