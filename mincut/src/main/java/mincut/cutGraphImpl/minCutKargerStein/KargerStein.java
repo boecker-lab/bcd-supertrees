@@ -22,8 +22,7 @@ public class KargerStein<G extends KargerGraph<G, S>, S> {
     private int maxCuts = Integer.MAX_VALUE;
 
     private G recursiveContract(G gr) {
-        if (gr.isCutted())
-            System.out.println("haehh");
+        assert gr.isCutted();
         final int n = gr.getNumberOfVertices();
         if (n <= 6) {
             contract(gr, 2);
@@ -57,11 +56,8 @@ public class KargerStein<G extends KargerGraph<G, S>, S> {
 
         if (recursive) {
             final int iter = (int) ((Math.log(n) / Math.log(2)) * (Math.log(n) / Math.log(2)));
-//            System.out.println("Num of iter = " + iter);
             for (int i = 0; i < iter; i++) {
-                long start = System.currentTimeMillis();
                 recursiveContract(gr.clone());
-//                System.out.println("ITER time:" + (System.currentTimeMillis() - start) / 1000d + "s");
             }
         } else {
             final int iter = (int) (n * n * (Math.log(n) / Math.log(2)));

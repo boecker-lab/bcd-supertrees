@@ -67,7 +67,6 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph,
     }
 
     public CompressedKargerGraph(CompressedBCDGraph sourceGraph, boolean preMergeInfinityChars) {
-        long start = System.currentTimeMillis();
         final RoaringBitmap allTaxa = new RoaringBitmap();
 
         if (preMergeInfinityChars && sourceGraph.hasGuideEdges()) {
@@ -113,17 +112,11 @@ public class CompressedKargerGraph implements KargerGraph<CompressedKargerGraph,
                 }
             }
 
-
             refreshCharacters(charCandidates);
-
-            System.out.println(sourceGraph.numCharacter() + "reduced to" + hyperEdges.length);
-
 
             numberOfvertices = allTaxa.getCardinality();
             mergedTaxa = createMergedTaxaMap(allTaxa, numberOfvertices);
         }
-
-        System.out.println("Create GRAPH took:" + (System.currentTimeMillis() - start) / 1000d + "s");
     }
 
 
