@@ -30,7 +30,7 @@ public class CompressedBCDMultiCut extends CompressedBCDCut implements MultiCut<
     public List<CompressedBCDMultiCutGraph> getSplittedGraphs() {
         if (splittedGraphs == null) {
             splittedGraphs = source.split(getCutSet());
-            toDelete = null;
+//            toDelete = null;
             split = new HashSet<>(splittedGraphs.size());
             for (CompressedBCDMultiCutGraph graph : splittedGraphs) {
                 split.add(graph.getTaxa());

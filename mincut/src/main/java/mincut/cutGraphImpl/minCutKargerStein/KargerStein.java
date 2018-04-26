@@ -22,7 +22,7 @@ public class KargerStein<G extends KargerGraph<G, S>, S> {
     private int maxCuts = Integer.MAX_VALUE;
 
     private G recursiveContract(G gr) {
-        assert gr.isCutted();
+        assert !gr.isCutted();
         final int n = gr.getNumberOfVertices();
         if (n <= 6) {
             contract(gr, 2);

@@ -5,6 +5,7 @@ package phylo.tree.algorithm.flipcut.cutter;
  * 14.02.17.
  */
 
+import mincut.cutGraphAPI.bipartition.CompressedBCDCut;
 import mincut.cutGraphAPI.bipartition.CompressedBCDMultiCut;
 import mincut.cutGraphAPI.bipartition.Cut;
 import mincut.cutGraphAPI.bipartition.MultiCut;
@@ -17,6 +18,7 @@ import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.CompressedBCDMultiCutGraph;
 import phylo.tree.algorithm.flipcut.bcdGraph.edge.Hyperedge;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -66,20 +68,33 @@ public class MultiCutGraphCutterUndirectedTranfomationCompressed extends CutGrap
             return cut;
         }).collect(Collectors.toCollection(LinkedList::new));
 
-
         //check if optimal is found again needed
         if (mincuts == null) {
             mincuts = new LinkedList<>();
         } else {
             if (!mincuts.isEmpty()) {
-                if (mincuts.getFirst().equals(mincut)) {
-                    mincuts.pollFirst();
-                } else if (mincuts.size() == source.getK()) {
-                    mincuts.pollLast();
+                Iterator<Cut<RoaringBitmap>> it = mincuts.iterator();
+                while (it.hasNext()) {
+                    Cut<RoaringBitmap> cut = it.next();
+                    if (cut.minCutValue() == mincut.minCutValue()) {
+                        if (compare((CompressedBCDMultiCut) cut, (CompressedBCDCut) mincut)) {
+                            it.remove();
+                        }
+                    } else {
+                        break;
+                    }
                 }
+                while (mincuts.size() >= source.getK())
+                    mincuts.pollLast();
             }
         }
         return mincuts;
+    }
+
+    private boolean compare(CompressedBCDMultiCut randomCut, CompressedBCDCut mincut) {
+        if (randomCut.minCutValue() != mincut.minCutValue())
+            return false;
+        return randomCut.getCutSet().equals(mincut.getCutSet());
     }
 
     //returns the set of characters, that connect an taxon split
