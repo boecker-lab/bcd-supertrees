@@ -24,10 +24,10 @@ randomized version of the algorithm. For more detailed information about the alg
 
 # Download Links
 
-BCD Supertrees commandline tool v1.1.2
-* for [Windows](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.1.2-Win.zip)
-* for [Linux/Unix/Mac](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.1.2-Nix.zip)
-* as [jar file](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.1.2-Jar.zip)
+BCD Supertrees commandline tool v1.1.3
+* for [Windows](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.1.3-Win.zip)
+* for [Linux/Unix/Mac](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.1.3-Nix.zip)
+* as [jar file](https://bio.informatik.uni-jena.de/repository/dist-release-local/de/unijena/bioinf/phylo/bcd-cli/bcdSupertrees-1.1.3-Jar.zip)
 
 The **Source Code** can be found on [GitHub](https://github.com/boecker-lab/bcd-supertrees)
 
