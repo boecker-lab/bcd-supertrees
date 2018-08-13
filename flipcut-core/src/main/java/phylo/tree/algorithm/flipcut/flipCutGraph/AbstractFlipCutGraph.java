@@ -6,6 +6,7 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import mincut.cutGraphAPI.bipartition.Cut;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.LoggerFactory;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
@@ -13,6 +14,7 @@ import phylo.tree.model.TreeNode;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -20,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Time: 14:36
  */
 public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> implements SourceTreeGraph<LinkedHashSet<N>> {
-
+    protected static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AbstractFlipCutGraph.class);
     /**
      * Turn on/off debug mode
      */
@@ -70,12 +72,12 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
     }
 
     protected AbstractFlipCutGraph(CostComputer costs, int bootstrapThreshold) {
-        System.out.println("Creating graph representation of input trees...");
+        LOGGER.info("Creating graph representation of input trees...");
 
         List<LinkedHashSet<N>> data = createGraphData(costs, bootstrapThreshold);
         this.characters = data.get(0);
         this.taxa = data.get(1);
-        System.out.println("...Done!");
+        LOGGER.info("...Done!");
     }
 
 
@@ -122,16 +124,16 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
     protected void removeAdjacentEdges(N characterToRemove) {
         // remove edges to taxa
         if (characterToRemove == null || characterToRemove.edges == null)
-            System.out.println("fail");
+            LOGGER.error("Unexpected Cut result. No Characters to Remove!");
         for (N taxon : characterToRemove.edges) {
             if (!taxon.edges.remove(characterToRemove))
-                System.out.println("WTF");
+                LOGGER.error("Character to remove not connected to taxon !!!");
         }
         //check that no active scaffold character gets removded
         //JUST for DEBUGGING
         if (DEBUG) {
             if (scaffoldCharacterMapping.containsKey(characterToRemove)) {
-                System.out.println("ERROR: Illegal SCAFFOLD character deletion!!! " + characterToRemove.toString());
+                LOGGER.error("Illegal SCAFFOLD character deletion!!! " + characterToRemove.toString());
             }
         }
     }
@@ -179,7 +181,7 @@ public abstract class AbstractFlipCutGraph<N extends AbstractFlipCutNode<N>> imp
                 it.remove();
                 removeAdjacentEdges(character);
                 if (DEBUG)
-                    System.out.println("Removing semi universal char " + character.toString() + " semiUniversal");
+                    LOGGER.info("Removing semi universal char " + character.toString() + " semiUniversal");
             }
         }
     }

@@ -26,8 +26,8 @@ public class CompressedGraphFactory {
     private final static Logger LOGGER = LoggerFactory.getLogger(CompressedGraphFactory.class);
 
     public static CompressedBCDSourceGraph createSourceGraph(CostComputer costComputer, double bootstrapTheshold, boolean mergedEdges) {
-        System.out.println("Creating graph representation of input trees...");
-        System.out.println("Merge graph data structrure = " + mergedEdges);
+        LOGGER.info("Creating graph representation of input trees...");
+        LOGGER.info("Merge graph data structrure = " + mergedEdges);
         final Tree scaffold = costComputer.getScaffoldTree();
         final List<Tree> trees = costComputer.getTrees();
 

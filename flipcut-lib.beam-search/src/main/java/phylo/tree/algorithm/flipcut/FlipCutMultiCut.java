@@ -1,15 +1,14 @@
 package phylo.tree.algorithm.flipcut;
 
 import core.algorithm.Algorithm;
+import org.slf4j.Logger;
 import phylo.tree.algorithm.flipcut.cutter.MultiCutter;
 import phylo.tree.algorithm.flipcut.cutter.MultiCutterFactory;
 import phylo.tree.algorithm.flipcut.model.Partition;
-import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.logging.Logger;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)

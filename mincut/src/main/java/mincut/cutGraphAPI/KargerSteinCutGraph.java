@@ -84,9 +84,9 @@ public class KargerSteinCutGraph<V, C extends CutFactory<LinkedHashSet<V>, ? ext
         } else {
             List<AbstractBipartition<V>> cuts = calculateMinCuts();
             if (cuts.size() > numberOfCuts) {
-                System.out.println("leght before: " + cuts.size());
+//                System.out.println("leght before: " + cuts.size());
                 cuts.subList(numberOfCuts + 1, cuts.size()).clear();
-                System.out.println("leght after: " + cuts.size());
+//                System.out.println("leght after: " + cuts.size());
             }
             return cuts;
         }

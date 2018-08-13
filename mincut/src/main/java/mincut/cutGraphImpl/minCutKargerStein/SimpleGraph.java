@@ -116,11 +116,11 @@ public class SimpleGraph implements KargerGraph<SimpleGraph, TIntSet> {
             es = edgeColors;
         }
 
-        for (int l : vertices.keys()) {
+        /*for (int l : vertices.keys()) {
             //todo debug
             if (g.getVertex(l) == null)
                 System.out.println("What");
-        }
+        }*/
 
         for (EdgeColor sourceColor : es) {
             EdgeColor target = sourceColor.clone();
@@ -321,10 +321,10 @@ public class SimpleGraph implements KargerGraph<SimpleGraph, TIntSet> {
             picked = preMergedColors.iterator().next();
         }
 
-        Edge e = (Edge) picked.getRandomElement();
-        if (e == null)
-            System.out.println("fali");
-        return e;
+//        Edge e = (Edge) picked.getRandomElement();
+//        if (e == null)
+//            System.out.println("fali");
+        return (Edge) picked.getRandomElement();
     }
 
     public Set<EdgeColor> getEdgeColors() {

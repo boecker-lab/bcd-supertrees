@@ -1,8 +1,10 @@
 package phylo.tree.algorithm.flipcut;
 
 import core.algorithm.Algorithm;
-import core.utils.progressBar.CLIProgressBar;
+import me.tongfei.progressbar.ProgressBar;
+import me.tongfei.progressbar.ProgressBarStyle;
 import mincut.cutGraphAPI.bipartition.Cut;
+import org.slf4j.Logger;
 import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
 import phylo.tree.io.Newick;
@@ -14,7 +16,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.*;
-import java.util.logging.Logger;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -29,9 +30,6 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
     private Queue<C> cutterQueue;
 
     public DebugInfo debugInfo;
-
-    protected CLIProgressBar progressBar = null;
-    protected int finish;
 
     protected Tree supertree = null;
 
@@ -66,6 +64,17 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
         return this;
     }
 
+    ProgressBar progressBar = null;
+    private void initProgressbar(){
+        if (printProgress) {
+            System.err.println();
+            System.out.flush();
+            System.err.flush();
+            progressBar = new ProgressBar("BCD", initialGraph.numTaxa() - 1, ProgressBarStyle.ASCII);
+            printProgress("Start Computation", 0);
+        }
+    }
+
     private void calculateST() {
         long time = System.currentTimeMillis();
         supertree = null;
@@ -77,52 +86,55 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
             if (CALCULATE_SCORE)
                 globalWeight = 0;
 
-            System.out.println("Computing Supertree...");
-
-            if (printProgress) {
-                progressBar = new CLIProgressBar();
-                finish = initialGraph.numTaxa() * 2 + 10;
-                progressBar.update(0, finish);
-            }
-
-
             Tree supertree = null;
             try {
                 //this is the all parralel version
-                if (numberOfThreads < 0) {
-                    if (executorService == null)
-                        executorService = Executors.newWorkStealingPool();
+                if (numberOfThreads <= 0) {
+                    if (executorService == null) {
+                        if (numberOfThreads == 0)
+                            numberOfThreads = CORES_AVAILABLE;
+                        executorService = Executors.newWorkStealingPool(Math.abs(numberOfThreads));
+                    }
+
+                    LOGGER.info("Computing Supertree with " + Math.abs(numberOfThreads) + " threads. Parallelization over MinCuts AND Tree Partitions");
+                    initProgressbar();
                     supertree = computeSTIterativeMultiThreaded();
                     //only max flow calculation is parralel, more efficient
                 } else {
                     if (executorService == null) {
-                        if (numberOfThreads == 0) {
-                            executorService = Executors.newFixedThreadPool(CORES_AVAILABLE);
-                        } else if (numberOfThreads > 1) {
+                        if (numberOfThreads > 1) {
                             executorService = Executors.newFixedThreadPool(numberOfThreads);
+                            LOGGER.info("Computing Supertree with " + Math.abs(numberOfThreads) + " threads. Parallelization over MinCuts");
+                        } else {
+                            executorService = Executors.newSingleThreadExecutor();
+                            LOGGER.info("Computing Supertree with " + Math.abs(numberOfThreads) + " threads.");
                         }
                     }
+                    initProgressbar();
                     supertree = computeSTIterativeSingleThreaded();
                 }
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (ExecutionException | InterruptedException e) {
+                LOGGER.error("Error during BCD algorithm execution", e);
             }
+
             if (CALCULATE_SCORE) supertree.setName("" + globalWeight);
             if (DEBUG) {
                 debugInfo.weight = globalWeight;
                 debugInfo.overallCalculationTime = (System.currentTimeMillis() - debugInfo.overallCalculationTime) / 1000;
             }
-            if (printProgress) {
-                progressBar.update(finish, finish);
-                System.out.println();
+
+            printProgress("Computation DONE!");
+            if (progressBar != null) {
+                progressBar.close();
+                System.err.println();
+                System.err.flush();
+                System.out.flush();
             }
-            System.out.println("...Supertree construction FINISHED!");
+
             this.supertree = supertree;
-            System.out.println("SupertreeScore: " + supertree.getName());
-            System.out.println("SuperTree: " + Newick.getStringFromTree(supertree));
-            System.out.println("calculations time: " + (double) (System.currentTimeMillis() - time) / 1000d + "s");
+            LOGGER.info(("SupertreeScore: " + supertree.getName()));
+            LOGGER.info(("SuperTree: " + Newick.getStringFromTree(supertree)));
+            LOGGER.info(("calculations time: " + (double) (System.currentTimeMillis() - time) / 1000d + "s"));
 
 
         } else {
@@ -131,7 +143,6 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
     }
 
     private Tree computeSTIterativeMultiThreaded() throws ExecutionException, InterruptedException {
-        LOGGER.info("Computing Supertree during iterative graph splitting (MultiThreaded)");
         Tree supertree = null;
 
         supertree = new Tree();
@@ -154,9 +165,8 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
                     supertree.addVertex(child);
                     supertree.addEdge(parent, child);
                 }
+                printProgress((pcount += (toAdd.size() - 1)));
             }
-            if (printProgress)
-                progressBar.update(pcount++, finish);
         }
         return supertree;
     }
@@ -174,8 +184,6 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
         supertree.addVertex(parentNode);
         supertree.setRoot(parentNode);
 
-        LOGGER.info("Computing Supertree during iterative graph splitting (SingleThreaded)");
-
         int pcount = 1;
         while (graphs.size() > 0) {
             initialGraph = graphs.poll();
@@ -183,6 +191,7 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
 
 
             // init the graph (remove semi universals)
+//            printProgress("Deleting Semiuniversals...");
             initialGraph.deleteSemiUniversals();
 
             // check if we have just one taxon left
@@ -191,19 +200,20 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
                 parentNode.setLabel((String) initialGraph.taxaLabels().iterator().next());
                 // check if we have just two taxa left --> cut is trivial
             } else if (initialGraph.numTaxa() == 2) {
-                //System.out.println("################ TRIVAL CUT ################");
                 for (Object to : initialGraph.taxaLabels()) {
                     final String taxon = (String) to;
                     TreeNode t = new TreeNode(taxon);
                     supertree.addVertex(t);
                     supertree.addEdge(parentNode, t);
                 }
+                printProgress(pcount++);
             } else {
                 if (DEBUG)
                     debugInfo.currentStartTime = System.currentTimeMillis();
 
                 //partition the current graph
                 cutter.clear();
+                printProgress("Cut: " + initialGraph.numTaxa() + " Taxa - " + initialGraph.numCharacter() + " Clades" );
                 List<T> componentGraphs = (List<T>) initialGraph.getPartitions(cutter);
                 for (T componentGraph : componentGraphs) {
                     // add the node
@@ -214,6 +224,8 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
                     graphs.offer(componentGraph);
                     treeNodes.offer(treeNode);
                 }
+
+                printProgress(pcount += (componentGraphs.size() - 1));
 
                 if (CALCULATE_SCORE) {
                     Cut<S> cut = cutter.getMinCut();
@@ -227,11 +239,45 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
                 if (DEBUG)
                     debugInfo.cuttingTimes.add((System.currentTimeMillis() - debugInfo.currentStartTime) / 1000);
             }
-            if (printProgress)
-                progressBar.update(pcount++, finish);
+
         }
 
         return supertree;
+    }
+
+    protected void printProgress(String message, long stepto, long limit) {
+        if (progressBar != null) {
+            progressBar.maxHint(limit);
+            progressBar.stepTo(stepto);
+            progressBar.setExtraMessage(message);
+        }
+    }
+
+    protected void printProgress(String message, long stepto) {
+        if (progressBar != null) {
+            progressBar.stepTo(stepto);
+            progressBar.setExtraMessage(message);
+        }
+
+    }
+
+    protected void printProgress(String message) {
+        if (progressBar != null) {
+            progressBar.setExtraMessage(message);
+        }
+    }
+
+    protected void printProgress(long stepto, long limit) {
+        if (progressBar != null) {
+            progressBar.maxHint(limit);
+            progressBar.stepTo(stepto);
+        }
+    }
+
+    protected void printProgress(long stepto) {
+        if (progressBar != null) {
+            progressBar.stepTo(stepto);
+        }
     }
 
 
@@ -256,20 +302,41 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
                 treeNode.setLabel((String) currentGraph.taxaLabels().iterator().next());
                 return null;
             } else {
+                final int c = currentGraph.numCharacter();
+                final int t = currentGraph.numTaxa();
+
+                printProgress("Start Cut: " + t + " Taxa - " + c + " Clades" );
+
                 final Queue<TreeNode> nodes = new LinkedList<>();
                 nodes.offer(treeNode);
 
                 //partition the current graph
-                C cutter = cutterQueue.poll();
-                if (cutter == null)
-                    cutter = type.newInstance(currentGraph, executorService, numberOfThreads);
-                cutter.clear();
-                List<T> componentGraphs = (List<T>) initialGraph.getPartitions(cutter);
+                List<T> componentGraphs = null;
+                {
+                    C cutter = cutterQueue.poll();
+                    if (cutter == null)
+                        cutter = type.newInstance(currentGraph, executorService, Math.abs(numberOfThreads));
+                    cutter.clear();
+
+                    componentGraphs = (List<T>) currentGraph.getPartitions(cutter);
+                    if (CALCULATE_SCORE) {
+                        Cut<S> cut = cutter.getMinCut();
+                        if (cut != null)
+                            globalWeight += cut.minCutValue();
+                    }
+
+                    cutter.clear();
+                    cutterQueue.offer(cutter);
+                }
+
                 for (T componentGraph : componentGraphs) {
                     TreeNode componentTreeNode = new TreeNode();
                     nodes.offer(componentTreeNode);
                     results.offer(executorService.submit(new GraphSplitterIterative(componentGraph, componentTreeNode)));
                 }
+
+                printProgress("Cut Done: " + t + " Taxa - " + c + " Clades" );
+
                 return nodes;
             }
         }

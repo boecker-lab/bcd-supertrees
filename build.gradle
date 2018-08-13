@@ -28,7 +28,7 @@ allprojects {
         mavenCentral()
         mavenLocal()
 //        maven { url "http://bio.informatik.uni-jena.de/artifactory/repo" }
-        maven { url "http://bio.informatik.uni-jena.de/repository/local" }
+        maven { url "http://bio.informatik.uni-jena.de/repository/libs-oss/" }
     }
 
     dependencies {
@@ -36,6 +36,7 @@ allprojects {
         compile 'de.unijena.bioinf.phylo:phyloTree-lib.algorithm:0.9.9'
         compile 'de.unijena.bioinf.phylo:phyloTree-lib.utils:0.9.9'
 
+        compile 'me.tongfei:progressbar:0.7.1'
 
         compile 'net.openhft:affinity:3.0'
         compile group: 'org.roaringbitmap', name: 'RoaringBitmap', version: '0.6.51'

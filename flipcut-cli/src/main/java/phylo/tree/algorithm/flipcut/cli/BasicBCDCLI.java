@@ -2,12 +2,11 @@ package phylo.tree.algorithm.flipcut.cli;
 
 import core.cli.Multithreaded;
 import core.cli.Progressbar;
-import phylo.tree.algorithm.flipcut.AbstractFlipCut;
-import phylo.tree.algorithm.flipcut.BCDSupertrees;
-import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.ExplicitBooleanOptionHandler;
+import phylo.tree.algorithm.flipcut.AbstractFlipCut;
+import phylo.tree.algorithm.flipcut.costComputer.FlipCutWeights;
 import phylo.tree.algorithm.flipcut.flipCutGraph.CutGraphTypes;
 import phylo.tree.algorithm.gscm.GreedySCMAlgorithm;
 import phylo.tree.algorithm.gscm.MultiGreedySCMAlgorithm;
@@ -44,21 +43,26 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
         }
         return this.inputSCMFile;
     }
+
     private Path inputSCMFile = null;
 
-    @Option(name = "-O", aliases = {"--fullOutput"}, usage = "Output file containing full output" , forbids = "-o")
+    @Option(name = "-O", aliases = {"--fullOutput"}, usage = "Output file containing full output", forbids = "-o")
     public void setFullOutput(Path output) {
         setOutput(output);
         fullOutput = true;
     }
+
     public boolean isFullOutput() {
         return fullOutput;
     }
+
     private boolean fullOutput = false;
 
 
     //##### flip cut parameter #####
-    public enum Algorithm {BCD, FC}
+    public enum Algorithm {
+        BCD, FC
+    }
 
     public enum SuppportedWeights {UNIT_WEIGHT, TREE_WEIGHT, BRANCH_LENGTH, BOOTSTRAP_WEIGHT, LEVEL, BRANCH_AND_LEVEL, BOOTSTRAP_AND_LEVEL}
 
@@ -103,6 +107,7 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
 
     @Option(name = "-b", aliases = "--bootstrapThreshold", usage = "Minimal bootstrap value of a tree-node to be considered during the supertree calculation")
     private int bootstrapThreshold = 0;
+
     public int getBootstrapThreshold() {
         return bootstrapThreshold;
     }
@@ -110,10 +115,12 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
 
     //annotations inherited from superclass
     private int numberOfThreads = 0;
+
     @Override
     public void setNumberOfThreads(int i) {
         numberOfThreads = i;
     }
+
     @Override
     public int getNumberOfThreads() {
         return numberOfThreads;
@@ -125,7 +132,9 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
     public boolean useSCM = true;  //default value has to be true because of -S
 
     @Option(name = "-S", aliases = "--scmScoring", usage = "Enable the usage of a GSCM-tree as guide tree and specify the scorings that will be used to construct this GSCM-tree", forbids = "-s", hidden = true, handler = SCMCLI.ScorerTypeArrayOptionHandler.class)
-    private TreeScorers.ScorerType[] scorerTypes = new TreeScorers.ScorerType[]{TreeScorers.ScorerType.COLLISION_SUBTREES, TreeScorers.ScorerType.UNIQUE_CLADE_RATE, TreeScorers.ScorerType.UNIQUE_CLADES_LOST};
+    public TreeScorers.ScorerType[] scorerTypes = new TreeScorers.ScorerType[]{/*TreeScorers.ScorerType.COLLISION_SUBTREES, TreeScorers.ScorerType.UNIQUE_CLADE_RATE,*/ TreeScorers.ScorerType.UNIQUE_CLADES_LOST};
+
+
 
     @Option(name = "-Sr", aliases = {"--scmRandomized"}, usage = "Enables randomization (standard iterations are numberOfTrees^2 per scoring)", forbids = {"-s", "-SR"}, hidden = true)
     private void setRandomized(boolean r) {
@@ -144,8 +153,8 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
             randomIterations = iter;
         }
     }
-    private int randomIterations = -1;
 
+    private int randomIterations = -1;
 
 
     //pre and post procesing stuff
@@ -164,6 +173,18 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
     @Option(name = "-j", aliases = "--supportValues", usage = "Calculate Split Fit for every clade of the supertree(s) ")
     public boolean supportValues = false;
 
+    private boolean useProgressBar = true;
+
+    @Override
+    public boolean isProgressBar() {
+        return useProgressBar;
+    }
+
+    @Override
+    public void setProgressBar(boolean progressBar) {
+        useProgressBar = progressBar;
+    }
+
     public SCMAlgorithm getSCMInstance() {
         SCMAlgorithm algo = null;
         if (randomIterations < 0) {
@@ -180,6 +201,7 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
             algo = new RandomizedGreedySCMAlgorithm(randomIterations, TreeScorers.getScorerArray(isMultiThreaded(), scorerTypes));
         }
         algo.setThreads(numberOfThreads);
+        algo.setPrintProgress(isProgressBar());
         return algo;
     }
 

@@ -2,6 +2,7 @@ package phylo.tree.algorithm.flipcut.flipCutGraph;
 
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import phylo.tree.algorithm.flipcut.SourceTreeGraph;
 import phylo.tree.algorithm.flipcut.costComputer.CostComputer;
@@ -18,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Time: 14:58
  */
 public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSimpleWeight> {
-
+    private final static Logger LOGGER = LoggerFactory.getLogger(FlipCutGraphSimpleWeight.class);
 
     public FlipCutGraphSimpleWeight(CostComputer costs) {
         super(costs);
@@ -56,7 +57,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         Map<String, FlipCutNodeSimpleWeight> taxa = new HashMap<>();
 
         //create taxon list
-        System.out.println("create taxon list");
+        LOGGER.info("Creating taxon list");
         for (Tree tree : inputTrees) {
             for (TreeNode taxon : tree.getLeaves()) {
                 if (!taxa.containsKey(taxon.getLabel())) {
@@ -67,7 +68,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         }
 
         //create character list
-        System.out.println("create chracter list");
+        LOGGER.info("create chracter list");
         int chars = 0;
         int bsIngnoredChars = 0;
 
@@ -163,15 +164,15 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         }
         if (DEBUG)
             if (scaffoldCharacterMapping != null)
-                System.out.println("Scaffold node number: " + scaffoldCharacterMapping.size());
+                LOGGER.debug("Scaffold node number: " + scaffoldCharacterMapping.size());
 
 
         List<LinkedHashSet<FlipCutNodeSimpleWeight>> out = new ArrayList<>(2);
         out.add(new LinkedHashSet<>(charactersMap.values()));
         out.add(new LinkedHashSet<>(taxa.values()));
 
-        System.out.println(bsIngnoredChars + " characters were ignored because of a bootstrap value less than " + bootstrapThreshold);
-        System.out.println(out.get(0).size() + " of " + chars + " added to initial graph");
+        LOGGER.info(bsIngnoredChars + " Characters were ignored because of a bootstrap value less than " + bootstrapThreshold);
+        LOGGER.info(out.get(0).size() + " of " + chars + " added to initial graph");
         return out;
     }
 
@@ -191,7 +192,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                 if (!sinkNodes.contains(node.clone)) {
                     FlipCutNodeSimpleWeight c = node.isClone() ? node.clone : node;
                     charactersToRemove.add(c);
-                    if (DEBUG) System.out.println("remove character " + c);
+                    if (DEBUG) LOGGER.debug("remove character " + c);
                 }
             }
         }
@@ -248,8 +249,9 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                     //remove edge to other side
 //                    System.out.println("!!!!!!!!!!!!! IMAGINARY-EDGE remove !!!!!!!!!!!!!");
                 } else if (aCharacter.edges.contains(bTaxon)) { // > 0
-                    System.out.println("!!!!!!!!!!!!!  EDGE remove -> should not the case for bcd: taxon " + bTaxon.name + " !!!!!!!!!!!!!");
-                    System.out.println("--> char: " + aCharacter.toString() + " with taxa: " + getSortedEdges(aCharacter.edges));
+                    LOGGER.error("EDGE remove: Should not the case for bcd!");
+                    LOGGER.error("--> taxon: " + bTaxon.name);
+                    LOGGER.error("--> char: " + aCharacter.toString() + " with taxa: " + getSortedEdges(aCharacter.edges));
                     aCharacter.edges.remove(bTaxon);
                     // remove reverse edge
                     bTaxon.edges.remove(aCharacter);
@@ -295,7 +297,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         for (AbstractFlipCutGraph<FlipCutNodeSimpleWeight> graph : graphs) {
             // checks an removes edges to taxa that are not in this component!
             if (graph.checkEdges(c.isFlipCut()))
-                System.out.println("INFO: Edges between graphs deleted! - Not possible for BCD");
+                LOGGER.error("Edges between graphs deleted! Not possible for BCD");
             if (SCAFF_TAXA_MERGE)
                 graph.insertScaffPartData(this, null);
             if (c.isBCD())

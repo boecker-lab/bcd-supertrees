@@ -1,5 +1,6 @@
 package phylo.tree.algorithm.flipcut;
 
+import org.slf4j.Logger;
 import phylo.tree.algorithm.SupertreeAlgorithm;
 import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
@@ -7,7 +8,6 @@ import phylo.tree.model.Tree;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.logging.Logger;
 
 
 /**
@@ -86,7 +86,7 @@ public abstract class AbstractFlipCut<S, T extends SourceTreeGraph<S>, C extends
         try {
             throw new NoSuchMethodException("Method not supported");
         } catch (NoSuchMethodException e) {
-            LOGGER.warning(e.toString());
+            LOGGER.warn(e.toString());
         }
     }
 
