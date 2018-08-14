@@ -173,16 +173,15 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
     @Option(name = "-j", aliases = "--supportValues", usage = "Calculate Split Fit for every clade of the supertree(s) ")
     public boolean supportValues = false;
 
-    private boolean useProgressBar = true;
-
+    private boolean disableProgressBar = false;
     @Override
     public boolean isProgressBar() {
-        return useProgressBar;
+        return !disableProgressBar;
     }
 
     @Override
     public void setProgressBar(boolean progressBar) {
-        useProgressBar = progressBar;
+        disableProgressBar = progressBar;
     }
 
     public SCMAlgorithm getSCMInstance() {

@@ -164,7 +164,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
         }
         if (DEBUG)
             if (scaffoldCharacterMapping != null)
-                LOGGER.debug("Scaffold node number: " + scaffoldCharacterMapping.size());
+                LOGGER.trace("Scaffold node number: " + scaffoldCharacterMapping.size());
 
 
         List<LinkedHashSet<FlipCutNodeSimpleWeight>> out = new ArrayList<>(2);
@@ -192,7 +192,7 @@ public class FlipCutGraphSimpleWeight extends AbstractFlipCutGraph<FlipCutNodeSi
                 if (!sinkNodes.contains(node.clone)) {
                     FlipCutNodeSimpleWeight c = node.isClone() ? node.clone : node;
                     charactersToRemove.add(c);
-                    if (DEBUG) LOGGER.debug("remove character " + c);
+                    if (DEBUG) LOGGER.trace("remove character " + c);
                 }
             }
         }

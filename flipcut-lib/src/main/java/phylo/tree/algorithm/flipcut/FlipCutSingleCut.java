@@ -7,7 +7,6 @@ import mincut.cutGraphAPI.bipartition.Cut;
 import org.slf4j.Logger;
 import phylo.tree.algorithm.flipcut.cutter.CutterFactory;
 import phylo.tree.algorithm.flipcut.cutter.GraphCutter;
-import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeNode;
 
@@ -16,6 +15,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
 
 /**
  * @author Markus Fleischauer (markus.fleischauer@uni-jena.de)
@@ -65,8 +66,10 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
     }
 
     ProgressBar progressBar = null;
-    private void initProgressbar(){
-        if (printProgress) {
+    AtomicInteger partitions = null;
+    private void initProgress(){
+        partitions = new AtomicInteger(0);
+            java.util.logging.Logger.getLogger("org.jline").setLevel(Level.OFF);        if (printProgress) {
             System.err.println();
             System.out.flush();
             System.err.flush();
@@ -76,7 +79,6 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
     }
 
     private void calculateST() {
-        long time = System.currentTimeMillis();
         supertree = null;
         if (initialGraph != null) {
             if (DEBUG) {
@@ -97,7 +99,7 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
                     }
 
                     LOGGER.info("Computing Supertree with " + Math.abs(numberOfThreads) + " threads. Parallelization over MinCuts AND Tree Partitions");
-                    initProgressbar();
+                    initProgress();
                     supertree = computeSTIterativeMultiThreaded();
                     //only max flow calculation is parralel, more efficient
                 } else {
@@ -110,7 +112,7 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
                             LOGGER.info("Computing Supertree with " + Math.abs(numberOfThreads) + " threads.");
                         }
                     }
-                    initProgressbar();
+                    initProgress();
                     supertree = computeSTIterativeSingleThreaded();
                 }
             } catch (ExecutionException | InterruptedException e) {
@@ -132,10 +134,6 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
             }
 
             this.supertree = supertree;
-            LOGGER.info(("SupertreeScore: " + supertree.getName()));
-            LOGGER.info(("SuperTree: " + Newick.getStringFromTree(supertree)));
-            LOGGER.info(("calculations time: " + (double) (System.currentTimeMillis() - time) / 1000d + "s"));
-
 
         } else {
             throw new IllegalArgumentException("No inputTrees found");
@@ -152,7 +150,6 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
 
         cutterQueue = new ConcurrentLinkedQueue<>();
         results.offer(executorService.submit(new GraphSplitterIterative(initialGraph, root)));
-        int pcount = 1;
         initialGraph = null;
 
         //building supertree during waiting for threads
@@ -165,7 +162,7 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
                     supertree.addVertex(child);
                     supertree.addEdge(parent, child);
                 }
-                printProgress((pcount += (toAdd.size() - 1)));
+                printProgress((partitions.addAndGet(toAdd.size() - 1)));
             }
         }
         return supertree;
@@ -213,7 +210,10 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
 
                 //partition the current graph
                 cutter.clear();
-                printProgress("Cut: " + initialGraph.numTaxa() + " Taxa - " + initialGraph.numCharacter() + " Clades" );
+
+                final int partitionIndex = partitions.get() + 1;
+                printProgress("START Part " + partitionIndex + ": " + initialGraph.numTaxa() + " Taxa - " + initialGraph.numCharacter() + " Clades" );
+
                 List<T> componentGraphs = (List<T>) initialGraph.getPartitions(cutter);
                 for (T componentGraph : componentGraphs) {
                     // add the node
@@ -225,7 +225,7 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
                     treeNodes.offer(treeNode);
                 }
 
-                printProgress(pcount += (componentGraphs.size() - 1));
+                printProgress("DONE Part " + partitionIndex + ": "  + initialGraph.numTaxa() + " Taxa - " + initialGraph.numCharacter() + " Clades", partitions.addAndGet(componentGraphs.size() - 1));
 
                 if (CALCULATE_SCORE) {
                     Cut<S> cut = cutter.getMinCut();
@@ -250,6 +250,9 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
             progressBar.maxHint(limit);
             progressBar.stepTo(stepto);
             progressBar.setExtraMessage(message);
+            LOGGER.debug(message);
+        }else{
+            LOGGER.info(message);
         }
     }
 
@@ -257,6 +260,9 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
         if (progressBar != null) {
             progressBar.stepTo(stepto);
             progressBar.setExtraMessage(message);
+            LOGGER.debug(message);
+        }else{
+            LOGGER.info(message);
         }
 
     }
@@ -264,6 +270,9 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
     protected void printProgress(String message) {
         if (progressBar != null) {
             progressBar.setExtraMessage(message);
+            LOGGER.debug(message);
+        }else{
+            LOGGER.info(message);
         }
     }
 
@@ -304,8 +313,8 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
             } else {
                 final int c = currentGraph.numCharacter();
                 final int t = currentGraph.numTaxa();
-
-                printProgress("Start Cut: " + t + " Taxa - " + c + " Clades" );
+                final int partitionIndex = partitions.get() + 1;
+                printProgress("START Part " + partitionIndex + ": " + t + " Taxa - " + c + " Clades" );
 
                 final Queue<TreeNode> nodes = new LinkedList<>();
                 nodes.offer(treeNode);
@@ -335,7 +344,7 @@ public class FlipCutSingleCut<S, T extends SourceTreeGraph<S>, C extends GraphCu
                     results.offer(executorService.submit(new GraphSplitterIterative(componentGraph, componentTreeNode)));
                 }
 
-                printProgress("Cut Done: " + t + " Taxa - " + c + " Clades" );
+                printProgress("DONE Part " + partitionIndex + ": " + t + " Taxa - " + c + " Clades" );
 
                 return nodes;
             }

@@ -7,6 +7,7 @@ import phylo.tree.algorithm.flipcut.cli.BCDCLI;
 import phylo.tree.algorithm.flipcut.utils.Utils;
 import phylo.tree.algorithm.gscm.SCMAlgorithm;
 import phylo.tree.algorithm.gscm.treeMerger.TreeScorers;
+import phylo.tree.io.Newick;
 import phylo.tree.model.Tree;
 import phylo.tree.model.TreeUtils;
 import phylo.tree.treetools.ReductionModifier;
@@ -20,7 +21,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
+import java.util.logging.*;
 
 
 /**
@@ -36,7 +37,7 @@ public class BCDSupertrees {
 
     public static void run(final String[] args) {
         double startTime = System.currentTimeMillis();
-        CLI.LOGGER.info("Start calculation with following parameters: " + Arrays.toString(args));
+        CLI.LOGGER_WRAPPER.info("Start calculation with following parameters: " + Arrays.toString(args));
         final CmdLineParser parser = new InterfaceCmdLineParser(CLI);
 
         try {
@@ -59,7 +60,7 @@ public class BCDSupertrees {
             Tree guideTreeToCut = null;
             if (CLI.useSCM) {
                 if (guideTree == null) { //scm tree option is hidden because should be activated
-                    CLI.LOGGER.info("Calculating SCM Guide Tree...");
+                    CLI.LOGGER_WRAPPER.info("Calculating SCM Guide Tree...");
                     scmRuntime = System.currentTimeMillis();
                     SCMAlgorithm algo;
                     {
@@ -67,7 +68,7 @@ public class BCDSupertrees {
                         List<Tree> input = TreetoolUtils.removeDuplicates(CLI.parseInput());
                         if (input.size() > 100){
                             CLI.scorerTypes = new TreeScorers.ScorerType[]{TreeScorers.ScorerType.UNIQUE_TAXA};
-                            CLI.LOGGER.warn("More than 100 input trees, using GSCM with Unique-Taxa scoring instead Unique-Clades-Lost scoring as default postprocessing.");
+                            CLI.LOGGER_WRAPPER.warn("More than 100 input trees, using GSCM with Unique-Taxa scoring instead Unique-Clades-Lost scoring as default postprocessing.");
                         }
                         algo = CLI.getSCMInstance();
                         algo.setInput(input);
@@ -76,20 +77,24 @@ public class BCDSupertrees {
                     algo.shutdown();
                     guideTree = algo.getResult();
                     scmRuntime = ((double) System.currentTimeMillis() - scmRuntime) / 1000d;
-                    CLI.LOGGER.info("...SCM Guide Tree calculation DONE in " + scmRuntime + "s");
+                    CLI.LOGGER_WRAPPER.info("...SCM Guide Tree calculation DONE in " + scmRuntime + "s");
+                    if (CLI.isVerbose())
+                        CLI.LOGGER_WRAPPER.debug("GuideTree:" + System.lineSeparator() + Newick.getStringFromTree(guideTree));
                 } else {
 
                 }
                 guideTreeToCut = guideTree;
                 guideTree = TreeUtils.deleteInnerLabels(guideTreeToCut);
-                CLI.LOGGER.info("Clades in guide tree: " + (guideTree.vertexCount() - guideTree.getNumTaxa()));
+                CLI.LOGGER_WRAPPER.info("Clades in guide tree: " + (guideTree.vertexCount() - guideTree.getNumTaxa()));
             }
 
 
             Tree suppportTree = null;
             ReductionModifier reducer = null;
             List<Tree> inputTrees = CLI.parseInput();
-            CLI.LOGGER.info("Tree sizes: " + Arrays.toString(inputTrees.stream().mapToInt(Tree::getNumTaxa).sorted().toArray()));
+            if (CLI.isVerbose())
+                CLI.LOGGER_WRAPPER.debug("Tree sizes: " + Arrays.toString(inputTrees.stream().mapToInt(Tree::getNumTaxa).sorted().toArray()));
+
             if (CLI.removeUndisputedSiblings) { //ATTENTION this is an Error prone method
                 if (suppportTree != null)
                     inputTrees.add(suppportTree); //put support tree temporary in input list
@@ -102,6 +107,8 @@ public class BCDSupertrees {
                 if (suppportTree != null)
                     inputTrees.add(suppportTree);
             }
+
+            Logger.getLogger("org.jline").setLevel(Level.OFF);
 
             // configure algorithm
             AbstractFlipCut algorithm = CLI.createAlgorithmInstance();
@@ -142,10 +149,18 @@ public class BCDSupertrees {
             //calculate runtime
             double calcTime = (System.currentTimeMillis() - startTime) / 1000d;
 
+            if (CLI.isVerbose()) {
+                int i = 1;
+                for (Tree supertree : superTrees) {
+                    CLI.LOGGER_WRAPPER.debug("SuperTree " + i++ +" with Score: " + supertree.getName()
+                            + System.lineSeparator()
+                            + Newick.getStringFromTree(supertree));
+                }
+            }
 
             if (!Double.isNaN(scmRuntime)) {
-                CLI.LOGGER.info("...GSCM run in " + (scmRuntime) + "s");
-                CLI.LOGGER.info("...BCD run in " + (calcTime - scmRuntime) + "s");
+                CLI.LOGGER_WRAPPER.info("...GSCM run in " + (scmRuntime) + "s");
+                CLI.LOGGER_WRAPPER.info("...BCD run in " + (calcTime - scmRuntime) + "s");
             }
 
             //todo move this to write output???
@@ -163,7 +178,7 @@ public class BCDSupertrees {
 
             }
 
-            CLI.LOGGER.info("Supertree calculation Done in: " + calcTime + "s");
+            CLI.LOGGER_WRAPPER.info("Supertree calculation Done in: " + calcTime + "s");
             algorithm.shutdown();
             System.exit(0);
 
@@ -171,19 +186,19 @@ public class BCDSupertrees {
             // if there's a problem in the command line,
             // you'll get this exception. this will report
             // an error message.
-            CLI.LOGGER.error(e.getMessage(), e);
+            CLI.LOGGER_WRAPPER.error(e.getMessage(), e);
             System.err.println(e.getMessage());
             System.err.println();
             CLI.printHelp(parser, System.err);
             System.exit(1);
         } catch (IOException e) {
-            CLI.LOGGER.error(e.getMessage(), e);
+            CLI.LOGGER_WRAPPER.error(e.getMessage(), e);
             System.err.println(e.getMessage());
             System.err.println();
             CLI.printHelp(parser, System.err);
             System.exit(2);
         } catch (Exception e) {
-            CLI.LOGGER.error(e.getMessage(), e);
+            CLI.LOGGER_WRAPPER.error(e.getMessage(), e);
             System.err.println(e.getMessage());
             System.err.println();
             System.exit(666);
