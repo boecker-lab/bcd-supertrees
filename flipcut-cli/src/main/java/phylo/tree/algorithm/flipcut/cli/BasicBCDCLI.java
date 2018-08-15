@@ -19,19 +19,12 @@ import phylo.tree.cli.gscm.SCMCLI;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.EnumMap;
+import java.util.logging.Level;
 
 /**
  * Created by fleisch on 20.11.15.
  */
 public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAlgortihmCLI<A> implements Multithreaded, Progressbar {
-    public BasicBCDCLI(String appHomeParent, String appHomeFolderName, String logDir, int maxLogFileSize, int logRotation) {
-        super(appHomeParent, appHomeFolderName, logDir, maxLogFileSize, logRotation);
-    }
-
-    public BasicBCDCLI(InputStream propertiesFile) {
-        super(propertiesFile);
-    }
-
     @Argument(usage = "Path of the file containing the guide tree", index = 1, required = false)
     private Path inputSCM = null;
 
@@ -206,4 +199,14 @@ public abstract class BasicBCDCLI<A extends AbstractFlipCut> extends SupertreeAl
 
     public abstract AbstractFlipCut createAlgorithmInstance();
 
+    @Override
+    public void setLogLevel(LogLevelEnum level) {
+        Level l = Level.parse(level.name());
+        if (isProgressBar() && l.intValue() < Level.INFO.intValue()) {
+            logLevel = l;
+            LOG_FILE_OUT.setLevel(l);
+        } else {
+            super.setLogLevel(level);
+        }
+    }
 }

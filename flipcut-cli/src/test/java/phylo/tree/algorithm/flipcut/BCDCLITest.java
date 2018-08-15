@@ -20,7 +20,7 @@ public class BCDCLITest extends BCDCLI { //extending from class to test to get p
     public final String requiredInputPath = "/home/user/inputTrees.tre";
 
     public BCDCLITest() {
-        super(BCDCLI.DEFAULT_PROPERTIES_FILE);
+        super();
     }
 
     //Test if parameter gets translated into flipcut parameters in the right way

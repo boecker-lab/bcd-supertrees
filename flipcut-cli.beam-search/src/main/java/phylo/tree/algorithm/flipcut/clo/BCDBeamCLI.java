@@ -34,14 +34,6 @@ public class BCDBeamCLI extends BCDCLI<FlipCutMultiCut> {
         this.multiType = multiType;
     }
 
-    public BCDBeamCLI(String appHomeParent, String appHomeFolderName, String logDir, int maxLogFileSize, int logRotation) {
-        super(appHomeParent, appHomeFolderName, logDir, maxLogFileSize, logRotation);
-    }
-
-    public BCDBeamCLI(InputStream propertiesFile) {
-        super(propertiesFile);
-    }
-
     public int cutNumber = 25; //default is null an means auto.
 
     @Option(name = "-k", aliases = "--cutNumber", handler = IntOptionHandler.class, usage = "Number of suboptimal solutions")

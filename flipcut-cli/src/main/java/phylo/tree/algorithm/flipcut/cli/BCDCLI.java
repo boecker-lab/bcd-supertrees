@@ -26,21 +26,6 @@ import java.util.List;
  * Created by fleisch on 03.02.16.
  */
 public class BCDCLI<A extends AbstractFlipCut> extends BasicBCDCLI<A> {
-
-    public BCDCLI(String appHomeParent, String appHomeFolderName, String logDir, int maxLogFileSize, int logRotation) {
-        super(appHomeParent, appHomeFolderName, logDir, maxLogFileSize, logRotation);
-    }
-
-    public BCDCLI(InputStream propertiesFile) {
-        super(propertiesFile);
-    }
-
-    static {
-        initName("bcd");
-        DEFAULT_PROPERTIES.setProperty("APP_HOME_PARENT", System.getProperty("user.home"));
-    }
-
-
     //##### flip cut parameter #####
     //this is a simple mapping from experimental weighting names to public naming
     @Override

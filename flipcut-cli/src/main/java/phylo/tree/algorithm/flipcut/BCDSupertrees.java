@@ -30,8 +30,11 @@ import java.util.logging.*;
 public class BCDSupertrees {
     protected static BCDCLI CLI;
 
+    static {
+        System.getProperties().setProperty("de.unijena.bioinf.corelib.appname", "bcd");
+    }
     public static void main(String[] args) {
-        CLI = new BCDCLI(BCDCLI.DEFAULT_PROPERTIES_FILE);
+        CLI = new BCDCLI();
         run(args);
     }
 
@@ -108,7 +111,6 @@ public class BCDSupertrees {
                     inputTrees.add(suppportTree);
             }
 
-            Logger.getLogger("org.jline").setLevel(Level.OFF);
 
             // configure algorithm
             AbstractFlipCut algorithm = CLI.createAlgorithmInstance();
